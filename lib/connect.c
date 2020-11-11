@@ -45,7 +45,7 @@ static char alphanum[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01
 
 static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking);
 static int mosquitto__connect_init(struct mosquitto *mosq, const char *host, int port, int keepalive);
-
+static const char *mosquitto__hostaddress_lookup(struct mosquitto *mosq, const char *hostname);
 
 static int mosquitto__connect_init(struct mosquitto *mosq, const char *host, int port, int keepalive)
 {
@@ -268,11 +268,13 @@ static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 
 #ifdef WITH_SOCKS
 	if(mosq->socks5_host){
-		rc = net__socket_connect(mosq, mosq->socks5_host, mosq->socks5_port, mosq->bind_address, blocking);
+		rc = net__socket_connect(mosq, mosq->socks5_host, mosq->socks5_port, mosq->bind_address, blocking,
+			mosquitto__hostaddress_lookup(mosq, mosq->socks5_host));
 	}else
 #endif
 	{
-		rc = net__socket_connect(mosq, mosq->host, mosq->port, mosq->bind_address, blocking);
+		rc = net__socket_connect(mosq, mosq->host, mosq->port, mosq->bind_address, blocking,
+			mosquitto__hostaddress_lookup(mosq, mosq->host));
 	}
 	char address[1024];
 	uint16_t port;
@@ -306,6 +308,77 @@ static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 	}
 }
 
+int mosquitto_add_hostaddress(struct mosquitto *mosq,
+ 	const char *hostname, const char *hostaddress)
+{
+	struct mosquitto__hostaddress_list *entry, *curr;
+
+	if (!mosq || !hostname || !hostaddress)
+		return MOSQ_ERR_INVAL;
+
+	entry = (struct mosquitto__hostaddress_list*)
+		mosquitto_calloc(1, sizeof(struct mosquitto__hostaddress_list));
+	if (!entry)
+		return MOSQ_ERR_NOMEM;
+
+	entry->hostname = mosquitto_strdup(hostname);
+	entry->hostaddress =  mosquitto_strdup(hostaddress);
+	entry->next = NULL;
+	curr = mosq->hostaddress_list;
+
+	while (curr && curr->next)
+		curr = curr->next;
+
+	if (curr)
+		curr->next = entry;
+	else
+		mosq->hostaddress_list = entry;
+
+	return 0;
+}
+
+
+int mosquitto_clear_hostaddresses(struct mosquitto *mosq)
+{
+	struct mosquitto__hostaddress_list *next, *curr;
+
+	if (!mosq)
+		return MOSQ_ERR_INVAL;
+
+	next = mosq->hostaddress_list;
+
+	while (next) {
+		curr = next;
+		next = next->next;
+		mosquitto_free(curr->hostname);
+		mosquitto_free(curr->hostaddress);
+		mosquitto_free(curr);
+	}
+
+	mosq->hostaddress_list = NULL;
+
+	return 0;
+}
+
+static const char *mosquitto__hostaddress_lookup(struct mosquitto *mosq,
+	const char *hostname)
+{
+	struct mosquitto__hostaddress_list *next, *curr;
+	if (!mosq || !hostname)
+		return NULL;
+
+	next = mosq->hostaddress_list;
+
+	while (next) {
+		curr = next;
+		next = next->next;
+
+		if (strcmp(hostname, curr->hostname) == 0)
+			return curr->hostaddress;
+	}
+
+	return NULL;
+}
 
 int mosquitto_disconnect(struct mosquitto *mosq)
 {
@@ -367,4 +440,3 @@ void do_client_disconnect(struct mosquitto *mosq, int reason_code, const mosquit
 
 	callback__on_disconnect(mosq, reason_code, properties);
 }
-
