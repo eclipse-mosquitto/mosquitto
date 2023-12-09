@@ -26,6 +26,8 @@ jobs:
             libcjson-dev \
             libcjson1 \
             libcunit1-dev \
+            libedit-dev \
+            libgmock-dev \
             libssl-dev \
             libwrap0-dev \
             microsocks \
@@ -43,6 +45,11 @@ jobs:
           CFLAGS="-O0 -Wall -ggdb -fprofile-arcs" \
           -j $(nproc) \
           binary
+        make \
+          WITH_COVERAGE=yes \
+          CFLAGS="-O0 -Wall -ggdb -fprofile-arcs" \
+          -j $(nproc) \
+          test-compile
 
     - run: |
         make -C test test

@@ -201,6 +201,7 @@ DB Dump:
 
 Apps:
 - Add `mosquitto_signal` for helping send signals to mosquitto on Windows.
+- Add interactive shell mode to mosquitto_ctrl.
 
 Build:
 - Increased CMake minimal required version to 3.14, which is required for the

@@ -21,6 +21,10 @@ LOCAL_LDFLAGS+=-pthread
 LOCAL_LDADD+=-lssl -lcrypto
 endif
 
+ifeq ($(WITH_EDITLINE),yes)
+LOCAL_LDADD+=-ledit
+LOCAL_CPPFLAGS+=-DWITH_EDITLINE
+endif
 
 OBJS= \
 	mosquitto_ctrl.o \
@@ -30,7 +34,20 @@ OBJS= \
 	dynsec_client.o \
 	dynsec_group.o \
 	dynsec_role.o \
-	options.o \
+	options.o
+
+ifeq ($(WITH_EDITLINE),yes)
+OBJS+= \
+	ctrl_shell.o \
+	ctrl_shell_broker.o \
+	ctrl_shell_client.o \
+	ctrl_shell_completion_tree.o \
+	ctrl_shell_dynsec.o \
+	ctrl_shell_io.o \
+	ctrl_shell_post_connect.o \
+	ctrl_shell_pre_connect.o \
+	ctrl_shell_printf.o
+endif
 
 OBJS_EXTERNAL= \
 	get_password.o \
@@ -46,7 +63,7 @@ endif
 
 all : ${TARGET}
 
-mosquitto_ctrl : ${OBJS} ${OBJS_EXTERNAL} ${LIBMOSQ}
+mosquitto_ctrl : ${OBJS} ${OBJS_EXTERNAL}
 	${CROSS_COMPILE}${CC} $^ -o $@ $(LOCAL_LDFLAGS) $(LOCAL_LDADD)
 
 mosquitto_ctrl_example.so : ${EXAMPLE_OBJS}

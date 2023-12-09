@@ -89,6 +89,7 @@ man/mosquitto.conf.5
 man/libmosquitto.3
 man/mosquitto_ctrl.1
 man/mosquitto_ctrl_dynsec.1
+man/mosquitto_ctrl_shell.1
 man/mosquitto_passwd.1
 man/mosquitto_pub.1
 man/mosquitto_rr.1
@@ -101,6 +102,13 @@ out/
 src/mosquitto
 src/mosquitto_broker.a
 
+test/apps/ctrl/ctrl_shell_broker_test
+test/apps/ctrl/ctrl_shell_completion_test
+test/apps/ctrl/ctrl_shell_dynsec_test
+test/apps/ctrl/ctrl_shell_help_test
+test/apps/ctrl/ctrl_shell_options_test
+test/apps/ctrl/ctrl_shell_pre_connect_test
+test/apps/ctrl/ctrl_shell_test
 test/broker/broker.pid
 test/test_client
 test/fake_user

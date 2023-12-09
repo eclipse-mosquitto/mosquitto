@@ -10,6 +10,7 @@ MANPAGES = \
 	mosquitto.conf.5 \
 	mosquitto_ctrl.1 \
 	mosquitto_ctrl_dynsec.1 \
+	mosquitto_ctrl_shell.1 \
 	mosquitto_passwd.1 \
 	mosquitto_pub.1 \
 	mosquitto_rr.1 \
@@ -35,6 +36,7 @@ install :
 	$(INSTALL) -d "${DESTDIR}$(mandir)/man1"
 	$(INSTALL) -m 644 mosquitto_ctrl.1 "${DESTDIR}${mandir}/man1/mosquitto_ctrl.1"
 	$(INSTALL) -m 644 mosquitto_ctrl_dynsec.1 "${DESTDIR}${mandir}/man1/mosquitto_ctrl_dynsec.1"
+	$(INSTALL) -m 644 mosquitto_ctrl_shell.1 "${DESTDIR}${mandir}/man1/mosquitto_ctrl_shell.1"
 	$(INSTALL) -m 644 mosquitto_passwd.1 "${DESTDIR}${mandir}/man1/mosquitto_passwd.1"
 	$(INSTALL) -m 644 mosquitto_pub.1 "${DESTDIR}${mandir}/man1/mosquitto_pub.1"
 	$(INSTALL) -m 644 mosquitto_sub.1 "${DESTDIR}${mandir}/man1/mosquitto_sub.1"
@@ -51,6 +53,7 @@ uninstall :
 	-rm -f "${DESTDIR}${mandir}/man5/mosquitto.conf.5"
 	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_ctrl.1"
 	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_ctrl_dynsec.1"
+	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_ctrl_shell.1"
 	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_passwd.1"
 	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_pub.1"
 	-rm -f "${DESTDIR}${mandir}/man1/mosquitto_sub.1"
@@ -75,6 +78,7 @@ potgen :
 	 xml2po -o po/mosquitto.conf/mosquitto.conf.5.pot mosquitto.conf.5.xml
 	 xml2po -o po/mosquitto_ctrl/mosquitto_ctrl.1.pot mosquitto_ctrl.1.xml
 	 xml2po -o po/mosquitto_ctrl/mosquitto_ctrl_dynsec.1.pot mosquitto_ctrl_dynsec.1.xml
+	 xml2po -o po/mosquitto_ctrl/mosquitto_ctrl_shell.1.pot mosquitto_ctrl_shell.1.xml
 	 xml2po -o po/mosquitto_passwd/mosquitto_passwd.1.pot mosquitto_passwd.1.xml
 	 xml2po -o po/mosquitto_pub/mosquitto_pub.1.pot mosquitto_pub.1.xml
 	 xml2po -o po/mosquitto_sub/mosquitto_sub.1.pot mosquitto_sub.1.xml

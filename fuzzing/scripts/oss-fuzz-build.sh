@@ -27,4 +27,4 @@ make install
 
 # Build broker and library static libraries
 cd ${SRC}/mosquitto
-make WITH_STATIC_LIBRARIES=yes WITH_DOCS=no WITH_FUZZING=yes
+make WITH_STATIC_LIBRARIES=yes WITH_DOCS=no WITH_FUZZING=yes WITH_EDITLINE=no

@@ -15,6 +15,7 @@ if(XSLTPROC AND NOT WIN32)
 
 	compile_manpage("mosquitto_ctrl.1")
 	compile_manpage("mosquitto_ctrl_dynsec.1")
+	compile_manpage("mosquitto_ctrl_shell.1")
 	compile_manpage("mosquitto_passwd.1")
 	compile_manpage("mosquitto_pub.1")
 	compile_manpage("mosquitto_sub.1")
@@ -29,6 +30,7 @@ if(XSLTPROC AND NOT WIN32)
 	install(FILES
 		mosquitto_ctrl.1
 		mosquitto_ctrl_dynsec.1
+		mosquitto_ctrl_shell.1
 		mosquitto_passwd.1
 		mosquitto_pub.1
 		mosquitto_sub.1

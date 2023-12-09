@@ -31,6 +31,7 @@ Contributors:
 #include "lib_load.h"
 #include "mosquitto.h"
 #include "mosquitto_ctrl.h"
+#include "ctrl_shell_internal.h"
 
 static void print_version(void)
 {
@@ -61,8 +62,12 @@ int main(int argc, char *argv[])
 	char lib_name[200];
 
 	if(argc == 1){
+#ifdef WITH_EDITLINE
+		ctrl_shell__main(NULL);
+#else
 		print_usage();
-		return 1;
+#endif
+		return 0;
 	}
 
 	memset(&ctrl, 0, sizeof(ctrl));
@@ -75,13 +80,22 @@ int main(int argc, char *argv[])
 	rc = ctrl_config_parse(&ctrl.cfg, &argc, &argv);
 	if(rc){
 		client_config_cleanup(&ctrl.cfg);
+		print_usage();
 		return rc;
 	}
 
-	if(argc < 2){
-		print_usage();
-		client_config_cleanup(&ctrl.cfg);
-		return 1;
+#ifdef WITH_EDITLINE
+	if(argc == 0){
+		ctrl_shell__main(&ctrl.cfg);
+		return 0;
+	}else
+#endif
+	{
+		if(argc < 2){
+			print_usage();
+			client_config_cleanup(&ctrl.cfg);
+			return 1;
+		}
 	}
 
 	/* In built modules */

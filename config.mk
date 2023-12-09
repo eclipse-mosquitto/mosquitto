@@ -152,6 +152,9 @@ WITH_FUZZING=no
 # Build using clang and with address sanitiser enabled
 WITH_ASAN=no
 
+# Build with editline support to allow the mosquitto_ctrl shell
+WITH_EDITLINE=yes
+
 # =============================================================================
 # End of user configuration
 # =============================================================================
@@ -286,6 +289,7 @@ endif
 
 ifeq ($(WITH_COVERAGE),yes)
 	LOCAL_CFLAGS+=-coverage
+	LOCAL_CXXFLAGS+=-coverage
 	LOCAL_LDFLAGS+=-coverage
 endif
 
@@ -300,4 +304,8 @@ ifeq ($(WITH_ARGON2),yes)
 	LOCAL_CPPFLAGS+=-DWITH_ARGON2
 	LIB_ARGON2=-largon2
 	LIBMOSQ_COMMON+=${LIB_ARGON2}
+endif
+
+ifeq ($(WITH_EDITLINE),yes)
+	LOCAL_CPPFLAGS+=-DWITH_EDITLINE
 endif

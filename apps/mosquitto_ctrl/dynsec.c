@@ -704,7 +704,7 @@ static int dynsec_init(int argc, char *argv[])
 		fprintf(stderr, "dynsec init: Out of memory.\n");
 		return MOSQ_ERR_NOMEM;
 	}
-	json_str = cJSON_Print(tree);
+	json_str = cJSON_PrintUnformatted(tree);
 	cJSON_Delete(tree);
 
 #ifdef WIN32

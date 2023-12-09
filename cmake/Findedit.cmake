@@ -1,0 +1,52 @@
+INCLUDE( FindPackageHandleStandardArgs )
+
+# Checks an environment variable; note that the first check
+# does not require the usual CMake $-sign.
+IF( DEFINED ENV{EDITLINE_DIR} )
+	SET( EDITLINE_DIR "$ENV{EDITLINE_DIR}" )
+ENDIF()
+
+FIND_PATH(
+		EDITLINE_INCLUDE_DIR
+		editline/readline.h
+	HINTS
+		EDITLINE_DIR
+)
+
+FIND_LIBRARY( EDITLINE_LIBRARY
+	NAMES edit
+	HINTS ${EDITLINE_DIR}
+)
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( edit DEFAULT_MSG
+	EDITLINE_INCLUDE_DIR EDITLINE_LIBRARY
+)
+
+SET(EDITLINE_FOUND ${EDIT_FOUND})
+
+IF( EDITLINE_FOUND )
+	SET( EDITLINE_INCLUDE_DIRS ${EDITLINE_INCLUDE_DIR} )
+	SET( EDITLINE_LIBRARIES ${EDITLINE_LIBRARY} )
+
+	MARK_AS_ADVANCED(
+		EDITLINE_LIBRARY
+		EDITLINE_INCLUDE_DIR
+		EDITLINE_DIR
+	)
+
+	add_library(editline SHARED IMPORTED)
+	set_target_properties(editline
+		PROPERTIES
+			INTERFACE_INCLUDE_DIRECTORIES "${EDITLINE_INCLUDE_DIRS}"
+	)
+
+	set_target_properties(editline
+		PROPERTIES
+			IMPORTED_LOCATION "${EDITLINE_LIBRARY}"
+			IMPORTED_IMPLIB "${EDITLINE_LIBRARY}"
+	)
+ELSE()
+	SET( EDITLINE_DIR "" CACHE STRING
+		"An optional hint to a directory for finding the `editline` library"
+	)
+ENDIF()

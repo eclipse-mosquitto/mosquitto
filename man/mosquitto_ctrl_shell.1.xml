@@ -1,0 +1,437 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="manpage.xsl"?>
+
+<refentry xml:id="mosquitto_ctrl" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<refmeta>
+		<refentrytitle>mosquitto_ctrl</refentrytitle>
+		<manvolnum>1</manvolnum>
+		<refmiscinfo class="source">Mosquitto Project</refmiscinfo>
+		<refmiscinfo class="manual">Commands</refmiscinfo>
+	</refmeta>
+
+	<refnamediv>
+		<refname>mosquitto_ctrl_shell</refname>
+		<refpurpose>a interactive shell for configuring a Mosquitto broker instance</refpurpose>
+	</refnamediv>
+
+	<refsynopsisdiv>
+		<cmdsynopsis>
+			<command>mosquitto_ctrl</command>
+			<arg><option>-h</option> <replaceable>hostname</replaceable></arg>
+			<arg><option>-p</option> <replaceable>port-number</replaceable></arg>
+			<arg><option>-u</option> <replaceable>username</replaceable></arg>
+			<arg><option>-P</option> <replaceable>password</replaceable></arg>
+			<arg><option>-i</option> <replaceable>client-id</replaceable></arg>
+			<arg><option>--cafile</option> <replaceable>file</replaceable></arg>
+			<arg><option>--capath</option> <replaceable>dir</replaceable></arg>
+			<arg choice='opt'>
+				<option>--cert</option> <replaceable>file</replaceable>
+				<option>--key</option> <replaceable>file</replaceable>
+			</arg>
+		</cmdsynopsis>
+	</refsynopsisdiv>
+
+	<refsect1>
+		<title>Description</title>
+		<para>
+			<command>mosquitto_ctrl</command> is a tool for helping configure
+			a Mosquitto broker instance.
+		</para>
+		<para>
+			This man page describes how to use the interactive shell. For
+			information on the pure command line mode, see
+			<citerefentry>
+				<refentrytitle><link xlink:href="mosquitto_ctrl-1.html">mosquitto_ctrl</link></refentrytitle>
+				<manvolnum>1</manvolnum>
+			</citerefentry>.
+			The interactive shell makes most operations very straightforward
+			and is recommended for ease of use.
+		</para>
+		<para>
+			To run in interactive mode, run <command>mosquitto_ctrl</command>
+			with no module or command, i.e. with at most the set of options
+			described in the synopsis above. The shell will start and you
+			will be presented with a prompt.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Encrypted Connections</title>
+		<para>
+			<command>mosquitto_ctrl</command> supports TLS encrypted
+			connections. It is strongly recommended that you use an encrypted
+			connection for all remote use of mosquitto_ctrl.
+		</para>
+		<para>
+			To enable TLS connections, connect using the <option>mqtts://</option>
+			or <option>wss://</option> scheme inside the shell, or use either
+			<option>--cafile</option> or <option>--capath</option> when starting
+			mosquitto_ctrl on the command line - this also allows custom CA
+			certificates to be used.
+		</para>
+		<para>Client certificates may be used for additional security. To
+			enable this, use the <option>--cert</option> and
+			<option>--key</option> options.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Example shell workflow</title>
+		<example title="shell-create-group">
+		<para>
+			The typical workflow for using the interactive shell is to configure
+			authentication and connect to a broker, then switch to the mode you are
+			interested in and run its commands. For example, to create a new group
+			in the dynamic-security plugin:
+		</para>
+
+		<programlisting language="shell">
+$ mosquitto_ctrl
+mosquitto_ctrl shell v2.1.0
+&gt; auth
+username: admin
+password:
+&gt; connect mqtt://localhost
+mqtt://localhost:1883&gt; dynsec
+mqtt://localhost:1883|dynsec&gt; createGroup newgroup
+OK</programlisting>
+		</example>
+	</refsect1>
+
+	<refsect1>
+		<title>Shell Behaviour</title>
+		<para>
+			The interactive shell operates in a set of different modes which
+			have different commands available. The shell has tab completion for
+			the commands and their arguments, where possible. It should usually
+			be possible to press the tab key twice to be able to be shown a list
+			of the currently available commmands or arguments.
+		</para>
+		<para>
+			The shell has a history of commands that can be accessed by pressing
+			the up and down arrow keys. The history is not saved to disk.
+		</para>
+		<para>
+			Help can be obtained for any command by typing <command>help</command>
+			followed by the command name. For example: <command>help createGroup</command>.
+		</para>
+
+		<para>The different modes are:</para>
+
+		<variablelist>
+			<varlistentry>
+				<term><command>Pre-connection</command></term>
+				<listitem>
+					<para>
+						In this mode it is possible to set the authentication
+						details, connect to a broker, read help and exit.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><command>Post-connection</command></term>
+				<listitem>
+					<para>
+						In this mode, mosquitto_ctrl is connected to a broker
+						and you can switch between different control modules,
+						view help or exit.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><command>dynsec</command></term>
+				<listitem><para>
+					Allows you to create, delete, and modify users, groups, roles, and ACLs.
+				</para></listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><command>broker</command></term>
+				<listitem><para>
+					Allows you to view listener and plugin information.
+				</para></listitem>
+			</varlistentry>
+		</variablelist>
+	</refsect1>
+
+	<refsect1>
+		<title>Authentication</title>
+		<para>
+			<command>mosquitto_ctrl</command> supports authentication via
+			username and password, or via x509 client certificates. If you are
+			using username and password authentication, then you must set the
+			username and password before connecting. This can be done in one of
+			two ways. The first is by using the <option>-u</option> and
+			<option>-P</option> options on the command line. The second is by
+			using the <command>auth</command> command in the shell.
+		</para>
+		<para>
+			Authentication in the shell can done in one of two ways. The first
+			is by using the <command>auth</command> command, which will then
+			prompt for a username and password. The second is by using the
+			<command>auth</command> <replaceable>username</replaceable> command,
+			which will then prompt for a password.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Connection</title>
+		<para>
+			To connect to a broker, use the <command>connect</command> command.
+		</para>
+
+		<itemizedlist mark="circle">
+			<listitem>
+				<para>Connect to the broker at localhost on port 1883.</para>
+				<programlisting language="shell">&gt; connect</programlisting>
+			</listitem>
+			<listitem>
+				<para>Connect to a specific broker using the default port 1883.</para>
+				<programlisting language="shell">&gt; connect mqtt://test.mosquitto.org</programlisting>
+			</listitem>
+			<listitem>
+				<para>Connect to a specific broker using the specific port 1884.</para>
+				<programlisting language="shell">&gt; connect mqtt://test.mosquitto.org:1884</programlisting>
+			</listitem>
+			<listitem>
+				<para>Connect to a specific broker using TLS.</para>
+				<programlisting language="shell">&gt; connect mqtts://test.mosquitto.org</programlisting>
+			</listitem>
+			<listitem>
+				<para>Connect to a specific broker using websockets.</para>
+				<programlisting language="shell">&gt; connect ws://test.mosquitto.org</programlisting>
+			</listitem>
+			<listitem>
+				<para>Connect to a specific broker using websockets over TLS.</para>
+				<programlisting language="shell">&gt; connect wss://test.mosquitto.org</programlisting>
+			</listitem>
+		</itemizedlist>
+
+		<para>
+			If the <option>-h</option> option is used on the command line, the
+			shell will immediately attempt to connect to the host specified.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Dynamic-security mode</title>
+		<para>
+			Once connected, you can use the command <command>dynsec</command> to switch
+			to the dynamic-security mode. This will only work if the broker has the
+			dynamic-security plugin loaded, and you have permission to use it.
+		</para>
+		<para>
+			The dynamic-security mode has commands to create, delete,
+			and modify users, groups, roles, and ACLs. The commands can be discovered by
+			pressing the tab key twice. Usernames, group names, and role names can be
+			auto-completed for the appropriate commands by pressing the tab key. Help
+			is available for each command by using <command>help</command> followed by
+			the command name.
+		</para>
+		<para>
+			To leave the dynamic-security mode, use the <command>return</command> command,
+			or use the <command>exit</command> command to exit the shell.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Broker mode</title>
+		<para>
+			Use the command <command>broker</command> to switch
+			to the broker mode. This will only work if the broker has the
+			<option>enable_control_api</option> option set to true.
+		</para>
+		<para>
+			The broker mode has the commands <command>listListeners</command>, to show
+			currently configured listener configuration, and <command>listPlugins</command>,
+			to show currently loaded plugins.
+		</para>
+		<para>
+			To leave the broker mode, use the <command>return</command> command,
+			or use the <command>exit</command> command to exit the shell.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Connection Options</title>
+		<para>The options below may be given on the command line</para>
+		<variablelist>
+			<varlistentry>
+				<term><option>--cafile</option></term>
+				<listitem>
+					<para>Define the path to a file containing PEM encoded CA
+						certificates that are trusted. Used to enable SSL
+						communication.</para>
+					<para>See also <option>--capath</option></para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--capath</option></term>
+				<listitem>
+					<para>Define the path to a directory containing PEM encoded CA
+						certificates that are trusted. Used to enable SSL
+						communication.</para>
+					<para>For <option>--capath</option> to work correctly, the
+						certificate files must have ".crt" as the file ending
+						and you must run "openssl rehash &lt;path to capath&gt;" each
+						time you add/remove a certificate.</para>
+					<para>See also <option>--cafile</option></para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--cert</option></term>
+				<listitem>
+					<para>Define the path to a file containing a PEM encoded
+						certificate for this client, if required by the
+						server.</para>
+					<para>See also <option>--key</option>.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--help</option></term>
+				<listitem>
+					<para>Display usage information.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-h</option></term>
+				<term><option>--host</option></term>
+				<listitem>
+					<para>Specify the host to connect to. Defaults to localhost.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-i</option></term>
+				<term><option>--id</option></term>
+				<listitem>
+					<para>
+						The id to use for this client. If not given, a client id will be
+						generated depending on the MQTT version being used. For v3.1.1/v3.1,
+                        the client generates a client id in the format
+						<option>mosq-XXXXXXXXXXXXXXXXXX</option>, where the <option>X</option>
+						are replaced with random alphanumeric characters. For v5.0, the
+						client sends a zero length client id, and the server will generate a
+						client id for the client.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>--key</option></term>
+				<listitem>
+					<para>
+						Define the path to a file containing a PEM encoded
+						private key for this client, if required by the
+						server.
+					</para>
+					<para>See also <option>--cert</option>.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-p</option></term>
+				<term><option>--port</option></term>
+				<listitem>
+					<para>
+						Connect to the port specified. If not given, the
+						default of 1883 for plain MQTT or 8883 for MQTT over
+						TLS will be used.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-P</option></term>
+				<term><option>--pw</option></term>
+				<listitem>
+					<para>
+						Provide a password to be used for authenticating with
+						the broker. Using this argument without also specifying
+						a username is invalid when using MQTT v3.1 or v3.1.1.
+						See also the <option>--username</option> option.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-u</option></term>
+				<term><option>--username</option></term>
+				<listitem>
+					<para>
+						Provide a username to be used for authenticating with
+						the broker.  See also the <option>--pw</option> argument.
+					</para>
+				</listitem>
+			</varlistentry>
+		</variablelist>
+	</refsect1>
+
+	<refsect1>
+		<title>Exit Status</title>
+		<para>
+			mosquitto_sub returns zero on success, or non-zero on error.
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>Bugs</title>
+		<para>
+			<command>mosquitto</command> bug information can be found at
+			<ulink url="https://github.com/eclipse/mosquitto/issues"/>
+		</para>
+	</refsect1>
+
+	<refsect1>
+		<title>See Also</title>
+		<simplelist type="inline">
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mqtt-7.html">mqtt</link></refentrytitle>
+					<manvolnum>7</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto_ctrl-1.html">mosquitto_ctrl</link></refentrytitle>
+					<manvolnum>1</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto_rr-1.html">mosquitto_rr</link></refentrytitle>
+					<manvolnum>1</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto_pub-1.html">mosquitto_pub</link></refentrytitle>
+					<manvolnum>1</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto_sub-1.html">mosquitto_sub</link></refentrytitle>
+					<manvolnum>1</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto-8.html">mosquitto</link></refentrytitle>
+					<manvolnum>8</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="libmosquitto-3.html">libmosquitto</link></refentrytitle>
+					<manvolnum>3</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto-tls-7.html">mosquitto-tls</link></refentrytitle>
+					<manvolnum>7</manvolnum>
+				</citerefentry>
+			</member>
+		</simplelist>
+	</refsect1>
+
+	<refsect1>
+		<title>Author</title>
+		<para>Roger Light <email>roger@atchoo.org</email></para>
+	</refsect1>
+</refentry>

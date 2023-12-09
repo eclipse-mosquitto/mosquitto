@@ -74,6 +74,11 @@
 
 		<cmdsynopsis>
 			<command>mosquitto_ctrl</command>
+			<arg choice='opt'>connection-options</arg>
+			(interactive shell mode)
+		</cmdsynopsis>
+		<cmdsynopsis>
+			<command>mosquitto_ctrl</command>
 				<arg><option>--help</option></arg>
 		</cmdsynopsis>
 	</refsynopsisdiv>
@@ -81,6 +86,12 @@
 	<refsect1>
 		<title>Description</title>
 		<para><command>mosquitto_ctrl</command> is a tool for helping configure a Mosquitto broker instance.</para>
+		<para>It can be run primarily as a straightforward command line tool, as described here, or as an interactive shell as described in
+			<citerefentry>
+				<refentrytitle><link xlink:href="mosquitto_ctrl_shell-1.html">mosquitto_ctrl_shell</link></refentrytitle>
+				<manvolnum>1</manvolnum>
+			</citerefentry>. The interactive shell makes most operations very straightforward and is recommended for ease of use.
+		</para>
 	</refsect1>
 
 	<refsect1>
@@ -629,6 +640,12 @@
 				<citerefentry>
 					<refentrytitle><link xlink:href="mqtt-7.html">mqtt</link></refentrytitle>
 					<manvolnum>7</manvolnum>
+				</citerefentry>
+			</member>
+			<member>
+				<citerefentry>
+					<refentrytitle><link xlink:href="mosquitto_ctrl_shell-1.html">mosquitto_ctrl_shell</link></refentrytitle>
+					<manvolnum>1</manvolnum>
 				</citerefentry>
 			</member>
 			<member>

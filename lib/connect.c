@@ -20,6 +20,13 @@ Contributors:
 
 #include <string.h>
 
+#ifdef WIN32
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#else
+#  include <arpa/inet.h>
+#endif
+
 #include "callbacks.h"
 #include "http_client.h"
 #include "mosquitto.h"
@@ -155,6 +162,33 @@ int mosquitto_reconnect(struct mosquitto *mosq)
 	return mosquitto__reconnect(mosq, true);
 }
 
+int get_address(int sock, char *buf, size_t len, uint16_t *remote_port)
+{
+	struct sockaddr_storage addr;
+	socklen_t addrlen;
+
+	memset(&addr, 0, sizeof(struct sockaddr_storage));
+	addrlen = sizeof(addr);
+	if(!getpeername(sock, (struct sockaddr *)&addr, &addrlen)){
+		if(addr.ss_family == AF_INET){
+			if(remote_port){
+				*remote_port = ntohs(((struct sockaddr_in *)&addr)->sin_port);
+			}
+			if(inet_ntop(AF_INET, &((struct sockaddr_in *)&addr)->sin_addr.s_addr, buf, (socklen_t)len)){
+				return 0;
+			}
+		}else if(addr.ss_family == AF_INET6){
+			if(remote_port){
+				*remote_port = ntohs(((struct sockaddr_in6 *)&addr)->sin6_port);
+			}
+			if(inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&addr)->sin6_addr.s6_addr, buf, (socklen_t)len)){
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
 
 static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 {
@@ -207,6 +241,9 @@ static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 	{
 		rc = net__socket_connect(mosq, mosq->host, mosq->port, mosq->bind_address, blocking);
 	}
+	char address[1024];
+	uint16_t port;
+	get_address(mosq->sock, address, 1024, &port);
 	if(rc>0){
 		mosquitto__set_state(mosq, mosq_cs_connect_pending);
 		return rc;

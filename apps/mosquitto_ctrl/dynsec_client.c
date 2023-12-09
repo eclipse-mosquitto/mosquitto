@@ -260,7 +260,7 @@ int dynsec_client__file_set_password(int argc, char *argv[], const char *file)
 					cJSON_DeleteItemFromObject(j_client, "encoded_password");
 					cJSON_AddItemToObject(j_client, "encoded_password", j_encoded_password);
 
-					json_str = cJSON_Print(j_tree);
+					json_str = cJSON_PrintUnformatted(j_tree);
 					cJSON_Delete(j_tree);
 					if(json_str == NULL){
 						fprintf(stderr, "Error: Out of memory.\n");

@@ -21,6 +21,7 @@ MOCKS = \
 
 all : test-compile
 test-compile : ${MOCKS}
+	$(MAKE) -C apps/mosquitto_ctrl test-compile
 	$(MAKE) -C lib test-compile
 
 check : test

@@ -1,9 +1,10 @@
+add_subdirectory(mock)
+
 add_subdirectory(apps)
 add_subdirectory(broker)
 add_subdirectory(client)
 add_subdirectory(lib)
 add_subdirectory(unit)
-add_subdirectory(mock)
 
 add_custom_target(coverage
     COMMAND lcov --quiet --capture --directory . --output-file ${PROJECT_BINARY_DIR}/coverage.info --no-external

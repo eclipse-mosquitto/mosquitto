@@ -9,6 +9,7 @@ all :
 check : test
 
 test-compile:
+	$(MAKE) -C ctrl test-compile
 
 test :
 	$(MAKE) -C db_dump test

@@ -98,6 +98,7 @@ endif()
 
 find_package(cJSON REQUIRED)
 find_package(argon2)
+find_package(edit)
 if(ARGON2_FOUND)
 	# Disable until separate password handling thread is implemented
 	#add_definitions("-DWITH_ARGON2")
