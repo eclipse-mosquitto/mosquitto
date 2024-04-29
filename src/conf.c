@@ -946,7 +946,20 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 #else
 					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Bridge support not available.");
 #endif
-				}else if(!strcmp(token, "bridge_cafile")){
+				}else if(!strcmp(token, "session_expiry")){
+#ifdef WITH_BRIDGE
+                    if(reload) continue; /* FIXME */
+                    if(!cur_bridge){
+                        log__printf(NULL, MOSQ_LOG_ERR, "Error: Invalid bridge configuration.");
+                        return MOSQ_ERR_INVAL;
+                    }
+                    if(conf__parse_int(&token, "session_expiry", &tmp_int, saveptr)) return MOSQ_ERR_INVAL;
+                    if(tmp_int < 0) tmp_int = 0;
+                    cur_bridge->session_expiry = (uint32_t)tmp_int;
+#else
+                    log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Bridge support not available.");
+#endif
+                }else if(!strcmp(token, "bridge_cafile")){
 #if defined(WITH_BRIDGE) && defined(WITH_TLS)
 					if(reload) continue; /* FIXME */
 					if(!cur_bridge){
@@ -1279,6 +1292,7 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 						cur_bridge->primary_retry_sock = INVALID_SOCKET;
 						cur_bridge->outgoing_retain = true;
 						cur_bridge->clean_start_local = -1;
+						cur_bridge->session_expiry = 0;
 					}else{
 						log__printf(NULL, MOSQ_LOG_ERR, "Error: Empty connection value in configuration.");
 						return MOSQ_ERR_INVAL;

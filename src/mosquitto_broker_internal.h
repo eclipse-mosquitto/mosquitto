@@ -544,6 +544,7 @@ struct mosquitto__bridge{
 	bool attempt_unsubscribe;
 	bool initial_notification_done;
 	bool outgoing_retain;
+    uint32_t session_expiry;
 #ifdef WITH_TLS
 	bool tls_insecure;
 	bool tls_ocsp_required;
