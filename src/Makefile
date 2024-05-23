@@ -6,6 +6,7 @@ include ${R}/config.mk
 LOCAL_CFLAGS+=
 LOCAL_CPPFLAGS+=-DWITH_BROKER -I${R}/lib -I${R}/libcommon
 LOCAL_LDFLAGS+=
+LOCAL_EMBEDD_LDFLAGS=${LOCAL_LDFLAGS}
 LOCAL_LDADD+=-lcjson -lm ${LIBMOSQ_COMMON}
 
 # ------------------------------------------
@@ -13,6 +14,7 @@ LOCAL_LDADD+=-lcjson -lm ${LIBMOSQ_COMMON}
 # ------------------------------------------
 ifneq ($(or $(findstring $(UNAME),FreeBSD), $(findstring $(UNAME),OpenBSD), $(findstring $(UNAME),NetBSD)),)
 	LOCAL_LDFLAGS+=-Wl,--dynamic-list=linker.syms
+	LOCAL_EMBEDD_LDFLAGS+=-Wl,--version-script=embedd-broker.version
 else
 	LOCAL_LDADD+=-ldl
 endif
@@ -20,6 +22,7 @@ endif
 ifeq ($(UNAME),Linux)
 	LOCAL_LDADD+=-lrt
 	LOCAL_LDFLAGS+=-Wl,--dynamic-list=linker.syms
+	LOCAL_EMBEDD_LDFLAGS+=-Wl,--version-script=embedd-broker.version
 endif
 
 ifeq ($(UNAME),QNX)
@@ -35,12 +38,20 @@ include ${R}/make/broker.mk
 #  Targets
 # ------------------------------------------
 ifeq ($(WITH_FUZZING),yes)
-all : mosquitto_broker.a
+ALL_TARGETS=libmosquitto_broker.a
 else
-all : mosquitto
+ALL_TARGETS=mosquitto
+ifeq ($(WITH_EMBEDD_BROKER),yes)
+ALL_TARGETS+=libmosquitto_broker.a
+ifeq ($(WITH_SHARED_LIBRARIES),yes)
+ALL_TARGETS+=libmosquitto_broker.so.${SOVERSION}
+endif
+endif
 endif
 
-OBJS=	mosquitto.o \
+all : ${ALL_TARGETS}
+
+COMMON_OBJS=	mosquitto.o \
 		bridge.o \
 		bridge_topic.o \
 		broker_control.o \
@@ -105,13 +116,19 @@ OBJS=	mosquitto.o \
 		send_unsuback.o \
 		service.o \
 		session_expiry.o \
-		signals.o \
 		subs.o \
 		sys_tree.o \
 		topic_tok.o \
 		websockets.o \
 		will_delay.o \
 		xtreport.o
+
+BROKER_OBJS=${COMMON_OBJS} \
+	main.o \
+	signals.o
+
+EMBED_OBJS=${COMMON_OBJS} \
+	embedd_broker.o
 
 OBJS_EXTERNAL= \
 		alias_mosq.o \
@@ -142,13 +159,21 @@ ifeq ($(WITH_WEBSOCKETS),yes)
 	OBJS_EXTERNAL+=${R}/deps/picohttpparser/picohttpparser.o
 endif
 
-mosquitto : ${OBJS} ${OBJS_EXTERNAL}
-	${CROSS_COMPILE}${CC} ${LOCAL_LDFLAGS} $^ -o $@ $(LOCAL_LDADD)
-
-mosquitto_broker.a : ${OBJS} ${OBJS_EXTERNAL}
+libmosquitto_broker.a : ${EMBED_OBJS} ${OBJS_EXTERNAL}
 	${CROSS_COMPILE}$(AR) cr $@ $^
 
-${OBJS} : %.o: %.c mosquitto_broker_internal.h
+ifeq ($(WITH_SHARED_LIBRARIES),yes)
+libmosquitto_broker.so.${SOVERSION} : ${EMBED_OBJS} ${OBJS_EXTERNAL}
+	${CROSS_COMPILE}$(CC) $(LOCAL_EMBEDD_LDFLAGS) -shared $^ -o $@ ${LOCAL_LDADD}
+endif
+
+mosquitto : ${BROKER_OBJS} ${OBJS_EXTERNAL}
+	${CROSS_COMPILE}${CC} ${LOCAL_LDFLAGS} $^ -o $@ $(LOCAL_LDADD)
+
+${BROKER_OBJS} : %.o: %.c mosquitto_broker_internal.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+embedd_broker.o : embedd_broker.c mosquitto_broker_internal.h Makefile
 	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 alias_mosq.o : ${R}/lib/alias_mosq.c ${R}/lib/alias_mosq.h
@@ -226,14 +251,24 @@ will_mosq.o : ${R}/lib/will_mosq.c ${R}/lib/will_mosq.h
 install : all
 	$(INSTALL) -d "${DESTDIR}$(prefix)/sbin"
 	$(INSTALL) ${STRIP_OPTS} mosquitto "${DESTDIR}${prefix}/sbin/mosquitto"
+ifeq ($(WITH_EMBEDD_BROKER),yes)
+	$(INSTALL) ${STRIP_OPTS} libmosquitto_broker.so.${SOVERSION} "${DESTDIR}${libdir}/libmosquitto_broker.so.${SOVERSION}"
+	ln -sf libmosquitto_broker.so.${SOVERSION} "${DESTDIR}${libdir}/libmosquitto_broker.so"
+ifeq ($(WITH_STATIC_LIBRARIES),yes)
+	$(INSTALL) ${STRIP_OPTS} libmosquitto_broker.a "${DESTDIR}${libdir}/libmosquitto_broker.a"
+endif
+endif
 
 uninstall :
 	-rm -f "${DESTDIR}${prefix}/sbin/mosquitto"
 	-rm -f "${DESTDIR}${prefix}/include/mosquitto_broker.h"
 	-rm -f "${DESTDIR}${prefix}/include/mosquitto_plugin.h"
+	-rm -f "${DESTDIR}${libdir}/libmosquitto_broker.so.${SOVERSION}"
+	-rm -f "${DESTDIR}${libdir}/libmosquitto_broker.so"
+	-rm -f "${DESTDIR}${libdir}/libmosquitto_broker.a"
 
 clean :
-	-rm -f ${OBJS} ${OBJS_EXTERNAL} mosquitto mosquitto_broker.a *.gcda *.gcno
+	-rm -f ${OBJS} ${OBJS_EXTERNAL} mosquitto libmosquitto_broker.a libmosquitto_broker.so.${VERSION} *.gcda *.gcno
 
 reallyclean : clean
 	-rm -rf *.orig *.db
