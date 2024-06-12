@@ -4,7 +4,7 @@ include ${R}/config.mk
 LOCAL_CFLAGS+=-fPIC
 LOCAL_CPPFLAGS+=
 LOCAL_LDFLAGS+=-fPIC
-LOCAL_LIBADD+=
+LOCAL_LIBADD+=-lcjson
 
 ifeq ($(WITH_MEMORY_TRACKING),yes)
 	LOCAL_CPPFLAGS+=-DWITH_MEMORY_TRACKING
@@ -16,6 +16,10 @@ endif
 
 ifeq ($(ALLOC_MISMATCH_ABORT),yes)
 	LOCAL_CPPFLAGS+=-DALLOC_MISMATCH_ABORT
+endif
+
+ifeq ($(WITH_TLS),yes)
+	LOCAL_LIBADD+=-lcrypto
 endif
 
 # ------------------------------------------
@@ -37,7 +41,7 @@ OBJS= \
 	topic_common.o \
 	utf8_common.o
 
-all : libmosquitto_common.a
+all : libmosquitto_common.a libmosquitto_common.so.${SOVERSION}
 
 install :
 
@@ -49,7 +53,7 @@ clean :
 	-rm -f ${OBJS} libmosquitto_common.so.${SOVERSION} libmosquitto_common.so libmosquitto_common.a *.gcno *.gcda
 
 libmosquitto_common.so.${SOVERSION} : ${OBJS}
-	${CROSS_COMPILE}$(CC) $(LOCAL_LDFLAGS) $^ -o $@ ${LOCAL_LIBADD}
+	${CROSS_COMPILE}$(CC) $(LOCAL_LDFLAGS) $^ -o $@ ${LOCAL_LIBADD} -shared
 
 libmosquitto_common.a : ${OBJS}
 	${CROSS_COMPILE}$(AR) cr $@ $^

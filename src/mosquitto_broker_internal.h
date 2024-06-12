@@ -41,6 +41,7 @@ Contributors:
 #include "logging_mosq.h"
 #include "tls_mosq.h"
 #include "uthash.h"
+#include "acl_file.h"
 
 #ifndef __GNUC__
 #define __attribute__(attrib)
@@ -194,11 +195,10 @@ struct mosquitto__security_options {
 	 */
 	struct mosquitto__unpwd *unpwd;
 	struct mosquitto__psk *psk_id;
-	struct mosquitto__acl_user *acl_list;
-	struct mosquitto__acl *acl_patterns;
+	struct acl_file_data acl_data;
+	char *acl_file;
 	char *password_file;
 	char *psk_file;
-	char *acl_file;
 	mosquitto_plugin_id_t **plugins;
 	int plugin_count;
 	int8_t allow_anonymous;
@@ -434,21 +434,6 @@ struct mosquitto__unpwd{
 	char *clientid;
 	struct mosquitto_pw *pw;
 };
-
-struct mosquitto__acl{
-	struct mosquitto__acl *next;
-	char *topic;
-	int access;
-	int ucount;
-	int ccount;
-};
-
-struct mosquitto__acl_user{
-	struct mosquitto__acl_user *next;
-	char *username;
-	struct mosquitto__acl *acl;
-};
-
 
 struct mosquitto__message_v5{
 	struct mosquitto__message_v5 *next, *prev;
@@ -916,6 +901,9 @@ int mosquitto_security_init_default(bool reload);
 int mosquitto_security_apply_default(void);
 int mosquitto_security_cleanup_default(bool reload);
 int mosquitto_psk_key_get_default(struct mosquitto *context, const char *hint, const char *identity, char *key, int max_key_len);
+int acl_file__init(void);
+int acl_file__cleanup(void);
+int acl_file__apply(void);
 int psk_file__init(void);
 int psk_file__cleanup(void);
 

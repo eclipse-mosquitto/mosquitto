@@ -192,6 +192,7 @@ endif
 	./09-extended-auth-multistep.py
 	./09-extended-auth-reauth.py
 	./09-extended-auth-single.py
+	./09-plugin-acl-access-variants.py
 	./09-plugin-acl-change.py
 	./09-plugin-auth-acl-pub.py
 	./09-plugin-auth-acl-sub-denied.py

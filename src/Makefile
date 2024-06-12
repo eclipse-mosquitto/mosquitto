@@ -45,6 +45,7 @@ all : mosquitto
 endif
 
 OBJS=	mosquitto.o \
+		acl_file.o \
 		bridge.o \
 		bridge_topic.o \
 		broker_control.o \
@@ -120,6 +121,8 @@ OBJS=	mosquitto.o \
 		xtreport.o
 
 OBJS_EXTERNAL= \
+		acl_check.o \
+		acl_parse.o \
 		alias_mosq.o \
 		handle_ping.o \
 		handle_pubackcomp.o \
@@ -155,6 +158,12 @@ mosquitto_broker.a : ${OBJS} ${OBJS_EXTERNAL}
 	${CROSS_COMPILE}$(AR) cr $@ $^
 
 ${OBJS} : %.o: %.c mosquitto_broker_internal.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+acl_check.o : ${R}/plugins/acl-file/acl_check.c acl_file.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+acl_parse.o : ${R}/plugins/acl-file/acl_parse.c acl_file.h
 	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 alias_mosq.o : ${R}/lib/alias_mosq.c ${R}/lib/alias_mosq.h

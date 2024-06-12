@@ -1,4 +1,5 @@
 DIRS= \
+		acl-file \
 		dynamic-security \
 		examples \
 		persist-sqlite \

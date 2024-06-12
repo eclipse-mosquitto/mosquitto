@@ -255,7 +255,7 @@ static void config__init_reload(struct mosquitto__config *config)
 	config->local_only = true;
 	config->allow_duplicate_messages = true;
 
-	mosquitto_FREE(config->security_options.acl_file);
+	mosquitto_FREE(config->security_options.acl_data.acl_file);
 	mosquitto_FREE(config->security_options.password_file);
 	mosquitto_FREE(config->security_options.psk_file);
 
@@ -363,7 +363,7 @@ void config__cleanup(struct mosquitto__config *config)
 	mosquitto_FREE(config->persistence_file);
 	mosquitto_FREE(config->persistence_filepath);
 	mosquitto_FREE(config->security_options.auto_id_prefix);
-	mosquitto_FREE(config->security_options.acl_file);
+	mosquitto_FREE(config->security_options.acl_data.acl_file);
 	mosquitto_FREE(config->security_options.password_file);
 	mosquitto_FREE(config->security_options.psk_file);
 	mosquitto_FREE(config->security_options.plugins);
@@ -378,7 +378,7 @@ void config__cleanup(struct mosquitto__config *config)
 			mosquitto_FREE(config->listeners[i].socks);
 			if(config->listeners[i].security_options){
 				mosquitto_FREE(config->listeners[i].security_options->auto_id_prefix);
-				mosquitto_FREE(config->listeners[i].security_options->acl_file);
+				mosquitto_FREE(config->listeners[i].security_options->acl_data.acl_file);
 				mosquitto_FREE(config->listeners[i].security_options->password_file);
 				mosquitto_FREE(config->listeners[i].security_options->psk_file);
 				mosquitto_FREE(config->listeners[i].security_options->plugins);
@@ -610,8 +610,8 @@ int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])
 
 static void config__copy(struct mosquitto__config *src, struct mosquitto__config *dest)
 {
-	mosquitto_FREE(dest->security_options.acl_file);
-	dest->security_options.acl_file = src->security_options.acl_file;
+	mosquitto_FREE(dest->security_options.acl_data.acl_file);
+	dest->security_options.acl_data.acl_file = src->security_options.acl_data.acl_file;
 
 	dest->security_options.allow_anonymous = src->security_options.allow_anonymous;
 	dest->security_options.allow_zero_length_clientid = src->security_options.allow_zero_length_clientid;
@@ -969,8 +969,8 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					REQUIRE_LISTENER_IF_PER_LISTENER(token);
 
 					conf__set_cur_security_options(config, &cur_listener, &cur_security_options, token);
-					mosquitto_FREE(cur_security_options->acl_file);
-					if(conf__parse_string(&token, "acl_file", &cur_security_options->acl_file, &saveptr)) return MOSQ_ERR_INVAL;
+					mosquitto_FREE(cur_security_options->acl_data.acl_file);
+					if(conf__parse_string(&token, "acl_file", &cur_security_options->acl_data.acl_file, &saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strcmp(token, "address") || !strcmp(token, "addresses")){
 #ifdef WITH_BRIDGE
 					REQUIRE_BRIDGE(token);

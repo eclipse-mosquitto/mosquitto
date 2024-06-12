@@ -195,12 +195,6 @@ int connect__on_authorised(struct mosquitto *context, void *auth_data_out, uint1
 		goto error;
 	}
 
-	rc = acl__find_acls(context);
-	if(rc){
-		SAFE_FREE(auth_data_out);
-		return rc;
-	}
-
 	if(db.config->connection_messages == true){
 		if(context->is_bridge){
 			if(context->username){
