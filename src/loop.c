@@ -45,6 +45,10 @@ Contributors:
 #  include <libwebsockets.h>
 #endif
 
+#ifdef WITH_SYSTEMD
+#  include <systemd/sd-daemon.h>
+#endif
+
 #include "mosquitto_broker_internal.h"
 #include "memory_mosq.h"
 #include "mqtt_protocol.h"
@@ -171,8 +175,22 @@ int mosquitto_main_loop(struct mosquitto__listener_sock *listensock, int listens
 #ifdef WITH_WEBSOCKETS
 	int i;
 #endif
+#ifdef WITH_SYSTEMD
+	char *watchdog_usec = getenv("WATCHDOG_USEC");
+	time_t next_ping = mosquitto_time();
+	time_t ping_sec = 0;
+#endif
 	int rc;
 
+#ifdef WITH_SYSTEMD
+	if(watchdog_usec){
+		char *endptr = NULL;
+		long usec = strtol(watchdog_usec, &endptr, 10);
+		if(watchdog_usec[0] != '\0' && endptr[0] == '\0' && usec > 0){
+			ping_sec = (usec / 1000000) / 2;
+		}
+	}
+#endif
 
 #if defined(WITH_WEBSOCKETS) && LWS_LIBRARY_VERSION_NUMBER == 3002000
 	memset(&sul, 0, sizeof(struct lws_sorted_usec_list));
@@ -187,6 +205,16 @@ int mosquitto_main_loop(struct mosquitto__listener_sock *listensock, int listens
 #endif
 
 	while(run){
+#ifdef WITH_SYSTEMD
+		if(ping_sec){
+			time_t now = mosquitto_time();
+			if(now > next_ping){
+				sd_notify(0, "WATCHDOG=1");
+				next_ping = now + ping_sec;
+			}
+		}
+#endif
+
 		queue_plugin_msgs();
 		context__free_disused();
 #ifdef WITH_SYS_TREE

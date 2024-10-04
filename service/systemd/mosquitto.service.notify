@@ -6,6 +6,7 @@ Wants=network.target
 
 [Service]
 Type=notify
+WatchdogSec=3min
 NotifyAccess=main
 ExecStart=/usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf
 ExecReload=/bin/kill -HUP $MAINPID
