@@ -85,7 +85,7 @@ static void on_publish_callback(struct mosquitto *mosq, void *obj, int rc)
 	UNUSED(rc);
 
 	userdata->published_count++;
-	if(userdata->published_count == userdata->msg_count) {
+	if(userdata->published_count >= userdata->msg_count) {
 		mosquitto_disconnect(mosq);
 	}
 }
@@ -311,6 +311,7 @@ libmosq_EXPORT int mosquitto_publish_multiple(
 
 	cb_userdata.messages = messages;
 	cb_userdata.msg_count = message_count;
+	cb_userdata.published_count = 0;
 
 	mosquitto_connect_callback_set(mosq, on_connect_publish);
 	mosquitto_publish_callback_set(mosq, on_publish_callback);

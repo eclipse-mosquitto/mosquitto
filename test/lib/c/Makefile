@@ -58,6 +58,8 @@ SRC = \
 	03-request-response-1.c \
 	03-request-response-2.c \
 	03-request-response-correlation-1.c \
+	03-publish-helper-single.c \
+	03-publish-helper-multiple.c \
 	04-retain-qos0.c \
 	08-ssl-bad-cacert.c \
 	08-ssl-connect-cert-auth-enc.c \
