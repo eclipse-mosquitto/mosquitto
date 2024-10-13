@@ -61,6 +61,8 @@ static void on_connect_publish(struct mosquitto *mosq, void *obj, int rc)
 	int result;
 	int i;
 
+	UNUSED(rc);
+
 	for (i=0; i < userdata->msg_count; i++){
 		current_msg = userdata->messages[i];
 
@@ -117,12 +119,6 @@ static int on_message_simple(struct mosquitto *mosq, void *obj, const struct mos
 
 static int mosquitto__helper_initialise(
 		struct mosquitto * mosq,
-		void *userdata,
-		const char *host,
-		int port,
-		const char *client_id,
-		int keepalive,
-		bool clean_session,
 		const char *username,
 		const char *password,
 		const struct libmosquitto_will *will,
@@ -250,9 +246,7 @@ libmosq_EXPORT int mosquitto_subscribe_callback(
 	}
 
 	rc = mosquitto__helper_initialise(
-			mosq, &cb_userdata,
-			host, port,
-			client_id, keepalive, clean_session,
+			mosq,
 			username, password,
 			will, tls);
 
@@ -296,9 +290,7 @@ libmosq_EXPORT int mosquitto_publish_multiple(
 	}
 
 	rc = mosquitto__helper_initialise(
-			mosq, &cb_userdata,
-			host, port,
-			client_id, keepalive, clean_session,
+			mosq,
 			username, password,
 			will, tls);
 
