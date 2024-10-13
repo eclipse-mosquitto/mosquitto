@@ -2799,6 +2799,7 @@ libmosq_EXPORT int mosquitto_publish_multiple(
  *   >0 - on error.
  */
 libmosq_EXPORT int mosquitto_publish_single(
+		int *mid,
 		const char *topic,
 		const void *payload,
 		int payloadlen,
