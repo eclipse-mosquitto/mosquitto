@@ -39,7 +39,7 @@ struct userdata__simple {
 };
 
 struct userdata__publish_callback {
-	struct mosquitto_message **messages;
+	struct mosquitto_message *const *messages;
 	int msg_count;
 	void *userdata;
 	int rc;
@@ -274,7 +274,7 @@ libmosq_EXPORT int mosquitto_subscribe_callback(
 }
 
 libmosq_EXPORT int mosquitto_publish_multiple(
-		struct mosquitto_message **messages,
+		struct mosquitto_message *const *const messages,
 		int message_count,
 		const char *host,
 		int port,

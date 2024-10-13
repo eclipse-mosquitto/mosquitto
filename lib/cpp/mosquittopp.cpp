@@ -201,7 +201,7 @@ mosqpp_EXPORT int publish_single(
 }
 
 mosqpp_EXPORT int publish_multiple(
-		struct mosquitto_message **messages,
+		struct mosquitto_message *const *const messages,
 		int message_count,
 		const char *host,
 		int port,

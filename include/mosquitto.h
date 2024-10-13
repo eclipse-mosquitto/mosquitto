@@ -2756,7 +2756,7 @@ libmosq_EXPORT int mosquitto_subscribe_callback(
  *   >0 - on error.
  */
 libmosq_EXPORT int mosquitto_publish_multiple(
-		struct mosquitto_message **messages,
+		struct mosquitto_message *const *const messages,
 		int message_count,
 		const char *host,
 		int port,
