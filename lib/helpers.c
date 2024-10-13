@@ -39,7 +39,7 @@ struct userdata__simple {
 };
 
 
-static void on_connect(struct mosquitto *mosq, void *obj, int rc)
+static void on_connect_subscribe(struct mosquitto *mosq, void *obj, int rc)
 {
 	struct userdata__callback *userdata = obj;
 
@@ -203,7 +203,7 @@ libmosq_EXPORT int mosquitto_subscribe_callback(
 		}
 	}
 
-	mosquitto_connect_callback_set(mosq, on_connect);
+	mosquitto_connect_callback_set(mosq, on_connect_subscribe);
 	mosquitto_message_callback_set(mosq, on_message_callback);
 
 	rc = mosquitto_connect(mosq, host, port, keepalive);
