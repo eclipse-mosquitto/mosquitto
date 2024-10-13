@@ -2769,7 +2769,7 @@ libmosq_EXPORT int mosquitto_publish_multiple(
 		const struct libmosquitto_tls *tls);
 
 /*
- * Function: mosquitto_publish_multiple
+ * Function: mosquitto_publish_single
  *
  * Helper function to make publishing a single message very straightforward.
  *
