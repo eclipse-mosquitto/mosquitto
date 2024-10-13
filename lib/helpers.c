@@ -315,7 +315,6 @@ libmosq_EXPORT int mosquitto_publish_multiple(
 }
 
 libmosq_EXPORT int mosquitto_publish_single(
-		int *mid,
 		const char *topic,
 		const void *payload,
 		int payloadlen,
@@ -333,10 +332,6 @@ libmosq_EXPORT int mosquitto_publish_single(
 	struct mosquitto_message message;
 	struct mosquitto_message *messages_ptr;
 	messages_ptr = &message;
-
-	if(mid != NULL) {
-		message.mid = *mid;
-	}
 
 	message.topic = (char *)topic;
 	message.qos = qos;
