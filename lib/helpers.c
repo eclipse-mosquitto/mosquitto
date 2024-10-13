@@ -41,6 +41,7 @@ struct userdata__simple {
 struct userdata__publish_callback {
 	struct mosquitto_message *const *messages;
 	int msg_count;
+	int published_count;
 	void *userdata;
 	int rc;
 };
@@ -76,7 +77,17 @@ static void on_connect_publish(struct mosquitto *mosq, void *obj, int rc)
 		}
 	}
 
-	mosquitto_disconnect(mosq);
+}
+
+static void on_publish_callback(struct mosquitto *mosq, void *obj, int rc)
+{
+	struct userdata__publish_callback *userdata = obj;
+	UNUSED(rc);
+
+	userdata->published_count++;
+	if(userdata->published_count == userdata->msg_count) {
+		mosquitto_disconnect(mosq);
+	}
 }
 
 static void on_message_callback(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message)
@@ -302,7 +313,8 @@ libmosq_EXPORT int mosquitto_publish_multiple(
 	cb_userdata.msg_count = message_count;
 
 	mosquitto_connect_callback_set(mosq, on_connect_publish);
-	
+	mosquitto_publish_callback_set(mosq, on_publish_callback);
+
 	rc = mosquitto_connect(mosq, host, port, keepalive);
 	if(rc){
 		mosquitto_destroy(mosq);
