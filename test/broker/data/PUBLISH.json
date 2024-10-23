@@ -41,7 +41,15 @@
 			{ "name": "30 topic with U+FFFF", "ver":4, "msgs": [{"type":"send", "payload":"30 0E 0005 746FEDBFBF 7061796C6F6164"}]},
 			{ "name": "30 topic with U+2A6D4 (section 1.5.3.1)", "ver":4, "expect_disconnect":false, "msgs": [{"type":"send", "payload":"30 0E 0005 41F0AA9B94 7061796C6F6164"}]},
 			{ "name": "30 topic with + [MQTT-3.3.2-2]", "ver":4, "msgs": [{"type":"send", "payload":"30 0E 0005 2B6F706963 7061796C6F6164"}]},
-			{ "name": "30 topic with # [MQTT-3.3.2-2]", "ver":4, "msgs": [{"type":"send", "payload":"30 0E 0005 236F706963 7061796C6F6164"}]}
+			{ "name": "30 topic with # [MQTT-3.3.2-2]", "ver":4, "msgs": [{"type":"send", "payload":"30 0E 0005 236F706963 7061796C6F6164"}]},
+			{ "name": "34 QoS 2 repeated with/without payload", "ver":4, "expect_disconnect":false, "msgs": [
+				{"type":"send", "payload":"34 09 0005 746F706963 1234"},
+				{"type":"recv", "payload":"50 02 1234"},
+				{"type":"send", "payload":"34 0A 0005 746F706963 1234 70"},
+				{"type":"recv", "payload":"50 02 1234"},
+				{"type":"send", "payload":"34 09 0005 746F706963 1234"},
+				{"type":"recv", "payload":"50 02 1234"}
+			]}
 		]
 	},
 	{
