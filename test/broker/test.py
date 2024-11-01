@@ -5,7 +5,8 @@ import ptest
 
 tests = [
     #(ports required, 'path'),
-	(1, './01-bad-initial-packets.py'),
+    (1, './01-bad-initial-packets.py'),
+    (1, './01-bad-packets.py'),
     (1, './01-connect-575314.py'),
     (1, './01-connect-allow-anonymous.py'),
     (1, './01-connect-disconnect-v5.py'),
@@ -70,7 +71,7 @@ tests = [
 
     (1, './04-retain-check-source-persist.py'),
     (1, './04-retain-check-source.py'),
-	(1, './04-retain-clear-multiple.py'),
+    (1, './04-retain-clear-multiple.py'),
     (1, './04-retain-qos0-clear.py'),
     (1, './04-retain-qos0-fresh.py'),
     (1, './04-retain-qos0-repeated.py'),
