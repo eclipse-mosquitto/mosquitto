@@ -38,6 +38,10 @@ jobs:
       uses: actions/checkout@v4
       with:
         submodules: 'true'
+
+    - name: temp
+      run: ip addr
+
     -
       name: make
       run: make
