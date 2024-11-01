@@ -6,6 +6,7 @@ import ptest
 tests = [
     #(ports required, 'path'),
 	(1, './01-bad-initial-packets.py'),
+	(1, './01-bad-packets.py'),
     (1, './01-connect-575314.py'),
     (1, './01-connect-allow-anonymous.py'),
     (1, './01-connect-disconnect-v5.py'),
