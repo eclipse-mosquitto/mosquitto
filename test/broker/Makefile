@@ -24,6 +24,7 @@ msg_sequence_test:
 
 01 :
 	./01-bad-initial-packets.py
+	./01-bad-packets.py
 	./01-connect-575314.py
 	./01-connect-allow-anonymous.py
 	./01-connect-disconnect-v5.py
