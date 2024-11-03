@@ -12,7 +12,8 @@
 			{ "name": "01", "ver":4, "msgs": [{"type":"send", "payload":"01 00"}]},
 			{ "name": "02", "ver":4, "msgs": [{"type":"send", "payload":"02 00"}]},
 			{ "name": "04", "ver":4, "msgs": [{"type":"send", "payload":"04 00"}]},
-			{ "name": "08", "ver":4, "msgs": [{"type":"send", "payload":"08 00"}]}
+			{ "name": "08", "ver":4, "msgs": [{"type":"send", "payload":"08 00"}]},
+                        { "name": "0A with illegal length C0", "ver":4, "expect_disconnect":true, "msgs": [{"type":"send", "payload":"0A C0"}]}
 		]
 	},
 	{
@@ -46,7 +47,11 @@
 			{ "name": "08", "ver":5, "msgs": [
 				{"type":"send", "payload":"08 00"},
 				{"type":"recv", "payload":"E0 01 82", "comment":"DISCONNECT protocol error"}
-			]}
+                        ]},
+                        { "name": "0A with illegal length C0", "ver":5, "expect_disconnect":true, "msgs": [
+                                {"type":"send", "payload":"0A C0"},
+                                {"type":"recv", "payload":"E0 01 82", "comment":"DISCONNECT protocol error"}
+                        ]}
 		]
 	}
 ]
