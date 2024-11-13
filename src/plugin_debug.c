@@ -34,10 +34,10 @@ void print_col(struct mosquitto *client)
 {
 	switch(mosquitto_client_protocol(client)){
 		case mp_mqtt:
-			printf("%s", ANSI_GREEN);
+			fprintf(stderr, "%s", ANSI_GREEN);
 			break;
 		case mp_websockets:
-			printf("%s", ANSI_MAGENTA);
+			fprintf(stderr, "%s", ANSI_MAGENTA);
 			break;
 		default:
 			break;
@@ -46,54 +46,58 @@ void print_col(struct mosquitto *client)
 
 int mosquitto_auth_plugin_version(void)
 {
-	printf(ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_version()" ANSI_RESET "\n");
+	fprintf(stderr, ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_version()" ANSI_RESET "\n");
 	return 4;
 }
 
 int mosquitto_auth_plugin_init(void **user_data, struct mosquitto_opt *auth_opts, int auth_opt_count)
 {
-	printf(ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_init(,,%d)" ANSI_RESET "\n", auth_opt_count);
+	fprintf(stderr, ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_init(,,%d)" ANSI_RESET "\n", auth_opt_count);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_plugin_cleanup(void *user_data, struct mosquitto_opt *auth_opts, int auth_opt_count)
 {
-	printf(ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_cleanup(,,%d)" ANSI_RESET "\n", auth_opt_count);
+	fprintf(stderr, ANSI_BLUE "PLUGIN ::: mosquitto_auth_plugin_cleanup(,,%d)" ANSI_RESET "\n", auth_opt_count);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_security_init(void *user_data, struct mosquitto_opt *auth_opts, int auth_opt_count, bool reload)
 {
-	printf(ANSI_BLUE "PLUGIN ::: mosquitto_auth_security_init(,,%d, %d)" ANSI_RESET "\n", auth_opt_count, reload);
+	fprintf(stderr, ANSI_BLUE "PLUGIN ::: mosquitto_auth_security_init(,,%d, %d)" ANSI_RESET "\n", auth_opt_count, reload);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_security_cleanup(void *user_data, struct mosquitto_opt *auth_opts, int auth_opt_count, bool reload)
 {
-	printf(ANSI_BLUE "PLUGIN ::: mosquitto_auth_security_cleanup(,,%d, %d)" ANSI_RESET "\n", auth_opt_count, reload);
+	fprintf(stderr, ANSI_BLUE "PLUGIN ::: mosquitto_auth_security_cleanup(,,%d, %d)" ANSI_RESET "\n", auth_opt_count, reload);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_acl_check(void *user_data, int access, struct mosquitto *client, const struct mosquitto_acl_msg *msg)
 {
 	print_col(client);
-	printf("PLUGIN ::: mosquitto_auth_acl_check(%p, %d, %s, %s)" ANSI_RESET "\n",
+	fprintf(stderr, "PLUGIN ::: mosquitto_auth_acl_check(%p, %d, %s, %s)" ANSI_RESET "\n",
 			user_data, access, mosquitto_client_username(client), msg->topic);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_unpwd_check(void *user_data, struct mosquitto *client, const char *username, const char *password)
 {
+	const char *client_id = mosquitto_client_id(client);
+	const char *ip_address = mosquitto_client_address(client);
+	const void *cert = mosquitto_client_certificate(client);
+
 	print_col(client);
-	printf("PLUGIN ::: mosquitto_auth_unpwd_check(%p, %s, %s)" ANSI_RESET "\n",
-			user_data, mosquitto_client_username(client), username);
+	fprintf(stderr, "PLUGIN ::: mosquitto_auth_unpwd_check(%p, %s, %s, id=%s, ip=%s, cert=%p)" ANSI_RESET "\n",
+			user_data, mosquitto_client_username(client), username, client_id, ip_address, cert);
 	return MOSQ_ERR_SUCCESS;
 }
 
 int mosquitto_auth_psk_key_get(void *user_data, struct mosquitto *client, const char *hint, const char *identity, char *key, int max_key_len)
 {
 	print_col(client);
-	printf("PLUGIN ::: mosquitto_auth_psk_key_get(%p, %s, %s)" ANSI_RESET "\n",
+	fprintf(stderr, "PLUGIN ::: mosquitto_auth_psk_key_get(%p, %s, %s)" ANSI_RESET "\n",
 			user_data, mosquitto_client_username(client), hint);
 	return MOSQ_ERR_SUCCESS;
 }
@@ -101,7 +105,7 @@ int mosquitto_auth_psk_key_get(void *user_data, struct mosquitto *client, const 
 int mosquitto_auth_start(void *user_data, struct mosquitto *client, const char *method, bool reauth, const void *data_in, uint16_t data_in_len, void **data_out, uint16_t *data_out_len)
 {
 	print_col(client);
-	printf("PLUGIN ::: mosquitto_auth_start(%p, %s, %s, %d, %d, %hn)" ANSI_RESET "\n",
+	fprintf(stderr, "PLUGIN ::: mosquitto_auth_start(%p, %s, %s, %d, %d, %hn)" ANSI_RESET "\n",
 			user_data, mosquitto_client_username(client), method, reauth, data_in_len, data_out_len);
 	return MOSQ_ERR_SUCCESS;
 }
@@ -109,7 +113,7 @@ int mosquitto_auth_start(void *user_data, struct mosquitto *client, const char *
 int mosquitto_auth_continue(void *user_data, struct mosquitto *client, const char *method, const void *data_in, uint16_t data_in_len, void **data_out, uint16_t *data_out_len)
 {
 	print_col(client);
-	printf("PLUGIN ::: mosquitto_auth_continue(%p, %s, %s, %d, %hn)" ANSI_RESET "\n",
+	fprintf(stderr, "PLUGIN ::: mosquitto_auth_continue(%p, %s, %s, %d, %hn)" ANSI_RESET "\n",
 			user_data, mosquitto_client_username(client), method, data_in_len, data_out_len);
 	return MOSQ_ERR_SUCCESS;
 }
