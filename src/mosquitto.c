@@ -446,6 +446,7 @@ static int pid__write(void)
 
 int main(int argc, char *argv[])
 {
+	mosquitto_time_init();
 	struct mosquitto__config config;
 #ifdef WITH_BRIDGE
 	int i;
