@@ -11,7 +11,7 @@
 # If a non-root user runs the command, then SNAP_USER_COMMON will be used.
 
 case "$SNAP_USER_COMMON" in
-	*/root/snap/mosquitto/common*) COMMON=$SNAP_COMMON ;;
+	*/root/snap/$SNAP_INSTANCE_NAME/common*) COMMON=$SNAP_COMMON ;;
 	*)                             COMMON=$SNAP_USER_COMMON ;;
 esac
 
