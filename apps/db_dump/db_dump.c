@@ -38,6 +38,10 @@ Contributors:
 
 #include "db_dump.h"
 
+#ifdef __ANDROID__
+#include <sys/endian.h>
+#endif
+
 struct client_data
 {
 	UT_hash_handle hh_id;
