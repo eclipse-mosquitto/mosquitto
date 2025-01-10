@@ -245,17 +245,18 @@ int bridge__connect_step1(struct mosquitto *context)
 		}
 	}
 
-	log__printf(NULL, MOSQ_LOG_NOTICE, "Connecting bridge (step 1) %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
+	log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge (step 1) %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 	rc = net__try_connect_step1(context, context->bridge->addresses[context->bridge->cur_address].address);
 	if(rc > 0 ){
 		if(rc == MOSQ_ERR_TLS){
 			mux__delete(context);
 			net__socket_close(context);
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp1: %s.", strerror(errno));
 			return rc; /* Error already printed */
 		}else if(rc == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
 		}
 
 		return rc;
@@ -271,17 +272,18 @@ int bridge__connect_step2(struct mosquitto *context)
 
 	if(!context || !context->bridge) return MOSQ_ERR_INVAL;
 
-	log__printf(NULL, MOSQ_LOG_NOTICE, "Connecting bridge (step 2) %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
+	log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge (step 2) %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 	rc = net__try_connect_step2(context, context->bridge->addresses[context->bridge->cur_address].port, &context->sock);
 	if(rc > 0){
 		if(rc == MOSQ_ERR_TLS){
 			mux__delete(context);
 			net__socket_close(context);
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp2: %s.", strerror(errno));
 			return rc; /* Error already printed */
 		}else if(rc == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
 		}
 
 		return rc;
@@ -303,16 +305,19 @@ int bridge__connect_step3(struct mosquitto *context)
 	mosquitto_property session_expiry_interval;
 	mosquitto_property *properties = NULL;
 
+	log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge (step 3) %s (%s)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address);
+
 	rc = net__socket_connect_step3(context, context->bridge->addresses[context->bridge->cur_address].address);
 	if(rc > 0){
 		if(rc == MOSQ_ERR_TLS){
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp3: %s.", strerror(errno));
 			mux__delete(context);
 			net__socket_close(context);
 			return rc; /* Error already printed */
 		}else if(rc == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
 		}
 
 		return rc;
@@ -333,14 +338,16 @@ int bridge__connect_step3(struct mosquitto *context)
 	if(rc == MOSQ_ERR_SUCCESS){
 		return MOSQ_ERR_SUCCESS;
 	}else if(rc == MOSQ_ERR_ERRNO && errno == ENOTCONN){
+    log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: the ENOTCONN thing happened");
 		return MOSQ_ERR_SUCCESS;
 	}else{
 		if(rc == MOSQ_ERR_TLS){
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp4: %s.", strerror(errno));
 			return rc; /* Error already printed */
 		}else if(rc == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
 		}
 		mux__delete(context);
 		net__socket_close(context);
@@ -362,6 +369,8 @@ int bridge__connect(struct mosquitto *context)
     mosquitto_property *properties = NULL;
 
 	if(!context || !context->bridge) return MOSQ_ERR_INVAL;
+
+	log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 
 	mosquitto__set_state(context, mosq_cs_new);
 	context->sock = INVALID_SOCKET;
@@ -449,7 +458,7 @@ int bridge__connect(struct mosquitto *context)
 		}
 	}
 
-	log__printf(NULL, MOSQ_LOG_NOTICE, "Connecting bridge %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
+	log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge - socket_conect() %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 	rc = net__socket_connect(context,
 			context->bridge->addresses[context->bridge->cur_address].address,
 			context->bridge->addresses[context->bridge->cur_address].port,
@@ -460,17 +469,21 @@ int bridge__connect(struct mosquitto *context)
 		if(rc == MOSQ_ERR_TLS){
 			mux__delete(context);
 			net__socket_close(context);
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp5: %s.", strerror(errno));
 			return rc; /* Error already printed */
 		}else if(rc == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
 		}
 
 		return rc;
 	}else if(rc == MOSQ_ERR_CONN_PENDING){
+    log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge - connection pending %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 		mosquitto__set_state(context, mosq_cs_connect_pending);
 		mux__add_out(context);
+	} else {
+    log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge - connection established %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 	}
 
 	HASH_ADD(hh_sock, db.contexts_by_sock, sock, sizeof(context->sock), context);
@@ -484,16 +497,21 @@ int bridge__connect(struct mosquitto *context)
 
     rc2 = send__connect(context, context->keepalive, context->clean_start, properties);
 	if(rc2 == MOSQ_ERR_SUCCESS){
+    log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Connecting bridge - send__connect() succeeded %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 		return rc;
 	}else if(rc2 == MOSQ_ERR_ERRNO && errno == ENOTCONN){
+    log__printf(NULL, MOSQ_LOG_WARNING, "rkdb: Connecting bridge - send__connect() ENOTCONN %s (%s:%d)", context->bridge->name, context->bridge->addresses[context->bridge->cur_address].address, context->bridge->addresses[context->bridge->cur_address].port);
 		return MOSQ_ERR_SUCCESS;
 	}else{
 		if(rc2 == MOSQ_ERR_TLS){
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: TLS error - cp6: %s.", strerror(errno));
 			return rc2; /* Error already printed */
 		}else if(rc2 == MOSQ_ERR_ERRNO){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", strerror(errno));
 		}else if(rc2 == MOSQ_ERR_EAI){
-			log__printf(NULL, MOSQ_LOG_ERR, "Error creating bridge: %s.", gai_strerror(errno));
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Error creating bridge: %s.", gai_strerror(errno));
+		} else {
+			log__printf(NULL, MOSQ_LOG_ERR, "rkdb: Unknown Error creating bridge: %s.", strerror(errno));
 		}
 		mux__delete(context);
 		net__socket_close(context);
@@ -744,6 +762,8 @@ static void bridge_check_pending(struct mosquitto *context)
 	}
 }
 
+static long unsigned int checkCount = 0;
+
 void bridge_check(void)
 {
 	static time_t last_check = 0;
@@ -760,7 +780,11 @@ void bridge_check(void)
 
 		context = db.bridges[i];
 
+    if (checkCount++ % 100 == 0) {
+      log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Checking bridge state checkCount=%lu: %s.", checkCount, context->bridge->name);
+    }
 		if(context->sock != INVALID_SOCKET){
+      // log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: connection looks good - sending keepalive, check if primary_retry defined: %s.", context->bridge->name);
 			mosquitto__check_keepalive(context);
 			bridge_check_pending(context);
 
@@ -770,6 +794,8 @@ void bridge_check(void)
 					&& context->bridge->cur_address != 0
 					&& context->bridge->primary_retry
 					&& db.now_s > context->bridge->primary_retry){
+
+        log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: primary retry defined - some chicanery going on.");
 
 				if(context->bridge->primary_retry_sock == INVALID_SOCKET){
 					rc = net__try_connect(context->bridge->addresses[0].address,
@@ -813,6 +839,7 @@ void bridge_check(void)
 
 		if(context->sock == INVALID_SOCKET){
 			/* Want to try to restart the bridge connection */
+      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: connection is down - checking if should try to restart: %s", context->bridge->name);
 			if(!context->bridge->restart_t){
 				context->bridge->restart_t = db.now_s+context->bridge->restart_timeout;
 				context->bridge->cur_address++;
@@ -824,6 +851,7 @@ void bridge_check(void)
 						|| (context->bridge->start_type == bst_automatic && db.now_s > context->bridge->restart_t)){
 
 #if defined(__GLIBC__) && defined(WITH_ADNS)
+          log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting adns restart: %s", context->bridge->name);
 					if(context->adns){
 						/* Connection attempted, waiting on DNS lookup */
 						rc = gai_error(context->adns);
@@ -870,6 +898,7 @@ void bridge_check(void)
 					}
 #else
 					{
+            log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting NON-adns restart: %s", context->bridge->name);
 						rc = bridge__connect(context);
 						context->bridge->restart_t = 0;
 						if(rc == MOSQ_ERR_SUCCESS || rc == MOSQ_ERR_CONN_PENDING){

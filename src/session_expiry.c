@@ -146,33 +146,35 @@ void session_expiry__remove_all(void)
 
 void session_expiry__check(void)
 {
-	struct session_expiry_list *item, *tmp;
-	struct mosquitto *context;
+  struct session_expiry_list *item, *tmp;
+  struct mosquitto *context;
 
-	if(db.now_real_s <= last_check) return;
+  if(db.now_real_s <= last_check) return;
 
-	last_check = db.now_real_s;
+  last_check = db.now_real_s;
 
-	DL_FOREACH_SAFE(expiry_list, item, tmp){
-		if(item->context->session_expiry_time < db.now_real_s){
+  DL_FOREACH_SAFE(expiry_list, item, tmp){
+    if (item->context->bridge == NULL) {
+      if(item->context->session_expiry_time < db.now_real_s){
 
-			context = item->context;
-			session_expiry__remove(context);
+        context = item->context;
+        session_expiry__remove(context);
 
-			if(context->id){
-				log__printf(NULL, MOSQ_LOG_NOTICE, "Expiring client %s due to timeout.", context->id);
-			}
-			G_CLIENTS_EXPIRED_INC();
+        if(context->id){
+          log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Expiring client %s due to timeout.", context->id);
+        }
+        G_CLIENTS_EXPIRED_INC();
 
-			/* Session has now expired, so clear interval */
-			context->session_expiry_interval = 0;
-			/* Session has expired, so will delay should be cleared. */
-			context->will_delay_interval = 0;
-			will_delay__remove(context);
-			context__send_will(context);
-			context__add_to_disused(context);
-		}else{
-			return;
-		}
-	}
+        /* Session has now expired, so clear interval */
+        context->session_expiry_interval = 0;
+        /* Session has expired, so will delay should be cleared. */
+        context->will_delay_interval = 0;
+        will_delay__remove(context);
+        context__send_will(context);
+        context__add_to_disused(context);
+      }else{
+        return;
+      }
+    }
+  }
 }
