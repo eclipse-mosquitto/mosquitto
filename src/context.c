@@ -237,6 +237,10 @@ void context__disconnect(struct mosquitto *context)
 		}else{
 			session_expiry__add(context);
 		}
+#ifdef WITH_BRIDGE
+	} else {
+    log__printf(NULL, MOSQ_LOG_WARNING, "rkdb: context_disconnect() called for bridge %s", context->bridge->name);
+#endif
 	}
 	keepalive__remove(context);
 	mosquitto__set_state(context, mosq_cs_disconnected);
