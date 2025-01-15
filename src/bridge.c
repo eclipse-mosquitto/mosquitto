@@ -780,8 +780,8 @@ void bridge_check(void)
 
 		context = db.bridges[i];
 
-    if (checkCount++ % 100 == 0) {
-      log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Checking bridge state checkCount=%lu: %s.", checkCount, context->bridge->name);
+    if (++checkCount % 100 == 0) {
+      log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Checking bridge state: %s", context->bridge->name);
     }
 		if(context->sock != INVALID_SOCKET){
       // log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: connection looks good - sending keepalive, check if primary_retry defined: %s.", context->bridge->name);
@@ -839,7 +839,9 @@ void bridge_check(void)
 
 		if(context->sock == INVALID_SOCKET){
 			/* Want to try to restart the bridge connection */
-      log__printf(NULL, MOSQ_LOG_ERR, "rkdb: connection is down - checking if should try to restart: %s", context->bridge->name);
+      if (checkCount % 100 == 0) {
+        log__printf(NULL, MOSQ_LOG_ERR, "rkdb: connection is down - checking if should try to restart: %s", context->bridge->name);
+      }
 			if(!context->bridge->restart_t){
 				context->bridge->restart_t = db.now_s+context->bridge->restart_timeout;
 				context->bridge->cur_address++;
@@ -851,7 +853,9 @@ void bridge_check(void)
 						|| (context->bridge->start_type == bst_automatic && db.now_s > context->bridge->restart_t)){
 
 #if defined(__GLIBC__) && defined(WITH_ADNS)
-          log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting adns restart: %s", context->bridge->name);
+          if (checkCount % 100 == 0) {
+            log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting adns restart: %s", context->bridge->name);
+          }
 					if(context->adns){
 						/* Connection attempted, waiting on DNS lookup */
 						rc = gai_error(context->adns);
@@ -898,7 +902,9 @@ void bridge_check(void)
 					}
 #else
 					{
-            log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting NON-adns restart: %s", context->bridge->name);
+            if (checkCount % 100 == 0) {
+              log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting NON-adns restart: %s", context->bridge->name);
+            }
 						rc = bridge__connect(context);
 						context->bridge->restart_t = 0;
 						if(rc == MOSQ_ERR_SUCCESS || rc == MOSQ_ERR_CONN_PENDING){

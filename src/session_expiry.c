@@ -157,8 +157,8 @@ void session_expiry__check(void)
 
   DL_FOREACH_SAFE(expiry_list, item, tmp){
     if (item->context->bridge != NULL) {
-			if (checkCount++ % 60 == 0 || item->context->session_expiry_time == db.now_real_s) {
-				log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: bridge expiry time is %lds from now", item->context->session_expiry_time - db.now_real_s);
+      if (checkCount++ % 60 == 0 || item->context->session_expiry_time == db.now_real_s) {
+        log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: bridge expiry time is %lds from now", item->context->session_expiry_time - db.now_real_s);
       }
     }
     if (item->context->bridge == NULL) {
