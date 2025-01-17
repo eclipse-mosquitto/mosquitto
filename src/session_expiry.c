@@ -144,8 +144,6 @@ void session_expiry__remove_all(void)
 	}
 }
 
-static long unsigned int checkCount = 0;
-
 void session_expiry__check(void)
 {
   struct session_expiry_list *item, *tmp;
@@ -156,11 +154,6 @@ void session_expiry__check(void)
   last_check = db.now_real_s;
 
   DL_FOREACH_SAFE(expiry_list, item, tmp){
-    if (item->context->bridge != NULL) {
-      if (checkCount++ % 60 == 0 || item->context->session_expiry_time == db.now_real_s) {
-        log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: bridge expiry time is %lds from now", item->context->session_expiry_time - db.now_real_s);
-      }
-    }
     if (item->context->bridge == NULL) {
       if(item->context->session_expiry_time < db.now_real_s){
 

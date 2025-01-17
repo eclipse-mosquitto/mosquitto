@@ -775,14 +775,12 @@ void bridge_check(void)
 
 	if(db.now_s <= last_check) return;
 
+  ++checkCount;
 	for(i=0; i<db.bridge_count; i++){
 		if(!db.bridges[i]) continue;
 
 		context = db.bridges[i];
 
-    if (++checkCount % 100 == 0) {
-      log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: Checking bridge state: %s", context->bridge->name);
-    }
 		if(context->sock != INVALID_SOCKET){
       // log__printf(NULL, MOSQ_LOG_NOTICE, "rkdb: connection looks good - sending keepalive, check if primary_retry defined: %s.", context->bridge->name);
 			mosquitto__check_keepalive(context);
@@ -840,9 +838,10 @@ void bridge_check(void)
 		if(context->sock == INVALID_SOCKET){
 			/* Want to try to restart the bridge connection */
       if (checkCount % 100 == 0) {
-        log__printf(NULL, MOSQ_LOG_ERR, "rkdb: connection is down - checking if should try to restart: %s", context->bridge->name);
+        log__printf(NULL, MOSQ_LOG_ERR, "rkdb: connection is down - checking if I should try to restart: %s", context->bridge->name);
       }
 			if(!context->bridge->restart_t){
+        log__printf(NULL, MOSQ_LOG_ERR, "rkdb: setting restart time to %d seconds from now", context->bridge->restart_timeout);
 				context->bridge->restart_t = db.now_s+context->bridge->restart_timeout;
 				context->bridge->cur_address++;
 				if(context->bridge->cur_address == context->bridge->address_count){
@@ -853,9 +852,6 @@ void bridge_check(void)
 						|| (context->bridge->start_type == bst_automatic && db.now_s > context->bridge->restart_t)){
 
 #if defined(__GLIBC__) && defined(WITH_ADNS)
-          if (checkCount % 100 == 0) {
-            log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting adns restart: %s", context->bridge->name);
-          }
 					if(context->adns){
 						/* Connection attempted, waiting on DNS lookup */
 						rc = gai_error(context->adns);
@@ -889,6 +885,7 @@ void bridge_check(void)
 							context->bridge->restart_t = 0;
 						}
 					}else{
+            log__printf(NULL, MOSQ_LOG_ERR, "rkdb: adns restart: %s", context->bridge->name);
 						rc = bridge__connect_step1(context);
 						if(rc){
 							context->bridge->cur_address++;
@@ -903,7 +900,7 @@ void bridge_check(void)
 #else
 					{
             if (checkCount % 100 == 0) {
-              log__printf(NULL, MOSQ_LOG_ERR, "rkdb: attempting NON-adns restart: %s", context->bridge->name);
+              log__printf(NULL, MOSQ_LOG_ERR, "rkdb: NON-adns restart: %s", context->bridge->name);
             }
 						rc = bridge__connect(context);
 						context->bridge->restart_t = 0;
