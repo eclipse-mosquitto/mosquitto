@@ -16,6 +16,10 @@ Build:
 - Fix Windows builds not having websockets enabled.
 - Add tzdata to docker images
 
+Tests:
+- Fix 08-ssl-connect-cert-auth-expired and 08-ssl-connect-cert-auth-revoked
+  tests when under load. Closes #3208.
+
 
 2.0.20 - 2024-10-16
 ===================
