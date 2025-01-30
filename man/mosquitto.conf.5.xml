@@ -1326,6 +1326,7 @@ log_timestamp_format %Y-%m-%dT%H:%M:%S
 							"openssl rehash &lt;path to capath&gt;" each time
 							you add/remove a certificate.
 						</para>
+						<para><option>capath</option> is not supported for websockets.</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>

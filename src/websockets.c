@@ -698,7 +698,12 @@ void mosq_websockets_init(struct mosquitto__listener *listener, const struct mos
 	info.gid = -1;
 	info.uid = -1;
 #ifdef WITH_TLS
-	info.ssl_ca_filepath = listener->cafile;
+	if(listener->cafile){
+		info.ssl_ca_filepath = listener->cafile;
+	}
+	else if(listener->capath){
+		log__printf(NULL, MOSQ_LOG_WARNING, "Warning: CA path option is not supported for websockets");
+	}
 	info.ssl_cert_filepath = listener->certfile;
 	info.ssl_private_key_filepath = listener->keyfile;
 	info.ssl_cipher_list = listener->ciphers;
