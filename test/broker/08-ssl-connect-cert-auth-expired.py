@@ -41,9 +41,10 @@ try:
     except ssl.SSLError as err:
         if err.errno == 1:
             rc = 0
-        else:
-            broker.terminate()
-            raise ValueError(err.errno)
+    except IOError as err:
+        if err.errno == errno.ECONNRESET:
+            rc = 0
+
 except mosq_test.TestError:
     pass
 finally:

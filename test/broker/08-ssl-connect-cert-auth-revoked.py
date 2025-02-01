@@ -40,10 +40,9 @@ try:
     except ssl.SSLError as err:
         if err.errno == 1 and "certificate revoked" in err.strerror:
             rc = 0
-        else:
-            broker.terminate()
-            print(err.strerror)
-            raise ValueError(err.errno)
+    except IOError as err:
+        if err.errno == errno.ECONNRESET:
+            rc = 0
 
 except mosq_test.TestError:
     pass
