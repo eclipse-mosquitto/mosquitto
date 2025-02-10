@@ -11,26 +11,26 @@
 
 from mosq_test_helper import *
 
-def do_test():
+def do_test(proto_ver):
     rc = 1
     mid = 53
     keepalive = 60
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.PROP_SESSION_EXPIRY_INTERVAL, 60)
-    connect_packet = mosq_test.gen_connect("subpub-qos0-test", keepalive=keepalive, proto_ver=5, clean_session=False, properties=props)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=5, flags=1)
+    connect_packet = mosq_test.gen_connect("subpub-qos0-test", keepalive=keepalive, proto_ver=proto_ver, clean_session=False, properties=props)
+    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver, flags=1)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "subpub/qos1", 1, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=5)
+    subscribe_packet = mosq_test.gen_subscribe(mid, "subpub/qos1", 1, proto_ver=proto_ver)
+    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
 
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.PROP_MESSAGE_EXPIRY_INTERVAL, 10)
-    helper_connect = mosq_test.gen_connect("helper", proto_ver=5, will_topic="subpub/qos1", will_qos=1, will_payload=b"message", will_properties=props, keepalive=2)
-    helper_connack = mosq_test.gen_connack(rc=0, proto_ver=5)
+    helper_connect = mosq_test.gen_connect("helper", proto_ver=proto_ver, will_topic="subpub/qos1", will_qos=1, will_payload=b"message", will_properties=props, keepalive=2)
+    helper_connack = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
 
     #mid=2
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.PROP_MESSAGE_EXPIRY_INTERVAL, 10)
-    publish2s_packet = mosq_test.gen_publish("subpub/qos1", mid=mid, qos=1, payload="message2", proto_ver=5, properties=props)
+    publish2s_packet = mosq_test.gen_publish("subpub/qos1", mid=mid, qos=1, payload="message2", proto_ver=proto_ver, properties=props)
     puback2s_packet = mosq_test.gen_puback(mid)
 
 
@@ -50,7 +50,7 @@ def do_test():
         packet = sock.recv(len(publish2s_packet))
         for i in range(10, 5, -1):
             props = mqtt5_props.gen_uint32_prop(mqtt5_props.PROP_MESSAGE_EXPIRY_INTERVAL, i)
-            publish2r_packet = mosq_test.gen_publish("subpub/qos1", mid=1, qos=1, payload="message", proto_ver=5, properties=props)
+            publish2r_packet = mosq_test.gen_publish("subpub/qos1", mid=1, qos=1, payload="message", proto_ver=proto_ver, properties=props)
             if packet == publish2r_packet:
                 rc = 0
                 break
@@ -68,5 +68,5 @@ def do_test():
             exit(rc)
 
 
-do_test()
+do_test(proto_ver=5)
 exit(0)

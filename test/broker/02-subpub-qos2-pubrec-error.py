@@ -30,25 +30,25 @@ def helper(port):
     sock.close()
 
 
-def do_test():
+def do_test(proto_ver):
     rc = 1
     keepalive = 60
-    connect_packet = mosq_test.gen_connect("pub-qo2-timeout-test", keepalive=keepalive, proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mosq_test.gen_connect("pub-qo2-timeout-test", keepalive=keepalive, proto_ver=proto_ver)
+    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "qos2/pubrec/+", 2, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=5)
+    subscribe_packet = mosq_test.gen_subscribe(mid, "qos2/pubrec/+", 2, proto_ver=proto_ver)
+    suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
 
     mid = 1
-    publish_1_packet = mosq_test.gen_publish("qos2/pubrec/rejected", qos=2, mid=mid, payload="rejected-message", proto_ver=5)
-    pubrec_1_packet = mosq_test.gen_pubrec(mid, proto_ver=5, reason_code=0x80)
+    publish_1_packet = mosq_test.gen_publish("qos2/pubrec/rejected", qos=2, mid=mid, payload="rejected-message", proto_ver=proto_ver)
+    pubrec_1_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver, reason_code=0x80)
 
     mid = 2
-    publish_2_packet = mosq_test.gen_publish("qos2/pubrec/accepted", qos=2, mid=mid, payload="accepted-message", proto_ver=5)
-    pubrec_2_packet = mosq_test.gen_pubrec(mid, proto_ver=5)
-    pubrel_2_packet = mosq_test.gen_pubrel(mid, proto_ver=5)
-    pubcomp_2_packet = mosq_test.gen_pubcomp(mid, proto_ver=5)
+    publish_2_packet = mosq_test.gen_publish("qos2/pubrec/accepted", qos=2, mid=mid, payload="accepted-message", proto_ver=proto_ver)
+    pubrec_2_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
+    pubrel_2_packet = mosq_test.gen_pubrel(mid, proto_ver=proto_ver)
+    pubcomp_2_packet = mosq_test.gen_pubcomp(mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
@@ -81,5 +81,5 @@ def do_test():
             exit(rc)
 
 
-do_test()
+do_test(proto_ver=5)
 exit(0)
