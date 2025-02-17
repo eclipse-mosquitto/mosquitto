@@ -401,8 +401,8 @@ they would be provided on the command line. For example:
 
 ```
 --cafile /path/to/my/CA.crt
---certfile /path/to/my/client.crt
---keyfile /path/to/my/client.key
+--cert /path/to/my/client.crt
+--key /path/to/my/client.key
 -u admin
 -h mosquitto.example.com
 
