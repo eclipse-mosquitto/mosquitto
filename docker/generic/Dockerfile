@@ -15,7 +15,7 @@ ENV \
 
 LABEL \
     org.opencontainers.image.authors="Roger Light <roger@atchoo.org>" \
-    org.opencontainers.image.title="mosquitto " \
+    org.opencontainers.image.title="mosquitto" \
     org.opencontainers.image.description="Eclipse Mosquitto MQTT Broker" \
     org.opencontainers.image.url="https://mosquitto.org/" \
     org.opencontainers.image.documentation="https://mosquitto.org/documentation/" \
