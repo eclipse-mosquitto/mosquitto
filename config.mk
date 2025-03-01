@@ -106,6 +106,10 @@ CLIENT_STATIC_LDADD:=
 # Build shared libraries
 WITH_SHARED_LIBRARIES:=yes
 
+# Build the broker additionally as a library, which can be used to
+# embedd a broker into an own executable.
+WITH_EMBEDD_BROKER:=no
+
 # Build with async dns lookup support for bridges (temporary). Requires glibc.
 #WITH_ADNS:=yes
 
@@ -229,6 +233,7 @@ ifeq ($(WITH_SHARED_LIBRARIES),yes)
 else
 	LIBMOSQ:=${R}/lib/libmosquitto.a
 endif
+
 LIBMOSQ_COMMON:=-Wl,--whole-archive ${R}/libcommon/libmosquitto_common.a -Wl,--no-whole-archive -lcjson
 
 ifeq ($(WITH_TLS),yes)
@@ -283,6 +288,10 @@ endif
 ifeq ($(WITH_COVERAGE),yes)
 	LOCAL_CFLAGS+=-coverage
 	LOCAL_LDFLAGS+=-coverage
+endif
+
+ifeq ($(WITH_SHARED_LIBRARIES),yes)
+	LOCAL_CFLAGS+=-fPIC
 endif
 
 ifeq ($(WITH_FUZZING),yes)
