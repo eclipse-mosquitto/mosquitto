@@ -1,17 +1,23 @@
 include ../config.mk
 
-.PHONY: all check test ptest clean
+.PHONY: all check test ptest clean ssl
 
 all :
 
 check : test
 
-test : utest
+ssl: ssl/all-ca.crt
+
+ssl/all-ca.crt: ssl/gen.sh
+	cd "${<D}" && "${CURDIR}/${<}"
+	test -e "$@"
+
+test : utest ssl
 	$(MAKE) -C broker test
 	$(MAKE) -C lib test
 	$(MAKE) -C client test
 
-ptest : utest
+ptest : utest ssl
 	$(MAKE) -C broker ptest
 	$(MAKE) -C lib ptest
 	$(MAKE) -C client test
