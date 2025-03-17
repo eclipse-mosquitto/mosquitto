@@ -50,7 +50,7 @@ int handle__suback(struct mosquitto *mosq)
 	if(mosquitto__get_state(mosq) != mosq_cs_active){
 		return MOSQ_ERR_PROTOCOL;
 	}
-	if(mosq->in_packet.command != CMD_SUBACK){
+	if((mosq->in_packet.command >> 4) != (CMD_SUBACK >> 4)){
 		return MOSQ_ERR_MALFORMED_PACKET;
 	}
 
