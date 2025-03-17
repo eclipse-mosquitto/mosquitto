@@ -34,6 +34,7 @@
 				</arg>
 				<arg choice='plain'><option>-L</option> <replaceable>URL</replaceable></arg>
 			</group>
+			<sbr/>
 			<arg><option>-A</option> <replaceable>bind-address</replaceable></arg>
 			<arg><option>-c</option></arg>
 			<arg><option>-d</option></arg>
@@ -50,6 +51,7 @@
 					<arg><option>--cert</option> <replaceable>file</replaceable></arg>
 					<arg><option>--key</option> <replaceable>file</replaceable></arg>
 					<arg><option>--ciphers</option> <replaceable>ciphers</replaceable></arg>
+					<sbr/>
 					<arg><option>--tls-version</option> <replaceable>version</replaceable></arg>
 					<arg><option>--tls-alpn</option> <replaceable>protocol</replaceable></arg>
 					<arg><option>--tls-engine</option> <replaceable>engine</replaceable></arg>
@@ -58,17 +60,21 @@
 						<arg choice='plain'><replaceable>pem</replaceable></arg>
 						<arg choice='plain'><replaceable>engine</replaceable></arg>
 					</group></arg>
+					<sbr/>
 					<arg><option>--tls-engine-kpass-sha1</option> <replaceable>kpass-sha1</replaceable></arg>
 					<arg><option>--insecure</option></arg>
 				</arg>
+				<sbr/>
 				<arg>
 					<arg choice='plain'><option>--psk</option> <replaceable>hex-key</replaceable></arg>
 					<arg choice='plain'><option>--psk-identity</option> <replaceable>identity</replaceable></arg>
 					<arg><option>--ciphers</option> <replaceable>ciphers</replaceable></arg>
+					<sbr/>
 					<arg><option>--tls-use-os-certs</option></arg>
 					<arg><option>--tls-version</option> <replaceable>version</replaceable></arg>
 				</arg>
 			</group>
+			<sbr/>
 			<arg><option>--proxy</option> <replaceable>socks-url</replaceable></arg>
 		</cmdsynopsis>
 		<cmdsynopsis>
