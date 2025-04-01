@@ -320,7 +320,7 @@ void do_disconnect(struct mosquitto *context, int reason)
 			if(context->id){
 				id = context->id;
 			}else{
-				id = "<unknown>";
+				id = context->address;
 			}
 			if(context->state != mosq_cs_disconnecting && context->state != mosq_cs_disconnect_with_will){
 				switch(reason){
