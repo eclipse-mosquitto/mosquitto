@@ -7,6 +7,9 @@ import subprocess
 import time
 import sys
 
+COLOUR_PASS = 34
+COLOUR_FAIL = 124
+
 class PTestCase():
     def __init__(self, path, ports, cmd, args=None):
         self.path = path
@@ -30,9 +33,22 @@ class PTestCase():
         self.proc = subprocess.Popen(self.run_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.path)
         self.start_time = time.time()
 
-    def print_result(self, col):
+    def print_result(self, attempt, col):
         cmd = " ".join(self.run_args)
-        print(f"{self.runtime:0.3f}s : \033[{col}m{self.path}/{cmd}\033[0m")
+        if col == COLOUR_PASS:
+            stat = "✓"
+        elif col == COLOUR_FAIL:
+            stat = "✗"
+        else:
+            stat = attempt
+
+        if sys.stdout.isatty():
+            ansi_col = f"\033[38:5:{col}m"
+            ansi_reset = "\033[0m"
+        else:
+            ansi_col = ""
+            ansi_reset = ""
+        print(f"{self.runtime:0.3f}s : {stat} : {ansi_col}{self.path}/{cmd}{ansi_reset}")
 
 
 class PTest():
@@ -119,7 +135,7 @@ class PTest():
                     t.proc.wait()
 
                     if t.proc.returncode == 1 and t.attempts < 5:
-                        t.print_result(33)
+                        t.print_result(t.attempts+1, 226-6*t.attempts)
                         retried += 1
                         t.attempts += 1
                         t.proc = None
@@ -128,7 +144,7 @@ class PTest():
                         continue
 
                     if t.proc.returncode == 1:
-                        t.print_result(31)
+                        t.print_result(0, COLOUR_FAIL)
                         failed = failed + 1
                         failed_tests.append(t.cmd)
                         failed_tests_output.append([t.ports]+t.args)
@@ -136,7 +152,7 @@ class PTest():
                         (stdo, stde) = t.proc.communicate()
                     else:
                         passed = passed + 1
-                        t.print_result(32)
+                        t.print_result(0, COLOUR_PASS)
 
         print("Passed: %d\nRetried: %d\nFailed: %d\nTotal: %d\nTotal time: %0.2f" % (passed, retried, failed, passed+failed, time.time()-start_time))
         if failed > 0:
