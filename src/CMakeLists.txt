@@ -204,7 +204,13 @@ if (WITH_WEBSOCKETS)
 	endif (STATIC_WEBSOCKETS)
 endif (WITH_WEBSOCKETS)
 
-add_executable(mosquitto ${MOSQ_SRCS})
+FIND_PACKAGE(CMLIB REQUIRED COMPONENTS STORAGE)
+
+CMDEF_ADD_EXECUTABLE(
+	TARGET mosquitto
+	SOURCES ${MOSQ_SRCS}
+)
+
 target_link_libraries(mosquitto ${MOSQ_LIBS})
 if (WIN32)
 	set_target_properties(mosquitto PROPERTIES ENABLE_EXPORTS 1)
@@ -218,5 +224,19 @@ if (UNIX)
 	endif (APPLE)
 endif (UNIX)
 
-install(TARGETS mosquitto RUNTIME DESTINATION "${CMAKE_INSTALL_SBINDIR}")
-install(FILES ../include/mosquitto_broker.h ../include/mosquitto_plugin.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+#install(TARGETS mosquitto RUNTIME DESTINATION "${CMAKE_INSTALL_SBINDIR}")
+#install(FILES ../include/mosquitto_broker.h ../include/mosquitto_plugin.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+
+INCLUDE(GNUInstallDirs)
+CMDEF_INSTALL(
+		TARGET mosquitto
+		NAMESPACE mosquitto::
+)
+BA_PACKAGE_DEPS_IMPORTED(mosquitto)
+
+CMDEF_PACKAGE(
+		MAIN_TARGET mosquitto
+		VERSION 1.1.1
+)
+SET(CPACK_GENERATOR ZIP)
+INCLUDE(CPack)
