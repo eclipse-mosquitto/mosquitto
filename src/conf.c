@@ -2313,6 +2313,7 @@ static int config__check(struct mosquitto__config *config)
 		}
 	}
 
+#ifdef WITH_TLS
 	/* Check for missing TLS cafile/capath/certfile/keyfile */
 	for(int i=0; i<config->listener_count; i++){
 		 bool cafile = !!config->listeners[i].cafile;
@@ -2333,6 +2334,7 @@ static int config__check(struct mosquitto__config *config)
 			 return MOSQ_ERR_INVAL;
 		 }
 	}
+#endif
 	return MOSQ_ERR_SUCCESS;
 }
 
