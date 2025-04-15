@@ -205,6 +205,8 @@ install(
 # Testing
 # ========================================
 if(WITH_TESTS)
+	find_package(GTest REQUIRED)
+	include(GoogleTest)
 	enable_testing()
 	add_subdirectory(test)
 endif()

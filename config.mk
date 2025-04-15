@@ -142,6 +142,9 @@ WITH_OLD_KEEPALIVE=no
 # Build with sqlite3 support - this enables the sqlite persistence plugin.
 WITH_SQLITE=yes
 
+# Use gmock for testing
+WITH_GMOCK:=yes
+
 # Build broker for fuzzing only - does not work as a normal broker. This is
 # currently only suitable for use with oss-fuzz.
 WITH_FUZZING=no
@@ -220,6 +223,7 @@ ifeq ($(UNAME),SunOS)
 endif
 
 ifeq ($(WITH_FUZZING),yes)
+	WITH_GMOCK:=no
 	WITH_SHARED_LIBRARIES:=no
 	WITH_STATIC_LIBRARIES:=yes
 endif

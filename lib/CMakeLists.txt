@@ -23,11 +23,12 @@ set(C_SRC
 	handle_unsuback.c
 	helpers.c
 	http_client.c http_client.h
+	libmosquitto.c
 	logging_mosq.c logging_mosq.h
 	loop.c
 	messages_mosq.c messages_mosq.h
-	mosquitto.c ../include/mosquitto.h
 	mosquitto_internal.h
+	../include/mosquitto.h
 	../include/mosquitto/mqtt_protocol.h
 	net_mosq_ocsp.c net_mosq.c net_mosq.h
 	net_ws.c

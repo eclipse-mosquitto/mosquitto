@@ -39,7 +39,7 @@ endif
 .PHONY : really clean install
 
 OBJS= \
-	mosquitto.o \
+	libmosquitto.o \
 	actions_publish.o \
 	actions_subscribe.o \
 	actions_unsubscribe.o \

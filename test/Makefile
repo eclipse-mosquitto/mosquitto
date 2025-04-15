@@ -6,6 +6,9 @@ include ${R}/config.mk
 all :
 
 test-compile:
+ifeq ($(WITH_GMOCK),yes)
+	$(MAKE) -C mock test-compile
+endif
 	$(MAKE) -C broker test-compile
 	$(MAKE) -C client test-compile
 	$(MAKE) -C lib test-compile
