@@ -21,11 +21,6 @@ Copyright (c) 2022 Cedalo GmbH
 
 namespace t = testing;
 
-typedef void (*LIBMOSQ_FUNC_connect_callback)(struct mosquitto *, void *, int);
-typedef void (*LIBMOSQ_FUNC_message_callback)(struct mosquitto *, void *, const struct mosquitto_message *);
-typedef void (*LIBMOSQ_FUNC_subscribe_callback)(struct mosquitto *, void *, int, int, const int *);
-typedef void (*LIBMOSQ_FUNC_publish_v5_callback)(struct mosquitto *, void *, int, int, const mosquitto_property *);
-
 struct pending_payload{
 	struct pending_payload *next, *prev;
 	char payload[1024];
@@ -38,10 +33,10 @@ class CtrlShellBrokerTest : public ::t::Test
 		::t::StrictMock<EditLineMock> editline_mock_{};
 		::t::StrictMock<LibMosquittoMock> libmosquitto_mock_{};
 		::t::StrictMock<PThreadMock> pthread_mock_{};
-		LIBMOSQ_FUNC_connect_callback on_connect{};
-		LIBMOSQ_FUNC_message_callback on_message{};
-		LIBMOSQ_FUNC_subscribe_callback on_subscribe{};
-		LIBMOSQ_FUNC_publish_v5_callback on_publish{};
+		LIBMOSQ_CB_connect on_connect{};
+		LIBMOSQ_CB_message on_message{};
+		LIBMOSQ_CB_subscribe on_subscribe{};
+		LIBMOSQ_CB_publish_v5 on_publish{};
 		struct pending_payload *pending_payloads = nullptr;
 
 		void expect_setup(struct mosq_config *config)
@@ -60,16 +55,16 @@ class CtrlShellBrokerTest : public ::t::Test
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_new(t::Eq(nullptr), t::Eq(true), t::Eq(nullptr)))
 				.WillOnce(t::Return(mosq));
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_int_option(t::Eq(mosq), MOSQ_OPT_PROTOCOL_VERSION, 5));
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_subscribe_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_subscribe_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_subscribe_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_subscribe>()))
 				.WillRepeatedly(t::SaveArg<1>(&this->on_subscribe));
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_publish_v5_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_publish_v5_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_publish_v5_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_publish_v5>()))
 				.WillRepeatedly(t::SaveArg<1>(&this->on_publish));
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect(t::Eq(mosq), t::StrEq(host), port, 60));
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_loop_start(t::Eq(mosq)));
 
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_connect_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_connect>()))
 				.WillRepeatedly(t::SaveArg<1>(&this->on_connect));
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_message_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_message_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_message_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_message>()))
 				.WillOnce(t::SaveArg<1>(&this->on_message));
 		}
 

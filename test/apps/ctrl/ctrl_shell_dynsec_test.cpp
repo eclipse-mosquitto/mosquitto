@@ -21,9 +21,6 @@ Copyright (c) 2022 Cedalo GmbH
 
 namespace t = testing;
 
-typedef void (*LIBMOSQ_FUNC_connect_callback)(struct mosquitto *, void *, int);
-typedef void (*LIBMOSQ_FUNC_message_callback)(struct mosquitto *, void *, const struct mosquitto_message *);
-
 struct pending_payload{
 	struct pending_payload *next, *prev;
 	char payload[1024];
@@ -36,8 +33,8 @@ class CtrlShellDynsecTest : public ::t::Test
 		::t::StrictMock<EditLineMock> editline_mock_{};
 		::t::StrictMock<LibMosquittoMock> libmosquitto_mock_{};
 		::t::StrictMock<PThreadMock> pthread_mock_{};
-		LIBMOSQ_FUNC_connect_callback on_connect{};
-		LIBMOSQ_FUNC_message_callback on_message{};
+		LIBMOSQ_CB_connect on_connect{};
+		LIBMOSQ_CB_message on_message{};
 		struct pending_payload *pending_payloads = nullptr;
 
 		void expect_setup(struct mosq_config *config)
@@ -61,9 +58,9 @@ class CtrlShellDynsecTest : public ::t::Test
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect(t::Eq(mosq), t::StrEq(host), port, 60));
 			EXPECT_CALL(libmosquitto_mock_, mosquitto_loop_start(t::Eq(mosq)));
 
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_connect_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_connect_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_connect>()))
 				.WillRepeatedly(t::SaveArg<1>(&this->on_connect));
-			EXPECT_CALL(libmosquitto_mock_, mosquitto_message_callback_set(t::Eq(mosq), t::A<LIBMOSQ_FUNC_message_callback>()))
+			EXPECT_CALL(libmosquitto_mock_, mosquitto_message_callback_set(t::Eq(mosq), t::A<LIBMOSQ_CB_message>()))
 				.WillOnce(t::SaveArg<1>(&this->on_message));
 		}
 

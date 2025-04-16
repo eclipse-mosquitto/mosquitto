@@ -61,7 +61,8 @@ extern "C" {
  * See Also:
  *  <mosquitto_pre_connect_callback_set>
  */
-libmosq_EXPORT void mosquitto_connect_callback_set(struct mosquitto *mosq, void (*on_connect)(struct mosquitto *, void *, int));
+typedef void (*LIBMOSQ_CB_connect)(struct mosquitto *mosq, void *obj, int rc);
+libmosq_EXPORT void mosquitto_connect_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_connect on_connect);
 
 /*
  * Function: mosquitto_connect_with_flags_callback_set
@@ -86,7 +87,8 @@ libmosq_EXPORT void mosquitto_connect_callback_set(struct mosquitto *mosq, void 
  * See Also:
  *  <mosquitto_pre_connect_callback_set>
  */
-libmosq_EXPORT void mosquitto_connect_with_flags_callback_set(struct mosquitto *mosq, void (*on_connect)(struct mosquitto *, void *, int, int));
+typedef void (*LIBMOSQ_CB_connect_with_flags)(struct mosquitto *mosq, void *obj, int rc, int flags);
+libmosq_EXPORT void mosquitto_connect_with_flags_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_connect_with_flags on_connect);
 
 /*
  * Function: mosquitto_connect_v5_callback_set
@@ -116,7 +118,8 @@ libmosq_EXPORT void mosquitto_connect_with_flags_callback_set(struct mosquitto *
  * See Also:
  *  <mosquitto_pre_connect_callback_set>
  */
-libmosq_EXPORT void mosquitto_connect_v5_callback_set(struct mosquitto *mosq, void (*on_connect)(struct mosquitto *, void *, int, int, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_connect_v5)(struct mosquitto *mosq, void *obj, int rc, int flags, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_connect_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_connect_v5 on_connect);
 
 /*
  * Function: mosquitto_pre_connect_callback_set
@@ -135,7 +138,8 @@ libmosq_EXPORT void mosquitto_connect_v5_callback_set(struct mosquitto *mosq, vo
  *  mosq - the mosquitto instance making the callback.
  *  obj - the user data provided in <mosquitto_new>
  */
-libmosq_EXPORT void mosquitto_pre_connect_callback_set(struct mosquitto *mosq, void (*on_pre_connect)(struct mosquitto *, void *));
+typedef void (*LIBMOSQ_CB_pre_connect)(struct mosquitto *mosq, void *obj);
+libmosq_EXPORT void mosquitto_pre_connect_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_pre_connect on_pre_connect);
 
 /*
  * Function: mosquitto_disconnect_callback_set
@@ -155,7 +159,8 @@ libmosq_EXPORT void mosquitto_pre_connect_callback_set(struct mosquitto *mosq, v
  *         means the client has called <mosquitto_disconnect>. Any other value
  *         indicates that the disconnect is unexpected.
  */
-libmosq_EXPORT void mosquitto_disconnect_callback_set(struct mosquitto *mosq, void (*on_disconnect)(struct mosquitto *, void *, int));
+typedef void (*LIBMOSQ_CB_disconnect)(struct mosquitto *mosq, void *obj, int rc);
+libmosq_EXPORT void mosquitto_disconnect_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_disconnect on_disconnect);
 
 /*
  * Function: mosquitto_disconnect_v5_callback_set
@@ -180,7 +185,8 @@ libmosq_EXPORT void mosquitto_disconnect_callback_set(struct mosquitto *mosq, vo
  *         indicates that the disconnect is unexpected.
  *  props - list of MQTT 5 properties, or NULL
  */
-libmosq_EXPORT void mosquitto_disconnect_v5_callback_set(struct mosquitto *mosq, void (*on_disconnect)(struct mosquitto *, void *, int, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_disconnect_v5)(struct mosquitto *mosq, void *obj, int rc, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_disconnect_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_disconnect_v5 on_disconnect);
 
 /*
  * Function: mosquitto_publish_callback_set
@@ -206,7 +212,8 @@ libmosq_EXPORT void mosquitto_disconnect_v5_callback_set(struct mosquitto *mosq,
  *  obj -  the user data provided in <mosquitto_new>
  *  mid -  the message id of the sent message.
  */
-libmosq_EXPORT void mosquitto_publish_callback_set(struct mosquitto *mosq, void (*on_publish)(struct mosquitto *, void *, int));
+typedef void (*LIBMOSQ_CB_publish)(struct mosquitto *mosq, void *obj, int mid);
+libmosq_EXPORT void mosquitto_publish_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_publish on_publish);
 
 /*
  * Function: mosquitto_publish_v5_callback_set
@@ -241,7 +248,8 @@ libmosq_EXPORT void mosquitto_publish_callback_set(struct mosquitto *mosq, void 
  *  reason_code - the MQTT 5 reason code
  *  props - list of MQTT 5 properties, or NULL
  */
-libmosq_EXPORT void mosquitto_publish_v5_callback_set(struct mosquitto *mosq, void (*on_publish)(struct mosquitto *, void *, int, int, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_publish_v5)(struct mosquitto *mosq, void *obj, int mid, int reason_code, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_publish_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_publish_v5 on_publish);
 
 /*
  * Function: mosquitto_message_callback_set
@@ -264,7 +272,8 @@ libmosq_EXPORT void mosquitto_publish_v5_callback_set(struct mosquitto *mosq, vo
  * See Also:
  * 	<mosquitto_message_copy>
  */
-libmosq_EXPORT void mosquitto_message_callback_set(struct mosquitto *mosq, void (*on_message)(struct mosquitto *, void *, const struct mosquitto_message *));
+typedef void (*LIBMOSQ_CB_message)(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message);
+libmosq_EXPORT void mosquitto_message_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_message on_message);
 
 /*
  * Function: mosquitto_message_v5_callback_set
@@ -292,7 +301,8 @@ libmosq_EXPORT void mosquitto_message_callback_set(struct mosquitto *mosq, void 
  * See Also:
  * 	<mosquitto_message_copy>
  */
-libmosq_EXPORT void mosquitto_message_v5_callback_set(struct mosquitto *mosq, void (*on_message)(struct mosquitto *, void *, const struct mosquitto_message *, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_message_v5)(struct mosquitto *mosq, void *obj, const struct mosquitto_message *message, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_message_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_message_v5 on_message);
 
 /*
  * Function: mosquitto_subscribe_callback_set
@@ -313,7 +323,8 @@ libmosq_EXPORT void mosquitto_message_v5_callback_set(struct mosquitto *mosq, vo
  *  granted_qos - an array of integers indicating the granted QoS for each of
  *                the subscriptions.
  */
-libmosq_EXPORT void mosquitto_subscribe_callback_set(struct mosquitto *mosq, void (*on_subscribe)(struct mosquitto *, void *, int, int, const int *));
+typedef void (*LIBMOSQ_CB_subscribe)(struct mosquitto *mosq, void *obj, int mid, int qos_count, const int *granted_qos);
+libmosq_EXPORT void mosquitto_subscribe_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_subscribe on_subscribe);
 
 /*
  * Function: mosquitto_subscribe_v5_callback_set
@@ -339,7 +350,8 @@ libmosq_EXPORT void mosquitto_subscribe_callback_set(struct mosquitto *mosq, voi
  *                the subscriptions.
  *  props - list of MQTT 5 properties, or NULL
  */
-libmosq_EXPORT void mosquitto_subscribe_v5_callback_set(struct mosquitto *mosq, void (*on_subscribe)(struct mosquitto *, void *, int, int, const int *, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_subscribe_v5)(struct mosquitto *mosq, void *obj, int mid, int qos_count, const int *granted_qos, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_subscribe_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_subscribe_v5 on_subscribe);
 
 /*
  * Function: mosquitto_unsubscribe_callback_set
@@ -357,7 +369,8 @@ libmosq_EXPORT void mosquitto_subscribe_v5_callback_set(struct mosquitto *mosq, 
  *  obj -  the user data provided in <mosquitto_new>
  *  mid -  the message id of the unsubscribe message.
  */
-libmosq_EXPORT void mosquitto_unsubscribe_callback_set(struct mosquitto *mosq, void (*on_unsubscribe)(struct mosquitto *, void *, int));
+typedef void (*LIBMOSQ_CB_unsubscribe)(struct mosquitto *mosq, void *obj, int mid);
+libmosq_EXPORT void mosquitto_unsubscribe_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_unsubscribe on_unsubscribe);
 
 /*
  * Function: mosquitto_unsubscribe_v5_callback_set
@@ -380,7 +393,8 @@ libmosq_EXPORT void mosquitto_unsubscribe_callback_set(struct mosquitto *mosq, v
  *  mid -  the message id of the unsubscribe message.
  *  props - list of MQTT 5 properties, or NULL
  */
-libmosq_EXPORT void mosquitto_unsubscribe_v5_callback_set(struct mosquitto *mosq, void (*on_unsubscribe)(struct mosquitto *, void *, int, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_unsubscribe_v5)(struct mosquitto *mosq, void *obj, int mid, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_unsubscribe_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_unsubscribe_v5 on_unsubscribe);
 
 /*
  * Function: mosquitto_unsubscribe2_v5_callback_set
@@ -408,7 +422,8 @@ libmosq_EXPORT void mosquitto_unsubscribe_v5_callback_set(struct mosquitto *mosq
  *  mid -               the message id of the unsubscribe message.
  *  props -             list of MQTT 5 properties, or NULL
  */
-libmosq_EXPORT void mosquitto_unsubscribe2_v5_callback_set(struct mosquitto *mosq, void (*on_unsubscribe)(struct mosquitto *, void *, int, int, const int *, const mosquitto_property *props));
+typedef void (*LIBMOSQ_CB_unsubscribe2_v5)(struct mosquitto *mosq, void *obj, int mid, int reason_code_count, const int *reason_codes, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_unsubscribe2_v5_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_unsubscribe2_v5 on_unsubscribe);
 
 /*
  * Function: mosquitto_ext_auth_callback_set
@@ -440,7 +455,8 @@ libmosq_EXPORT void mosquitto_unsubscribe2_v5_callback_set(struct mosquitto *mos
  * See Also:
  *    <mosquitto_ext_auth_continue>
  */
-libmosq_EXPORT void mosquitto_ext_auth_callback_set(struct mosquitto *mosq, int (*on_auth)(struct mosquitto *, void *, const char *, uint16_t, const void *, const mosquitto_property *props));
+typedef int (*LIBMOSQ_CB_ext_auth)(struct mosquitto *mosq, void *obj, const char *auth_method, uint16_t auth_data_len, const void *auth_data, const mosquitto_property *props);
+libmosq_EXPORT void mosquitto_ext_auth_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_ext_auth on_ext_auth);
 
 /*
  * Function: mosquitto_log_callback_set
@@ -463,7 +479,8 @@ libmosq_EXPORT void mosquitto_ext_auth_callback_set(struct mosquitto *mosq, int 
  *	        MOSQ_LOG_DEBUG
  *	str -   the message string.
  */
-libmosq_EXPORT void mosquitto_log_callback_set(struct mosquitto *mosq, void (*on_log)(struct mosquitto *, void *, int, const char *));
+typedef void (*LIBMOSQ_CB_log)(struct mosquitto *mosq, void *obj, int level, const char *str);
+libmosq_EXPORT void mosquitto_log_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_log on_log);
 
 #ifdef __cplusplus
 }

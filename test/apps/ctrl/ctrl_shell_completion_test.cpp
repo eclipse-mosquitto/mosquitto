@@ -26,9 +26,6 @@ extern "C" {
 
 namespace t = testing;
 
-typedef void (*LIBMOSQ_FUNC_connect_callback)(struct mosquitto *, void *, int);
-typedef void (*LIBMOSQ_FUNC_message_callback)(struct mosquitto *, void *, const struct mosquitto_message *);
-
 class CtrlShellCompletionTest : public ::t::Test
 {
 	public:
