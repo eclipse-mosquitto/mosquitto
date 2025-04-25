@@ -43,7 +43,7 @@ if (WITH_TLS AND CJSON_FOUND)
 		endif (APPLE)
 	endif (UNIX)
 
-	target_link_libraries(mosquitto_ctrl ${OPENSSL_LIBRARIES} ${CJSON_LIBRARIES})
+	target_link_libraries(mosquitto_ctrl OpenSSL::SSL ${CJSON_LIBRARIES})
 
 	install(TARGETS mosquitto_ctrl RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 endif (WITH_TLS AND CJSON_FOUND)
