@@ -44,7 +44,7 @@ void watchdog__init(void)
 		if(watchdog_usec[0] != '\0' && endptr[0] == '\0' && usec > 0){
 			ping_sec = (usec / 1000000) / 2;
 		}
-		next_ping = mosquito_time();
+		next_ping = mosquitto_time();
 	}
 #endif
 }
