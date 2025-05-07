@@ -824,13 +824,6 @@ int handle__connect(struct mosquitto *context)
 		}
 	}
 
-	/* Check for an existing delayed auth check, reject if present */
-	HASH_FIND(hh_id, db.contexts_by_id_delayed_auth, clientid, strlen(clientid), found_context);
-	if(found_context){
-		rc = MOSQ_ERR_UNKNOWN;
-		goto handle_connect_error;
-	}
-
 	if(will){
 		rc = will__read(context, clientid, &will_struct, will_qos, will_retain);
 		if(rc){
@@ -982,6 +975,14 @@ int handle__connect(struct mosquitto *context)
 			goto handle_connect_error;
 		}
 	}
+
+	/* Check for an existing delayed auth check, reject if present */
+	HASH_FIND(hh_id, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), found_context);
+	if(found_context){
+		rc = MOSQ_ERR_UNKNOWN;
+		goto handle_connect_error;
+	}
+
 	context->clean_start = clean_start;
 	context->will = will_struct;
 	will_struct = NULL;
