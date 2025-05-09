@@ -711,6 +711,10 @@ void mosq_websockets_init(struct mosquitto__listener *listener, const struct mos
 	info.ssl_cert_filepath = listener->certfile;
 	info.ssl_private_key_filepath = listener->keyfile;
 	info.ssl_cipher_list = listener->ciphers;
+	/* HTTP 1 only, due to HTTP 2 issues in Firefox:
+	   https://github.com/eclipse-mosquitto/mosquitto/issues/1211
+	*/
+	info.alpn = "h1";
 #if defined(WITH_WEBSOCKETS) && LWS_LIBRARY_VERSION_NUMBER>=3001000
 	info.tls1_3_plus_cipher_list = listener->ciphers_tls13;
 #endif
