@@ -100,7 +100,8 @@ man/mqtt.7
 out/
 
 src/mosquitto
-src/mosquitto_broker.a
+src/libmosquitto_broker.a
+src/libmosquitto_broker.so*
 
 test/apps/ctrl/ctrl_shell_broker_test
 test/apps/ctrl/ctrl_shell_completion_test
