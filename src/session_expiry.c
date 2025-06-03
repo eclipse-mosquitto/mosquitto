@@ -154,7 +154,8 @@ void session_expiry__check(void)
 	last_check = db.now_real_s;
 
 	DL_FOREACH_SAFE(expiry_list, item, tmp){
-		if(item->context->session_expiry_time < db.now_real_s){
+		/* Do not expire if it is a bridge. */
+		if(item->context->session_expiry_time < db.now_real_s && !item->context->bridge ){
 
 			context = item->context;
 			session_expiry__remove(context);
@@ -172,6 +173,10 @@ void session_expiry__check(void)
 			context__send_will(context);
 			context__add_to_disused(context);
 		}else{
+			if (item->context->bridge) {
+                            mosquitto_log_printf(MOSQ_LOG_NOTICE, "Skipping expiry for bridge %s", item->context->id);
+                            continue;
+                        }
 			return;
 		}
 	}
