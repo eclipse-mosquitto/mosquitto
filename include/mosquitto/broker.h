@@ -431,9 +431,10 @@ mosq_EXPORT int mosquitto_plugin_set_info(
  *              Called when a client connects with TLS-PSK and the broker needs
  *              the PSK information.
  *          * MOSQ_EVT_TICK
- *              Called periodically in the event loop. At the moment this
- *              occurs at a regular frequency, but this should not be relied
- *              upon.
+ *              Called periodically by the broker. The next_s and next_ms
+ *              values of the event data can be used to set a minimum interval
+ *              that the broker will wait before calling the tick event again
+ *              for this callback.
  *          * MOSQ_EVT_DISCONNECT
  *              Called when a client disconnects from the broker.
  *          * MOSQ_EVT_CONNECT

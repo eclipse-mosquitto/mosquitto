@@ -139,6 +139,9 @@ Plugins / plugin interface:
   subscribe/unsubscribes actually succeed. Allow modifying topic and qos.
 - Add `mosquitto_persistence_location()` for plugins to use to find a valid
   location for storing persistent data.
+- Plugins can now use the next_s and next_ms members of the tick event data
+  struct to set a minimum interval that the broker will wait before calling the
+  tick callback again.
 
 Client library:
 - Add MOSQ_OPT_DISABLE_SOCKETPAIR to allow the disabling of the socketpair

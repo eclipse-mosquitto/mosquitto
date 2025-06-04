@@ -157,7 +157,11 @@ struct mosquitto__callback{
 	struct mosquitto__callback *next, *prev; /* For typical callbacks */
 	MOSQ_FUNC_generic_callback cb;
 	void *userdata;
-	char *data; /* e.g. topic for control event */
+	union{
+		char *topic;
+		struct timespec next_tick;
+	} data;
+	mosquitto_plugin_id_t *identifier;
 };
 
 struct plugin__callbacks{
@@ -312,6 +316,7 @@ struct mosquitto_plugin_id_t{
 	char *plugin_version;
 	struct control_endpoint *control_endpoints;
 	struct plugin_own_callback *own_callbacks;
+	struct timespec next_tick;
 };
 
 struct mosquitto__config {

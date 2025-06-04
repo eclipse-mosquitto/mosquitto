@@ -34,7 +34,7 @@ static void plugin__handle_reload_single(struct mosquitto__security_options *opt
 
 	// Using DL_FOREACH_SAFE here, as reload callbacks might unregister themself
 	DL_FOREACH_SAFE(opts->plugin_callbacks.reload, cb_base, cb_next){
-		cb_base->cb(MOSQ_EVT_TICK, &event_data, cb_base->userdata);
+		cb_base->cb(MOSQ_EVT_RELOAD, &event_data, cb_base->userdata);
 	}
 }
 

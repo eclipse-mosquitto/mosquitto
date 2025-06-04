@@ -90,12 +90,12 @@ static const char *get_event_name(enum mosquitto_plugin_event event)
 	return "";
 }
 
-static bool check_callback_exists(struct mosquitto__callback *cb_base, MOSQ_FUNC_generic_callback cb_func)
+static bool check_callback_exists(struct mosquitto__callback *cb_base, mosquitto_plugin_id_t *identifier, MOSQ_FUNC_generic_callback cb_func)
 {
 	struct mosquitto__callback *tail, *tmp;
 
 	DL_FOREACH_SAFE(cb_base, tail, tmp){
-		if(tail->cb == cb_func){
+		if(tail->identifier == identifier && tail->cb == cb_func){
 			return true;
 		}
 	}
@@ -186,7 +186,7 @@ static int remove_callback(mosquitto_plugin_id_t *plugin, struct plugin_own_call
 		}
 
 		DL_FOREACH_SAFE(*cb_base, tail, tmp){
-			if(tail->cb == own->cb_func){
+			if(tail->identifier == plugin && tail->cb == own->cb_func){
 				DL_DELETE(*cb_base, tail);
 				mosquitto_FREE(tail);
 				break;
@@ -240,7 +240,7 @@ BROKER_EXPORT int mosquitto_callback_register(
 			return MOSQ_ERR_NOT_SUPPORTED;
 		}
 
-		if(check_callback_exists(*cb_base, cb_func)){
+		if(check_callback_exists(*cb_base, identifier, cb_func)){
 			return MOSQ_ERR_ALREADY_EXISTS;
 		}
 
@@ -252,6 +252,7 @@ BROKER_EXPORT int mosquitto_callback_register(
 		}
 
 		DL_APPEND(*cb_base, cb_new);
+		cb_new->identifier = identifier;
 		cb_new->cb = cb_func;
 		cb_new->userdata = userdata;
 	}

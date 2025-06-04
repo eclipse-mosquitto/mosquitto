@@ -138,7 +138,7 @@ static int tick_callback(int event, void *event_data, void *userdata)
 		}
 		last_check = now;
 	}
-	/* Declare that we want another call in at most 1 second */
+	/* Declare that we want another call in 1 second at the earliest */
 	ed->next_s = 1;
 
 	return MOSQ_ERR_SUCCESS;

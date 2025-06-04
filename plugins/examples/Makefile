@@ -15,6 +15,7 @@ DIRS= \
 		payload-size-stats \
 		plugin-event-stats \
 		print-ip-on-publish \
+		tick-interval \
 		topic-modification \
 		topic-jail \
 		wildcard-temp
