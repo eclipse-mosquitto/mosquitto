@@ -116,6 +116,19 @@ static int check_uid(const char *s, const char *name)
 	return (int)id;
 }
 
+/* Prints the name of the process user from its user id */
+static int print_pwname()
+{
+	struct passwd *pwd = getpwuid(geteuid());
+	if(!pwd){
+		log__printf(NULL, MOSQ_LOG_ERR, "Error: running mosquitto as user: unknown.");
+		return -1;
+	}else{
+		log__printf(NULL, MOSQ_LOG_INFO, "Info: running mosquitto as user: %s.", pwd->pw_name);
+		return (int)pwd->pw_uid;
+	}
+}
+
 /* mosquitto shouldn't run as root.
  * This function will attempt to change to an unprivileged user and group if
  * running as root. The user is given in config->user.
@@ -206,10 +219,20 @@ static int drop_privileges(struct mosquitto__config *config)
 				return 1;
 			}
 		}
+		rc = print_pwname();
 		if(geteuid() == 0 || getegid() == 0){
 			log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Mosquitto should not be run as root/administrator.");
 		}
+	}else{
+		rc = print_pwname();
 	}
+
+	if (rc == -1){
+		err = strerror(errno);
+		log__printf(NULL, MOSQ_LOG_ERR, "Error while retrieving process user name: %s.", err);
+		return 1;
+	}
+
 #else
 	UNUSED(config);
 #endif
