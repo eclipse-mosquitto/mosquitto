@@ -153,6 +153,9 @@ obj-*/
 # Emacs generated files
 *~
 
+# VSCode generated files
+.vscode/
+
 # Others
 tmp/
 failed-tests.json
