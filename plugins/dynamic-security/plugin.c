@@ -629,7 +629,7 @@ void dynsec__config_save(void)
 		return;
 	}
 	fwrite(json_str, 1, json_str_len, fptr);
-	mosquitto_free(json_str);
+	cJSON_free(json_str);
 	fclose(fptr);
 
 	/* Everything is ok, so move new file over proper file */
