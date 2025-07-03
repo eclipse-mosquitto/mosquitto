@@ -153,6 +153,9 @@ obj-*/
 # Emacs generated files
 *~
 
+# clangd
+.cache/
+
 # Others
 tmp/
 failed-tests.json
