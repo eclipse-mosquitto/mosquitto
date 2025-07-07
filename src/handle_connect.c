@@ -469,6 +469,74 @@ static int read_protocol_name(struct mosquitto *context, char protocol_name[7])
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int read_and_verify_protocol_version(struct mosquitto *context, const char *protocol_name,
+											uint8_t *protocol_version)
+{
+	uint8_t tmp_protocol_version = 0;
+	if(packet__read_byte(&context->in_packet, &tmp_protocol_version)){
+		return MOSQ_ERR_PROTOCOL;
+	}
+
+	if(check_protocol_version(context->listener, tmp_protocol_version)){
+		if(tmp_protocol_version == 3 || tmp_protocol_version == 4){
+			context->protocol = mosq_p_mqtt311;
+			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
+		}else{
+			context->protocol = mosq_p_mqtt5;
+			send__connack(context, 0, MQTT_RC_UNSUPPORTED_PROTOCOL_VERSION, NULL);
+		}
+		return MOSQ_ERR_NOT_SUPPORTED;
+	}
+
+	if(!strcmp(protocol_name, PROTOCOL_NAME_v31)){
+		if((tmp_protocol_version&0x7F) != PROTOCOL_VERSION_v31){
+			if(db.config->connection_messages == true){
+				log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol version %d in CONNECT from %s.",
+						tmp_protocol_version, context->address);
+			}
+			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
+			return MOSQ_ERR_PROTOCOL;
+		}
+		context->protocol = mosq_p_mqtt31;
+		if((tmp_protocol_version&0x80) == 0x80){
+			context->is_bridge = true;
+		}
+	}else if(!strcmp(protocol_name, PROTOCOL_NAME)){
+		if((tmp_protocol_version&0x7F) == PROTOCOL_VERSION_v311){
+			context->protocol = mosq_p_mqtt311;
+
+			if((tmp_protocol_version&0x80) == 0x80){
+				context->is_bridge = true;
+			}
+		}else if((tmp_protocol_version&0x7F) == PROTOCOL_VERSION_v5){
+			context->protocol = mosq_p_mqtt5;
+		}else{
+			if(db.config->connection_messages == true){
+				log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol version %d in CONNECT from %s.",
+						tmp_protocol_version, context->address);
+			}
+			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
+			return MOSQ_ERR_PROTOCOL;
+		}
+		if((context->in_packet.command&0x0F) != 0x00){
+			/* Reserved flags not set to 0, must disconnect. */
+			return MOSQ_ERR_PROTOCOL;
+		}
+	}else{
+		if(db.config->connection_messages == true){
+			log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol \"%s\" in CONNECT from %s.",
+					protocol_name, context->address);
+		}
+		return MOSQ_ERR_PROTOCOL;
+	}
+	if((tmp_protocol_version&0x7F) != PROTOCOL_VERSION_v31 && context->in_packet.command != CMD_CONNECT){
+		return MOSQ_ERR_MALFORMED_PACKET;
+	}
+
+	*protocol_version = tmp_protocol_version;
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -703,68 +771,12 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-	if(packet__read_byte(&context->in_packet, &protocol_version)){
-		rc = MOSQ_ERR_PROTOCOL;
+	rc = read_and_verify_protocol_version(context, protocol_name, &protocol_version);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		if (rc == MOSQ_ERR_MALFORMED_PACKET) {
+			return rc;
+		}
 		goto handle_connect_error;
-	}
-	if(check_protocol_version(context->listener, protocol_version)){
-		if(protocol_version == 3 || protocol_version == 4){
-			context->protocol = mosq_p_mqtt311;
-			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
-		}else{
-			context->protocol = mosq_p_mqtt5;
-			send__connack(context, 0, MQTT_RC_UNSUPPORTED_PROTOCOL_VERSION, NULL);
-		}
-		rc = MOSQ_ERR_NOT_SUPPORTED;
-		goto handle_connect_error;
-	}
-	if(!strcmp(protocol_name, PROTOCOL_NAME_v31)){
-		if((protocol_version&0x7F) != PROTOCOL_VERSION_v31){
-			if(db.config->connection_messages == true){
-				log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol version %d in CONNECT from %s.",
-						protocol_version, context->address);
-			}
-			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
-			rc = MOSQ_ERR_PROTOCOL;
-			goto handle_connect_error;
-		}
-		context->protocol = mosq_p_mqtt31;
-		if((protocol_version&0x80) == 0x80){
-			context->is_bridge = true;
-		}
-	}else if(!strcmp(protocol_name, PROTOCOL_NAME)){
-		if((protocol_version&0x7F) == PROTOCOL_VERSION_v311){
-			context->protocol = mosq_p_mqtt311;
-
-			if((protocol_version&0x80) == 0x80){
-				context->is_bridge = true;
-			}
-		}else if((protocol_version&0x7F) == PROTOCOL_VERSION_v5){
-			context->protocol = mosq_p_mqtt5;
-		}else{
-			if(db.config->connection_messages == true){
-				log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol version %d in CONNECT from %s.",
-						protocol_version, context->address);
-			}
-			send__connack(context, 0, CONNACK_REFUSED_PROTOCOL_VERSION, NULL);
-			rc = MOSQ_ERR_PROTOCOL;
-			goto handle_connect_error;
-		}
-		if((context->in_packet.command&0x0F) != 0x00){
-			/* Reserved flags not set to 0, must disconnect. */
-			rc = MOSQ_ERR_PROTOCOL;
-			goto handle_connect_error;
-		}
-	}else{
-		if(db.config->connection_messages == true){
-			log__printf(NULL, MOSQ_LOG_INFO, "Invalid protocol \"%s\" in CONNECT from %s.",
-					protocol_name, context->address);
-		}
-		rc = MOSQ_ERR_PROTOCOL;
-		goto handle_connect_error;
-	}
-	if((protocol_version&0x7F) != PROTOCOL_VERSION_v31 && context->in_packet.command != CMD_CONNECT){
-		return MOSQ_ERR_MALFORMED_PACKET;
 	}
 
 	if(packet__read_byte(&context->in_packet, &connect_flags)){
