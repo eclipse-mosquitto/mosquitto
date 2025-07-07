@@ -537,6 +537,20 @@ static int read_and_verify_protocol_version(struct mosquitto *context, const cha
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int read_and_verify_connect_flags(struct mosquitto *context, uint8_t *connect_flags)
+{
+	if(packet__read_byte(&context->in_packet, connect_flags)){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	if(context->protocol == mosq_p_mqtt311 || context->protocol == mosq_p_mqtt5){
+		if((*connect_flags & 0x01) != 0x00){
+			return MOSQ_ERR_PROTOCOL;
+		}
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -779,15 +793,9 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-	if(packet__read_byte(&context->in_packet, &connect_flags)){
-		rc = MOSQ_ERR_PROTOCOL;
+	rc = read_and_verify_connect_flags(context, &connect_flags);
+	if (rc != MOSQ_ERR_SUCCESS) {
 		goto handle_connect_error;
-	}
-	if(context->protocol == mosq_p_mqtt311 || context->protocol == mosq_p_mqtt5){
-		if((connect_flags & 0x01) != 0x00){
-			rc = MOSQ_ERR_PROTOCOL;
-			goto handle_connect_error;
-		}
 	}
 
 	clean_start = (connect_flags & 0x02) >> 1;
