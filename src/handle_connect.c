@@ -447,6 +447,28 @@ inline static int send__connack_bad_username_or_password_error(struct mosquitto 
 	return send__connack_error_and_return(context, err_code, rc);
 }
 
+static int read_protocol_name(struct mosquitto *context, char protocol_name[7])
+{
+	/* Read protocol name as length then bytes rather than with read_string
+	 * because the length is fixed and we can check that. Removes the need
+	 * for another malloc as well. */
+
+	uint16_t slen = 0;
+
+	if(packet__read_uint16(&context->in_packet, &slen)){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	if(slen != 4 /* MQTT */ && slen != 6 /* MQIsdp */){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	if(packet__read_bytes(&context->in_packet, protocol_name, slen)){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	protocol_name[slen] = '\0';
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -676,22 +698,10 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-	/* Read protocol name as length then bytes rather than with read_string
-	 * because the length is fixed and we can check that. Removes the need
-	 * for another malloc as well. */
-	if(packet__read_uint16(&context->in_packet, &slen)){
-		rc = MOSQ_ERR_PROTOCOL;
+	rc = read_protocol_name(context, protocol_name);
+	if (rc != MOSQ_ERR_SUCCESS) {
 		goto handle_connect_error;
 	}
-	if(slen != 4 /* MQTT */ && slen != 6 /* MQIsdp */){
-		rc = MOSQ_ERR_PROTOCOL;
-		goto handle_connect_error;
-	}
-	if(packet__read_bytes(&context->in_packet, protocol_name, slen)){
-		rc = MOSQ_ERR_PROTOCOL;
-		goto handle_connect_error;
-	}
-	protocol_name[slen] = '\0';
 
 	if(packet__read_byte(&context->in_packet, &protocol_version)){
 		rc = MOSQ_ERR_PROTOCOL;
