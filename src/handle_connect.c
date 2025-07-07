@@ -623,6 +623,25 @@ static int handle_username_from_cert_options(struct mosquitto *context, char** u
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int handle_username_as_clientid_option(struct mosquitto *context)
+{
+	if(context->username){
+		mosquitto_FREE(context->id);
+		context->id = mosquitto_strdup(context->username);
+		if(!context->id){
+			return MOSQ_ERR_NOMEM;
+		}
+	}else{
+		uint8_t err_code = context->protocol == mosq_p_mqtt5
+												? (uint8_t)MQTT_RC_NOT_AUTHORIZED
+												: (uint8_t)CONNACK_REFUSED_NOT_AUTHORIZED;
+		return send__connack_error_and_return(context, err_code, MOSQ_ERR_AUTH);
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+
 int handle__connect(struct mosquitto *context)
 {
 	char protocol_name[7];
@@ -956,21 +975,10 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
+	/* use_username_as_clientid */
 	if(context->listener->use_username_as_clientid){
-		if(context->username){
-			mosquitto_FREE(context->id);
-			context->id = mosquitto_strdup(context->username);
-			if(!context->id){
-				rc = MOSQ_ERR_NOMEM;
-				goto handle_connect_error;
-			}
-		}else{
-			if(context->protocol == mosq_p_mqtt5){
-				send__connack(context, 0, MQTT_RC_NOT_AUTHORIZED, NULL);
-			}else{
-				send__connack(context, 0, CONNACK_REFUSED_NOT_AUTHORIZED, NULL);
-			}
-			rc = MOSQ_ERR_AUTH;
+		rc = handle_username_as_clientid_option(context);
+		if (rc != MOSQ_ERR_SUCCESS) {
 			goto handle_connect_error;
 		}
 	}
