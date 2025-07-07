@@ -292,7 +292,7 @@ struct mosquitto__listener_sock{
 struct plugin_own_callback{
 	struct plugin_own_callback *next, *prev;
 	MOSQ_FUNC_generic_callback cb_func;
-	int event;
+	enum mosquitto_plugin_event event;
 };
 
 struct mosquitto_plugin_id_t{

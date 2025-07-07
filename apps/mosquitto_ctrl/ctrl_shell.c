@@ -194,6 +194,7 @@ void ctrl_shell__connect_blocking(const char *hostname, int port)
 	rc = mosquitto_loop_start(data.mosq);
 
 	/* FIXME - do something with the error */
+	UNUSED(rc);
 
 	response_wait(true);
 }

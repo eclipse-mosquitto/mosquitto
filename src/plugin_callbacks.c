@@ -302,7 +302,7 @@ BROKER_EXPORT int mosquitto_callback_unregister(
 	}
 
 	DL_FOREACH_SAFE(identifier->own_callbacks, own, own_tmp){
-		if(own->event == event && own->cb_func == cb_func){
+		if(own->event == (enum mosquitto_plugin_event)event && own->cb_func == cb_func){
 			return remove_callback(identifier, own);
 		}
 	}
