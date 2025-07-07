@@ -65,7 +65,6 @@ struct mosquitto_client {
 	char *clientid;
 	char *username;
 	char *auth_method;
-	struct mosquitto_message_v5 *will;
 	time_t will_delay_time;
 	time_t session_expiry_time;
 	uint32_t will_delay_interval;
@@ -119,6 +118,16 @@ struct mosquitto_client_msg {
 	void *future2[8];
 };
 
+struct mosquitto_will_msg {
+	const char *clientid;
+	void *payload;
+	char *topic;
+	mosquitto_property *properties;
+	uint32_t payloadlen;
+	uint8_t qos;
+	bool retain;
+};
+
 /* =========================================================================
  *
  * Section: Register callbacks.
@@ -156,6 +165,8 @@ enum mosquitto_plugin_event {
 	MOSQ_EVT_PERSIST_CLIENT_MSG_UPDATE = 26,
 	MOSQ_EVT_MESSAGE_OUT = 27,
 	MOSQ_EVT_CLIENT_OFFLINE = 28,
+	MOSQ_EVT_PERSIST_WILL_ADD = 29,
+	MOSQ_EVT_PERSIST_WILL_DELETE = 30,
 };
 
 /* Data for the MOSQ_EVT_RELOAD event */
@@ -351,6 +362,15 @@ struct mosquitto_evt_persist_retain_msg {
 	void *future;
 	const char *topic;
 	uint64_t store_id;
+	void *future2[8];
+};
+
+/* Data for the MOSQ_EVT_PERSIST_WILL_ADD/_DELETE */
+/* NOTE: The persistence interface is currently marked as unstable, which means
+ * it may change in a future minor release. */
+struct mosquitto_evt_persist_will_msg {
+	void *future;
+	struct mosquitto_will_msg data;
 	void *future2[8];
 };
 
@@ -1227,6 +1247,35 @@ mosq_EXPORT int mosquitto_persist_retain_msg_delete(const char *topic);
  *   A NULL pointer if neither the option nor the variable are set
  */
 mosq_EXPORT const char *mosquitto_persistence_location(void);
+
+/* Function: mosquitto_client_will_set
+ *
+ * Set a will message for the client.
+ *
+ * Parameters:
+ *     clientid -   clientid of the sesion to set the will message for.
+ *     topic -      the topic on which to publish the will.
+ *     payloadlen - the size of the payload (bytes). Valid values are between 0 and
+ *                  268,435,455.
+ *     payload -    pointer to the data to send. If payloadlen > 0 this must be a
+ *                  valid memory location. The payload will be copied.
+ *     qos -        integer value 0, 1 or 2 indicating the Quality of Service to be
+ *                  used for the will.
+ *     retain -     set to true to make the will a retained message.
+ *     properties - list of MQTT 5 properties. Can be NULL. The property list
+ *                  becomes the property of the broker and will be freed by the
+ *                  broker, if the function call was successfull.
+ *
+ * Returns:
+ *     MOSQ_ERR_SUCCESS -        on success.
+ *     MOSQ_ERR_NOT_FOUND -      if the client is not found.
+ *     MOSQ_ERR_INVAL -          if the input parameters were invalid.
+ *     MOSQ_ERR_NOMEM -          if an out of memory condition occurred.
+ *     MOSQ_ERR_PAYLOAD_SIZE -   if payloadlen is too large.
+ *     MOSQ_ERR_MALFORMED_UTF8 - if the topic is not valid UTF-8.
+ */
+mosq_EXPORT int mosquitto_client_will_set(const char* clientid, const char *topic, int payloadlen, const void *payload, int qos, bool retain, mosquitto_property *properties);
+
 
 #ifdef __cplusplus
 }

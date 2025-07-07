@@ -259,7 +259,7 @@ def receive_unordered(sock, recv1_packet, recv2_packet, error_string):
         raise ValueError(error_string)
 
 
-def do_send_receive(sock, send_packet, receive_packet, error_string="send receive error"):
+def do_send(sock, send_packet):
     size = len(send_packet)
     total_sent = 0
     while total_sent < size:
@@ -267,6 +267,9 @@ def do_send_receive(sock, send_packet, receive_packet, error_string="send receiv
         if sent == 0:
             raise RuntimeError("socket connection broken")
         total_sent += sent
+
+def do_send_receive(sock, send_packet, receive_packet, error_string="send receive error"):
+    do_send(sock, send_packet)
 
     if expect_packet(sock, error_string, receive_packet):
         return sock
@@ -278,13 +281,7 @@ def do_send_receive(sock, send_packet, receive_packet, error_string="send receiv
 # Useful for mocking a client receiving (with ack) a qos1 publish
 def do_receive_send(sock, receive_packet, send_packet, error_string="receive send error"):
     if expect_packet(sock, error_string, receive_packet):
-        size = len(send_packet)
-        total_sent = 0
-        while total_sent < size:
-            sent = sock.send(send_packet[total_sent:])
-            if sent == 0:
-                raise RuntimeError("socket connection broken")
-            total_sent += sent
+        do_send(sock, send_packet)
         return sock
     else:
         sock.close()

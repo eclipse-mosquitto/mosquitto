@@ -18,6 +18,7 @@
 	mosquitto_client_protocol_version;
 	mosquitto_client_sub_count;
 	mosquitto_client_username;
+	mosquitto_client_will_set;
 	mosquitto_complete_basic_auth;
 	mosquitto_control_command_reply;
 	mosquitto_control_generic_callback;

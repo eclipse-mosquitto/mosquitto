@@ -317,6 +317,8 @@ int connect__on_authorised(struct mosquitto *context, void *auth_data_out, uint1
 
 		if(context->session_expiry_interval != 0){
 			plugin_persist__handle_client_add(context);
+		}else if (context->will){
+			plugin_persist__handle_will_add(context);
 		}
 	}
 	return rc;

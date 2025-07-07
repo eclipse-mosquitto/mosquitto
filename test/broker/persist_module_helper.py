@@ -4,7 +4,7 @@ import socket
 import mosq_test
 import mqtt5_props
 
-from typing import Optional
+from typing import Any, Optional
 from types import ModuleType
 
 
@@ -17,13 +17,15 @@ def connect_client(
     session_present: bool = False,
     subscribe_topic: Optional[str] = None,
     qos: int = 1,
+    **connect_params: Any,
 ):
     connect_packet = mosq_test.gen_connect(
         client_id=client_id,
         username=username,
         proto_ver=proto_ver,
-        clean_session=False,
+        clean_session=session_expiry == 0,
         session_expiry=session_expiry,
+        **connect_params,
     )
     connack_packet = mosq_test.gen_connack(
         rc=0, proto_ver=proto_ver, flags=1 if session_present else 0
@@ -66,7 +68,7 @@ def publish_messages(
             mid=mid,
             qos=qos,
             payload=payload.encode("UTF-8"),
-            retain = True if i < retain_end else False,
+            retain=True if i < retain_end else False,
             proto_ver=proto_ver,
             properties=props,
         )
@@ -82,9 +84,10 @@ def check_db(
     client_msg_counts: dict[str, int],
     publisher_id: str,
     num_published_msgs: int,
-    retain_end: int,
+    retain_end: int = 0,
     message_expiry: int = 0,
     qos: int = 1,
+    check_session_expiry_time: bool = True,
 ):
     count_list = [v for v in client_msg_counts.values() if v is not None] + [0]
     num_base_msgs = max(count_list)
@@ -106,7 +109,7 @@ def check_db(
             client_id,
             username=username,
             will_delay_time=0,
-            session_expiry_time=60,
+            session_expiry_time=60 if check_session_expiry_time else None,
             listener_port=None,  # persist-lmdb reset listener port to 0 on disconnect
             max_packet_size=0,
             max_qos=2,

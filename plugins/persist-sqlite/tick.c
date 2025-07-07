@@ -31,7 +31,7 @@ int persist_sqlite__tick_cb(int event, void *event_data, void *userdata)
 	struct mosquitto_sqlite *ms = userdata;
 
 	UNUSED(event);
-	if(ed->now_s > ms->last_transaction + ms->flush_period && ms->event_count > 0){
+	if(ed->now_s >= ms->last_transaction + ms->flush_period && ms->event_count > 0){
 		ms->last_transaction = ed->now_s;
 		ms->event_count = 0;
 		sqlite3_exec(ms->db, "END;", NULL, NULL, NULL);
