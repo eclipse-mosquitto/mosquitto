@@ -183,6 +183,8 @@ struct plugin__callbacks{
 	struct mosquitto__callback *persist_base_msg_delete;
 	struct mosquitto__callback *persist_retain_msg_set;
 	struct mosquitto__callback *persist_retain_msg_delete;
+	struct mosquitto__callback *persist_will_add;
+	struct mosquitto__callback *persist_will_delete;
 };
 
 /* This is owned by mosquitto__config or mosquitto__listener, and only referred
@@ -871,6 +873,8 @@ void plugin_persist__handle_base_msg_add(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_base_msg_delete(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_retain_msg_set(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_retain_msg_delete(struct mosquitto__base_msg *base_msg);
+void plugin_persist__handle_will_add(struct mosquitto *context);
+void plugin_persist__handle_will_delete(struct mosquitto *context);
 
 /* ============================================================
  * Property related functions

@@ -875,3 +875,13 @@ BROKER_EXPORT const char *mosquitto_persistence_location(void)
 {
 	return db.config->persistence_location;
 }
+
+
+BROKER_EXPORT int mosquitto_client_will_set(const char* clientid, const char *topic, int payloadlen, const void *payload, int qos, bool retain, mosquitto_property *properties)
+{
+	struct mosquitto* mosq = mosquitto_client(clientid);
+	if (!mosq){
+		return MOSQ_ERR_NOT_FOUND;
+	}
+	return will__set(mosq, topic, payloadlen, payload, qos, retain, properties);
+}

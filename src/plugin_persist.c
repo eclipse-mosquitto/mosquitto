@@ -50,9 +50,6 @@ void plugin_persist__handle_client_add(struct mosquitto *context)
 	struct mosquitto_evt_persist_client event_data;
 	struct mosquitto__callback *cb_base, *cb_next;
 	struct mosquitto__security_options *opts;
-	struct mosquitto_message_v5 will;
-
-	UNUSED(will); /* FIXME */
 
 	if(db.shutdown || context->is_persisted) return;
 
@@ -77,6 +74,11 @@ void plugin_persist__handle_client_add(struct mosquitto *context)
 	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_client_add, cb_base, cb_next){
 		cb_base->cb(MOSQ_EVT_PERSIST_CLIENT_ADD, &event_data, cb_base->userdata);
 	}
+
+	if (context->will){
+		plugin_persist__handle_will_add(context);
+	}
+
 	context->is_persisted = true;
 }
 
@@ -113,6 +115,12 @@ void plugin_persist__handle_client_update(struct mosquitto *context)
 	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_client_update, cb_base, cb_next){
 		cb_base->cb(MOSQ_EVT_PERSIST_CLIENT_UPDATE, &event_data, cb_base->userdata);
 	}
+
+	if (context->will){
+		plugin_persist__handle_will_add(context);
+	}else{
+		plugin_persist__handle_will_delete(context);
+	}
 }
 
 
@@ -127,9 +135,13 @@ void plugin_persist__handle_client_delete(struct mosquitto *context)
 			|| context->id == NULL
 			|| context->state == mosq_cs_duplicate
 			|| db.shutdown){
-
 		return;
 	}
+
+	if (context->will){
+		plugin_persist__handle_will_delete(context);
+	}
+
 	opts = &db.config->security_options;
 	memset(&event_data, 0, sizeof(event_data));
 	event_data.data.clientid = context->id;
@@ -366,4 +378,51 @@ void plugin_persist__handle_retain_msg_delete(struct mosquitto__base_msg *base_m
 	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_retain_msg_delete, cb_base, cb_next){
 		cb_base->cb(MOSQ_EVT_PERSIST_RETAIN_MSG_DELETE, &event_data, cb_base->userdata);
 	}
+}
+
+void plugin_persist__handle_will_add(struct mosquitto *context)
+{
+	struct mosquitto_evt_persist_will_msg event_data;
+	struct mosquitto__callback *cb_base, *cb_next;
+	struct mosquitto__security_options *opts;
+	struct mosquitto_message *will_msg;
+
+	if(db.shutdown || !context->will){
+		return;
+	}
+
+	opts = &db.config->security_options;
+	will_msg = &context->will->msg;
+	memset(&event_data, 0, sizeof(event_data));
+	event_data.data.clientid = context->id;
+	event_data.data.topic = will_msg->topic;
+	event_data.data.payload = will_msg->payload;
+	event_data.data.payloadlen = (uint32_t)will_msg->payloadlen;
+	event_data.data.qos = (uint8_t)will_msg->qos;
+	event_data.data.retain = will_msg->retain;
+	event_data.data.properties = context->will->properties;
+
+	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_will_add, cb_base, cb_next){
+		cb_base->cb(MOSQ_EVT_PERSIST_WILL_ADD, &event_data, cb_base->userdata);
+	}
+}
+
+void plugin_persist__handle_will_delete(struct mosquitto *context)
+{
+	struct mosquitto_evt_persist_will_msg event_data;
+	struct mosquitto__callback *cb_base, *cb_next;
+	struct mosquitto__security_options *opts;
+
+	memset(&event_data, 0, sizeof(event_data));
+	event_data.data.clientid = context->id;
+
+	if(db.shutdown){
+		return;
+	}
+	opts = &db.config->security_options;
+	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_will_delete, cb_base, cb_next){
+		mosquitto_log_printf(MOSQ_LOG_INFO, "plugin_persist__handle_will_delete invoke %p", (void*)cb_base);
+		cb_base->cb(MOSQ_EVT_PERSIST_WILL_ADD, &event_data, cb_base->userdata);
+	}
+
 }

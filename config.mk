@@ -191,7 +191,7 @@ ifeq ($(UNAME),SunOS)
 		CFLAGS?=-Wall -ggdb -O2
 	endif
 else
-	CFLAGS?=-Wall -ggdb -O3 -Wconversion -Wextra -std=gnu99
+	CFLAGS?=-Wall -ggdb -O3 -Wconversion -Wextra -std=gnu99 -Werror=switch
 	CXXFLAGS?=-Wall -ggdb -O3 -Wconversion -Wextra
 endif
 

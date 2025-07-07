@@ -23,7 +23,7 @@ Contributors:
 #include "lib_load.h"
 
 
-static const char *get_event_name(int event)
+static const char *get_event_name(enum mosquitto_plugin_event event)
 {
 	switch(event){
 		case MOSQ_EVT_RELOAD:
@@ -38,6 +38,8 @@ static const char *get_event_name(int event)
 			return "auth-start";
 		case MOSQ_EVT_EXT_AUTH_CONTINUE:
 			return "auth-continue";
+	  case MOSQ_EVT_CONTROL:
+			return "control";
 		case MOSQ_EVT_MESSAGE_IN:
 			return "message-in";
 		case MOSQ_EVT_MESSAGE_OUT:
@@ -80,9 +82,12 @@ static const char *get_event_name(int event)
 			return "persist-client-msg-delete";
 		case MOSQ_EVT_PERSIST_CLIENT_MSG_UPDATE:
 			return "persist-client-msg-update";
-		default:
-			return "";
+	  case MOSQ_EVT_PERSIST_WILL_ADD:
+			return "persist-will-add";
+	  case MOSQ_EVT_PERSIST_WILL_DELETE:
+			return "persist-will-delete";
 	}
+	return "";
 }
 
 static bool check_callback_exists(struct mosquitto__callback *cb_base, MOSQ_FUNC_generic_callback cb_func)
@@ -97,7 +102,7 @@ static bool check_callback_exists(struct mosquitto__callback *cb_base, MOSQ_FUNC
 	return false;
 }
 
-static struct mosquitto__callback **plugin__get_callback_base(struct mosquitto__security_options *security_options, int event)
+static struct mosquitto__callback **plugin__get_callback_base(struct mosquitto__security_options *security_options, enum mosquitto_plugin_event event)
 {
 	switch(event){
 		case MOSQ_EVT_RELOAD:
@@ -156,9 +161,12 @@ static struct mosquitto__callback **plugin__get_callback_base(struct mosquitto__
 			return &security_options->plugin_callbacks.persist_retain_msg_delete;
 		case MOSQ_EVT_MESSAGE_OUT:
 			return &security_options->plugin_callbacks.message_out;
-		default:
-			return NULL;
+  	case MOSQ_EVT_PERSIST_WILL_ADD:
+			return &security_options->plugin_callbacks.persist_will_add;
+  	case MOSQ_EVT_PERSIST_WILL_DELETE:
+			return &security_options->plugin_callbacks.persist_will_delete;
 	}
+	return NULL;
 }
 
 

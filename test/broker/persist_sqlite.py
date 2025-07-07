@@ -20,7 +20,6 @@ ms_send_pubrec = 10
 ms_queued = 11
 
 
-
 def write_config(filename, port, additional_config_entries: dict = {}):
     with open(filename, "w") as f:
         f.write("listener %d\n" % (port))
@@ -72,6 +71,11 @@ def init(port, create_db_of_version: list[int] = None):
                 f"INSERT INTO version_info(component,major,minor,patch) VALUES ('database_schema',{','.join([str(i) for i in create_db_of_version])});",
             ]:
                 cursor.execute(statement)
+            if create_db_of_version[1] >= 1:
+                for statement in [
+                    "CREATE TABLE wills(client_id TEXT PRIMARY KEY,payload BLOB,topic STRING NOT NULL,payloadlen INTEGER,qos INTEGER,retain INTEGER,properties STRING);"
+                ]:
+                    cursor.execute(statement)
 
         cursor.close()
         con.commit()
@@ -115,9 +119,14 @@ def check_version_infos(port, database_schema_version):
         "SELECT major,minor,patch FROM version_info WHERE component = 'database_schema';"
     )
     row = cur.fetchone()
-    assert len(row) == len(database_schema_version)
+
+    if len(row) != len(database_schema_version):
+        raise ValueError("Could not fetch db version info from DB")
     for i in range(len(row)):
-        assert row[i] == database_schema_version[i]
+        if row[i] != database_schema_version[i]:
+            raise ValueError(
+                f"DB version info {'.'.join([str(v) for v in row])} != expected {'.'.join([str(v) for v in database_schema_version])}"
+            )
     con.close()
 
 
@@ -210,11 +219,13 @@ def check_client(
     if (will_delay_time == 0 and row[2] != 0) or (will_delay_time != 0 and row[2] == 0):
         raise ValueError("Invalid will_delay_time %d / %d" % (row[2], will_delay_time))
 
-    if (session_expiry_time == 0 and row[3] != 0) or (
-        session_expiry_time != 0 and row[3] == 0
+    if session_expiry_time and (
+        (session_expiry_time == 0 and row[3] != 0)
+        or (session_expiry_time != 0 and row[3] == 0)
     ):
         raise ValueError(
-            "Invalid session_expiry_time %d / %d" % (row[3], session_expiry_time)
+            "Invalid session_expiry_time %d / %d for client %s"
+            % (row[3], session_expiry_time, client_id)
         )
 
     if listener_port is not None and row[4] != listener_port:
@@ -461,3 +472,55 @@ def check_retain(port, topic, store_id):
     if row[0] != store_id:
         raise ValueError("Invalid store_id %d / %d" % (row[0], store_id))
     con.close()
+
+
+def check_will(
+    port,
+    client_id: str,
+    payload: bytes,
+    topic: str,
+    qos: int,
+    retain: int,
+    properties: str,
+    idx=0,
+):
+    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    try:
+        cur = con.cursor()
+        cur.execute(
+            "SELECT client_id,topic,payload,payloadlen,qos,retain,properties "
+            "FROM wills",
+        )
+        for i in range(0, idx + 1):
+            row = cur.fetchone()
+
+        if row is None:
+            raise ValueError(f"no will at index {idx}")
+
+        if row[0] != client_id:
+            raise ValueError(f"Invalid client_id {row[0]} / {client_id}")
+
+        if row[1] != topic:
+            raise ValueError("Invalid topic %s / %s" % (row[2], topic))
+
+        if row[2] != payload:
+            raise ValueError("Invalid payload %s / %s" % (row[2], payload))
+
+        if row[3] != len(payload):
+            raise ValueError("Invalid payloadlen %d / %d" % (row[3], len(payload)))
+
+        if row[4] != qos:
+            raise ValueError("Invalid qos %d / %d" % (row[4], qos))
+
+        if row[5] != retain:
+            raise ValueError("Invalid retain %d / %d" % (row[5], retain))
+
+        if row[6] != properties:
+            raise ValueError("Invalid properties %s / %s" % (row[6], properties))
+
+    except ValueError as err:
+        raise ValueError(str(err) + f" at index {idx}") from err
+    finally:
+        con.close()
+
+    return row[0]
