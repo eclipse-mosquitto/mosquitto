@@ -45,7 +45,8 @@ extern "C" {
 enum mosquitto_protocol {
 	mp_mqtt,
 	mp_mqttsn,
-	mp_websockets
+	mp_websockets,
+	mp_http_api,
 };
 
 enum mosquitto_broker_msg_direction {

@@ -30,6 +30,10 @@ Contributors:
 #  endif
 #endif
 
+#ifdef WITH_HTTP_API
+#  include <microhttpd.h>
+#endif
+
 #ifdef __linux__
 #define WITH_TCP_USER_TIMEOUT
 #endif
@@ -256,9 +260,9 @@ struct mosquitto__listener {
 #  if WITH_WEBSOCKETS == WS_IS_LWS
 	struct lws_context *ws_context;
 	bool ws_in_init;
-	char *http_dir;
 	struct lws_protocols *ws_protocol;
 #  endif
+	char *http_dir;
 	char **ws_origins;
 	int ws_origin_count;
 #endif
@@ -271,6 +275,9 @@ struct mosquitto__listener {
 	bool disable_protocol_v5;
 	int enable_proxy_protocol;
 	bool proxy_protocol_v2_require_tls;
+#ifdef WITH_HTTP_API
+	struct MHD_Daemon *mhd;
+#endif
 };
 
 
@@ -983,6 +990,12 @@ int will_delay__add(struct mosquitto *context);
 void will_delay__check(void);
 void will_delay__send_all(void);
 void will_delay__remove(struct mosquitto *mosq);
+
+/* ============================================================
+ * HTTP Info
+ * ============================================================ */
+int http_api__start(struct mosquitto__listener *listener);
+void http_api__stop(struct mosquitto__listener *listener);
 
 
 /* ============================================================

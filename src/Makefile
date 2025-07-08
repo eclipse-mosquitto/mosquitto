@@ -61,6 +61,7 @@ OBJS=	mosquitto.o \
 		handle_publish.o \
 		handle_subscribe.o \
 		handle_unsubscribe.o \
+		http_api.o \
 		http_serv.o \
 		keepalive.o \
 		listeners.o \

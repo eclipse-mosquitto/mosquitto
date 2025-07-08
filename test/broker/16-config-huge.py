@@ -134,7 +134,7 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         f.write(f"crlfile {ssl_dir}/crl.pem\n")
         #f.write("dhparamfile file\n")
         f.write("disable_client_cert_date_checks true\n")
-        f.write("http_dir dir\n")
+        f.write("http_dir .\n")
         f.write("max_connections 10\n")
         f.write("max_qos 1\n")
         f.write("mount_point mount/\n")

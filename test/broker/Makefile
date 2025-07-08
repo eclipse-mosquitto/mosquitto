@@ -18,7 +18,7 @@ test-compile :
 ptest : test-compile
 	./test.py
 
-test : test-compile msg_sequence_test 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 20 21
+test : test-compile msg_sequence_test 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 20 21 22
 
 msg_sequence_test:
 	./msg_sequence_test.py
@@ -345,3 +345,8 @@ endif
 	./21-proxy-v2-ssl-cipher.py
 	./21-proxy-v2-ssl-require-tls-failure.py
 	./21-proxy-v2-ssl-require-tls-success.py
+
+22:
+	./22-http-api-api.py
+	./22-http-api-file.py
+	./22-http-api-tls.py

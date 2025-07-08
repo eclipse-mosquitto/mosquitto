@@ -404,10 +404,8 @@ void config__cleanup(struct mosquitto__config *config)
 				config->listeners[i].ssl_ctx = NULL;
 			}
 #endif
-#ifdef WITH_WEBSOCKETS
-#  if WITH_WEBSOCKETS == WS_IS_LWS
 			mosquitto_FREE(config->listeners[i].http_dir);
-#  endif
+#ifdef WITH_WEBSOCKETS
 			for(int j=0; j<config->listeners[i].ws_origin_count; j++){
 				mosquitto_FREE(config->listeners[i].ws_origins[j]);
 			}
@@ -1621,18 +1619,26 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 				}else if(!strcmp(token, "global_max_connections")){
 					if(conf__parse_int(&token, "global_max_connections", &config->global_max_connections, &saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strcmp(token, "http_dir")){
-#ifdef WITH_WEBSOCKETS
-#  if WITH_WEBSOCKETS == WS_IS_LWS
+#if defined(WITH_WEBSOCKETS) || defined(WITH_HTTP_API)
 					if(reload) continue; /* Not valid for reloading. */
 					REQUIRE_LISTENER(token);
 					if(conf__parse_string(&token, "http_dir", &cur_listener->http_dir, &saveptr)) return MOSQ_ERR_INVAL;
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: http_dir support will be removed when support for libwebsockets is removed in a future version.");
-#  else
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Builtin websockets does not support the `http_dir` option.");
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Recompile using libwebsockets support if this is important to you, but be aware support will be completely removed in a future version.");
-#  endif
+#ifdef WIN32
+					char *http_dir_canonical = _fullpath(NULL, cur_listener->http_dir, 0);
 #else
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Websockets support not available.");
+					char *http_dir_canonical = realpath(cur_listener->http_dir, NULL);
+#endif
+					if(!http_dir_canonical){
+						return MOSQ_ERR_NOMEM;
+					}
+					mosquitto_FREE(cur_listener->http_dir);
+					cur_listener->http_dir = mosquitto_strdup(http_dir_canonical);
+					mosquitto_FREE(http_dir_canonical);
+					if(!cur_listener->http_dir){
+						return MOSQ_ERR_NOMEM;
+					}
+#else
+					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: http_dir support not available.");
 #endif
 				}else if(!strcmp(token, "idle_timeout")){
 #ifdef WITH_BRIDGE
@@ -2145,6 +2151,13 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 						cur_listener->protocol = mp_websockets;
 #else
 						log__printf(NULL, MOSQ_LOG_ERR, "Error: Websockets support not available.");
+						return MOSQ_ERR_INVAL;
+#endif
+					}else if(!strcmp(token, "http_api")){
+#ifdef WITH_HTTP_API
+						cur_listener->protocol = mp_http_api;
+#else
+						log__printf(NULL, MOSQ_LOG_ERR, "Error: HTTP API support not available.");
 						return MOSQ_ERR_INVAL;
 #endif
 					}else{

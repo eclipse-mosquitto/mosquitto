@@ -1358,14 +1358,15 @@ accept_protocol_versions 3, 4</programlisting>
 				<varlistentry>
 					<term><option>http_dir</option> <replaceable>directory</replaceable></term>
 					<listitem>
-						<para>When a listener is using the websockets protocol,
+						<para>When a listener is using the http_api protocol,
 							it is possible to serve http data as well. Set
 							<option>http_dir</option> to a directory which
 							contains the files you wish to serve. If this
 							option is not specified, then no normal http
 							connections will be possible.</para>
 						<para>
-							This option is only available if Mosquitto is
+							This option is also available for websockets
+							listeners if Mosquitto is
 							compiled with websockets support provided by
 							libwebsockets. This is not the default, and will be
 							removed in version 3.0.
@@ -1536,16 +1537,38 @@ accept_protocol_versions 3, 4</programlisting>
 				<varlistentry>
 					<term><option>protocol</option> <replaceable>value</replaceable></term>
 					<listitem>
-						<para>Set the protocol to accept for the current listener. Can
-							be <option>mqtt</option>, the default, or
-							<option>websockets</option> if available.</para>
-						<para>Websockets support is currently disabled by
-							default at compile time. Certificate based TLS may be used
-							with websockets, except that only the
+						<para>
+							Set the protocol to accept for the current listener. Can
+							be <option>mqtt</option>, the default,
+							<option>websockets</option>, or <option>http_api</option>.
+						</para>
+
+						<para>
+							<option>mqtt</option>: the standard MQTT listener.
+						</para>
+
+						<para>
+							<option>websockets</option>: MQTT tunnelled over WebSockets.
+							If the legacy websockets support using libwebsockets is used,
+							then only a reduced TLS feature set is available, namely
 							<option>cafile</option>, <option>certfile</option>,
 							<option>keyfile</option>, <option>ciphers</option>, and
-							<option>ciphers_tls1.3</option> options are
-							supported.</para>
+							<option>ciphers_tls1.3</option>.
+						</para>
+
+						<para>
+							<option>http_api</option>: This starts the listener as a very
+							simple webserver (see the <option>http_dir</option> option)
+							that can also serve some HTTP API requests. TLS is supported
+							for this listener, however only the <option>certfile</option> and
+							<option>keyfile</option> options are allowed. Authentication is
+							not currently possible - to use this listener it is strongly
+							recommended to bind the listener to the loopback interface and
+							then configure a reverse proxy with the appropriate encryption
+							and authentication.
+						</para>
+
+
 						<para>Not reloaded on reload signal.</para>
 					</listitem>
 				</varlistentry>

@@ -152,6 +152,9 @@ WITH_ASAN=no
 # Build with editline support to allow the mosquitto_ctrl shell
 WITH_EDITLINE=yes
 
+# Build with basic HTTP API support
+WITH_HTTP_API=yes
+
 # =============================================================================
 # End of user configuration
 # =============================================================================

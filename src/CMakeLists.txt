@@ -97,6 +97,17 @@ if(INC_BRIDGE_SUPPORT)
 	target_compile_definitions(mosquitto PRIVATE "WITH_BRIDGE")
 endif()
 
+option(WITH_HTTP_API
+	"Include http_api support for listeners?" ON)
+if(WITH_HTTP_API)
+	find_library(MICROHTTPD_LIBRARY NAMES microhttpd)
+	if(MICROHTTPD_LIBRARY)
+		target_sources(mosquitto PRIVATE http_api.c)
+		target_compile_definitions(mosquitto PRIVATE "WITH_HTTP_API")
+		target_link_libraries(mosquitto PRIVATE microhttpd)
+	endif()
+endif()
+
 
 option(USE_LIBWRAP "Include tcp-wrappers support?" OFF)
 

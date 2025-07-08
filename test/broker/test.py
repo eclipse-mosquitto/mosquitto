@@ -290,6 +290,10 @@ tests = [
     (1, './21-proxy-v2-ssl-cipher.py'),
     (1, './21-proxy-v2-ssl-require-tls-failure.py'),
     (1, './21-proxy-v2-ssl-require-tls-success.py'),
+
+    (2, './22-http-api-api.py'),
+    (2, './22-http-api-file.py'),
+    (2, './22-http-api-tls.py'),
 ]
 
 if __name__ == "__main__":

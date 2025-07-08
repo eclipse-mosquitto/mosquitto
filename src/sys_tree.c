@@ -144,6 +144,11 @@ struct metric_load metric_loads[mosq_metric_load_max] = {
 static time_t start_time = 0;
 static time_t last_update = 0;
 
+time_t broker_uptime(void)
+{
+	return db.now_s - start_time;
+}
+
 void sys_tree__init(void)
 {
 	char buf[64];
