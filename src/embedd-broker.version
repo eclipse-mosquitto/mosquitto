@@ -1,0 +1,4 @@
+EMBEDD {
+  global: mosquitto_broker_main; mosquitto_broker_stop; # explicitly list symbols to be exported
+  local: *;         # hide everything else
+};
