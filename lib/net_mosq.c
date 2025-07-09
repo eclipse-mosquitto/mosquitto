@@ -122,6 +122,9 @@ static void cleanup_ui_method(void)
 
 UI_METHOD *net__get_ui_method(void)
 {
+	if(!_ui_method){
+		setup_ui_method();
+	}
 	return _ui_method;
 }
 
@@ -171,9 +174,8 @@ void net__init_tls(void)
 #if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
 	ENGINE_load_builtin_engines();
 #endif
-	setup_ui_method();
 	if(tls_ex_index_mosq == -1){
-		tls_ex_index_mosq = SSL_get_ex_new_index(0, "client context", NULL, NULL, NULL);
+		tls_ex_index_mosq = SSL_get_ex_new_index(0, NULL, NULL, NULL, NULL);
 	}
 
 	is_tls_initialized = true;
