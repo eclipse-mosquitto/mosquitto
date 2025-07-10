@@ -16,4 +16,5 @@ const INTERVAL_5SECS_IN_MILLISECONDS = 1000 * 5;
 const CHARTJS_ANIMATION_DURATION_MS = 400;
 const SYSTOPIC_ENDPOINT = "/api/systree";
 const VERSION_ENDPOINT = "/api/version";
+const LISTENERS_ENDPOINT = "/api/listeners";
 const CHART_DISPLAY_WINDOW = 16;
