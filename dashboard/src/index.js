@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
     storedSetting = JSON.parse(storedSetting);
     if (storedSetting === false) {
       // set isGridView from the default value of true to match the "false" coming from the session store by calling the toggle function
-      toggleView();
+      queue.enqueue(toAsyncAndWaitAfter(toggleView));
     }
   }
 

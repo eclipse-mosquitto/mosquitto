@@ -90,7 +90,7 @@
                                 </div>
                                 <div>
                                     <span class="text-gray-500">uptime:</span>
-                                    <span class="ml-2" id="broker-uptime">6d 18h 43m 22sec</span>
+                                    <span class="ml-2" id="broker-uptime">?</span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">status:</span>
@@ -182,7 +182,7 @@
                 <div class="mb-4 flex justify-end">
                     <button id="chart-data-type-global-toggle" class="mr-2 inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
                         <!-- for when we are on raw data state -->
-                        <svg id="smoothed-state-svg" class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="smooth-state-svg" class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0"></path>
                         </svg>
                         <!-- for when we are on smoothed data state -->
@@ -697,6 +697,7 @@
     <script src="lib/chart.umd.js"></script>
     <script src="lib/chartjs-plugin-zoom.min.js"></script>
     <script src="consts.js"></script>
+    <script src="queue.js"></script>
     <script src="assert.js"></script>
     <script src="utils.js"></script>
     <script src="sidebar.js"></script>

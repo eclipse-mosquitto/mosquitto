@@ -24,6 +24,7 @@ class MosquittoDashboard {
     this.timeoutHandler = null;
 
     this.initializeCharts();
+    this.addToggle();
     this.startDataUpdates();
   }
 
@@ -440,6 +441,11 @@ class MosquittoDashboard {
         chart.options.scales.x.min = newStart;
         chart.options.scales.x.max = newTotalLen - 1;
         chart.update();
+        //chart.update("none");
+        //Object.values(chart.options.scales).forEach((axisOptions) => {
+        //  delete axisOptions.min;
+        //  delete axisOptions.max;
+        //});
         chart.resetZoom();
         break;
       default:
@@ -447,6 +453,46 @@ class MosquittoDashboard {
         console.error(errorMsg);
         alert(errorMsg);
     }
+  }
+
+  addToggle() {
+    const toggleChartDataTypeButton = document.getElementById(
+      "chart-data-type-global-toggle",
+    );
+    const toggleChartDataTypeText = document.getElementById(
+      "chart-data-type-text",
+    );
+
+    // set to an opposite state and toggle once to refresh the button captions etc
+    if (this.dashboardDataObject.options.chartDataType === "raw") {
+      this.dashboardDataObject.options.chartDataType = "smooth";
+    } else {
+      this.dashboardDataObject.options.chartDataType = "raw";
+    }
+    const handleChartDataTypeToggle = () => {
+      if (this.dashboardDataObject.options.chartDataType === "raw") {
+        this.dashboardDataObject.options.chartDataType = "smooth";
+        this.destroyCharts();
+        toggleChartDataTypeText.textContent = "Show Raw Data";
+        this.addHtmlElementClass("smooth-state-svg", "hidden");
+        this.removeHtmlElementClass("raw-state-svg", "hidden");
+      } else {
+        this.dashboardDataObject.options.chartDataType = "raw";
+        this.destroyCharts();
+        toggleChartDataTypeText.textContent = "Show Smoothed Data";
+        this.addHtmlElementClass("raw-state-svg", "hidden");
+        this.removeHtmlElementClass("smooth-state-svg", "hidden");
+      }
+      this.initializeCharts();
+      sessionStorage.setItem(
+        "options",
+        JSON.stringify(this.dashboardDataObject.options),
+      );
+    };
+    toggleChartDataTypeButton.addEventListener("click", () => {
+      queue.enqueue(toAsyncAndWaitAfter(handleChartDataTypeToggle));
+    });
+    queue.enqueue(toAsyncAndWaitAfter(handleChartDataTypeToggle));
   }
 
   initializeCharts() {
@@ -508,48 +554,12 @@ class MosquittoDashboard {
         const chartId = e.target.dataset.chart;
         if (chartId) {
           const action = e.target.dataset.action;
-          this.handleChartAction(chartId, action);
+          queue.enqueue(
+            toAsyncAndWaitAfter(() => this.handleChartAction(chartId, action)),
+          );
         }
       }
     });
-
-    const toggleChartDataTypeButton = document.getElementById(
-      "chart-data-type-global-toggle",
-    );
-    const toggleChartDataTypeText = document.getElementById(
-      "chart-data-type-text",
-    );
-
-    // set to an opposite state and toggle once to refresh the button captions etc
-    if (this.dashboardDataObject.options.chartDataType === "raw") {
-      this.dashboardDataObject.options.chartDataType = "smooth";
-    } else {
-      this.dashboardDataObject.options.chartDataType = "raw";
-    }
-    const handleChartDataTypeToggle = () => {
-      if (this.dashboardDataObject.options.chartDataType === "raw") {
-        this.dashboardDataObject.options.chartDataType = "smooth";
-        this.updateChartDataTypes("smooth");
-        toggleChartDataTypeText.textContent = "Show Raw Data";
-        this.addHtmlElementClass("smoothed-state-svg", "hidden");
-        this.removeHtmlElementClass("raw-state-svg", "hidden");
-      } else {
-        this.dashboardDataObject.options.chartDataType = "raw";
-        this.updateChartDataTypes("raw");
-        toggleChartDataTypeText.textContent = "Show Smoothed Data";
-        this.addHtmlElementClass("raw-state-svg", "hidden");
-        this.removeHtmlElementClass("smoothed-state-svg", "hidden");
-      }
-      sessionStorage.setItem(
-        "options",
-        JSON.stringify(this.dashboardDataObject.options),
-      );
-    };
-    toggleChartDataTypeButton.addEventListener(
-      "click",
-      handleChartDataTypeToggle,
-    );
-    handleChartDataTypeToggle();
   }
 
   getChartDatasets(chartId) {
@@ -606,38 +616,13 @@ class MosquittoDashboard {
     chart.options.scales.x.max = newTotalLen - 1;
   }
 
-  updateChartDataTypes(dataType) {
-    for (const [chartId, chart] of Object.entries(this.charts)) {
+  destroyCharts() {
+    for (const [chartId, _] of Object.entries(this.charts)) {
       let data;
       let data2;
       let labels;
       [labels, data, data2] = this.getChartDatasets(chartId);
-
-      const [zoomLevel, currentEnd, lastX] = this.getChartPositionalData(chart);
-
-      if (dataType === "smooth") {
-        data = data.smoothedData;
-        data2 = data2 ? data.smoothedData : data2;
-        labels = labels.smoothedLabels;
-      } else {
-        data = data.rawData;
-        data2 = data2 ? data.smoothedData : data2;
-        labels = labels.rawLabels;
-      }
-
-      chart.data.labels = labels;
-      chart.data.datasets[0].data = data;
-      if (data2) {
-        chart.data.datasets[1].data = data2;
-      }
-
-      if (
-        this.isEndElementVisibleAndDefaultZoom(lastX, currentEnd, zoomLevel)
-      ) {
-        this.slideChart(chart);
-      }
-
-      chart.update();
+      this.charts[chartId].destroy();
     }
   }
 
@@ -647,7 +632,9 @@ class MosquittoDashboard {
 
   updateMatchingChart(chartId, sysTopics, chartIdsToUpdate) {
     const createErrorMsg = (matchingChartId, matchingChartSysTopic) =>
-      `datapoint doesn't exist in current sysTopic data for the chart "${matchingChartId}" matching the chart "${chartId}". Matching chart sys topic: ${matchingChartSysTopic}. Available sys topics: ${JSON.stringify(sysTopics)}`;
+      `datapoint doesn't exist in current sysTopic data for the chart "${matchingChartId}" matching the chart "${chartId}". Matching chart sys topic: ${matchingChartSysTopic}. Available sys topics: ${JSON.stringify(
+        sysTopics,
+      )}`;
 
     if (chartId === "chart-messages-sent") {
       const matchingChartId = "chart-messages-received";
@@ -699,6 +686,7 @@ class MosquittoDashboard {
 
     // sys topics object looks as follows:
     //{
+    //  "$SYS/broker/uptime":	99999,
     //  "$SYS/broker/clients/total":	0,
     //  "$SYS/broker/clients/maximum":	1,
     //  "$SYS/broker/clients/disconnected":	0,
@@ -724,6 +712,16 @@ class MosquittoDashboard {
     //  "$SYS/broker/publish/messages/received":	0,
     //  "$SYS/broker/publish/messages/sent":	0
     //}
+    topic = "$SYS/broker/uptime";
+    if (
+      sysTopics[topic] !== undefined &&
+      this.dashboardDataObject.lastSysTopics[topic] !== sysTopics[topic]
+    ) {
+      this.updateLastSysTopics(topic, sysTopics[topic]);
+      htmlIdsToUpdate["broker-uptime"] = secondsToIntervalString(
+        sysTopics[topic],
+      );
+    }
 
     topic = "$SYS/broker/clients/total";
     if (
@@ -1094,7 +1092,9 @@ class MosquittoDashboard {
 
   setMustUpdateForMatchingGraph(chartId) {
     const createAssertErrorMsg = (id) =>
-      `mustUpdate option not found for chart "${id}". Available options: ${JSON.stringify(this.dashboardDataObject.charts[id]?.options)}. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`;
+      `mustUpdate option not found for chart "${id}". Available options: ${JSON.stringify(
+        this.dashboardDataObject.charts[id]?.options,
+      )}. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`;
     let oppositeChartId;
 
     if (chartId === "chart-messages-sent") {
@@ -1187,15 +1187,21 @@ class MosquittoDashboard {
     );
     assertExistence(
       chartData,
-      `Data for the chart "${id}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Data for the chart "${id}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
     assertExistence(
       chartLabels,
-      `Labels for the chart "${id}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Labels for the chart "${id}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
     assertExistence(
       chartOptions,
-      `Options for the chart "${id}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Options for the chart "${id}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
 
     this.processChartOverflow(
@@ -1252,20 +1258,28 @@ class MosquittoDashboard {
     );
     assertExistence(
       firstChartData,
-      `Data for the first sub chart with id "${firstSubChartId}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Data for the first sub chart with id "${firstSubChartId}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
     assertExistence(
       firstChartLabels,
-      `Labels for the first sub chart with id "${firstSubChartId}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Labels for the first sub chart with id "${firstSubChartId}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
 
     assertExistence(
       secondChartData,
-      `Data for the second sub chart with "${secondSubChartId}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Data for the second sub chart with "${secondSubChartId}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
     assertExistence(
       secondChartLabels,
-      `Labels for the second sub chart with id "${secondSubChartId}" not found. Available charts: ${Object.keys(this.dashboardDataObject.charts)}`,
+      `Labels for the second sub chart with id "${secondSubChartId}" not found. Available charts: ${Object.keys(
+        this.dashboardDataObject.charts,
+      )}`,
     );
 
     const [zoomLevel, currentEnd, lastX, secondToLastX] =
@@ -1282,12 +1296,6 @@ class MosquittoDashboard {
     ) {
       this.slideChart(chart);
     }
-    id === "chart-message-overview" &&
-      console.log(
-        "chart message overview is updating",
-        new Date().toISOString(),
-      );
-
     chart.update();
   }
 
@@ -1343,13 +1351,8 @@ class MosquittoDashboard {
     }
   }
 
-  updateCharts(
-    chartData,
-    dashboardDataObject,
-    timestampMilliseconds,
-    isUpdatingAllCharts,
-  ) {
-    const lastDataPoints = {
+  getLastChartsDataPoints(dashboardDataObject) {
+    const lastChartsDataPoints = {
       "chart-messages-sent":
         dashboardDataObject.lastSysTopics["$SYS/broker/messages/sent"],
       "chart-messages-received":
@@ -1367,6 +1370,16 @@ class MosquittoDashboard {
       "chart-clients-disconnected":
         dashboardDataObject.lastSysTopics["$SYS/broker/clients/disconnected"],
     };
+    return lastChartsDataPoints;
+  }
+
+  updateCharts(
+    chartData,
+    dashboardDataObject,
+    timestampMilliseconds,
+    isUpdatingAllCharts,
+  ) {
+    const lastDataPoints = this.getLastChartsDataPoints(dashboardDataObject);
     let id = "";
 
     id = "chart-messages-sent";
@@ -1467,7 +1480,6 @@ class MosquittoDashboard {
   }
 
   async checkForDataUpdates() {
-    // TODO: update uptime here
     const nowTimestampMilliseconds = new Date().getTime();
     let sysTopics = null;
     try {
@@ -1520,11 +1532,23 @@ class MosquittoDashboard {
         updateAllCharts,
       );
 
-      this.updateStore(this.dashboardDataObject, chartsToUpdate || {});
+      let chartsIds;
+      if (updateAllCharts) {
+        const lastDataPointsOfAllCharts = this.getLastChartsDataPoints(
+          this.dashboardDataObject,
+        );
+        // importantly this gives us ids of all charts
+        chartsIds = Object.keys(lastDataPointsOfAllCharts);
+      } else if (chartsToUpdate) {
+        chartsIds = Object.keys(chartsToUpdate);
+      } else {
+        chartsIds = []; // nothing to update
+      }
+      this.updateStore(this.dashboardDataObject, chartsIds);
     }
   }
 
-  updateStore(dashboardDataObject, chartsToUpdate) {
+  updateStore(dashboardDataObject, idsOfChartsToUpdate) {
     try {
       sessionStorage.setItem(
         "options",
@@ -1538,7 +1562,7 @@ class MosquittoDashboard {
         "updateDueToIntervalTimestamp",
         JSON.stringify(dashboardDataObject.lastUpdateDueToIntervalTimestamp),
       );
-      for (const key of Object.keys(chartsToUpdate)) {
+      for (const key of idsOfChartsToUpdate) {
         const chartData = dashboardDataObject.charts[key];
         if (!chartData) {
           throw new Error(
@@ -1554,10 +1578,10 @@ class MosquittoDashboard {
     }
   }
 
-  startDataUpdates() {
-    const checkForDataUpdatesWrapper = () => {
+  async startDataUpdates() {
+    const checkForDataUpdatesWrapper = async () => {
       try {
-        this.checkForDataUpdates();
+        await this.checkForDataUpdates();
       } catch (error) {
         const errorMsg = `Error while checking for dashboard data updates ${error?.message}. Reopen the page to try again.`;
         console.error(errorMsg);
@@ -1567,7 +1591,7 @@ class MosquittoDashboard {
     };
 
     try {
-      checkForDataUpdatesWrapper();
+      await checkForDataUpdatesWrapper();
     } catch (error) {
       return;
     }
@@ -1580,20 +1604,36 @@ class MosquittoDashboard {
 
     const interval = nextTimestampDivisibleBy5Seconds - timestampNow;
 
-    const doDataUpdate = () => {
+    const doDataUpdate = async () => {
       clearTimeout(this.timeoutHandler);
 
+      let startTs, endTs;
       try {
-        checkForDataUpdatesWrapper();
+        startTs = Date.now();
+        await checkForDataUpdatesWrapper();
+        endTs = Date.now();
       } catch (error) {
         return;
       }
-      // TODO: await for the checkForDataUpdatesWrapper and then calculate next tick taking into account the execution time the function took
+      const executionTimeMs = endTs - startTs;
+
       this.timeoutHandler = setTimeout(
-        doDataUpdate,
-        INTERVAL_5SECS_IN_MILLISECONDS,
+        // don't want anything to get into a contending state while animation is running, so wait a bit after doDataUpdate returns
+        () =>
+          queue.enqueue(
+            toAsyncAndWaitAfter(
+              doDataUpdate,
+              CHARTJS_ANIMATION_DURATION_MS + 50,
+            ),
+          ),
+        INTERVAL_5SECS_IN_MILLISECONDS - executionTimeMs > 0
+          ? INTERVAL_5SECS_IN_MILLISECONDS - executionTimeMs
+          : 0,
       );
     };
-    this.timeoutHandler = setTimeout(doDataUpdate, interval);
+    this.timeoutHandler = setTimeout(
+      () => queue.enqueue(doDataUpdate),
+      interval,
+    );
   }
 }

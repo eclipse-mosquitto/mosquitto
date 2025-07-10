@@ -1,3 +1,24 @@
+function toAsyncAndWaitAfter(task, delay = 0) {
+  return () => {
+    const promise = new Promise((resolve, reject) => {
+      let result;
+      try {
+        result = task();
+      } catch (err) {
+        return reject(err);
+      }
+      if (delay) {
+        setTimeout(() => {
+          resolve(result);
+        }, delay);
+      } else {
+        resolve(result);
+      }
+    });
+    return promise;
+  };
+}
+
 async function fetchData(endpoint) {
   if (!endpoint) {
     throw new Error("No endpoint provided to fetch data function");
@@ -63,4 +84,59 @@ function prettifyNumber(number) {
   }
 
   return prettifiedNumber;
+}
+
+function secondsToIntervalString(number) {
+  const minuteInSeconds = 60;
+  const hourInSeconds = minuteInSeconds * 60;
+  const dayInSeconds = hourInSeconds * 24;
+  const yearInSeconds = dayInSeconds * 365;
+
+  if (typeof number !== "number") {
+    throw new Error(
+      `Invalid datatype for converting into interval string. Expected: number. Got: ${typeof number}`,
+    );
+  }
+  if (number < 0) {
+    throw new Error(
+      `Invalid value for converting into interval string. Received negative number: ${number}`,
+    );
+  }
+
+  let intervalString = "";
+
+  const years = Math.floor(number / yearInSeconds);
+  number = number % yearInSeconds;
+  if (years) {
+    intervalString += years === 1 ? "1 year " : `${years} years `;
+  }
+
+  const days = Math.floor(number / dayInSeconds);
+  number = number % dayInSeconds;
+  if (days) {
+    intervalString += days === 1 ? "1 day " : `${days} days `;
+  }
+
+  const hours = Math.floor(number / hourInSeconds);
+  number = number % hourInSeconds;
+  if (hours) {
+    intervalString += hours === 1 ? "1 hour " : `${hours} hours `;
+  }
+
+  const minutes = Math.floor(number / minuteInSeconds);
+  number = number % minuteInSeconds;
+  if (minutes) {
+    intervalString += minutes === 1 ? "1 minute " : `${minutes} minutes `;
+  }
+
+  const seconds = number;
+  if (seconds) {
+    intervalString += seconds === 1 ? "1 second " : `${seconds} seconds `;
+  }
+
+  if (!intervalString) {
+    return "0 seconds"; // This would be strange if this happened. Maybe better to throw an error
+  }
+
+  return intervalString;
 }
