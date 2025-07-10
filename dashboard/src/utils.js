@@ -140,3 +140,24 @@ function secondsToIntervalString(number) {
 
   return intervalString;
 }
+
+async function copyToClipboard(textToCopy) {
+  if (navigator.clipboard) {
+    return await navigator.clipboard.writeText(textToCopy);
+  }
+
+  const dummyTextArea = document.createElement("textarea");
+  dummyTextArea.value = textToCopy;
+
+  document.body.appendChild(dummyTextArea);
+  dummyTextArea.focus({ preventScroll: true });
+  dummyTextArea.select();
+
+  try {
+    document.execCommand("copy");
+  } catch (err) {
+    throw new Error("Copy command failed: " + err?.message);
+  } finally {
+    dummyTextArea.remove();
+  }
+}

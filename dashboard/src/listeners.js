@@ -145,7 +145,7 @@ class Listeners {
     copyButton.addEventListener("click", async () => {
       try {
         const command = this.generateConnectionCommand(listener, type);
-        await navigator.clipboard.writeText(command);
+        copyToClipboard(command);
 
         copyIcon.style.display = "none";
         checkIcon.style.display = "block";
@@ -157,8 +157,7 @@ class Listeners {
           copyButton.title = "Copy command";
         }, 2000);
       } catch (err) {
-        console.error("Error when copying:", err);
-        // TODO: add some fallback for old browsers here
+        console.error("Error when copying to clipboard:", err);
       }
     });
 
@@ -284,4 +283,5 @@ class Listeners {
 document.addEventListener("DOMContentLoaded", () => {
   new Sidebar();
   new Listeners();
+  new MosquittoDashboard(true);
 });
