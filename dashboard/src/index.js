@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   new Sidebar();
-  const dashboard = new MosquittoDashboard();
-  dashboard.init();
+  new MosquittoDashboard();
 });
 
 document.addEventListener("DOMContentLoaded", function () {

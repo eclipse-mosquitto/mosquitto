@@ -28,25 +28,6 @@ class MosquittoDashboard {
     this.startDataUpdates();
   }
 
-  async init() {
-    try {
-      this.version = (await fetchData(VERSION_ENDPOINT)).version;
-      this.previousDataFetchFailed = false;
-      this.brokerOnline = true;
-    } catch (error) {
-      const errorMsg = `Error fetching version information: ${error?.message}`;
-      console.error(errorMsg);
-      this.brokerOnline = false;
-      this.setBrokerStatus();
-      if (!this.previousDataFetchFailed) {
-        alert(errorMsg);
-      }
-      this.previousDataFetchFailed = true;
-    }
-    this.setBrokerVersion();
-    this.setBrokerStatus();
-  }
-
   getChartDataFromStore(chartId) {
     const chartDataString = sessionStorage.getItem(chartId);
     let chartDataObject = null;
@@ -1484,8 +1465,11 @@ class MosquittoDashboard {
     let sysTopics = null;
     try {
       sysTopics = await fetchData(SYSTOPIC_ENDPOINT);
+      this.version = sysTopics?.["$SYS/broker/version"];
+
       this.previousDataFetchFailed = false;
       this.brokerOnline = true;
+      this.setBrokerVersion();
       this.setBrokerStatus();
     } catch (error) {
       const errorMsg = `Error fetching sys topics: ${error?.message}`;
