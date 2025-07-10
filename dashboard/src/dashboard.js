@@ -1,7 +1,9 @@
-window.Chart.register(window.ChartZoom); // chartjs comes from lib/
-
 class MosquittoDashboard {
-  constructor() {
+  constructor(headless = false) {
+    this.headlessMode = !!headless;
+
+    !this.headlessMode && window.Chart.register(window.ChartZoom); // chartjs comes from lib/
+
     this.previousDataFetchFailed = false;
     this.brokerOnline = true;
     this.version = "";
@@ -12,7 +14,7 @@ class MosquittoDashboard {
     );
 
     // if metrics were present in the session store, update them immediately
-    if (entitiesToUpdate) {
+    if (!this.headlessMode && entitiesToUpdate) {
       Object.entries(entitiesToUpdate).forEach(([id, value]) => {
         this.updateHtmlElementById(id, value);
       });
@@ -23,8 +25,8 @@ class MosquittoDashboard {
     this.charts = {};
     this.timeoutHandler = null;
 
-    this.initializeCharts();
-    this.addToggle();
+    !this.headlessMode && this.initializeCharts();
+    !this.headlessMode && this.addToggle();
     this.startDataUpdates();
   }
 
@@ -98,10 +100,16 @@ class MosquittoDashboard {
   }
 
   setBrokerVersion() {
+    if (this.headlessMode) {
+      return;
+    }
     this.updateHtmlElementById("broker-version", this.version);
   }
 
   setBrokerStatus() {
+    if (this.headlessMode) {
+      return;
+    }
     this.removeHtmlElementClass(
       "broker-status",
       this.brokerOnline ? "broker-inactive" : "broker-active",
@@ -1157,15 +1165,16 @@ class MosquittoDashboard {
   }
 
   updateChartInner(id, datapoint, timestamp, dashboardDataObject) {
-    const chart = this.charts[id];
+    const chart = this.charts[id]; // note: in headless mode chart will be undefined as no chart objects are initialized
     const chartData = dashboardDataObject.charts[id].data;
     const chartLabels = dashboardDataObject.charts[id].labels;
     const chartOptions = dashboardDataObject.charts[id].options;
 
-    assertExistence(
-      chart,
-      `Chart "${id}" not found. Available charts: ${Object.keys(this.charts)}`,
-    );
+    !this.headlessMode &&
+      assertExistence(
+        chart,
+        `Chart "${id}" not found. Available charts: ${Object.keys(this.charts)}`,
+      );
     assertExistence(
       chartData,
       `Data for the chart "${id}" not found. Available charts: ${Object.keys(
@@ -1191,7 +1200,10 @@ class MosquittoDashboard {
       timestamp,
     );
 
-    const [zoomLevel, currentEnd, lastX] = this.getChartPositionalData(chart);
+    let zoomLevel, currentEnd, lastX;
+    if (!this.headlessMode) {
+      [zoomLevel, currentEnd, lastX] = this.getChartPositionalData(chart);
+    }
 
     const timeString = toTimeString(new Date(timestamp));
     chartData.rawData.push(datapoint);
@@ -1205,11 +1217,14 @@ class MosquittoDashboard {
       id,
     );
 
-    if (this.isEndElementVisibleAndDefaultZoom(lastX, currentEnd, zoomLevel)) {
+    if (
+      !this.headlessMode &&
+      this.isEndElementVisibleAndDefaultZoom(lastX, currentEnd, zoomLevel)
+    ) {
       this.slideChart(chart);
     }
 
-    chart.update(); // put 'none' for no animation on updates
+    !this.headlessMode && chart.update(); // put 'none' for no animation on updates
   }
 
   getOverviewChartSubchartIds(id) {
@@ -1223,6 +1238,10 @@ class MosquittoDashboard {
   }
 
   updateOverviewChartInner(id, firstSubChartId, secondSubChartId) {
+    if (this.headlessMode) {
+      // this function only update the chart chart view itself, no data manipulations are done as it simply consumes other line charts. So we have nothing to do in headless mode
+      return;
+    }
     const chart = this.charts[id];
     const firstChartData =
       this.dashboardDataObject.charts[firstSubChartId].data;
@@ -1489,7 +1508,7 @@ class MosquittoDashboard {
       this.getElementsToUpdate(sysTopics);
     this.dashboardDataObject.lastSysTopics = sysTopics;
 
-    if (metricsToUpdate) {
+    if (!this.headlessMode && metricsToUpdate) {
       Object.entries(metricsToUpdate).forEach(([id, value]) => {
         this.updateHtmlElementById(id, value);
       });
