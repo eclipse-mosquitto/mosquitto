@@ -17,6 +17,10 @@ ifeq ($(WITH_EPOLL),yes)
 	endif
 endif
 
+ifeq ($(WITH_HTTP_API),yes)
+	LOCAL_CPPFLAGS+=-DWITH_HTTP_API
+	LOCAL_LDADD+=-lmicrohttpd
+endif
 ifeq ($(WITH_MEMORY_TRACKING),yes)
 	ifneq ($(UNAME),SunOS)
 		LOCAL_CPPFLAGS+=-DWITH_MEMORY_TRACKING

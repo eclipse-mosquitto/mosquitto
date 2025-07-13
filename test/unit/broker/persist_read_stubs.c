@@ -198,6 +198,7 @@ int sub__messages_queue(const char *source_id, const char *topic, uint8_t qos, i
 	*base_msg = NULL;
 	return 0;
 }
+#ifdef WITH_SYS_TREE
 void metrics__int_inc(enum mosq_metric_type m, int64_t value)
 {
 	UNUSED(m); UNUSED(value);
@@ -206,6 +207,7 @@ void metrics__int_dec(enum mosq_metric_type m, int64_t value)
 {
 	UNUSED(m); UNUSED(value);
 }
+#endif
 int send__publish(struct mosquitto *mosq, uint16_t mid, const char *topic, uint32_t payloadlen, const void *payload, uint8_t qos, bool retain, bool dup, uint32_t subscription_identifier, const mosquitto_property *store_props, uint32_t expiry_interval)
 {
 	UNUSED(mosq);

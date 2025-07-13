@@ -105,3 +105,12 @@ cJSON *cJSON_AddIntToObject(cJSON * const object, const char * const name, long 
 	snprintf(buf, sizeof(buf), "%lld", number);
 	return cJSON_AddRawToObject(object, name, buf);
 }
+
+
+cJSON *cJSON_AddUIntToObject(cJSON * const object, const char * const name, unsigned long long number)
+{
+	char buf[30];
+
+	snprintf(buf, sizeof(buf), "%llu", number);
+	return cJSON_AddRawToObject(object, name, buf);
+}

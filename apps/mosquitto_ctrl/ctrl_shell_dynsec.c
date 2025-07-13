@@ -909,6 +909,8 @@ static void print_default_acls(cJSON *j_data)
 
 static void response_callback(const char *command, cJSON *j_data, const char *payload)
 {
+	UNUSED(payload);
+
 	if(!strcmp(command, "listClients")){
 		completion_tree_arg_list_args_free(tree_clients);
 

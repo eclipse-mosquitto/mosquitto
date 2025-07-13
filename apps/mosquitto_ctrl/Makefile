@@ -6,7 +6,7 @@ include ${R}/config.mk
 LOCAL_CFLAGS+=
 LOCAL_CPPFLAGS+=-I${R}/lib -I${R}/apps/mosquitto_passwd -I${R}/plugins/dynamic-security -I${R}/common
 LOCAL_LDFLAGS+=
-LOCAL_LDADD+=-lcjson -ldl ${LIBMOSQ} ${LIBMOSQ_COMMON}
+LOCAL_LDADD+=-lcjson -ldl ${LIBMOSQ} ${LIBMOSQ_COMMON} -lcrypto -lssl
 
 # ------------------------------------------
 #  Compile time options
@@ -18,7 +18,6 @@ endif
 
 ifeq ($(WITH_THREADING),yes)
 LOCAL_LDFLAGS+=-pthread
-LOCAL_LDADD+=-lssl -lcrypto
 endif
 
 ifeq ($(WITH_EDITLINE),yes)

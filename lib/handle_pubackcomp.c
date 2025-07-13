@@ -147,9 +147,9 @@ int handle__pubackcomp(struct mosquitto *mosq, const char *type)
 		}
 	}
 
-	pthread_mutex_lock(&mosq->msgs_out.mutex);
+	COMPAT_pthread_mutex_lock(&mosq->msgs_out.mutex);
 	message__release_to_inflight(mosq, mosq_md_out);
-	pthread_mutex_unlock(&mosq->msgs_out.mutex);
+	COMPAT_pthread_mutex_unlock(&mosq->msgs_out.mutex);
 
 	return MOSQ_ERR_SUCCESS;
 #endif

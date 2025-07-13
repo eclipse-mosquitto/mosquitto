@@ -47,7 +47,8 @@ struct mosquitto_sqlite {
 	sqlite3_stmt *base_msg_load_stmt;
 	sqlite3_stmt *retain_msg_set_stmt;
 	sqlite3_stmt *retain_msg_remove_stmt;
-	time_t last_transaction;
+	sqlite3_stmt *will_add_stmt;
+	sqlite3_stmt *will_remove_stmt;
 	int synchronous;
 	unsigned int event_count;
 	unsigned int flush_period;
@@ -76,5 +77,7 @@ int persist_sqlite__retain_msg_set_cb(int event, void *event_data, void *userdat
 int persist_sqlite__retain_msg_remove_cb(int event, void *event_data, void *userdata);
 int persist_sqlite__subscription_add_cb(int event, void *event_data, void *userdata);
 int persist_sqlite__subscription_remove_cb(int event, void *event_data, void *userdata);
+int persist_sqlite__will_add_cb(int event, void *event_data, void *userdata);
+int persist_sqlite__will_remove_cb(int event, void *event_data, void *userdata);
 int persist_sqlite__tick_cb(int event, void *event_data, void *userdata);
 #endif

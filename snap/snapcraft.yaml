@@ -10,7 +10,7 @@ description: This is a message broker that supports version 5.0, 3.1.1, and 3.1 
     example.
 confinement: strict
 grade: stable
-base: core20
+base: core24
 
 apps:
   mosquitto:
@@ -29,6 +29,10 @@ apps:
 
   rr:
     command: usr/bin/mosquitto_rr
+    plugs: [home, network]
+
+  signal:
+    command: usr/bin/mosquitto_signal
     plugs: [home, network]
 
   sub:
@@ -53,78 +57,57 @@ parts:
     prime:
       - mosquitto.conf
 
+  dashboard:
+    plugin: dump
+    source: dashboard/src
+    organize:
+      '*': dashboard/
 
   mosquitto:
-    after:
-      - lws
-    plugin: make
-    make-parameters:
-      - prefix=/usr
-      - WITH_WEBSOCKETS=lws
-      - WITH_ADNS=yes
-      - CFLAGS="-Wall -ggdb -O2 -I$SNAPCRAFT_STAGE/usr/include -D_GNU_SOURCE"
-    source: https://github.com/eclipse/mosquitto
+    plugin: cmake
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DHTTP_API_DIR=\\\"/snap/mosquitto/current/dashboard/\\\"
+      - -DWITH_TESTS=OFF
+    source: https://github.com/eclipse-mosquitto/mosquitto
     source-type: git
 
     build-packages:
+      - docbook-xsl
+      - g++
+      - gcc
+      - libcjson-dev
+      - libedit-dev
+      - libmicrohttpd-dev
+      - libsqlite3-dev
       - libssl-dev
       - xsltproc
-      - docbook-xsl
-      - gcc
-      - g++
     stage-packages:
-      - libssl1.1
       - ca-certificates
+      - libcjson1
+      - libmicrohttpd12t64
+      - libssl3t64
     prime:
       - usr/sbin/mosquitto
       - usr/bin/mosquitto_ctrl
       - usr/bin/mosquitto_pub
       - usr/bin/mosquitto_rr
+      - usr/bin/mosquitto_signal
       - usr/bin/mosquitto_sub
       - usr/bin/mosquitto_passwd
-      - usr/lib/libmosquitto.so*
-      - usr/lib/mosquitto_dynamic_security.so*
-      - lib/*-linux-gnu/libcrypto.so*
-      - lib/*-linux-gnu/libssl.so*
+      - usr/lib/*-linux-gnu/libmosquitto.so*
+      - usr/lib/*-linux-gnu/libmosquitto_common.so*
+      - usr/lib/*-linux-gnu/mosquitto_acl_file.so*
+      - usr/lib/*-linux-gnu/mosquitto_dynamic_security.so*
+      - usr/lib/*-linux-gnu/mosquitto_password_file.so*
+      - usr/lib/*-linux-gnu/mosquitto_persist_sqlite.so*
+      - usr/lib/*-linux-gnu/mosquitto_sparkplug_aware.so*
+      - usr/lib/*-linux-gnu/libcjson.so*
+      - usr/lib/*-linux-gnu/libcrypto.so*
+      - usr/lib/*-linux-gnu/libmicrohttpd.so*
+      - usr/lib/*-linux-gnu/libssl.so*
       - usr/include/mosquitto.h
       - usr/include/mosquitto_broker.h
       - usr/include/mosquitto_plugin.h
       - usr/include/mqtt_protocol.h
       - usr/include/mosquitto/*.h
-
-  lws:
-    after:
-      - cjson
-    plugin: cmake
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DLWS_IPV6=ON
-      - -DLWS_WITHOUT_CLIENT=ON
-      - -DLWS_WITHOUT_EXTENSIONS=ON
-      - -DLWS_WITH_ZIP_FOPS=OFF
-      - -DLWS_WITH_ZLIB=OFF
-      - -DLWS_WITH_SHARED=OFF
-    source: https://github.com/warmcat/libwebsockets/archive/v2.4.2.tar.gz
-    source-type: tar
-    stage:
-      - usr/include/libwebsockets.h
-      - usr/include/lws_config.h
-      - usr/lib/libwebsockets.a
-    prime: [-*]
-
-  cjson:
-    plugin: cmake
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DCMAKE_C_FLAGS=-fPIC
-      - -DBUILD_SHARED_AND_STATIC_LIBS=OFF
-      - -DBUILD_SHARED_LIBS=OFF
-      - -DCJSON_BUILD_SHARED_LIBS=OFF
-      - -DCJSON_OVERRIDE_BUILD_SHARED_LIBS=OFF
-      - -DENABLE_CJSON_TEST=OFF
-    source: https://github.com/DaveGamble/cJSON/archive/v1.7.14.tar.gz
-    source-type: tar
-    stage:
-      - usr/include/cjson/cJSON.h
-      - usr/lib/libcjson.a
-    prime: [-*]

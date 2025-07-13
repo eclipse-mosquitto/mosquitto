@@ -28,6 +28,7 @@ jobs:
           libcunit1-dev \
           libedit-dev \
           libgmock-dev \
+          libmicrohttpd-dev \
           libssl-dev \
           libwrap0-dev \
           microsocks \

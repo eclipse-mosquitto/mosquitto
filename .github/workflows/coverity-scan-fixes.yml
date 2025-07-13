@@ -24,6 +24,7 @@ jobs:
             libcjson1 \
             libcunit1-dev \
             libedit-dev \
+            libmicrohttpd-dev \
             libssl-dev \
             libwrap0-dev \
             microsocks \

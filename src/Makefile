@@ -45,6 +45,7 @@ all : mosquitto
 endif
 
 OBJS=	mosquitto.o \
+		acl_file.o \
 		bridge.o \
 		bridge_topic.o \
 		broker_control.o \
@@ -61,6 +62,7 @@ OBJS=	mosquitto.o \
 		handle_publish.o \
 		handle_subscribe.o \
 		handle_unsubscribe.o \
+		http_api.o \
 		http_serv.o \
 		keepalive.o \
 		listeners.o \
@@ -71,6 +73,7 @@ OBJS=	mosquitto.o \
 		mux_kqueue.o \
 		mux_poll.o \
 		net.o \
+		password_file.o \
 		property_broker.o \
 		persist_read.o \
 		persist_read_v234.o \
@@ -120,6 +123,8 @@ OBJS=	mosquitto.o \
 		xtreport.o
 
 OBJS_EXTERNAL= \
+		acl_check.o \
+		acl_parse.o \
 		alias_mosq.o \
 		handle_ping.o \
 		handle_pubackcomp.o \
@@ -133,6 +138,8 @@ OBJS_EXTERNAL= \
 		net_ws.o \
 		packet_datatypes.o \
 		packet_mosq.o \
+		password_check.o \
+		password_parse.o \
 		property_mosq.o \
 		send_connect.o \
 		send_disconnect.o \
@@ -155,6 +162,12 @@ mosquitto_broker.a : ${OBJS} ${OBJS_EXTERNAL}
 	${CROSS_COMPILE}$(AR) cr $@ $^
 
 ${OBJS} : %.o: %.c mosquitto_broker_internal.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+acl_check.o : ${R}/plugins/acl-file/acl_check.c acl_file.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+acl_parse.o : ${R}/plugins/acl-file/acl_parse.c acl_file.h
 	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 alias_mosq.o : ${R}/lib/alias_mosq.c ${R}/lib/alias_mosq.h
@@ -194,6 +207,12 @@ packet_datatypes.o : ${R}/lib/packet_datatypes.c ${R}/lib/packet_mosq.h
 	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 packet_mosq.o : ${R}/lib/packet_mosq.c ${R}/lib/packet_mosq.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+password_check.o : ${R}/plugins/password-file/password_check.c password_file.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
+
+password_parse.o : ${R}/plugins/password-file/password_parse.c password_file.h
 	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 ${R}/deps/picohttpparser/picohttpparser.o : ${R}/deps/picohttpparser/picohttpparser.c ${R}/deps/picohttpparser/picohttpparser.h

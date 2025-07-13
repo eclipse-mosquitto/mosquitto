@@ -214,10 +214,10 @@ static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 		if(rc) return rc;
 	}
 
-	pthread_mutex_lock(&mosq->msgtime_mutex);
+	COMPAT_pthread_mutex_lock(&mosq->msgtime_mutex);
 	mosq->last_msg_in = mosquitto_time();
 	mosq->next_msg_out = mosq->last_msg_in + mosq->keepalive;
-	pthread_mutex_unlock(&mosq->msgtime_mutex);
+	COMPAT_pthread_mutex_unlock(&mosq->msgtime_mutex);
 
 	mosq->ping_t = 0;
 
@@ -319,9 +319,9 @@ void do_client_disconnect(struct mosquitto *mosq, int reason_code, const mosquit
 	/* Free data and reset values */
 	packet__cleanup_all(mosq);
 
-	pthread_mutex_lock(&mosq->msgtime_mutex);
+	COMPAT_pthread_mutex_lock(&mosq->msgtime_mutex);
 	mosq->next_msg_out = mosquitto_time() + mosq->keepalive;
-	pthread_mutex_unlock(&mosq->msgtime_mutex);
+	COMPAT_pthread_mutex_unlock(&mosq->msgtime_mutex);
 
 	callback__on_disconnect(mosq, reason_code, properties);
 }

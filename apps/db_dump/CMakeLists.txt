@@ -4,6 +4,9 @@ add_executable(mosquitto_db_dump
 	print.c
 	stubs.c
 
+	../../common/json_help.c
+	../../common/json_help.h
+
 	../../lib/packet_datatypes.c
 	../../lib/property_mosq.c
 

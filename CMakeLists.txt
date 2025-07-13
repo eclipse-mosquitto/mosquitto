@@ -192,8 +192,35 @@ install(
 	${mosquitto_SOURCE_DIR}/include/mosquitto/broker.h
 	${mosquitto_SOURCE_DIR}/include/mosquitto/broker_control.h
 	${mosquitto_SOURCE_DIR}/include/mosquitto/broker_plugin.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/defs.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_base64.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_cjson.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_file.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_memory.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_password.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_properties.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_random.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_string.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_time.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_topic.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_utf8.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_auth.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_callbacks.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_connect.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_create_delete.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_helpers.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_loop.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_message.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_options.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_publish.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_socks.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_subscribe.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_tls.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_unsubscribe.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_will.h
 	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquittopp.h
-	${mosquitto_SOURCE_DIR}/include/mosquitto/mqtt_protocol.h
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mosquitto"
 )
 

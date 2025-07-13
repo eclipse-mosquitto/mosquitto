@@ -38,6 +38,14 @@ libmosqcommon_EXPORT time_t mosquitto_time(void);
  */
 libmosqcommon_EXPORT void mosquitto_time_ns(time_t *s, long *ns);
 
+/* Function: mosquitto_time_cmp
+ *
+ * Returns < 0 if the time t1 is smaller (earlier) than t2
+ * Returns > 0 if the time t1 is greater (later) than t2
+ * Returns == 0 if the time t1 is exactly equal to t2
+ */
+libmosqcommon_EXPORT long mosquitto_time_cmp(time_t t1_s, long t1_ns, time_t t2_s, long t2_ns);
+
 #ifdef __cplusplus
 }
 #endif

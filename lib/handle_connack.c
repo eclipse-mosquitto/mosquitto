@@ -114,11 +114,11 @@ int handle__connack(struct mosquitto *mosq)
 
 	switch(reason_code){
 		case 0:
-			pthread_mutex_lock(&mosq->state_mutex);
+			COMPAT_pthread_mutex_lock(&mosq->state_mutex);
 			if(mosq->state != mosq_cs_disconnecting){
 				mosq->state = mosq_cs_active;
 			}
-			pthread_mutex_unlock(&mosq->state_mutex);
+			COMPAT_pthread_mutex_unlock(&mosq->state_mutex);
 			message__retry_check(mosq);
 			return MOSQ_ERR_SUCCESS;
 		case 1:

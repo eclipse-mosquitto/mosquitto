@@ -24,20 +24,7 @@ Contributors:
 
 #include "mosquitto.h"
 #include "persist_sqlite.h"
-
-static char *properties_to_json(const mosquitto_property *properties)
-{
-	cJSON *array;
-	char *json_str;
-
-	array = mosquitto_properties_to_json(properties);
-	if(!array) return NULL;
-
-	json_str = cJSON_PrintUnformatted(array);
-	cJSON_Delete(array);
-	return json_str;
-}
-
+#include "util.h"
 
 int persist_sqlite__base_msg_add_cb(int event, void *event_data, void *userdata)
 {
@@ -45,8 +32,8 @@ int persist_sqlite__base_msg_add_cb(int event, void *event_data, void *userdata)
 	struct mosquitto_sqlite *ms = userdata;
 	int rc = MOSQ_ERR_UNKNOWN;
 	char *str = NULL;
-
 	UNUSED(event);
+
 
 	rc = 0;
 	rc += sqlite3_bind_int64(ms->base_msg_add_stmt, 1, (int64_t)ed->data.store_id);
@@ -73,7 +60,7 @@ int persist_sqlite__base_msg_add_cb(int event, void *event_data, void *userdata)
 	rc += sqlite3_bind_int(ms->base_msg_add_stmt, 10, ed->data.qos);
 	rc += sqlite3_bind_int(ms->base_msg_add_stmt, 11, ed->data.retain);
 	if(ed->data.properties){
-		str = properties_to_json(ed->data.properties);
+		str = properties_to_json_str(ed->data.properties);
 	}
 	if(str){
 		rc += sqlite3_bind_text(ms->base_msg_add_stmt, 12, str, (int)strlen(str), SQLITE_STATIC);
@@ -81,15 +68,7 @@ int persist_sqlite__base_msg_add_cb(int event, void *event_data, void *userdata)
 		rc += sqlite3_bind_null(ms->base_msg_add_stmt, 12);
 	}
 
-	if(rc == 0){
-		ms->event_count++;
-		rc = sqlite3_step(ms->base_msg_add_stmt);
-		if(rc == SQLITE_DONE){
-			rc = MOSQ_ERR_SUCCESS;
-		}else{
-			rc = MOSQ_ERR_UNKNOWN;
-		}
-	}
+	rc = sqlite3_single_step_stmt(rc, ms, ms->base_msg_add_stmt);
 	sqlite3_reset(ms->base_msg_add_stmt);
 	free(str);
 
@@ -105,13 +84,7 @@ int persist_sqlite__base_msg_remove_cb(int event, void *event_data, void *userda
 	UNUSED(event);
 
 	if(sqlite3_bind_int64(ms->base_msg_remove_stmt, 1, (int64_t)ed->data.store_id) == SQLITE_OK){
-		ms->event_count++;
-		rc = sqlite3_step(ms->base_msg_remove_stmt);
-		if(rc == SQLITE_DONE){
-			rc = MOSQ_ERR_SUCCESS;
-		}else{
-			rc = MOSQ_ERR_UNKNOWN;
-		}
+		rc = sqlite3_single_step_stmt(0, ms, ms->base_msg_remove_stmt);
 	}
 	sqlite3_reset(ms->base_msg_remove_stmt);
 
@@ -123,13 +96,7 @@ int persist_sqlite__base_msg_clear(struct mosquitto_sqlite *ms, const char *clie
 	int rc = MOSQ_ERR_UNKNOWN;
 
 	if(sqlite3_bind_text(ms->base_msg_remove_for_clientid_stmt, 1, clientid, (int)strlen(clientid), SQLITE_STATIC) == SQLITE_OK){
-		ms->event_count++;
-		rc = sqlite3_step(ms->base_msg_remove_for_clientid_stmt);
-		if(rc == SQLITE_DONE){
-			rc = MOSQ_ERR_SUCCESS;
-		}else{
-			rc = MOSQ_ERR_UNKNOWN;
-		}
+		rc = sqlite3_single_step_stmt(0, ms, ms->base_msg_remove_for_clientid_stmt);
 	}
 	sqlite3_reset(ms->base_msg_remove_for_clientid_stmt);
 

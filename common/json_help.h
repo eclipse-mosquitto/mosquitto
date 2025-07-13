@@ -30,6 +30,7 @@ int json_get_int(cJSON *json, const char *name, int *value, bool optional, int d
 int json_get_string(cJSON *json, const char *name, const char **value, bool optional);
 
 cJSON *cJSON_AddIntToObject(cJSON * const object, const char * const name, long long number);
+cJSON *cJSON_AddUIntToObject(cJSON * const object, const char * const name, unsigned long long number);
 cJSON *cJSON_CreateInt(int num);
 
 #ifdef __cplusplus

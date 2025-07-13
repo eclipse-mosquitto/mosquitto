@@ -18,7 +18,7 @@ test-compile :
 ptest : test-compile
 	./test.py
 
-test : test-compile msg_sequence_test 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 20 21
+test : test-compile msg_sequence_test 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 20 21 22
 
 msg_sequence_test:
 	./msg_sequence_test.py
@@ -43,6 +43,7 @@ msg_sequence_test:
 	./01-connect-unix-socket.py
 	./01-connect-windows-line-endings.py
 	./01-connect-zero-length-id.py
+	./01-plugin-connect-uname-password-denied.py
 
 
 02 :
@@ -192,6 +193,7 @@ endif
 	./09-extended-auth-multistep.py
 	./09-extended-auth-reauth.py
 	./09-extended-auth-single.py
+	./09-plugin-acl-access-variants.py
 	./09-plugin-acl-change.py
 	./09-plugin-auth-acl-pub.py
 	./09-plugin-auth-acl-sub-denied.py
@@ -290,6 +292,7 @@ PERSIST_TESTS = \
 	./15-persist-client-msg-out-v5-0.py \
 	./15-persist-client-v3-1-1.py \
 	./15-persist-client-v5-0.py \
+	./15-persist-client-will.py \
 	./15-persist-publish-properties-v5-0.py \
 	./15-persist-retain-clear.py \
 	./15-persist-retain-v3-1-1.py \
@@ -345,3 +348,8 @@ endif
 	./21-proxy-v2-ssl-cipher.py
 	./21-proxy-v2-ssl-require-tls-failure.py
 	./21-proxy-v2-ssl-require-tls-success.py
+
+22:
+	./22-http-api-api.py
+	./22-http-api-file.py
+	./22-http-api-tls.py

@@ -64,6 +64,7 @@ TEST_OBJS = \
 	ctrl_shell_pre_connect_test.o
 
 ifeq ($(WITH_GMOCK),yes)
+ifeq ($(WITH_EDITLINE),yes)
 MOCK_TESTS = \
 	ctrl_shell_test \
 	ctrl_shell_broker_test \
@@ -72,6 +73,9 @@ MOCK_TESTS = \
 	ctrl_shell_help_test \
 	ctrl_shell_options_test \
 	ctrl_shell_pre_connect_test
+else
+MOCK_TESTS =
+endif
 else
 MOCK_TESTS =
 endif

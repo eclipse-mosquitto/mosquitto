@@ -12,6 +12,7 @@ DISTFILES= \
 	examples/ \
 	include/ \
 	installer/ \
+	libcommon/ \
 	lib/ \
 	logo/ \
 	make/ \

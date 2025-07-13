@@ -35,8 +35,8 @@ void listener__set_defaults(struct mosquitto__listener *listener)
 	listener->protocol = mp_mqtt;
 	mosquitto_FREE(listener->mount_point);
 
-	mosquitto_FREE(listener->security_options->acl_file);
-	mosquitto_FREE(listener->security_options->password_file);
+	mosquitto_FREE(listener->security_options->acl_data.acl_file);
+	mosquitto_FREE(listener->security_options->password_data.password_file);
 	mosquitto_FREE(listener->security_options->psk_file);
 	listener->security_options->allow_anonymous = -1;
 	listener->security_options->allow_zero_length_clientid = true;
@@ -192,6 +192,10 @@ static int listeners__start_local_only(void)
 		count = (size_t)(db.config->cmd_port_count*2);
 	}
 
+#ifdef WITH_HTTP_API
+	count++;
+#endif
+
 	listeners = mosquitto_realloc(db.config->listeners, count*sizeof(struct mosquitto__listener));
 	if(listeners == NULL){
 		return MOSQ_ERR_NOMEM;
@@ -218,6 +222,10 @@ static int listeners__start_local_only(void)
 	}
 
 	if(db.config->listener_count > 0){
+#ifdef WITH_HTTP_API
+		db.config->listener_count++;
+		http_api__start_local(&db.config->listeners[db.config->listener_count-1]);
+#endif
 		return MOSQ_ERR_SUCCESS;
 	}else{
 		return MOSQ_ERR_UNKNOWN;
@@ -266,6 +274,10 @@ int listeners__start(void)
 				return 1;
 			}
 #endif
+#ifdef WITH_HTTP_API
+		}else if(db.config->listeners[i].protocol == mp_http_api){
+			http_api__start(&db.config->listeners[i]);
+#endif
 		}
 	}
 	if(g_listensock == NULL){
@@ -292,6 +304,11 @@ void listeners__stop(void)
 #ifdef WITH_UNIX_SOCKETS
 		if(db.config->listeners[i].unix_socket_path != NULL){
 			unlink(db.config->listeners[i].unix_socket_path);
+		}
+#endif
+#ifdef WITH_HTTP_API
+		if(db.config->listeners[i].mhd){
+			http_api__stop(&db.config->listeners[i]);
 		}
 #endif
 	}

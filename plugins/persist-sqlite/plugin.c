@@ -39,11 +39,11 @@ MOSQUITTO_PLUGIN_DECLARE_VERSION(5);
 static mosquitto_plugin_id_t *plg_id = NULL;
 static struct mosquitto_sqlite plg_data;
 
-static int conf_parse_uint(const char *in, const char *name, unsigned int *value)
+static int conf_parse_uint(const char *in, const char *name, unsigned int *value, int min_value)
 {
 	int v = atoi(in);
-	if(v <= 0){
-		mosquitto_log_printf(MOSQ_LOG_ERR, "Error: Invalid '%s' value in configuration.", name);
+	if(v < min_value){
+		mosquitto_log_printf(MOSQ_LOG_ERR, "Error: Invalid '%s' value %d in configuration.", name, v);
 		return MOSQ_ERR_INVAL;
 	}
 
@@ -123,10 +123,10 @@ int mosquitto_plugin_init(mosquitto_plugin_id_t *identifier, void **user_data, s
 				return MOSQ_ERR_INVAL;
 			}
 		}else if(!strcasecmp(options[i].key, "flush_period")){
-			rc = conf_parse_uint(options[i].value, "flush_period", &plg_data.flush_period);
+			rc = conf_parse_uint(options[i].value, "flush_period", &plg_data.flush_period, 0);
 			if(rc) return rc;
 		}else if(!strcasecmp(options[i].key, "page_size")){
-			rc = conf_parse_uint(options[i].value, "page_size", &plg_data.page_size);
+			rc = conf_parse_uint(options[i].value, "page_size", &plg_data.page_size, 1);
 			if(rc) return rc;
 		}
 	}
@@ -164,6 +164,10 @@ int mosquitto_plugin_init(mosquitto_plugin_id_t *identifier, void **user_data, s
 	rc = mosquitto_callback_register(plg_id, MOSQ_EVT_PERSIST_CLIENT_MSG_DELETE, persist_sqlite__client_msg_remove_cb, NULL, &plg_data);
 	if(rc) goto fail;
 	rc = mosquitto_callback_register(plg_id, MOSQ_EVT_PERSIST_CLIENT_MSG_UPDATE, persist_sqlite__client_msg_update_cb, NULL, &plg_data);
+	if(rc) goto fail;
+	rc = mosquitto_callback_register(plg_id, MOSQ_EVT_PERSIST_WILL_ADD, persist_sqlite__will_add_cb, NULL, &plg_data);
+	if(rc) goto fail;
+	rc = mosquitto_callback_register(plg_id, MOSQ_EVT_PERSIST_WILL_DELETE, persist_sqlite__will_remove_cb, NULL, &plg_data);
 	if(rc) goto fail;
 	rc = mosquitto_callback_register(plg_id, MOSQ_EVT_TICK, persist_sqlite__tick_cb, NULL, &plg_data);
 	if(rc) goto fail;

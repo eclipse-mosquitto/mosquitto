@@ -279,6 +279,7 @@ int send__disconnect(struct mosquitto *mosq, uint8_t reason_code, const mosquitt
 	return 0;
 }
 
+#ifdef WITH_SYS_TREE
 void metrics__int_inc(enum mosq_metric_type m, int64_t value)
 {
 	UNUSED(m); UNUSED(value);
@@ -287,3 +288,4 @@ void metrics__int_dec(enum mosq_metric_type m, int64_t value)
 {
 	UNUSED(m); UNUSED(value);
 }
+#endif

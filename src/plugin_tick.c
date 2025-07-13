@@ -35,10 +35,22 @@ static void plugin__handle_tick_single(struct mosquitto__security_options *opts)
 	// Using DL_FOREACH_SAFE here, as tick callbacks might unregister themself
 	DL_FOREACH_SAFE(opts->plugin_callbacks.tick, cb_base, cb_next){
 		mosquitto_time_ns(&event_data.now_s, &event_data.now_ns);
-		event_data.next_s = 0;
-		event_data.next_ms = 0;
-		cb_base->cb(MOSQ_EVT_TICK, &event_data, cb_base->userdata);
-		loop__update_next_event(event_data.next_s * 1000 + event_data.next_ms);
+
+		if(mosquitto_time_cmp(event_data.now_s, event_data.now_ns,
+					cb_base->data.next_tick.tv_sec, cb_base->data.next_tick.tv_nsec) > 0){
+
+			event_data.next_s = 0;
+			event_data.next_ms = 0;
+			cb_base->cb(MOSQ_EVT_TICK, &event_data, cb_base->userdata);
+			loop__update_next_event(event_data.next_s * 1000 + event_data.next_ms);
+
+			cb_base->data.next_tick.tv_sec = event_data.now_s + event_data.next_s;
+			cb_base->data.next_tick.tv_nsec = event_data.now_ns + 1000000*event_data.next_ms;
+			if(cb_base->data.next_tick.tv_nsec > 1000000000){
+				cb_base->data.next_tick.tv_nsec -= 1000000000;
+				cb_base->data.next_tick.tv_sec += 1;
+			}
+		}
 	}
 }
 

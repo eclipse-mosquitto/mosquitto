@@ -31,12 +31,14 @@ int persist_sqlite__tick_cb(int event, void *event_data, void *userdata)
 	struct mosquitto_sqlite *ms = userdata;
 
 	UNUSED(event);
-	if(ed->now_s > ms->last_transaction + ms->flush_period && ms->event_count > 0){
-		ms->last_transaction = ed->now_s;
+
+	if(ms->event_count > 0){
 		ms->event_count = 0;
 		sqlite3_exec(ms->db, "END;", NULL, NULL, NULL);
 		sqlite3_exec(ms->db, "BEGIN;", NULL, NULL, NULL);
 	}
+
+	ed->next_s = ms->flush_period;
 
 	return MOSQ_ERR_SUCCESS;
 }

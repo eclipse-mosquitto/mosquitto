@@ -430,3 +430,43 @@ error:
 	}
 	return MOSQ_ERR_ERRNO;
 }
+
+
+int mosquitto_read_file(const char *file, char **buf)
+{
+	FILE *fptr;
+	size_t buflen;
+	long l;
+
+	*buf = NULL;
+	fptr = fopen(file, "rt");
+	if(fptr == NULL) return MOSQ_ERR_INVAL;
+
+	fseek(fptr, 0, SEEK_END);
+	l = ftell(fptr);
+	fseek(fptr, 0, SEEK_SET);
+	if(l < 0){
+		fclose(fptr);
+		return MOSQ_ERR_ERRNO;
+	}
+	buflen = (size_t)l;
+
+	if(buflen == 0){
+		fclose(fptr);
+		return MOSQ_ERR_SUCCESS;
+	}
+
+	*buf = mosquitto_calloc(buflen+1, sizeof(char));
+	if((*buf) == NULL){
+		fclose(fptr);
+		return MOSQ_ERR_NOMEM;
+	}
+	if(fread(*buf, 1, buflen, fptr) != buflen){
+		free(*buf);
+		fclose(fptr);
+		return MOSQ_ERR_INVAL;
+	}
+	fclose(fptr);
+
+	return MOSQ_ERR_SUCCESS;
+}

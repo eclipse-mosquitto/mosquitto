@@ -26,6 +26,7 @@ tests = [
     (1, './01-connect-unix-socket.py'),
     (1, './01-connect-windows-line-endings.py'),
     (2, './01-connect-zero-length-id.py'),
+    (1, './01-plugin-connect-uname-password-denied.py'),
 
     (1, './02-shared-nolocal.py'),
     (1, './02-shared-qos0-v5.py'),
@@ -163,6 +164,7 @@ tests = [
     (1, './09-extended-auth-multistep.py'),
     (1, './09-extended-auth-reauth.py'),
     (1, './09-extended-auth-single.py'),
+    (1, './09-plugin-acl-access-variants.py'),
     (1, './09-plugin-acl-change.py'),
     (1, './09-plugin-auth-acl-pub.py'),
     (1, './09-plugin-auth-acl-sub-denied.py'),
@@ -290,6 +292,10 @@ tests = [
     (1, './21-proxy-v2-ssl-cipher.py'),
     (1, './21-proxy-v2-ssl-require-tls-failure.py'),
     (1, './21-proxy-v2-ssl-require-tls-success.py'),
+
+    (2, './22-http-api-api.py'),
+    (2, './22-http-api-file.py'),
+    (2, './22-http-api-tls.py'),
 ]
 
 if __name__ == "__main__":

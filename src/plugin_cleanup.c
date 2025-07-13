@@ -131,5 +131,5 @@ int mosquitto_security_cleanup(bool reload)
 		plugin__security_cleanup_single(db.plugins[i], reload);
 	}
 
-	return mosquitto_security_cleanup_default(reload);
+	return mosquitto_security_cleanup_default();
 }

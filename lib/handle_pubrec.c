@@ -110,9 +110,9 @@ int handle__pubrec(struct mosquitto *mosq)
 			callback__on_publish(mosq, mid, reason_code, properties);
 		}
 		util__increment_send_quota(mosq);
-		pthread_mutex_lock(&mosq->msgs_out.mutex);
+		COMPAT_pthread_mutex_lock(&mosq->msgs_out.mutex);
 		message__release_to_inflight(mosq, mosq_md_out);
-		pthread_mutex_unlock(&mosq->msgs_out.mutex);
+		COMPAT_pthread_mutex_unlock(&mosq->msgs_out.mutex);
 		return MOSQ_ERR_SUCCESS;
 	}
 #endif

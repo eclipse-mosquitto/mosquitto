@@ -235,9 +235,6 @@ static int retain__process(struct mosquitto__retainhier *branch, struct mosquitt
 		retain_ctxt.username = retained->data.source_username;
 		retain_ctxt.listener = retained->source_listener;
 
-		rc = acl__find_acls(&retain_ctxt);
-		if(rc) return rc;
-
 		rc = mosquitto_acl_check(&retain_ctxt, retained->data.topic, retained->data.payloadlen, retained->data.payload,
 				retained->data.qos, retained->data.retain, MOSQ_ACL_WRITE);
 		if(rc == MOSQ_ERR_ACL_DENIED){

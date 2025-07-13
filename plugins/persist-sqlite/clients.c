@@ -22,6 +22,7 @@ Contributors:
 #include "mosquitto.h"
 #include "mosquitto/broker.h"
 #include "persist_sqlite.h"
+#include "util.h"
 
 int persist_sqlite__client_add_cb(int event, void *event_data, void *userdata)
 {

@@ -2,7 +2,7 @@ R=../..
 include ${R}/config.mk
 
 LOCAL_CFLAGS+=
-LOCAL_CPPFLAGS+=-I${R}/lib -I${R}/src -I${R}/common -DWITH_BROKER
+LOCAL_CPPFLAGS+=-I${R} -I${R}/lib -I${R}/src -I${R}/common -DWITH_BROKER
 LOCAL_LDFLAGS+=
 LOCAL_LDADD+=-lcjson -lm ${LIBMOSQ_COMMON}
 
@@ -29,6 +29,9 @@ BROKER_OBJS = \
 	${R}/src/property_mosq.o \
 	${R}/src/topic_tok.o
 
+OBJS_EXTERNAL = \
+	json_help.o
+
 .PHONY: all clean reallyclean
 
 ifeq ($(WITH_FUZZING),yes)
@@ -37,7 +40,7 @@ else
 all : mosquitto_db_dump
 endif
 
-mosquitto_db_dump : ${OBJS} ${BROKER_OBJS}
+mosquitto_db_dump : ${OBJS} ${BROKER_OBJS} ${OBJS_EXTERNAL}
 	${CROSS_COMPILE}${CC} $^ -o $@ ${LOCAL_LDFLAGS} ${LOCAL_LDADD}
 
 mosquitto_db_dump.a : ${OBJS} ${BROKER_OBJS}
@@ -48,6 +51,9 @@ ${OBJS} : %.o:%.c db_dump.h
 
 ${BROKER_OBJS} :
 	$(MAKE) -C ${R}/src $(notdir $@)
+
+json_help.o : ${R}/common/json_help.c ${R}/common/json_help.h
+	${CROSS_COMPILE}${CC} $(LOCAL_CPPFLAGS) $(LOCAL_CFLAGS) -c $< -o $@
 
 reallyclean: clean
 

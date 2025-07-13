@@ -406,7 +406,6 @@ int main(int argc, char *argv[])
 #else
 	struct timeval tv;
 #endif
-	struct mosquitto *ctxt, *ctxt_tmp;
 
 	mosquitto_time_init();
 	cjson_init();
@@ -541,18 +540,6 @@ int main(int argc, char *argv[])
 	session_expiry__check();
 	db__retain_expiry_check();
 	db__msg_store_compact();
-
-	/* After loading persisted clients and ACLs, try to associate them,
-	 * so persisted subscriptions can start storing messages */
-	HASH_ITER(hh_id, db.contexts_by_id, ctxt, ctxt_tmp){
-		if(ctxt && !ctxt->clean_start && ctxt->username){
-			rc = acl__find_acls(ctxt);
-			if(rc){
-				log__printf(NULL, MOSQ_LOG_WARNING, "Failed to associate persisted user %s with ACLs, "
-					"likely due to changed ports while using a per_listener_settings configuration.", ctxt->username);
-			}
-		}
-	}
 
 #ifdef WITH_SYS_TREE
 	sys_tree__init();

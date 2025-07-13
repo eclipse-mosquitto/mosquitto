@@ -156,6 +156,9 @@ obj-*/
 # VSCode generated files
 .vscode/
 
+# clangd
+.cache/
+
 # Others
 tmp/
 failed-tests.json

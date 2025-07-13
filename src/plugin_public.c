@@ -303,7 +303,6 @@ BROKER_EXPORT int mosquitto_set_username(struct mosquitto *client, const char *u
 {
 	char *u_dup;
 	char *old;
-	int rc;
 
 	if(!client) return MOSQ_ERR_INVAL;
 
@@ -320,15 +319,8 @@ BROKER_EXPORT int mosquitto_set_username(struct mosquitto *client, const char *u
 	old = client->username;
 	client->username = u_dup;
 
-	rc = acl__find_acls(client);
-	if(rc){
-		client->username = old;
-		mosquitto_FREE(u_dup);
-		return rc;
-	}else{
-		mosquitto_FREE(old);
-		return MOSQ_ERR_SUCCESS;
-	}
+	mosquitto_FREE(old);
+	return MOSQ_ERR_SUCCESS;
 }
 
 BROKER_EXPORT int mosquitto_set_clientid(struct mosquitto *client, const char *clientid)
@@ -874,4 +866,14 @@ BROKER_EXPORT int mosquitto_broker_node_id_set(uint16_t id)
 BROKER_EXPORT const char *mosquitto_persistence_location(void)
 {
 	return db.config->persistence_location;
+}
+
+
+BROKER_EXPORT int mosquitto_client_will_set(const char* clientid, const char *topic, int payloadlen, const void *payload, int qos, bool retain, mosquitto_property *properties)
+{
+	struct mosquitto* mosq = mosquitto_client(clientid);
+	if (!mosq){
+		return MOSQ_ERR_NOT_FOUND;
+	}
+	return will__set(mosq, topic, payloadlen, payload, qos, retain, properties);
 }

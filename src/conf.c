@@ -255,8 +255,8 @@ static void config__init_reload(struct mosquitto__config *config)
 	config->local_only = true;
 	config->allow_duplicate_messages = true;
 
-	mosquitto_FREE(config->security_options.acl_file);
-	mosquitto_FREE(config->security_options.password_file);
+	mosquitto_FREE(config->security_options.acl_data.acl_file);
+	mosquitto_FREE(config->security_options.password_data.password_file);
 	mosquitto_FREE(config->security_options.psk_file);
 
 	config->security_options.allow_anonymous = -1;
@@ -363,8 +363,8 @@ void config__cleanup(struct mosquitto__config *config)
 	mosquitto_FREE(config->persistence_file);
 	mosquitto_FREE(config->persistence_filepath);
 	mosquitto_FREE(config->security_options.auto_id_prefix);
-	mosquitto_FREE(config->security_options.acl_file);
-	mosquitto_FREE(config->security_options.password_file);
+	mosquitto_FREE(config->security_options.acl_data.acl_file);
+	mosquitto_FREE(config->security_options.password_data.password_file);
 	mosquitto_FREE(config->security_options.psk_file);
 	mosquitto_FREE(config->security_options.plugins);
 	mosquitto_FREE(config->pid_file);
@@ -378,8 +378,8 @@ void config__cleanup(struct mosquitto__config *config)
 			mosquitto_FREE(config->listeners[i].socks);
 			if(config->listeners[i].security_options){
 				mosquitto_FREE(config->listeners[i].security_options->auto_id_prefix);
-				mosquitto_FREE(config->listeners[i].security_options->acl_file);
-				mosquitto_FREE(config->listeners[i].security_options->password_file);
+				mosquitto_FREE(config->listeners[i].security_options->acl_data.acl_file);
+				mosquitto_FREE(config->listeners[i].security_options->password_data.password_file);
 				mosquitto_FREE(config->listeners[i].security_options->psk_file);
 				mosquitto_FREE(config->listeners[i].security_options->plugins);
 				mosquitto_FREE(config->listeners[i].security_options);
@@ -404,10 +404,8 @@ void config__cleanup(struct mosquitto__config *config)
 				config->listeners[i].ssl_ctx = NULL;
 			}
 #endif
-#ifdef WITH_WEBSOCKETS
-#  if WITH_WEBSOCKETS == WS_IS_LWS
 			mosquitto_FREE(config->listeners[i].http_dir);
-#  endif
+#ifdef WITH_WEBSOCKETS
 			for(int j=0; j<config->listeners[i].ws_origin_count; j++){
 				mosquitto_FREE(config->listeners[i].ws_origins[j]);
 			}
@@ -610,8 +608,14 @@ int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])
 
 static void config__copy(struct mosquitto__config *src, struct mosquitto__config *dest)
 {
-	mosquitto_FREE(dest->security_options.acl_file);
-	dest->security_options.acl_file = src->security_options.acl_file;
+	mosquitto_FREE(dest->security_options.acl_data.acl_file);
+	dest->security_options.acl_data.acl_file = src->security_options.acl_data.acl_file;
+
+	acl_file__cleanup(&dest->security_options.acl_data);
+	dest->security_options.acl_data.acl_users = src->security_options.acl_data.acl_users;
+	dest->security_options.acl_data.acl_patterns = src->security_options.acl_data.acl_patterns;
+	dest->security_options.acl_data.acl_anon.username = src->security_options.acl_data.acl_anon.username;
+	dest->security_options.acl_data.acl_anon.acl = src->security_options.acl_data.acl_anon.acl;
 
 	dest->security_options.allow_anonymous = src->security_options.allow_anonymous;
 	dest->security_options.allow_zero_length_clientid = src->security_options.allow_zero_length_clientid;
@@ -620,8 +624,11 @@ static void config__copy(struct mosquitto__config *src, struct mosquitto__config
 	dest->security_options.auto_id_prefix = src->security_options.auto_id_prefix;
 	dest->security_options.auto_id_prefix_len = src->security_options.auto_id_prefix_len;
 
-	mosquitto_FREE(dest->security_options.password_file);
-	dest->security_options.password_file = src->security_options.password_file;
+	mosquitto_FREE(dest->security_options.password_data.password_file);
+	dest->security_options.password_data.password_file = src->security_options.password_data.password_file;
+
+	password_file__cleanup(&dest->security_options.password_data);
+	dest->security_options.password_data.unpwd = src->security_options.password_data.unpwd;
 
 	mosquitto_FREE(dest->security_options.psk_file);
 	dest->security_options.psk_file = src->security_options.psk_file;
@@ -969,8 +976,8 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					REQUIRE_LISTENER_IF_PER_LISTENER(token);
 
 					conf__set_cur_security_options(config, &cur_listener, &cur_security_options, token);
-					mosquitto_FREE(cur_security_options->acl_file);
-					if(conf__parse_string(&token, "acl_file", &cur_security_options->acl_file, &saveptr)) return MOSQ_ERR_INVAL;
+					mosquitto_FREE(cur_security_options->acl_data.acl_file);
+					if(conf__parse_string(&token, "acl_file", &cur_security_options->acl_data.acl_file, &saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strcmp(token, "address") || !strcmp(token, "addresses")){
 #ifdef WITH_BRIDGE
 					REQUIRE_BRIDGE(token);
@@ -1621,18 +1628,26 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 				}else if(!strcmp(token, "global_max_connections")){
 					if(conf__parse_int(&token, "global_max_connections", &config->global_max_connections, &saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strcmp(token, "http_dir")){
-#ifdef WITH_WEBSOCKETS
-#  if WITH_WEBSOCKETS == WS_IS_LWS
+#if defined(WITH_WEBSOCKETS) || defined(WITH_HTTP_API)
 					if(reload) continue; /* Not valid for reloading. */
 					REQUIRE_LISTENER(token);
 					if(conf__parse_string(&token, "http_dir", &cur_listener->http_dir, &saveptr)) return MOSQ_ERR_INVAL;
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: http_dir support will be removed when support for libwebsockets is removed in a future version.");
-#  else
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Builtin websockets does not support the `http_dir` option.");
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Recompile using libwebsockets support if this is important to you, but be aware support will be completely removed in a future version.");
-#  endif
+#ifdef WIN32
+					char *http_dir_canonical = _fullpath(NULL, cur_listener->http_dir, 0);
 #else
-					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Websockets support not available.");
+					char *http_dir_canonical = realpath(cur_listener->http_dir, NULL);
+#endif
+					if(!http_dir_canonical){
+						return MOSQ_ERR_NOMEM;
+					}
+					mosquitto_FREE(cur_listener->http_dir);
+					cur_listener->http_dir = mosquitto_strdup(http_dir_canonical);
+					mosquitto_FREE(http_dir_canonical);
+					if(!cur_listener->http_dir){
+						return MOSQ_ERR_NOMEM;
+					}
+#else
+					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: http_dir support not available.");
 #endif
 				}else if(!strcmp(token, "idle_timeout")){
 #ifdef WITH_BRIDGE
@@ -2058,8 +2073,8 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 				}else if(!strcmp(token, "password_file")){
 					REQUIRE_LISTENER_IF_PER_LISTENER(token);
 					conf__set_cur_security_options(config, &cur_listener, &cur_security_options, token);
-					mosquitto_FREE(cur_security_options->password_file);
-					if(conf__parse_string(&token, "password_file", &cur_security_options->password_file, &saveptr)) return MOSQ_ERR_INVAL;
+					mosquitto_FREE(cur_security_options->password_data.password_file);
+					if(conf__parse_string(&token, "password_file", &cur_security_options->password_data.password_file, &saveptr)) return MOSQ_ERR_INVAL;
 				}else if(!strcmp(token, "per_listener_settings")){
 					OPTION_DEPRECATED(token, "Please see the documentation for how to achieve the same effect.");
 					if(config->per_listener_settings){
@@ -2084,6 +2099,9 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					time_t expiration_mult;
 
 					switch(token[strlen(token)-1]){
+						case 's':
+							expiration_mult = 1;
+							break;
 						case 'h':
 							expiration_mult = 3600;
 							break;
@@ -2145,6 +2163,13 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 						cur_listener->protocol = mp_websockets;
 #else
 						log__printf(NULL, MOSQ_LOG_ERR, "Error: Websockets support not available.");
+						return MOSQ_ERR_INVAL;
+#endif
+					}else if(!strcmp(token, "http_api")){
+#ifdef WITH_HTTP_API
+						cur_listener->protocol = mp_http_api;
+#else
+						log__printf(NULL, MOSQ_LOG_ERR, "Error: HTTP API support not available.");
 						return MOSQ_ERR_INVAL;
 #endif
 					}else{

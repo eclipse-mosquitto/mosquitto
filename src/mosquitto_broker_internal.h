@@ -30,6 +30,10 @@ Contributors:
 #  endif
 #endif
 
+#ifdef WITH_HTTP_API
+#  include <microhttpd.h>
+#endif
+
 #ifdef __linux__
 #define WITH_TCP_USER_TIMEOUT
 #endif
@@ -41,6 +45,8 @@ Contributors:
 #include "logging_mosq.h"
 #include "tls_mosq.h"
 #include "uthash.h"
+#include "acl_file.h"
+#include "password_file.h"
 
 #ifndef __GNUC__
 #define __attribute__(attrib)
@@ -151,7 +157,11 @@ struct mosquitto__callback{
 	struct mosquitto__callback *next, *prev; /* For typical callbacks */
 	MOSQ_FUNC_generic_callback cb;
 	void *userdata;
-	char *data; /* e.g. topic for control event */
+	union{
+		char *topic;
+		struct timespec next_tick;
+	} data;
+	mosquitto_plugin_id_t *identifier;
 };
 
 struct plugin__callbacks{
@@ -183,6 +193,8 @@ struct plugin__callbacks{
 	struct mosquitto__callback *persist_base_msg_delete;
 	struct mosquitto__callback *persist_retain_msg_set;
 	struct mosquitto__callback *persist_retain_msg_delete;
+	struct mosquitto__callback *persist_will_add;
+	struct mosquitto__callback *persist_will_delete;
 };
 
 /* This is owned by mosquitto__config or mosquitto__listener, and only referred
@@ -194,11 +206,9 @@ struct mosquitto__security_options {
 	 */
 	struct mosquitto__unpwd *unpwd;
 	struct mosquitto__psk *psk_id;
-	struct mosquitto__acl_user *acl_list;
-	struct mosquitto__acl *acl_patterns;
-	char *password_file;
+	struct acl_file_data acl_data;
+	struct password_file_data password_data;
 	char *psk_file;
-	char *acl_file;
 	mosquitto_plugin_id_t **plugins;
 	int plugin_count;
 	int8_t allow_anonymous;
@@ -256,11 +266,13 @@ struct mosquitto__listener {
 #  if WITH_WEBSOCKETS == WS_IS_LWS
 	struct lws_context *ws_context;
 	bool ws_in_init;
-	char *http_dir;
 	struct lws_protocols *ws_protocol;
 #  endif
 	char **ws_origins;
 	int ws_origin_count;
+#endif
+#if defined(WITH_WEBSOCKETS) || defined(WITH_HTTP_API)
+	char *http_dir;
 #endif
 	struct mosquitto__security_options *security_options;
 #ifdef WITH_UNIX_SOCKETS
@@ -271,6 +283,9 @@ struct mosquitto__listener {
 	bool disable_protocol_v5;
 	int enable_proxy_protocol;
 	bool proxy_protocol_v2_require_tls;
+#ifdef WITH_HTTP_API
+	struct MHD_Daemon *mhd;
+#endif
 };
 
 
@@ -290,7 +305,7 @@ struct mosquitto__listener_sock{
 struct plugin_own_callback{
 	struct plugin_own_callback *next, *prev;
 	MOSQ_FUNC_generic_callback cb_func;
-	int event;
+	enum mosquitto_plugin_event event;
 };
 
 struct mosquitto_plugin_id_t{
@@ -301,6 +316,7 @@ struct mosquitto_plugin_id_t{
 	char *plugin_version;
 	struct control_endpoint *control_endpoints;
 	struct plugin_own_callback *own_callbacks;
+	struct timespec next_tick;
 };
 
 struct mosquitto__config {
@@ -427,28 +443,6 @@ struct mosquitto__psk{
 	char *username;
 	char *password;
 };
-
-struct mosquitto__unpwd{
-	UT_hash_handle hh;
-	char *username;
-	char *clientid;
-	struct mosquitto_pw *pw;
-};
-
-struct mosquitto__acl{
-	struct mosquitto__acl *next;
-	char *topic;
-	int access;
-	int ucount;
-	int ccount;
-};
-
-struct mosquitto__acl_user{
-	struct mosquitto__acl_user *next;
-	char *username;
-	struct mosquitto__acl *acl;
-};
-
 
 struct mosquitto__message_v5{
 	struct mosquitto__message_v5 *next, *prev;
@@ -871,6 +865,8 @@ void plugin_persist__handle_base_msg_add(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_base_msg_delete(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_retain_msg_set(struct mosquitto__base_msg *base_msg);
 void plugin_persist__handle_retain_msg_delete(struct mosquitto__base_msg *base_msg);
+void plugin_persist__handle_will_add(struct mosquitto *context);
+void plugin_persist__handle_will_delete(struct mosquitto *context);
 
 /* ============================================================
  * Property related functions
@@ -912,10 +908,14 @@ int mosquitto_acl_check(struct mosquitto *context, const char *topic, uint32_t p
 int mosquitto_basic_auth(struct mosquitto *context);
 int mosquitto_psk_key_get(struct mosquitto *context, const char *hint, const char *identity, char *key, int max_key_len);
 
-int mosquitto_security_init_default(bool reload);
+int mosquitto_security_init_default(void);
 int mosquitto_security_apply_default(void);
-int mosquitto_security_cleanup_default(bool reload);
+int mosquitto_security_cleanup_default(void);
 int mosquitto_psk_key_get_default(struct mosquitto *context, const char *hint, const char *identity, char *key, int max_key_len);
+int broker_acl_file__init(void);
+void broker_acl_file__cleanup(void);
+int broker_password_file__init(void);
+void broker_password_file__cleanup(void);
 int psk_file__init(void);
 int psk_file__cleanup(void);
 
@@ -983,6 +983,13 @@ int will_delay__add(struct mosquitto *context);
 void will_delay__check(void);
 void will_delay__send_all(void);
 void will_delay__remove(struct mosquitto *mosq);
+
+/* ============================================================
+ * HTTP Info
+ * ============================================================ */
+int http_api__start_local(struct mosquitto__listener *listener);
+int http_api__start(struct mosquitto__listener *listener);
+void http_api__stop(struct mosquitto__listener *listener);
 
 
 /* ============================================================

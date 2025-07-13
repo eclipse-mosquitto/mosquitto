@@ -47,6 +47,13 @@ libmosqcommon_EXPORT char *mosquitto_fgets(char **buf, int *buflen, FILE *stream
  */
 libmosqcommon_EXPORT int mosquitto_write_file(const char* target_path, bool restrict_read, int (*write_fn)(FILE* fptr, void* user_data), void* user_data, void (*log_fn)(const char* msg));
 
+
+/*
+ * Function: mosquitto_read_file
+ */
+libmosqcommon_EXPORT int mosquitto_read_file(const char *file, char **buf);
+
+
 /*
  * Function: mosquitto_trimblanks
  *

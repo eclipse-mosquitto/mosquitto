@@ -19,6 +19,7 @@ Contributors:
 
 #include "config.h"
 
+#include <stdlib.h>
 #include <time.h>
 #include "mosquitto.h"
 
@@ -35,8 +36,8 @@ void watchdog__init(void)
 {
 #ifdef WITH_SYSTEMD
 	char *watchdog_usec = getenv("WATCHDOG_USEC");
-	time_t next_ping = mosquitto_time();
-	time_t ping_sec = 0;
+	next_ping = mosquitto_time();
+	ping_sec = 0;
 
 	if(watchdog_usec){
 		char *endptr = NULL;

@@ -107,3 +107,12 @@ void mosquitto_time_ns(time_t *s, long *ns)
 	*ns = tv.tv_usec * 1000;
 #endif
 }
+
+long mosquitto_time_cmp(time_t t1_s, long t1_ns, time_t t2_s, long t2_ns)
+{
+	if(t1_s == t2_s){
+		return (long)(t1_ns - t2_ns);
+	}else{
+		return (long)(t1_s - t2_s);
+	}
+}

@@ -1,8 +1,14 @@
+R=..
+include ${R}/config.mk
+
 DIRS= \
-		db_dump \
 		mosquitto_ctrl \
 		mosquitto_passwd \
 		mosquitto_signal
+
+ifeq ($(WITH_PERSISTENCE),yes)
+DIRS+=db_dump
+endif
 
 .PHONY : all binary check clean reallyclean test install uninstall
 

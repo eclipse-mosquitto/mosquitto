@@ -17,6 +17,7 @@ Contributors:
 */
 
 #include "config.h"
+#include <stdlib.h> /* Keep this here to allow glibc detection */
 
 #ifdef WIN32
 #  include <winsock2.h>

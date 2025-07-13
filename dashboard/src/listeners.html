@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mosquitto Broker Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="media/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/x-icon" href="media/favicon-32x32.png" sizes="32x32">
+</head>
+<body class="min-h-screen bg-gray-50">
+    <div id="menu-overlay" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300"></div>
+
+    <!-- sliding menu panel -->
+    <div id="sliding-menu" class="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="flex flex-col h-full">
+            <!-- menu header with close button (displayed only for mobile) -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div></div>
+                <button id="menu-close" class="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200">
+                    <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- menu content -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <nav class="space-y-1 mb-8">
+                    <a href="." class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                        Dashboard
+                    </a>
+                    <a href="listeners.html" class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors bg-gray-100">
+                        Listeners
+                    </a>
+                    <a href="https://mosquitto.org" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors">
+                        Docs
+                    </a>
+                </nav>
+            </div>
+
+            <!-- menu footer -->
+            <div class="border-t border-gray-200 p-6">
+            </div>
+        </div>
+    </div>
+    <div id="main-content" class="transition-all duration-300 ease-in-out">
+        <div class="p-6">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <!-- header -->
+                <div class="sticky bg-gray-50 top-0 z-10 pb-2 flex items-center justify-between">
+                    <button id="menu-toggle" class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-c-orange hover:cursor-pointer hover:text-white transition-colors duration-200">
+                        <!-- menu icon -->
+                        <svg id="hamburger-icon" class="h-4 w-4 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+
+                        <!-- arrow icon in place of the menu icon when the menu is open (hidden by default) -->
+                        <svg id="arrow-icon" class="h-4 w-4 hidden transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+                    <div id="logo-text" class="flex items-center gap-3 w-64">
+                        <img src="/media/mosquitto-logo.png"/>
+                    </div>
+
+                    <div id="logo-icon" class="hidden">
+                        <svg width="71" height="54" viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M57.0013 86L58.5908 64.5156L59.8811 47.0706C62.5402 45.9585 64.4064 43.3537 64.4064 40.3183C64.4064 36.2725 61.0902 32.9916 57.0013 32.9916C52.9121 32.9916 49.5962 36.2725 49.5962 40.3183C49.5962 43.3537 51.4625 45.9585 54.1216 47.0706L55.412 64.5156L57.0013 86Z" fill="#F3771C"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.42676 40.291C6.42676 52.6852 11.0068 64.2874 18.9495 73.2527L14.1625 77.4988C5.1991 67.4059 0 54.2981 0 40.291C0 24.5083 6.55628 10.2381 17.1193 7.62939e-06L17.3602 0.213791L31.52 12.7736C18.2121 24.8448 15.456 44.4755 24.7152 59.5987L29.6037 55.2628C22.5455 42.6463 25.2344 26.7106 36.3333 17.0429L41.1815 21.3426L45.4936 25.168L49.9667 29.1355C48.2936 30.1731 46.8715 31.5698 45.8107 33.2165C44.4992 35.2519 43.7396 37.6684 43.7396 40.2597C43.7396 46.037 47.5151 50.9431 52.7571 52.6942L53.2087 58.7914C44.4739 57.0506 37.8941 49.4142 37.8941 40.2597C37.8941 36.1833 39.1989 32.408 41.4175 29.3198L37.1379 25.5231L37.1219 25.509C30.1062 34.73 30.5396 47.5312 38.0944 56.2719L23.7361 69.0071C9.60061 52.9899 9.19696 29.2169 22.7358 12.7492L17.9465 8.50084C11.336 16.442 7.14974 26.4328 6.51204 37.3633L6.48277 37.3959L6.50886 37.4186C6.45429 38.3692 6.42676 39.3268 6.42676 40.2912V40.291ZM61.2429 52.6942C66.4849 50.9431 70.2608 46.037 70.2608 40.2597C70.2608 37.6684 69.5008 35.2519 68.1898 33.217C67.1285 31.5703 65.7064 30.1731 64.0342 29.1355L68.5069 25.1683L72.8194 21.3426H72.8189L77.6672 17.0429C88.7656 26.7106 91.455 42.6463 84.3968 55.2628L89.2848 59.5987C98.5445 44.4755 95.7883 24.8448 82.48 12.7736L96.6408 0.212845L96.8807 7.62939e-06C107.444 10.2381 114 24.5083 114 40.291C114 54.2981 108.801 67.4059 99.838 77.4988L95.0505 73.2527C102.994 64.2874 107.573 52.6852 107.573 40.291C107.573 39.3266 107.546 38.369 107.492 37.4184L107.517 37.3958L107.488 37.3632C106.851 26.4326 102.664 16.4419 96.054 8.50068L91.2647 12.7491C104.804 29.2167 104.4 52.9897 90.2639 69.007L75.9061 56.2718C83.4609 47.531 83.8943 34.7299 76.8784 25.5088L76.8621 25.523L72.5825 29.3202C74.8011 32.4078 76.1059 36.1836 76.1059 40.2596C76.1059 49.414 69.5261 57.05 60.7918 58.7913L61.2429 52.6941V52.6942Z" fill="#3C5280"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="p-4"></div>
+
+                <!-- listener information header card -->
+                <div class="card flex items-top gap-3 p-6">
+                    <div id="broker-info-icon" class="mr-[3%] hidden">
+                        <svg width="114" height="86" viewBox="0 0 114 86" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M57.0013 86L58.5908 64.5156L59.8811 47.0706C62.5402 45.9585 64.4064 43.3537 64.4064 40.3183C64.4064 36.2725 61.0902 32.9916 57.0013 32.9916C52.9121 32.9916 49.5962 36.2725 49.5962 40.3183C49.5962 43.3537 51.4625 45.9585 54.1216 47.0706L55.412 64.5156L57.0013 86Z" fill="#F3771C"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M6.42676 40.291C6.42676 52.6852 11.0068 64.2874 18.9495 73.2527L14.1625 77.4988C5.1991 67.4059 0 54.2981 0 40.291C0 24.5083 6.55628 10.2381 17.1193 7.62939e-06L17.3602 0.213791L31.52 12.7736C18.2121 24.8448 15.456 44.4755 24.7152 59.5987L29.6037 55.2628C22.5455 42.6463 25.2344 26.7106 36.3333 17.0429L41.1815 21.3426L45.4936 25.168L49.9667 29.1355C48.2936 30.1731 46.8715 31.5698 45.8107 33.2165C44.4992 35.2519 43.7396 37.6684 43.7396 40.2597C43.7396 46.037 47.5151 50.9431 52.7571 52.6942L53.2087 58.7914C44.4739 57.0506 37.8941 49.4142 37.8941 40.2597C37.8941 36.1833 39.1989 32.408 41.4175 29.3198L37.1379 25.5231L37.1219 25.509C30.1062 34.73 30.5396 47.5312 38.0944 56.2719L23.7361 69.0071C9.60061 52.9899 9.19696 29.2169 22.7358 12.7492L17.9465 8.50084C11.336 16.442 7.14974 26.4328 6.51204 37.3633L6.48277 37.3959L6.50886 37.4186C6.45429 38.3692 6.42676 39.3268 6.42676 40.2912V40.291ZM61.2429 52.6942C66.4849 50.9431 70.2608 46.037 70.2608 40.2597C70.2608 37.6684 69.5008 35.2519 68.1898 33.217C67.1285 31.5703 65.7064 30.1731 64.0342 29.1355L68.5069 25.1683L72.8194 21.3426H72.8189L77.6672 17.0429C88.7656 26.7106 91.455 42.6463 84.3968 55.2628L89.2848 59.5987C98.5445 44.4755 95.7883 24.8448 82.48 12.7736L96.6408 0.212845L96.8807 7.62939e-06C107.444 10.2381 114 24.5083 114 40.291C114 54.2981 108.801 67.4059 99.838 77.4988L95.0505 73.2527C102.994 64.2874 107.573 52.6852 107.573 40.291C107.573 39.3266 107.546 38.369 107.492 37.4184L107.517 37.3958L107.488 37.3632C106.851 26.4326 102.664 16.4419 96.054 8.50068L91.2647 12.7491C104.804 29.2167 104.4 52.9897 90.2639 69.007L75.9061 56.2718C83.4609 47.531 83.8943 34.7299 76.8784 25.5088L76.8621 25.523L72.5825 29.3202C74.8011 32.4078 76.1059 36.1836 76.1059 40.2596C76.1059 49.414 69.5261 57.05 60.7918 58.7913L61.2429 52.6941V52.6942Z" fill="#3C5280"/>
+                        </svg>
+                    </div>
+                    <div>
+                    <div>
+                        <h2 class="text-lg font-semibold">Listener Information</h2>
+                    </div>
+                    <div>
+                        <div class="grid grid-rows-3 gap-1 text-sm">
+                            <div>
+                                <span class="text-gray-500">Number of listeners:</span>
+                                <span class="ml-2" id="broker-all-listener-cnt">?</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Anonymous listeners:</span>
+                                <span class="ml-2" id="broker-anonym-listener-cnt">none</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div id="listeners-container" class="space-y-4">
+                <!-- listeners will be populated here from javascript -->
+            </div>
+        </div>
+    </div>
+
+   <!-- footer -->
+   <div class="mt-[5%] pt-6 pb-6 bg-gray-100">
+       <div class="flex grid grid-cols-1 md:grid-cols-2 items-center justify-evenly gap-2 text-gray-500">
+           <div class="flex items-center justify-center">
+               <a href="https://github.com/eclipse-mosquitto/mosquitto" target="_blank" rel="noopener noreferrer">Github</a>
+           </div>
+           <div class="flex items-center justify-center">
+               <a href="https://test.mosquitto.org/" target="_blank" rel="noopener noreferrer">Test Mosquitto Instance</a>
+           </div>
+       </div>
+   </div>
+    <script src="consts.js"></script>
+    <script src="utils.js"></script>
+    <script src="sidebar.js"></script>
+    <script src="listeners.js"></script>
+</body>
+</html>

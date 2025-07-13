@@ -25,9 +25,12 @@ static void proxy_cleanup(struct mosquitto *context)
 
 static int update_transport(struct mosquitto *context)
 {
+#if defined(WITH_WEBSOCKETS) && WITH_WEBSOCKETS == WS_IS_BUILTIN
 	if(context->listener->protocol == mp_websockets){
 		return http__context_init(context);
-	}else{
+	}else
+#endif
+	{
 		context->transport = mosq_t_tcp;
 	}
 	return MOSQ_ERR_SUCCESS;

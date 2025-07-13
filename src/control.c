@@ -110,14 +110,15 @@ int control__register_callback(mosquitto_plugin_id_t *pid, MOSQ_FUNC_generic_cal
 	if(cb_new == NULL){
 		return MOSQ_ERR_NOMEM;
 	}
-	cb_new->data = mosquitto_strdup(topic);
-	if(cb_new->data == NULL){
+	cb_new->data.topic = mosquitto_strdup(topic);
+	if(cb_new->data.topic == NULL){
 		mosquitto_FREE(cb_new);
 		return MOSQ_ERR_NOMEM;
 	}
+	cb_new->identifier = pid;
 	cb_new->cb = cb_func;
 	cb_new->userdata = userdata;
-	HASH_ADD_KEYPTR(hh, opts->plugin_callbacks.control, cb_new->data, strlen(cb_new->data), cb_new);
+	HASH_ADD_KEYPTR(hh, opts->plugin_callbacks.control, cb_new->data.topic, strlen(cb_new->data.topic), cb_new);
 
 	if(pid->plugin_name){
 		struct control_endpoint *ep;
@@ -156,7 +157,7 @@ int control__unregister_callback(mosquitto_plugin_id_t *identifier, MOSQ_FUNC_ge
 	HASH_FIND(hh, opts->plugin_callbacks.control, topic, topic_len, cb_found);
 	if(cb_found && cb_found->cb == cb_func){
 		HASH_DELETE(hh, opts->plugin_callbacks.control, cb_found);
-		mosquitto_FREE(cb_found->data);
+		mosquitto_FREE(cb_found->data.topic);
 		mosquitto_FREE(cb_found);
 
 		DL_FOREACH(identifier->control_endpoints, ep){
@@ -188,7 +189,7 @@ void control__unregister_all_callbacks(mosquitto_plugin_id_t *identifier)
 		HASH_FIND(hh, opts->plugin_callbacks.control, ep->topic, strlen(ep->topic), cb_found);
 		if(cb_found){
 			HASH_DELETE(hh, opts->plugin_callbacks.control, cb_found);
-			mosquitto_FREE(cb_found->data);
+			mosquitto_FREE(cb_found->data.topic);
 			mosquitto_FREE(cb_found);
 		}
 

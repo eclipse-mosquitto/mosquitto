@@ -163,10 +163,10 @@ int handle__publish(struct mosquitto *mosq)
 			message->properties = properties;
 			util__decrement_receive_quota(mosq);
 			rc = send__pubrec(mosq, mid, 0, NULL);
-			pthread_mutex_lock(&mosq->msgs_in.mutex);
+			COMPAT_pthread_mutex_lock(&mosq->msgs_in.mutex);
 			message->state = mosq_ms_wait_for_pubrel;
 			message__queue(mosq, message, mosq_md_in);
-			pthread_mutex_unlock(&mosq->msgs_in.mutex);
+			COMPAT_pthread_mutex_unlock(&mosq->msgs_in.mutex);
 			return rc;
 		default:
 			message__cleanup(&message);

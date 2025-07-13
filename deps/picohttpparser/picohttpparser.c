@@ -90,7 +90,7 @@
             CHECK_EOF();                                                                                                           \
         }                                                                                                                          \
         tok = tok_start;                                                                                                           \
-        toklen = buf - tok_start;                                                                                                  \
+        toklen = (size_t)(buf - tok_start);															                                                           \
     } while (0)
 
 static const char *token_char_map = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -181,9 +181,9 @@ FOUND_CTL:
     if (likely(*buf == '\015')) {
         ++buf;
         EXPECT_CHAR('\012');
-        *token_len = buf - 2 - token_start;
+        *token_len = (size_t)(buf - 2 - token_start);
     } else if (*buf == '\012') {
-        *token_len = buf - token_start;
+			*token_len = (size_t)(buf - token_start);
         ++buf;
     } else {
         *ret = -1;
@@ -272,7 +272,7 @@ static const char *parse_token(const char *buf, const char *buf_end, const char 
         CHECK_EOF();
     }
     *token = buf_start;
-    *token_len = buf - buf_start;
+    *token_len = (size_t)(buf - buf_start);
     return buf;
 }
 
@@ -347,7 +347,7 @@ static const char *parse_headers(const char *buf, const char *buf_end, struct ph
             }
         }
         headers[*num_headers].value = value;
-        headers[*num_headers].value_len = value_end - value;
+        headers[*num_headers].value_len = (size_t)(value_end - value);
     }
     return buf;
 }
@@ -563,7 +563,7 @@ ssize_t phr_decode_chunked(struct phr_chunked_decoder *decoder, char *buf, size_
                     ret = -1;
                     goto Exit;
                 }
-                decoder->bytes_left_in_chunk = decoder->bytes_left_in_chunk * 16 + v;
+                decoder->bytes_left_in_chunk = decoder->bytes_left_in_chunk * 16 + (size_t)v;
                 ++decoder->_hex_count;
             }
             decoder->_hex_count = 0;
@@ -647,7 +647,7 @@ ssize_t phr_decode_chunked(struct phr_chunked_decoder *decoder, char *buf, size_
     }
 
 Complete:
-    ret = bufsz - src;
+    ret = (ssize_t)(bufsz - src);
 Exit:
     if (dst != src)
         memmove(buf + dst, buf + src, bufsz - src);

@@ -10,10 +10,14 @@ LOCAL_CPPFLAGS+=-DWITH_BROKER -I${R}/src -I${R}/test -I${R}/lib -DTEST_SOURCE_DI
 LOCAL_LDFLAGS+=-coverage
 LOCAL_LDADD+=-lcunit ${LIBMOSQ_COMMON}
 
-ALL_TESTS:=keepalive_test persist_read_test persist_write_test subs_test
+ALL_TESTS:=keepalive_test subs_test
 
 ifeq ($(WITH_BRIDGE),yes)
 	ALL_TESTS+=bridge_topic_test
+endif
+
+ifeq ($(WITH_PERSISTENCE),yes)
+	ALL_TESTS+=persist_read_test persist_write_test
 endif
 
 ifeq ($(WITH_TLS),yes)

@@ -14,9 +14,15 @@ void do_disconnect(struct mosquitto *context, int reason)
 {
 	UNUSED(reason);
 
+#ifndef WITH_OLD_KEEPALIVE
 	keepalive__remove(context);
+#else
+	UNUSED(context);
+#endif
 }
 
+
+#ifndef WITH_OLD_KEEPALIVE
 
 static void TEST_single_client(void)
 {
@@ -256,14 +262,16 @@ int init_keepalive_tests(void)
 
 	return 0;
 }
+#endif
 
 int main(int argc, char *argv[])
 {
-	unsigned int fails;
+	unsigned int fails = 0;
 
 	UNUSED(argc);
 	UNUSED(argv);
 
+#ifndef WITH_OLD_KEEPALIVE
 	if(CU_initialize_registry() != CUE_SUCCESS){
 		printf("Error initializing CUnit registry.\n");
 		return 1;
@@ -281,6 +289,7 @@ int main(int argc, char *argv[])
 	CU_basic_run_tests();
 	fails = CU_get_number_of_failures();
 	CU_cleanup_registry();
+#endif
 
 	return (int)fails;
 }

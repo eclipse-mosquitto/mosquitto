@@ -1,11 +1,12 @@
 {
-  "name": "mosquitto",
-  "version-string": "2.1.0",
-  "dependencies": [
-	"argon2",
-    "cjson",
-	"openssl",
-	"pthreads",
-    "sqlite3"
-  ]
+	"name": "mosquitto",
+	"version-string": "2.1.0",
+	"dependencies": [
+		"argon2",
+		"cjson",
+		"libmicrohttpd",
+		"openssl",
+		"pthreads",
+		"sqlite3"
+	]
 }

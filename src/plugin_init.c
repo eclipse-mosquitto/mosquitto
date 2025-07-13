@@ -163,6 +163,6 @@ int mosquitto_security_init(bool reload)
 		rc = plugin__security_init_single(db.plugins[i], reload);
 		if(rc != MOSQ_ERR_SUCCESS) return rc;
 	}
-	rc = mosquitto_security_init_default(reload);
+	rc = mosquitto_security_init_default();
 	return rc;
 }

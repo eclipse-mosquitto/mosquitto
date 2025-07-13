@@ -232,6 +232,7 @@ void context__send_will(struct mosquitto *ctxt)
 					&ctxt->will->properties);
 		}
 	}
+	
 	will__clear(ctxt);
 }
 

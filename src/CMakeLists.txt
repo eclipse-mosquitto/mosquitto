@@ -1,4 +1,7 @@
 add_executable(mosquitto
+	acl_file.c acl_file.h
+	../plugins/acl-file/acl_check.c
+	../plugins/acl-file/acl_parse.c
 	../lib/alias_mosq.c ../lib/alias_mosq.h
 	bridge.c bridge_topic.c
 	broker_control.c
@@ -36,6 +39,9 @@ add_executable(mosquitto
 	../lib/net_ws.c
 	../lib/packet_datatypes.c
 	../lib/packet_mosq.c ../lib/packet_mosq.h
+	password_file.c password_file.h
+	../plugins/password-file/password_check.c
+	../plugins/password-file/password_parse.c
 	persist_read_v234.c persist_read_v5.c persist_read.c
 	persist_write_v5.c persist_write.c
 	persist.h
@@ -95,6 +101,17 @@ option(INC_BRIDGE_SUPPORT
 if(INC_BRIDGE_SUPPORT)
 	target_sources(mosquitto PRIVATE bridge.c)
 	target_compile_definitions(mosquitto PRIVATE "WITH_BRIDGE")
+endif()
+
+option(WITH_HTTP_API
+	"Include http_api support for listeners?" ON)
+if(WITH_HTTP_API)
+	find_library(MICROHTTPD_LIBRARY NAMES microhttpd)
+	if(MICROHTTPD_LIBRARY)
+		target_sources(mosquitto PRIVATE http_api.c)
+		target_compile_definitions(mosquitto PRIVATE "WITH_HTTP_API")
+		target_link_libraries(mosquitto PRIVATE microhttpd)
+	endif()
 endif()
 
 

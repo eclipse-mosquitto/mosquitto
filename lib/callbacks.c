@@ -138,9 +138,9 @@ void mosquitto_log_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_log on_log)
 
 void mosquitto_ext_auth_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_ext_auth on_ext_auth)
 {
-	pthread_mutex_lock(&mosq->callback_mutex);
+	COMPAT_pthread_mutex_lock(&mosq->callback_mutex);
 	mosq->on_ext_auth = on_ext_auth;
-	pthread_mutex_unlock(&mosq->callback_mutex);
+	COMPAT_pthread_mutex_unlock(&mosq->callback_mutex);
 }
 
 
@@ -300,9 +300,9 @@ int callback__on_ext_auth(struct mosquitto *mosq, const char *auth_method, uint1
 	int rc = MOSQ_ERR_AUTH;
 	LIBMOSQ_CB_ext_auth on_ext_auth;
 
-	pthread_mutex_lock(&mosq->callback_mutex);
+	COMPAT_pthread_mutex_lock(&mosq->callback_mutex);
 	on_ext_auth = mosq->on_ext_auth;
-	pthread_mutex_unlock(&mosq->callback_mutex);
+	COMPAT_pthread_mutex_unlock(&mosq->callback_mutex);
 
 	mosq->callback_depth++;
 	if(on_ext_auth){
