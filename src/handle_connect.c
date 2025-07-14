@@ -576,6 +576,29 @@ static int read_and_reset_keepalive(struct mosquitto *context)
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int read_and_verify_v5_connect_properties(struct mosquitto *context, mosquitto_property **properties, uint8_t protocol_version)
+{
+	int rc;
+
+	if(protocol_version == PROTOCOL_VERSION_v5){
+		rc = property__read_all(CMD_CONNECT, &context->in_packet, properties);
+		if(rc == MOSQ_ERR_DUPLICATE_PROPERTY || rc == MOSQ_ERR_PROTOCOL){
+			send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
+		}else if(rc == MOSQ_ERR_MALFORMED_PACKET){
+			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
+		}
+		if(rc) {
+			return rc;
+		}
+	}
+	rc = property__process_connect(context, properties);
+	if(rc != MOSQ_ERR_SUCCESS){
+		return send__connack_error_and_return(context, MQTT_RC_PROTOCOL_ERROR, rc);
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -831,6 +854,11 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
+	rc = read_and_verify_v5_connect_properties(context, &properties, protocol_version);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		goto handle_connect_error;
+	}
+
 	will = connect_flags & 0x04;
 	will_qos = (connect_flags & 0x18) >> 3;
 	if(will_qos == 3){
@@ -848,21 +876,6 @@ int handle__connect(struct mosquitto *context)
 			send__connack(context, 0, MQTT_RC_RETAIN_NOT_SUPPORTED, NULL);
 		}
 		rc = MOSQ_ERR_NOT_SUPPORTED;
-		goto handle_connect_error;
-	}
-
-	if(protocol_version == PROTOCOL_VERSION_v5){
-		rc = property__read_all(CMD_CONNECT, &context->in_packet, &properties);
-		if(rc == MOSQ_ERR_DUPLICATE_PROPERTY || rc == MOSQ_ERR_PROTOCOL){
-			send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
-		}else if(rc == MOSQ_ERR_MALFORMED_PACKET){
-			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
-		}
-		if(rc) goto handle_connect_error;
-	}
-	rc = property__process_connect(context, &properties);
-	if(rc == MOSQ_ERR_PROTOCOL){
-		send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
 		goto handle_connect_error;
 	}
 
