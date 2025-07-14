@@ -551,6 +551,17 @@ static int read_and_verify_connect_flags(struct mosquitto *context, uint8_t *con
 	return MOSQ_ERR_SUCCESS;
 }
 
+static void set_session_expiry_interval(struct mosquitto *context, uint8_t clean_start, uint8_t protocol_version)
+{
+	/* session_expiry_interval will be overriden if the properties are read later */
+	if(clean_start == false && protocol_version != PROTOCOL_VERSION_v5){
+		/* v3* has clean_start == false mean the session never expires */
+		context->session_expiry_interval = UINT32_MAX;
+	}else{
+		context->session_expiry_interval = 0;
+	}
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -799,13 +810,8 @@ int handle__connect(struct mosquitto *context)
 	}
 
 	clean_start = (connect_flags & 0x02) >> 1;
-	/* session_expiry_interval will be overriden if the properties are read later */
-	if(clean_start == false && protocol_version != PROTOCOL_VERSION_v5){
-		/* v3* has clean_start == false mean the session never expires */
-		context->session_expiry_interval = UINT32_MAX;
-	}else{
-		context->session_expiry_interval = 0;
-	}
+	set_session_expiry_interval(context, clean_start, protocol_version);
+
 	will = connect_flags & 0x04;
 	will_qos = (connect_flags & 0x18) >> 3;
 	if(will_qos == 3){
