@@ -562,6 +562,20 @@ static void set_session_expiry_interval(struct mosquitto *context, uint8_t clean
 	}
 }
 
+static int read_and_reset_keepalive(struct mosquitto *context)
+{
+	/* _remove here because net__socket_accept() uses _add and we must have the
+	 * correct keepalive value */
+	keepalive__remove(context);
+
+	if(packet__read_uint16(&context->in_packet, &(context->keepalive))){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	keepalive__add(context);
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -812,6 +826,11 @@ int handle__connect(struct mosquitto *context)
 	clean_start = (connect_flags & 0x02) >> 1;
 	set_session_expiry_interval(context, clean_start, protocol_version);
 
+	rc = read_and_reset_keepalive(context);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		goto handle_connect_error;
+	}
+
 	will = connect_flags & 0x04;
 	will_qos = (connect_flags & 0x18) >> 3;
 	if(will_qos == 3){
@@ -831,16 +850,6 @@ int handle__connect(struct mosquitto *context)
 		rc = MOSQ_ERR_NOT_SUPPORTED;
 		goto handle_connect_error;
 	}
-
-	/* _remove here because net__socket_accept() uses _add and we must have the
-	 * correct keepalive value */
-	keepalive__remove(context);
-
-	if(packet__read_uint16(&context->in_packet, &(context->keepalive))){
-		rc = MOSQ_ERR_PROTOCOL;
-		goto handle_connect_error;
-	}
-	keepalive__add(context);
 
 	if(protocol_version == PROTOCOL_VERSION_v5){
 		rc = property__read_all(CMD_CONNECT, &context->in_packet, &properties);
