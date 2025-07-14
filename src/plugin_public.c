@@ -875,5 +875,11 @@ BROKER_EXPORT int mosquitto_client_will_set(const char* clientid, const char *to
 	if (!mosq){
 		return MOSQ_ERR_NOT_FOUND;
 	}
+	if (properties && mosq->protocol != mosq_p_mqtt5){
+		if (net__is_connected(mosq)) {
+			return MOSQ_ERR_NOT_SUPPORTED;
+		}
+		mosq->protocol = mosq_p_mqtt5;
+	}
 	return will__set(mosq, topic, payloadlen, payload, qos, retain, properties);
 }
