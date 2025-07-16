@@ -14,6 +14,7 @@ DISTFILES= \
 	installer/ \
 	libcommon/ \
 	lib/ \
+	libcommon/ \
 	logo/ \
 	make/ \
 	man/ \
