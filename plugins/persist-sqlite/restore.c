@@ -485,12 +485,16 @@ static int will_restore(struct mosquitto_sqlite *ms)
 		properties = json_to_properties((const char *)sqlite3_column_text(stmt, 6));
 
 		rc = mosquitto_client_will_set(clientid, topic, payloadlen, payload, qos, retain, properties);
-		if (rc == MOSQ_ERR_NOT_FOUND || (sqlite3_column_int64(stmt, 7) == 0 && sqlite3_column_int64(stmt, 8) == 0)){
-			/* If the client does not exist this is the will message of a non-persistent client.
-			   If the client is a persistent client and was connected at the moment of a crash
-			   and has no will delay we publish it's will message.*/
+		if (rc == MOSQ_ERR_NOT_FOUND){
+			/* If the client does not exist this is the will message of a non-persistent client. */
+			rc = publish_will_msg(topic, payloadlen, payload, qos, retain, properties);
+		} else if (rc == MOSQ_ERR_SUCCESS && (sqlite3_column_int64(stmt, 7) == 0 && sqlite3_column_int64(stmt, 8) == 0)) {
+			/* If the client is a persistent client and was connected at the moment of a crash
+				 and has no will delay we publish it's will message now, but need a new copy of the properties. */
+			properties = json_to_properties((const char *)sqlite3_column_text(stmt, 6));
 			rc = publish_will_msg(topic, payloadlen, payload, qos, retain, properties);
 		}
+
 		if(rc == MOSQ_ERR_SUCCESS){
 			count++;
 		}else{

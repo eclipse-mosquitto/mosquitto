@@ -136,15 +136,13 @@ void plugin_persist__handle_client_delete(struct mosquitto *context)
 		return;
 	}
 
-	log__printf(NULL, MOSQ_LOG_INFO, "plugin_persist__handle_client_delete for client %s will %p", context->id, context->will);
-	
 	plugin_persist__handle_will_delete(context);
 
 	if (context->is_persisted == false
 			|| context->session_expiry_interval > 0){
 		return;
 	}
-	
+
 	opts = &db.config->security_options;
 	memset(&event_data, 0, sizeof(event_data));
 	event_data.data.clientid = context->id;
@@ -423,8 +421,6 @@ void plugin_persist__handle_will_delete(struct mosquitto *context)
 		return;
 	}
 
-	log__printf(NULL, MOSQ_LOG_INFO, "plugin_persist__handle_will_delete for client %s", context->id);
-	
 	opts = &db.config->security_options;
 	DL_FOREACH_SAFE(opts->plugin_callbacks.persist_will_delete, cb_base, cb_next){
 		cb_base->cb(MOSQ_EVT_PERSIST_WILL_ADD, &event_data, cb_base->userdata);
