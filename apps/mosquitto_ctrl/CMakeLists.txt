@@ -29,6 +29,7 @@ if(WITH_TLS)
 			"${mosquitto_SOURCE_DIR}"
 			"${mosquitto_SOURCE_DIR}/common"
 			"${mosquitto_SOURCE_DIR}/include"
+			"${OPENSSL_INCLUDE_DIR}"
 		)
 		add_library(ctrl_shell_io OBJECT
 			ctrl_shell_io.c
