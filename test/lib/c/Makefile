@@ -57,6 +57,7 @@ SRC = \
 	03-publish-qos0.c \
 	03-request-response-1.c \
 	03-request-response-2.c \
+	03-request-response-loop-forever.c \
 	03-request-response-correlation-1.c \
 	03-publish-helper-single.c \
 	03-publish-helper-multiple.c \
