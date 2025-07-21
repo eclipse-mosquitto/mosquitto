@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 2.1.0 - 2021-xx-xx
 ==================
 
@@ -234,11 +235,10 @@ Broker:
 - Fix some strict protocol compliance issues. Closes #3052.
 
 Client library:
-- Fix cmake build on OS X. Closes #3125.
+- Fix cmake build on OS X. Closes #3125 and Closes #3312.
 
 Build:
 - Fix build on NetBSD
-
 
 2.0.19 - 2024-10-02
 ===================
