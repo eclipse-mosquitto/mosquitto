@@ -551,6 +551,79 @@ static int read_and_verify_connect_flags(struct mosquitto *context, uint8_t *con
 	return MOSQ_ERR_SUCCESS;
 }
 
+static void set_session_expiry_interval(struct mosquitto *context, uint8_t clean_start, uint8_t protocol_version)
+{
+	/* session_expiry_interval will be overriden if the properties are read later */
+	if(clean_start == false && protocol_version != PROTOCOL_VERSION_v5){
+		/* v3* has clean_start == false mean the session never expires */
+		context->session_expiry_interval = UINT32_MAX;
+	}else{
+		context->session_expiry_interval = 0;
+	}
+}
+
+static int read_and_reset_keepalive(struct mosquitto *context)
+{
+	/* _remove here because net__socket_accept() uses _add and we must have the
+	 * correct keepalive value */
+	keepalive__remove(context);
+
+	if(packet__read_uint16(&context->in_packet, &(context->keepalive))){
+		return MOSQ_ERR_PROTOCOL;
+	}
+	keepalive__add(context);
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int read_and_verify_v5_connect_properties(struct mosquitto *context, mosquitto_property **properties, uint8_t protocol_version)
+{
+	int rc;
+
+	if(protocol_version == PROTOCOL_VERSION_v5){
+		rc = property__read_all(CMD_CONNECT, &context->in_packet, properties);
+		if(rc == MOSQ_ERR_DUPLICATE_PROPERTY || rc == MOSQ_ERR_PROTOCOL){
+			send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
+		}else if(rc == MOSQ_ERR_MALFORMED_PACKET){
+			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
+		}
+		if(rc) {
+			return rc;
+		}
+	}
+	rc = property__process_connect(context, properties);
+	if(rc != MOSQ_ERR_SUCCESS){
+		return send__connack_error_and_return(context, MQTT_RC_PROTOCOL_ERROR, rc);
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int verify_will_options(struct mosquitto *context, uint8_t will, uint8_t will_qos, uint8_t will_retain, uint8_t protocol_version)
+{
+	if(will_qos == 3){
+		log__printf(NULL, MOSQ_LOG_INFO, "Invalid Will QoS in CONNECT from %s.",
+				context->address);
+		return MOSQ_ERR_PROTOCOL;
+	}
+
+	if(will && will_retain && db.config->retain_available == false){
+		if(protocol_version == mosq_p_mqtt5){
+			send__connack(context, 0, MQTT_RC_RETAIN_NOT_SUPPORTED, NULL);
+		}
+		return MOSQ_ERR_NOT_SUPPORTED;
+	}
+
+	if(will && will_qos > context->listener->max_qos){
+		if(protocol_version == mosq_p_mqtt5){
+			send__connack(context, 0, MQTT_RC_QOS_NOT_SUPPORTED, NULL);
+		}
+		return MOSQ_ERR_NOT_SUPPORTED;
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -799,65 +872,28 @@ int handle__connect(struct mosquitto *context)
 	}
 
 	clean_start = (connect_flags & 0x02) >> 1;
-	/* session_expiry_interval will be overriden if the properties are read later */
-	if(clean_start == false && protocol_version != PROTOCOL_VERSION_v5){
-		/* v3* has clean_start == false mean the session never expires */
-		context->session_expiry_interval = UINT32_MAX;
-	}else{
-		context->session_expiry_interval = 0;
+	set_session_expiry_interval(context, clean_start, protocol_version);
+
+	rc = read_and_reset_keepalive(context);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		goto handle_connect_error;
 	}
+
+	rc = read_and_verify_v5_connect_properties(context, &properties, protocol_version);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		goto handle_connect_error;
+	}
+
 	will = connect_flags & 0x04;
 	will_qos = (connect_flags & 0x18) >> 3;
-	if(will_qos == 3){
-		log__printf(NULL, MOSQ_LOG_INFO, "Invalid Will QoS in CONNECT from %s.",
-				context->address);
-		rc = MOSQ_ERR_PROTOCOL;
+	will_retain = ((connect_flags & 0x20) == 0x20);
+	rc = verify_will_options(context, will, will_qos, will_retain, protocol_version);
+	if (rc != MOSQ_ERR_SUCCESS) {
 		goto handle_connect_error;
 	}
-	will_retain = ((connect_flags & 0x20) == 0x20);
+
 	password_flag = connect_flags & 0x40;
 	username_flag = connect_flags & 0x80;
-
-	if(will && will_retain && db.config->retain_available == false){
-		if(protocol_version == mosq_p_mqtt5){
-			send__connack(context, 0, MQTT_RC_RETAIN_NOT_SUPPORTED, NULL);
-		}
-		rc = MOSQ_ERR_NOT_SUPPORTED;
-		goto handle_connect_error;
-	}
-
-	/* _remove here because net__socket_accept() uses _add and we must have the
-	 * correct keepalive value */
-	keepalive__remove(context);
-
-	if(packet__read_uint16(&context->in_packet, &(context->keepalive))){
-		rc = MOSQ_ERR_PROTOCOL;
-		goto handle_connect_error;
-	}
-	keepalive__add(context);
-
-	if(protocol_version == PROTOCOL_VERSION_v5){
-		rc = property__read_all(CMD_CONNECT, &context->in_packet, &properties);
-		if(rc == MOSQ_ERR_DUPLICATE_PROPERTY || rc == MOSQ_ERR_PROTOCOL){
-			send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
-		}else if(rc == MOSQ_ERR_MALFORMED_PACKET){
-			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
-		}
-		if(rc) goto handle_connect_error;
-	}
-	rc = property__process_connect(context, &properties);
-	if(rc == MOSQ_ERR_PROTOCOL){
-		send__connack(context, 0, MQTT_RC_PROTOCOL_ERROR, NULL);
-		goto handle_connect_error;
-	}
-
-	if(will && will_qos > context->listener->max_qos){
-		if(protocol_version == mosq_p_mqtt5){
-			send__connack(context, 0, MQTT_RC_QOS_NOT_SUPPORTED, NULL);
-		}
-		rc = MOSQ_ERR_NOT_SUPPORTED;
-		goto handle_connect_error;
-	}
 
 	mosquitto_property_read_string(properties, MQTT_PROP_AUTHENTICATION_METHOD, &context->auth_method, false);
 	mosquitto_property_read_binary(properties, MQTT_PROP_AUTHENTICATION_DATA, &auth_data, &auth_data_len, false);
