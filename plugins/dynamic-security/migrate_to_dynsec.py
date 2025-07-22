@@ -418,16 +418,71 @@ def migrate_to_dynsec(
     return dynsec_config
 
 
+def migrate_mosquitto_conf(
+    mosquitto_conf: str, dynsec_lib_path: Path, dynsec_config_path: Path
+) -> str:
+    migrated_mosquitto_conf: list[str] = []
+    for line in mosquitto_conf.splitlines():
+        if line.startswith("acl_file"):
+            continue
+
+        if line.startswith("password_file"):
+            dynsec_plugin_configuration = [
+                f"plugin {str(dynsec_lib_path)}",
+                f"plugin_opt_config_file {str(dynsec_config_path)}",
+            ]
+            migrated_mosquitto_conf.extend(dynsec_plugin_configuration)
+            continue
+
+        migrated_mosquitto_conf.append(line)
+
+    return "\n".join(migrated_mosquitto_conf)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--acl-file", required=True, type=str, help="Path to ACL file")
     parser.add_argument(
         "--pw-file", required=True, type=str, help="Path to password file"
     )
+    parser.add_argument(
+        "--conf", required=False, type=str, help="Path to mosquitto.conf file"
+    )
+    parser.add_argument(
+        "--dynsec-lib",
+        required=False,
+        type=str,
+        help="Path to mosquitto_dynamic_security.so/.dll",
+    )
 
     args = parser.parse_args()
     acl_file_path = Path(args.acl_file)
     pw_file_path = Path(args.pw_file)
+
+    dynsec_config_file_path = Path(__file__).parent.resolve() / "dynamic-security.json"
+
+    if args.conf is not None:
+        if args.dynsec_lib is None:
+            print(
+                "Error: Cannot migrate mosquitto.conf file. Reason: --dynsec-lib argument is missing"
+            )
+            return
+
+        mosquitto_conf_path = Path(args.conf)
+        mosquitto_conf = mosquitto_conf_path.read_text(encoding="utf-8")
+
+        # Migrate mosquitto.conf
+        migrated_mosquitto_conf = migrate_mosquitto_conf(
+            mosquitto_conf,
+            Path(args.dynsec_lib),
+            dynsec_config_file_path,
+        )
+
+        # Backup old mosquitto.conf and afterwards write migrated mosquitto.conf file
+        mosquitto_conf_path.with_suffix(".conf.old.dynsec").write_text(
+            mosquitto_conf, encoding="utf-8"
+        )
+        mosquitto_conf_path.write_text(migrated_mosquitto_conf, encoding="utf-8")
 
     parsed_acl_file: AclFileConfig = AclFileConfig.parse_acl_file(acl_file_path)
 
@@ -439,8 +494,7 @@ def main():
 
     # Migrate config and write to file
     dynsec_config = migrate_to_dynsec(parsed_acl_file, parsed_pw_file)
-    dynsec_file_path = Path(__file__).parent.resolve() / "dynamic-security.json"
-    dynsec_file_path.write_text(
+    dynsec_config_file_path.write_text(
         data=json.dumps(dynsec_config.asdict(), indent=4), encoding="utf-8"
     )
 
