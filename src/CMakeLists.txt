@@ -163,7 +163,10 @@ if (WITH_DLT)
     set (MOSQ_LIBS ${MOSQ_LIBS} ${DLT_LIBRARIES})
 endif (WITH_DLT)
 
-set (MOSQ_LIBS ${MOSQ_LIBS} OpenSSL::SSL)
+if (WITH_TLS)
+	set (MOSQ_LIBS ${MOSQ_LIBS} OpenSSL::SSL)
+endif()
+
 # Check for getaddrinfo_a
 include(CheckLibraryExists)
 check_library_exists(anl getaddrinfo_a  "" HAVE_GETADDRINFO_A)

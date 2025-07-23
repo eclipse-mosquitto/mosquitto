@@ -60,7 +60,9 @@ set(C_SRC
 	util_mosq.c util_topic.c util_mosq.h
 	will_mosq.c will_mosq.h)
 
-set (LIBRARIES OpenSSL::SSL)
+if (WITH_TLS)
+	set (LIBRARIES OpenSSL::SSL)
+endif()
 
 if (UNIX AND NOT APPLE AND NOT ANDROID)
 	find_library(LIBRT rt)
