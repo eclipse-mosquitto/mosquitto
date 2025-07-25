@@ -100,4 +100,3 @@ int handle__suback(struct mosquitto *mosq)
 
 	return MOSQ_ERR_SUCCESS;
 }
-

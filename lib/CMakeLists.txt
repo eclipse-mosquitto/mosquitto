@@ -51,7 +51,7 @@ set(C_SRC
 	util_mosq.c util_mosq.h
 	will_mosq.c will_mosq.h)
 
-set(LIBRARIES common-options)
+set(LIBRARIES common-options libmosquitto_common)
 
 if(WITH_TLS)
 	set (LIBRARIES ${LIBRARIES} OpenSSL::SSL)
@@ -116,20 +116,16 @@ endif()
 
 if(WITH_THREADING)
 	if(WIN32)
-		 target_link_libraries(libmosquitto PRIVATE PThreads4W::PThreads4W)
+		set (LIBRARIES ${LIBRARIES} PThreads4W::PThreads4W)
 	else()
 		set(THREADS_PREFER_PTHREAD_FLAG ON)
 		find_package(Threads REQUIRED)
 
-		target_link_libraries(libmosquitto PRIVATE Threads::Threads)
+		set (LIBRARIES ${LIBRARIES} Threads::Threads)
 	endif()
 endif()
 
-target_link_libraries(libmosquitto
-	PUBLIC
-		libmosquitto_common
-)
-target_link_libraries(libmosquitto PRIVATE ${LIBRARIES})
+target_link_libraries(libmosquitto PUBLIC ${LIBRARIES})
 
 set_target_properties(libmosquitto PROPERTIES
 	OUTPUT_NAME mosquitto

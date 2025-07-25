@@ -74,7 +74,30 @@ and keys, must also be placed in `/var/snap/mosquitto/common/` - in new folders
 if wanted. This directory is the only place accessible by Mosquitto when
 running as a snap.
 
+Starting and stopping the broker service can be done with the snap command:
+
+```
+snap start mosquitto
+snap stop mosquitto
+```
+
+Or via systemd:
+
+```
+systemctl start snap.mosquitto.mosquitto
+systemctl stop snap.mosquitto.mosquitto
+```
+
 All other aspects of running Mosquitto are the same as with any other
 installation methods.
+
+## Client configuration files
+
+If you use the mosquitto_pub, mosquitto_rr, or mosquitto_sub configuration
+files they should be placed in `$HOME/snap/mosquitto/current/.config`:
+
+* `$HOME/snap/mosquitto/current/.config/mosquitto_pub`
+* `$HOME/snap/mosquitto/current/.config/mosquitto_rr`
+* `$HOME/snap/mosquitto/current/.config/mosquitto_sub`
 
 [authentication method]:/documentation/authentication-methods

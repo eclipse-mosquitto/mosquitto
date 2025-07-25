@@ -55,6 +55,7 @@ struct mosq_config {
 	char *tls_version;
 	char *tls_engine;
 	char *tls_engine_kpass_sha1;
+	bool tls_use_os_certs;
 	char *keyform;
 	char *psk;
 	char *psk_identity;

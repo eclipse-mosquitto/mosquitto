@@ -13,6 +13,16 @@ ENV \
     CJSON_VERSION=1.7.14 \
     CJSON_SHA256=fb50a663eefdc76bafa80c82bc045af13b1363e8f45cec8b442007aef6a41343
 
+LABEL \
+    org.opencontainers.image.authors="Roger Light <roger@atchoo.org>" \
+    org.opencontainers.image.title="mosquitto" \
+    org.opencontainers.image.description="Eclipse Mosquitto MQTT Broker" \
+    org.opencontainers.image.url="https://mosquitto.org/" \
+    org.opencontainers.image.documentation="https://mosquitto.org/documentation/" \
+    org.opencontainers.image.source="https://github.com/eclipse-mosquitto/mosquitto" \
+    org.opencontainers.image.licenses="EPL-2.0" \
+    org.opencontainers.image.version=${VERSION}
+
 RUN set -x && \
     apk --no-cache add --virtual build-deps \
         build-base \
@@ -108,7 +118,8 @@ RUN set -x && \
     install -Dm644 /build/mosq/edl-v10 /usr/share/licenses/mosquitto/edl-v10 && \
     chown -R mosquitto:mosquitto /mosquitto && \
     apk --no-cache add \
-        ca-certificates && \
+        ca-certificates \
+        tzdata && \
     apk del build-deps && \
     rm -rf /build
 

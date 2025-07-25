@@ -99,4 +99,3 @@ int handle__unsuback(struct mosquitto *mosq)
 
 	return MOSQ_ERR_SUCCESS;
 }
-

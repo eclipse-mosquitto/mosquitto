@@ -1166,6 +1166,34 @@ log_timestamp_format %Y-%m-%dT%H:%M:%S
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>retain_expiry_interval</option> <replaceable>minutes</replaceable></term>
+				<listitem>
+					<para>
+						The default behaviour of mosquitto is to remove retained
+						messages that have reached their message-expiry-interval
+						property the next time that that message is accessed -
+						either by being replaced by a new message, or on the
+						next subscription that matches the message. If you have
+						a pattern of publishing many retained messages with a
+						message-expiry-interval, but that are not subscribed to,
+						then the expired retained messages will remain in
+						memory. This option configures the broker to
+						periodically check the retained tree for expired
+						messages.
+					</para>
+
+					<para>
+						Defaults to off. Setting to a value greater than zero
+						means the broker will make a check at an interval of
+						that number of minutes.
+					</para>
+
+					<para>This option applies globally.</para>
+
+					<para>Reloaded on reload signal.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>set_tcp_nodelay</option> [ true | false ]</term>
 				<listitem>
 					<para>If set to true, the TCP_NODELAY option will be set on
@@ -1723,6 +1751,7 @@ accept_protocol_versions 3, 4</programlisting>
 							"openssl rehash &lt;path to capath&gt;" each time
 							you add/remove a certificate.
 						</para>
+						<para><option>capath</option> is not supported for websockets.</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>

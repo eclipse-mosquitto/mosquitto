@@ -126,4 +126,3 @@ int handle__pubrec(struct mosquitto *mosq)
 
 	return MOSQ_ERR_SUCCESS;
 }
-

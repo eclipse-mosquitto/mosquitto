@@ -32,6 +32,10 @@ BROKER_OBJS = \
 OBJS_EXTERNAL = \
 	json_help.o
 
+ifeq ($(UNAME),Linux)
+    LIBS:=$(LIBS) -lrt
+endif
+
 .PHONY: all clean reallyclean
 
 ifeq ($(WITH_FUZZING),yes)

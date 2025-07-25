@@ -359,6 +359,8 @@ static void post_shutdown_cleanup(void)
 		(void)remove(db.config->pid_file);
 	}
 
+	mux__cleanup();
+
 	log__close(db.config);
 	config__cleanup(db.config);
 	net__broker_cleanup();
@@ -387,6 +389,7 @@ int main(int argc, char *argv[])
 	mosquitto_time_init();
 	cjson_init();
 
+	mosquitto_time_init();
 #if defined(WIN32) || defined(__CYGWIN__)
 	if(argc == 2){
 		if(!strcmp(argv[1], "run")){
@@ -430,7 +433,10 @@ int main(int argc, char *argv[])
 	db.config = &config;
 	config__init(&config);
 	rc = config__parse_args(&config, argc, argv);
-	if(rc != MOSQ_ERR_SUCCESS){
+	if(rc == MOSQ_ERR_UNKNOWN){
+		post_shutdown_cleanup();
+		return MOSQ_ERR_SUCCESS;
+	}else if(rc != MOSQ_ERR_SUCCESS){
 		post_shutdown_cleanup();
 		return rc;
 	}

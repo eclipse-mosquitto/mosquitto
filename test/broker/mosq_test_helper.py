@@ -48,11 +48,12 @@ def do_test_broker_failure(
 ):
     rc = 1
 
+    use_conf_file = len(conf_file) > 0
+
     cmd_args = cmd_args.copy()
-    if with_test_config:
+    if with_test_config and use_conf_file:
         cmd_args.insert(0, "--test-config")
 
-    use_conf_file = len(conf_file)
     create_conf_file = use_conf_file and len(config)
     if create_conf_file:
         with open(conf_file, "w") as f:

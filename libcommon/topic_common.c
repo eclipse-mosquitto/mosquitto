@@ -54,7 +54,7 @@ BROKER_EXPORT int mosquitto_pub_topic_check(const char *str)
 		len++;
 		str = &str[1];
 	}
-	if(len > 65535) return MOSQ_ERR_INVAL;
+	if(len == 0 || len > 65535) return MOSQ_ERR_INVAL;
 	if(hier_count > TOPIC_HIERARCHY_LIMIT) return MOSQ_ERR_INVAL;
 
 	return MOSQ_ERR_SUCCESS;
@@ -65,7 +65,7 @@ BROKER_EXPORT int mosquitto_pub_topic_check2(const char *str, size_t len)
 	size_t i;
 	int hier_count = 0;
 
-	if(str == NULL || len > 65535){
+	if(str == NULL || len == 0 || len > 65535){
 		return MOSQ_ERR_INVAL;
 	}
 
@@ -114,7 +114,7 @@ BROKER_EXPORT int mosquitto_sub_topic_check(const char *str)
 		c = str[0];
 		str = &str[1];
 	}
-	if(len > 65535) return MOSQ_ERR_INVAL;
+	if(len == 0 || len > 65535) return MOSQ_ERR_INVAL;
 	if(hier_count > TOPIC_HIERARCHY_LIMIT) return MOSQ_ERR_INVAL;
 
 	return MOSQ_ERR_SUCCESS;
@@ -126,7 +126,7 @@ BROKER_EXPORT int mosquitto_sub_topic_check2(const char *str, size_t len)
 	size_t i;
 	int hier_count = 0;
 
-	if(str == NULL || len > 65535){
+	if(str == NULL || len == 0 || len > 65535){
 		return MOSQ_ERR_INVAL;
 	}
 

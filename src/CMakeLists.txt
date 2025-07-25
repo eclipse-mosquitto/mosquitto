@@ -138,6 +138,11 @@ if(WITH_SYS_TREE)
 	target_compile_definitions(mosquitto PRIVATE "WITH_SYS_TREE")
 endif()
 
+option(WITH_OLD_KEEPALIVE "Use legacy keepalive check mechanism?" OFF)
+if (WITH_OLD_KEEPALIVE)
+	add_definitions("-DWITH_OLD_KEEPALIVE")
+endif (WITH_OLD_KEEPALIVE)
+
 option(WITH_ADNS "Include ADNS support?" OFF)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -165,6 +170,7 @@ target_compile_definitions(mosquitto PRIVATE "WITH_BROKER")
 if(WITH_TLS)
 	target_link_libraries(mosquitto PRIVATE OpenSSL::SSL)
 endif()
+
 # Check for getaddrinfo_a
 include(CheckLibraryExists)
 check_library_exists(anl getaddrinfo_a  "" HAVE_GETADDRINFO_A)

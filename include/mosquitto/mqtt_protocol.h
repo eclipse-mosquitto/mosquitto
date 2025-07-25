@@ -36,6 +36,7 @@ Contributors:
 
 
 /* Message types */
+#define CMD_RESERVED 0x00U
 #define CMD_CONNECT 0x10U
 #define CMD_CONNACK 0x20U
 #define CMD_PUBLISH 0x30U

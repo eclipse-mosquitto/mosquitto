@@ -130,7 +130,7 @@ do_test(["broker", "unknown"], 13, response="Command 'unknown' not recognised.\n
 do_test(["dynsec", "unknown"], 13, response="Command 'unknown' not recognised.\n")
 do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-i"], 3, response="Error: -i argument given, but no iterations provided.\nError: Invalid input.\n")
 do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-c"], 3, response="Error: Unknown argument: -c\nError: Invalid input.\n")
-do_test(["dynsec", "createClient", "client", "-c"], 3, response="Error: -c argument given, but no clientid provided.\nError: Invalid input.\n")
+do_test(["dynsec", "createClient", "client", "-i"], 3, response="Error: -i argument given, but no clientid provided.\nError: Invalid input.\n")
 do_test(["dynsec", "createClient", "client", "-p"], 3, response="Error: -p argument given, but no password provided.\nError: Invalid input.\n")
 
 # Env modification

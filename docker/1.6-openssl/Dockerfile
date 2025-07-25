@@ -1,4 +1,4 @@
-FROM alpine:3.18
+FROM alpine:3.22
 
 LABEL maintainer="Roger Light <roger@atchoo.org>" \
     description="Eclipse Mosquitto MQTT Broker"
@@ -86,7 +86,8 @@ RUN set -x && \
     install -Dm644 /build/mosq/edl-v10 /usr/share/licenses/mosquitto/edl-v10 && \
     chown -R mosquitto:mosquitto /mosquitto && \
     apk --no-cache add \
-        ca-certificates && \
+        ca-certificates \
+        tzdata && \
     apk del build-deps && \
     rm -rf /build
 

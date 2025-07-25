@@ -80,6 +80,7 @@ Section "Files" SecInstall
 	File "..\build64\vcpkg_installed\x64-windows-release\bin\sqlite3.dll"
 
 	SetOutPath "$INSTDIR\devel"
+	File /oname=mosquitto_broker.lib "..\build64\src\Release\mosquitto.lib"
 	File "..\build64\lib\Release\mosquitto.lib"
 	File "..\build64\lib\cpp\Release\mosquittopp.lib"
 	File "..\include\mosquitto.h"
@@ -175,13 +176,6 @@ Section "Uninstall"
 	Delete "$INSTDIR\edl-v10"
 	Delete "$INSTDIR\epl-v20"
 	Delete "$INSTDIR\mosquitto.ico"
-
-	Delete "$INSTDIR\cjson.dll"
-	Delete "$INSTDIR\libcrypto-3-x64.dll"
-	Delete "$INSTDIR\libssl-3-x64.dll"
-	Delete "$INSTDIR\pthreadVC3.dll"
-	Delete "$INSTDIR\uv.dll"
-	Delete "$INSTDIR\websockets.dll"
 
 	Delete "$INSTDIR\argon2.dll"
 	Delete "$INSTDIR\cjson.dll"

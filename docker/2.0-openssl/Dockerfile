@@ -1,10 +1,10 @@
-FROM alpine:3.20
+FROM alpine:3.22
 
 LABEL maintainer="Roger Light <roger@atchoo.org>" \
     description="Eclipse Mosquitto MQTT Broker"
 
-ENV VERSION=2.0.20 \
-    DOWNLOAD_SHA256=ebd07d89d2a446a7f74100ad51272e4a8bf300b61634a7812e19f068f2759de8 \
+ENV VERSION=2.0.22 \
+    DOWNLOAD_SHA256=2f752589ef7db40260b633fbdb536e9a04b446a315138d64a7ff3c14e2de6b68 \
     GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7 \
     LWS_VERSION=4.2.1 \
     LWS_SHA256=842da21f73ccba2be59e680de10a8cce7928313048750eb6ad73b6fa50763c51
@@ -90,7 +90,8 @@ RUN set -x && \
     chown -R mosquitto:mosquitto /mosquitto && \
     apk --no-cache add \
         ca-certificates \
-        cjson && \
+        cjson \
+        tzdata && \
     apk del build-deps && \
     rm -rf /build
 

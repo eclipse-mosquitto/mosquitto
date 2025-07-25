@@ -4,7 +4,7 @@
 # To configure the build options either use the CMake gui, or run the command
 # line utility including the "-i" option.
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.18)
 
 set (VERSION 2.1.0)
 project(mosquitto

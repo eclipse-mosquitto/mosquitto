@@ -65,8 +65,13 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
     global vg_index
     global vg_logfiles
 
-    if use_conf:
+    if use_conf == True:
         cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+
+        if port == 0:
+            port = 1888
+        else:
+            cmd += ['-p', str(port)]
     else:
         if cmd is None and port != 0:
             cmd = [get_build_root() + '/src/mosquitto', '-v', '-p', str(port)]

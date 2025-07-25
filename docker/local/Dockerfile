@@ -50,7 +50,8 @@ RUN set -x && \
         argon2-libs \
         ca-certificates \
         cjson \
-        sqlite-libs && \
+        sqlite-libs \
+        tzdata && \
     apk del build-deps && \
     rm -rf /build
 

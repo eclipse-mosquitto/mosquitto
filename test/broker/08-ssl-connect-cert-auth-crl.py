@@ -31,6 +31,7 @@ broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2,
 try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=f"{ssl_dir}/test-root-ca.crt")
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_cert_chain(certfile=f"{ssl_dir}/client.crt", keyfile=f"{ssl_dir}/client.key")
     ssock = context.wrap_socket(sock, server_hostname="localhost")
     ssock.settimeout(20)

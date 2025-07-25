@@ -249,7 +249,7 @@
 					<para>Define the path to a file containing a PEM encoded
 						certificate for this client, if required by the
 						server.</para>
-					<para>See also <option>--key</option>.</para>
+					<para>See also <option>--key</option> and the Encrypted Connections section.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -410,7 +410,7 @@
 					<para>Define the path to a file containing a PEM encoded
 						private key for this client, if required by the
 						server.</para>
-					<para>See also <option>--cert</option>.</para>
+					<para>See also <option>--cert</option> and the Encrypted Connections section.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -1344,6 +1344,7 @@ mosquitto_sub -t 'bbc/#' -T bbc/bbc1 --remove-retained</programlisting>
 			<varlistentry>
 				<term><filename>$XDG_CONFIG_HOME/mosquitto_sub</filename></term>
 				<term><filename>$HOME/.config/mosquitto_sub</filename></term>
+				<term><filename>$HOME/snap/mosquitto/current/.config/mosquitto_sub</filename> (for snap installs)</term>
 				<listitem>
 					<para>Configuration file for default options.</para>
 				</listitem>

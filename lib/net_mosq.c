@@ -367,9 +367,7 @@ int net__try_connect_step2(struct mosquitto *mosq, uint16_t port, mosq_sock_t *s
 		}
 
 		rc = connect(*sock, rp->ai_addr, rp->ai_addrlen);
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(rc == 0 || errno == EINPROGRESS || errno == COMPAT_EWOULDBLOCK){
 			if(rc < 0 && (errno == EINPROGRESS || errno == COMPAT_EWOULDBLOCK)){
 				rc = MOSQ_ERR_CONN_PENDING;
@@ -467,9 +465,7 @@ static int net__try_connect_tcp(const char *host, uint16_t port, mosq_sock_t *so
 		}
 
 		rc = connect(*sock, rp->ai_addr, rp->ai_addrlen);
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(rc == 0 || errno == EINPROGRESS || errno == COMPAT_EWOULDBLOCK){
 			if(rc < 0 && (errno == EINPROGRESS || errno == COMPAT_EWOULDBLOCK)){
 				rc = MOSQ_ERR_CONN_PENDING;
@@ -1146,9 +1142,7 @@ int net__socketpair(mosq_sock_t *pairR, mosq_sock_t *pairW)
 			continue;
 		}
 		if(connect(spR, (struct sockaddr *)&ss, ss_len) < 0){
-#ifdef WIN32
-			errno = WSAGetLastError();
-#endif
+			WINDOWS_SET_ERRNO();
 			if(errno != EINPROGRESS && errno != COMPAT_EWOULDBLOCK){
 				COMPAT_CLOSE(spR);
 				COMPAT_CLOSE(listensock);
@@ -1157,9 +1151,7 @@ int net__socketpair(mosq_sock_t *pairR, mosq_sock_t *pairW)
 		}
 		spW = accept(listensock, NULL, 0);
 		if(spW == -1){
-#ifdef WIN32
-			errno = WSAGetLastError();
-#endif
+			WINDOWS_SET_ERRNO();
 			if(errno != EINPROGRESS && errno != COMPAT_EWOULDBLOCK){
 				COMPAT_CLOSE(spR);
 				COMPAT_CLOSE(listensock);

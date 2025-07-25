@@ -135,9 +135,7 @@ int mosquitto_loop(struct mosquitto *mosq, int timeout, int max_packets)
 	fdcount = select(maxfd+1, &readfds, &writefds, NULL, &local_timeout);
 #endif
 	if(fdcount == -1){
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(errno == EINTR){
 			return MOSQ_ERR_SUCCESS;
 		}else{
@@ -220,9 +218,7 @@ static int interruptible_sleep(struct mosquitto *mosq, time_t reconnect_delay)
 	fdcount = select(maxfd+1, &readfds, NULL, NULL, &local_timeout);
 #endif
 	if(fdcount == -1){
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(errno == EINTR){
 			return MOSQ_ERR_SUCCESS;
 		}else{

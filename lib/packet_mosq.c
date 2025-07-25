@@ -294,9 +294,8 @@ int packet__write(struct mosquitto *mosq)
 				packet->to_process -= (uint32_t)write_length;
 				packet->pos += (uint32_t)write_length;
 			}else{
-#ifdef WIN32
-				errno = WSAGetLastError();
-#endif
+				WINDOWS_SET_ERRNO();
+
 				if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK
 #ifdef WIN32
 						|| errno == WSAENOTCONN
@@ -363,9 +362,7 @@ static int read_header(struct mosquitto *mosq, ssize_t (*func_read)(struct mosqu
 		if(read_length == 0){
 			return MOSQ_ERR_CONN_LOST; /* EOF */
 		}
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK){
 			return MOSQ_ERR_SUCCESS;
 		}else{
@@ -384,7 +381,6 @@ static int read_header(struct mosquitto *mosq, ssize_t (*func_read)(struct mosqu
 
 static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_state state, ssize_t (*local__read)(struct mosquitto *, void *, size_t))
 {
-	uint8_t byte;
 	ssize_t read_length;
 	int rc = 0;
 
@@ -401,6 +397,11 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 #ifdef WITH_BROKER
 			/* Clients must send CONNECT as their first command. */
 			if(!(mosq->bridge) && state == mosq_cs_new && (mosq->in_packet.command&0xF0) != CMD_CONNECT){
+				return MOSQ_ERR_PROTOCOL;
+			}else if((mosq->in_packet.command&0xF0) == CMD_RESERVED){
+				if(mosq->protocol == mosq_p_mqtt5){
+					send__disconnect(mosq, MQTT_RC_PROTOCOL_ERROR, NULL);
+				}
 				return MOSQ_ERR_PROTOCOL;
 			}
 #else
@@ -420,6 +421,7 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 	 *   >0 means we have finished reading the remaining_length bytes.
 	 */
 	if(mosq->in_packet.remaining_count <= 0){
+		uint8_t byte;
 		do{
 			if(mosq->in_packet.packet_buffer_to_process == 0){
 				rc = read_header(mosq, local__read);
@@ -525,9 +527,7 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 			mosq->in_packet.to_process -= (uint32_t)read_length;
 			mosq->in_packet.pos += (uint32_t)read_length;
 		}else{
-#ifdef WIN32
-			errno = WSAGetLastError();
-#endif
+			WINDOWS_SET_ERRNO();
 			if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK){
 				if(mosq->in_packet.to_process > 1000){
 					/* Update last_msg_in time if more than 1000 bytes left to

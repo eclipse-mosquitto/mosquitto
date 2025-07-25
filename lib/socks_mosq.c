@@ -63,9 +63,8 @@ Contributors:
 
 static inline int socks5__network_error(struct mosquitto *mosq)
 {
-#ifdef WIN32
-	errno = WSAGetLastError();
-#endif
+	WINDOWS_SET_ERRNO();
+
 	if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK){
 		return MOSQ_ERR_SUCCESS;
 	}else{

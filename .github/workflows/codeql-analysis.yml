@@ -14,7 +14,7 @@ name: "CodeQL"
 on:
   workflow_dispatch:
   push:
-    branches: [ master, fixes, develop, 1.6.x ]
+    branches: [ master, fixes, develop ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]

@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Light"
+  given-names: "Roger A."
+  orcid: "https://orcid.org/0000-0001-9218-7797"
+title: "My Research Software"
+version: 2.0.21
+doi: 10.21105/joss.00265
+url: "https://github.com/eclise-mosquitto/mosquitto"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Light"
+    given-names: "Roger A."
+    orcid: "https://orcid.org/0000-0001-9218-7797"
+  doi: "10.21105/joss.00265"
+  journal: "Journal of Open Source Software"
+  start: 265
+  title: "Mosquitto: server and client implementation of the MQTT protocol"
+  issue: 13
+  volume: 2
+  year: 2017

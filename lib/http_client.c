@@ -129,9 +129,7 @@ int http_c__read(struct mosquitto *mosq)
 		if(read_length == 0){
 			return MOSQ_ERR_CONN_LOST; /* EOF */
 		}
-#ifdef WIN32
-		errno = WSAGetLastError();
-#endif
+		WINDOWS_SET_ERRNO();
 		if(errno == EAGAIN || errno == COMPAT_EWOULDBLOCK){
 			return MOSQ_ERR_SUCCESS;
 		}else{

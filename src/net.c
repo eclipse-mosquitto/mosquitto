@@ -123,7 +123,7 @@ struct mosquitto *net__socket_accept(struct mosquitto__listener_sock *listensock
 	new_sock = accept(listensock->sock, NULL, 0);
 	if(new_sock == INVALID_SOCKET){
 #ifdef WIN32
-		errno = WSAGetLastError();
+		WINDOWS_SET_ERRNO();
 		if(errno == WSAEMFILE){
 #else
 		if(errno == EMFILE || errno == ENFILE){
@@ -712,6 +712,9 @@ static int net__bind_interface(struct mosquitto__listener *listener, struct addr
 						memcpy(&((struct sockaddr_in6 *)rp->ai_addr)->sin6_addr,
 								&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr,
 								sizeof(struct in6_addr));
+
+						((struct sockaddr_in6 *)rp->ai_addr)->sin6_scope_id = ((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_scope_id;
+
 						freeifaddrs(ifaddr);
 						return MOSQ_ERR_SUCCESS;
 					}

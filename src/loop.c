@@ -184,6 +184,7 @@ int mosquitto_main_loop(struct mosquitto__listener_sock *listensock, int listens
 #endif
 
 	while(g_run){
+		retain__expire();
 		queue_plugin_msgs();
 		context__free_disused();
 
@@ -244,8 +245,6 @@ int mosquitto_main_loop(struct mosquitto__listener_sock *listensock, int listens
 		}
 #endif
 	}
-
-	mux__cleanup();
 
 	return MOSQ_ERR_SUCCESS;
 }

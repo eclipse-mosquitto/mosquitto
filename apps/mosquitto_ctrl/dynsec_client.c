@@ -41,9 +41,9 @@ int dynsec_client__create(int argc, char *argv[], cJSON *j_command)
 	username = argv[0];
 
 	for(i=1; i<argc; i++){
-		if(!strcmp(argv[i], "-c")){
+		if(!strcmp(argv[i], "-c") || !strcmp(argv[i], "-i")){
 			if(i+1 == argc){
-				fprintf(stderr, "Error: -c argument given, but no clientid provided.\n");
+				fprintf(stderr, "Error: -i argument given, but no clientid provided.\n");
 				return MOSQ_ERR_INVAL;
 			}
 			clientid = argv[i+1];

@@ -146,7 +146,14 @@ void listeners__add_websockets(struct lws_context *ws_context, mosq_sock_t fd)
 static int listeners__add_local(const char *host, uint16_t port)
 {
 	struct mosquitto__listener *listeners;
+	bool allow_anonymous;
+
 	listeners = db.config->listeners;
+	if(db.config->security_options.allow_anonymous == -1){
+		allow_anonymous = true;
+	}else{
+		allow_anonymous = db.config->security_options.allow_anonymous;
+	}
 
 	listeners[db.config->listener_count].security_options = mosquitto_calloc(1, sizeof(struct mosquitto__security_options));
 	if(listeners[db.config->listener_count].security_options == NULL){
@@ -154,7 +161,7 @@ static int listeners__add_local(const char *host, uint16_t port)
 	}
 
 	listener__set_defaults(&listeners[db.config->listener_count]);
-	listeners[db.config->listener_count].security_options->allow_anonymous = true;
+	listeners[db.config->listener_count].security_options->allow_anonymous = allow_anonymous;
 	listeners[db.config->listener_count].security_options->auto_id_prefix = mosquitto_strdup("auto-");
 	if(listeners[db.config->listener_count].security_options->auto_id_prefix == NULL){
 		mosquitto_FREE(listeners[db.config->listener_count].security_options);

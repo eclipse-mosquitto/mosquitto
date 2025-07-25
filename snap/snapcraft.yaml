@@ -1,12 +1,11 @@
 name: mosquitto
 version: 2.1.0
 summary: Eclipse Mosquitto MQTT broker
-description: This is a message broker that supports version 5.0, 3.1.1, and 3.1 of the MQTT
-    protocol.
+description: This is a message broker that supports version 5.0, 3.1.1, and 3.1 of the MQTT protocol.
     MQTT provides a method of carrying out messaging using a publish/subscribe
     model. It is lightweight, both in terms of bandwidth usage and ease of
     implementation. This makes it particularly useful at the edge of the network
-    where a sensor or other simple device may be implemented using an arduino for
+    where a sensor or other simple device may be implemented using a microcontroller for
     example.
 confinement: strict
 grade: stable
@@ -81,6 +80,7 @@ parts:
       - libmicrohttpd-dev
       - libsqlite3-dev
       - libssl-dev
+      - libwebsockets-dev
       - xsltproc
     stage-packages:
       - ca-certificates
@@ -95,19 +95,19 @@ parts:
       - usr/bin/mosquitto_signal
       - usr/bin/mosquitto_sub
       - usr/bin/mosquitto_passwd
+      - usr/include/mosquitto.h
+      - usr/include/mosquitto/*.h
+      - usr/include/mosquitto_broker.h
+      - usr/include/mosquitto_plugin.h
+      - usr/include/mqtt_protocol.h
+      - usr/lib/*-linux-gnu/libcjson.so*
+      - usr/lib/*-linux-gnu/libcrypto.so*
+      - usr/lib/*-linux-gnu/libmicrohttpd.so*
       - usr/lib/*-linux-gnu/libmosquitto.so*
       - usr/lib/*-linux-gnu/libmosquitto_common.so*
+      - usr/lib/*-linux-gnu/libssl.so*
       - usr/lib/*-linux-gnu/mosquitto_acl_file.so*
       - usr/lib/*-linux-gnu/mosquitto_dynamic_security.so*
       - usr/lib/*-linux-gnu/mosquitto_password_file.so*
       - usr/lib/*-linux-gnu/mosquitto_persist_sqlite.so*
       - usr/lib/*-linux-gnu/mosquitto_sparkplug_aware.so*
-      - usr/lib/*-linux-gnu/libcjson.so*
-      - usr/lib/*-linux-gnu/libcrypto.so*
-      - usr/lib/*-linux-gnu/libmicrohttpd.so*
-      - usr/lib/*-linux-gnu/libssl.so*
-      - usr/include/mosquitto.h
-      - usr/include/mosquitto_broker.h
-      - usr/include/mosquitto_plugin.h
-      - usr/include/mqtt_protocol.h
-      - usr/include/mosquitto/*.h

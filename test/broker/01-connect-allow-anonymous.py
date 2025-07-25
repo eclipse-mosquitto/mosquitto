@@ -29,10 +29,18 @@ def write_config5(filename, port):
 def write_config6(filename, port):
     with open(filename, 'w') as f:
         f.write("allow_anonymous false\n")
+
+def write_config7(filename, port):
+    with open(filename, 'w') as f:
+        f.write("allow_anonymous true\n")
+
+def write_config8(filename, port):
+    with open(filename, 'w') as f:
+        f.write("allow_anonymous false\n")
         f.write("listener %d\n" % (port))
         f.write("listener_allow_anonymous true\n")
 
-def write_config7(filename, port):
+def write_config9(filename, port):
     with open(filename, 'w') as f:
         f.write("allow_anonymous true\n")
         f.write("listener %d\n" % (port))
@@ -72,6 +80,7 @@ def do_test(use_conf, write_config, expect_success):
     finally:
         if write_config is not None:
             os.remove(conf_file)
+            pass
         broker.terminate()
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
@@ -87,8 +96,7 @@ def do_test(use_conf, write_config, expect_success):
 do_test(use_conf=False, write_config=None, expect_success=True)
 
 # Config file but no listener - allow_anonymous should be true
-# Not possible right now because the test doesn't allow us to use a config file and -p at the same time.
-#do_test(use_conf=True, write_config=write_config1, expect_success=True)
+do_test(use_conf=True, write_config=write_config1, expect_success=True)
 
 # Config file with "port" - allow_anonymous should be false
 do_test(use_conf=True, write_config=write_config2, expect_success=False)
@@ -102,9 +110,16 @@ do_test(use_conf=True, write_config=write_config4, expect_success=True)
 # Config file with "listener" - allow_anonymous explicitly true
 do_test(use_conf=True, write_config=write_config5, expect_success=True)
 
+# Config file without "listener" - allow_anonymous explicitly false
+do_test(use_conf=True, write_config=write_config6, expect_success=False)
+
+# Config file without "listener" - allow_anonymous explicitly true
+do_test(use_conf=True, write_config=write_config7, expect_success=True)
+
 # Config file with "listener" - allow_anonymous explicitly false and listener_allow_anonymous explicitly true
-do_test(use_conf=True, write_config=write_config6, expect_success=True)
+do_test(use_conf=True, write_config=write_config8, expect_success=True)
 
 # Config file with "listener" - allow_anonymous explicitly true and listener_allow_anonymous explicitly false
-do_test(use_conf=True, write_config=write_config7, expect_success=False)
+do_test(use_conf=True, write_config=write_config9, expect_success=False)
+
 exit(0)

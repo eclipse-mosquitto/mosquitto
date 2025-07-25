@@ -1,7 +1,7 @@
 R=..
 include ${R}/config.mk
 
-.PHONY: all check test test-compile ptest clean
+.PHONY: all check test test-compile ptest clean ssl
 
 all :
 
@@ -17,13 +17,19 @@ endif
 
 check : test
 
-test : utest
+ssl: ssl/all-ca.crt
+
+ssl/all-ca.crt: ssl/gen.sh
+	cd "${<D}" && "${CURDIR}/${<}"
+	test -e "$@"
+
+test : utest ssl
 	$(MAKE) -C broker test
 	$(MAKE) -C lib test
 	$(MAKE) -C client test
 	$(MAKE) -C apps test
 
-ptest : utest
+ptest : utest ssl
 	$(MAKE) -C broker ptest
 	$(MAKE) -C lib ptest
 	$(MAKE) -C client ptest

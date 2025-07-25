@@ -315,6 +315,7 @@ static void config__init_reload(struct mosquitto__config *config)
 	config->persistent_client_expiration = 0;
 	config->queue_qos0_messages = false;
 	config->retain_available = true;
+	config->retain_expiry_interval = 0;
 	config->set_tcp_nodelay = false;
 	config->sys_interval = 10;
 	config->upgrade_outgoing_qos = false;
@@ -489,6 +490,13 @@ void config__bridge_cleanup(struct mosquitto__bridge *bridge)
 }
 #endif
 
+static void print_version(void)
+{
+	printf("mosquitto %s\n", VERSION);
+	printf("Copyright © 2025 Roger Light.\n");
+	printf("License EPL-2.0 OR BSD-3-Clause.\n");
+}
+
 static void print_usage(void)
 {
 	printf("mosquitto version %s\n\n", VERSION);
@@ -533,7 +541,10 @@ int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])
 			config->daemon = true;
 		}else if(!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")){
 			print_usage();
-			return MOSQ_ERR_INVAL;
+			return MOSQ_ERR_UNKNOWN;
+		}else if(!strcmp(argv[i], "--version")){
+			print_version();
+			return MOSQ_ERR_UNKNOWN;
 		}else if(!strcmp(argv[i], "-p") || !strcmp(argv[i], "--port")){
 			if(i<argc-1){
 				port_tmp = atoi(argv[i+1]);
@@ -737,9 +748,7 @@ int config__read(struct mosquitto__config *config, bool reload)
 	}
 
 	/* If auth/access options are set and allow_anonymous not explicitly set, disallow anon. */
-	if(config->local_only == true){
-		config->security_options.allow_anonymous = true;
-	}else{
+	if(config->local_only == false){
 		if(config->per_listener_settings){
 			for(i=0; i<config->listener_count; i++){
 				/* Default option if no security options set */
@@ -2255,6 +2264,9 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 #endif
 				}else if(!strcmp(token, "retain_available")){
 					if(conf__parse_bool(&token, token, &config->retain_available, &saveptr)) return MOSQ_ERR_INVAL;
+				}else if(!strcmp(token, "retain_expiry_interval")){
+					if(conf__parse_int(&token, token, &config->retain_expiry_interval, &saveptr)) return MOSQ_ERR_INVAL;
+					config->retain_expiry_interval *= 60;
 				}else if(!strcmp(token, "retry_interval")){
 					OPTION_UNAVAILABLE(token);
 				}else if(!strcmp(token, "round_robin")){
@@ -2618,15 +2630,13 @@ static int config__check(struct mosquitto__config *config)
 #ifdef WITH_BRIDGE
 static int config__check_bridges(struct mosquitto__config *config)
 {
-	int i;
-	int j;
 	struct mosquitto__bridge *bridge1, *bridge2;
 	char hostname[256];
 	size_t len;
 
 	/* Check for bridge duplicate local_clientid, need to generate missing IDs
 	 * first. */
-	for(i=0; i<config->bridge_count; i++){
+	for(int i=0; i<config->bridge_count; i++){
 		bridge1 = config->bridges[i];
 
 		if(!bridge1->remote_clientid){
@@ -2653,9 +2663,9 @@ static int config__check_bridges(struct mosquitto__config *config)
 		}
 	}
 
-	for(i=0; i<config->bridge_count; i++){
+	for(int i=0; i<config->bridge_count; i++){
 		bridge1 = config->bridges[i];
-		for(j=i+1; j<config->bridge_count; j++){
+		for(int j=i+1; j<config->bridge_count; j++){
 			bridge2 = config->bridges[j];
 			if(!strcmp(bridge1->local_clientid, bridge2->local_clientid)){
 				log__printf(NULL, MOSQ_LOG_ERR, "Error: Bridge local_clientid "
@@ -2667,6 +2677,28 @@ static int config__check_bridges(struct mosquitto__config *config)
 		}
 	}
 
+#ifdef WITH_TLS
+	/* Check for missing TLS cafile/capath/certfile/keyfile */
+	for(int i=0; i<config->listener_count; i++){
+		bool cafile = !!config->listeners[i].cafile;
+		bool capath = !!config->listeners[i].capath;
+		bool certfile = !!config->listeners[i].certfile;
+		bool keyfile = !!config->listeners[i].keyfile;
+
+		if((certfile && !keyfile) || (!certfile && keyfile)){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: Both certfile and keyfile must be provided to enable a TLS listener.");
+			return MOSQ_ERR_INVAL;
+		}
+		if(cafile && !certfile){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: cafile specified without certfile and keyfile.");
+			return MOSQ_ERR_INVAL;
+		}
+		if(capath && !certfile){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: capath specified without certfile and keyfile.");
+			return MOSQ_ERR_INVAL;
+		}
+	}
+#endif
 	return MOSQ_ERR_SUCCESS;
 }
 #endif

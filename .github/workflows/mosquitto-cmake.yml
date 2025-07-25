@@ -1,14 +1,21 @@
 name: Mosquitto - CMake
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - develop
+      - master
       - fixes
+      - develop
+      - release/*
+    tags:
+      - 'v[0-9]+.*'
   pull_request:
     branches:
-      - develop
+      - master
       - fixes
+      - develop
+      - release/*
 
 jobs:
   build:

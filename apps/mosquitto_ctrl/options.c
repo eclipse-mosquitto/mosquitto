@@ -256,6 +256,7 @@ static int client_config_line_proc(struct mosq_config *cfg, int *argc, char **ar
 				} else if(!strncasecmp(url, "mqtts://", 8)) {
 					url += 8;
 					cfg->port = 8883;
+					cfg->tls_use_os_certs = true;
 				} else {
 					fprintf(stderr, "Error: Unsupported URL scheme.\n\n");
 					return 1;
@@ -406,6 +407,8 @@ static int client_config_line_proc(struct mosq_config *cfg, int *argc, char **ar
 			}
 			argv++;
 			(*argc)--;
+		}else if(!strcmp(argv[0], "--tls-use-os-certs")){
+			cfg->tls_use_os_certs = true;
 		}else if(!strcmp(argv[0], "--tls-version")){
 			if((*argc) == 1){
 				fprintf(stderr, "Error: --tls-version argument given but no version specified.\n\n");
@@ -622,7 +625,21 @@ int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 			}
 			return 1;
 		}
+#  ifdef FINAL_WITH_TLS_PSK
+	}else if (cfg->psk){
+		if(mosquitto_tls_psk_set(mosq, cfg->psk, cfg->psk_identity, NULL)){
+			fprintf(stderr, "Error: Problem setting TLS-PSK options.\n");
+			mosquitto_lib_cleanup();
+			return 1;
+		}
+#  endif
+	}else if(cfg->port == 8883){
+		mosquitto_int_option(mosq, MOSQ_OPT_TLS_USE_OS_CERTS, 1);
 	}
+	if(cfg->tls_use_os_certs){
+		mosquitto_int_option(mosq, MOSQ_OPT_TLS_USE_OS_CERTS, 1);
+	}
+
 	mosquitto_tls_insecure_set(mosq, cfg->insecure);
 	if(cfg->tls_engine && mosquitto_string_option(mosq, MOSQ_OPT_TLS_ENGINE, cfg->tls_engine)){
 		fprintf(stderr, "Error: Problem setting TLS engine, is %s a valid engine?\n", cfg->tls_engine);
@@ -636,12 +653,6 @@ int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 		fprintf(stderr, "Error: Problem setting TLS ALPN protocol.\n");
 		return 1;
 	}
-#  ifdef FINAL_WITH_TLS_PSK
-	if(cfg->psk && mosquitto_tls_psk_set(mosq, cfg->psk, cfg->psk_identity, NULL)){
-		fprintf(stderr, "Error: Problem setting TLS-PSK options.\n");
-		return 1;
-	}
-#  endif
 	if((cfg->tls_version || cfg->ciphers) && mosquitto_tls_opts_set(mosq, 1, cfg->tls_version, cfg->ciphers)){
 		fprintf(stderr, "Error: Problem setting TLS options, check the options are valid.\n");
 		return 1;

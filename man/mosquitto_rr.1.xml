@@ -244,7 +244,7 @@
 					<para>Define the path to a file containing a PEM encoded
 						certificate for this client, if required by the
 						server.</para>
-					<para>See also <option>--key</option>.</para>
+					<para>See also <option>--key</option> and the Encrypted Connections section.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -393,7 +393,7 @@
 					<para>Define the path to a file containing a PEM encoded
 						private key for this client, if required by the
 						server.</para>
-					<para>See also <option>--cert</option>.</para>
+					<para>See also <option>--cert</option> and the Encrypted Connections section.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
@@ -1040,6 +1040,7 @@
 			<varlistentry>
 				<term><filename>$XDG_CONFIG_HOME/mosquitto_rr</filename></term>
 				<term><filename>$HOME/.config/mosquitto_rr</filename></term>
+				<term><filename>$HOME/snap/mosquitto/current/.config/mosquitto_rr</filename> (for snap installs)</term>
 				<listitem>
 					<para>Configuration file for default options.</para>
 				</listitem>

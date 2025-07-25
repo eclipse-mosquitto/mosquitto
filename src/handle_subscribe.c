@@ -196,6 +196,7 @@ int handle__subscribe(struct mosquitto *context)
 					break;
 				default:
 					mosquitto_FREE(sub.topic_filter);
+					mosquitto_FREE(payload);
 					return rc2;
 			}
 			if(qos > 127){
@@ -208,18 +209,21 @@ int handle__subscribe(struct mosquitto *context)
 				rc2 = plugin__handle_subscribe(context, &sub);
 				if(rc2){
 					mosquitto_FREE(sub.topic_filter);
+					mosquitto_FREE(payload);
 					return rc2;
 				}
 
 				rc2 = sub__add(context, &sub);
 				if(rc2 > 0){
 					mosquitto_FREE(sub.topic_filter);
+					mosquitto_FREE(payload);
 					return rc2;
 				}
 				if(context->protocol == mosq_p_mqtt311 || context->protocol == mosq_p_mqtt31){
 					if(rc2 == MOSQ_ERR_SUCCESS || rc2 == MOSQ_ERR_SUB_EXISTS){
 						if(retain__queue(context, &sub)){
 							mosquitto_FREE(sub.topic_filter);
+							mosquitto_FREE(payload);
 							return rc;
 						}
 					}
@@ -229,6 +233,7 @@ int handle__subscribe(struct mosquitto *context)
 
 						if(retain__queue(context, &sub)){
 							mosquitto_FREE(sub.topic_filter);
+							mosquitto_FREE(payload);
 							return rc;
 						}
 					}
@@ -255,6 +260,7 @@ int handle__subscribe(struct mosquitto *context)
 	if(context->protocol != mosq_p_mqtt31){
 		if(payloadlen == 0){
 			/* No subscriptions specified, protocol error. */
+			fprintf(stderr, "no payload\n");
 			return MOSQ_ERR_MALFORMED_PACKET;
 		}
 	}
