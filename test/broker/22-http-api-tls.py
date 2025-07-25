@@ -27,6 +27,7 @@ rc = 1
 
 try:
     context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_verify_locations(cafile=f"{ssl_dir}/all-ca.crt")
     http_conn = http.client.HTTPSConnection(f"localhost:{http_port}", context=context)
 

@@ -28,8 +28,9 @@ broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2,
 
 ssl_eof = False
 try:
-    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile="../ssl/test-root-ca.crt")
-    context.load_cert_chain(certfile="../ssl/client-expired.crt", keyfile="../ssl/client-expired.key")
+    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=f"{ssl_dir}/test-root-ca.crt")
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.load_cert_chain(certfile=f"{ssl_dir}/client-expired.crt", keyfile=f"{ssl_dir}/client-expired.key")
     with socket.create_connection(("localhost", port1)) as sock:
         ssock = context.wrap_socket(sock, server_hostname="localhost", suppress_ragged_eofs=True)
         ssock.settimeout(None)
