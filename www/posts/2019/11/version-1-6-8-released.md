@@ -45,7 +45,7 @@ Mosquitto 1.6.8 has been released, this is a bugfix release.
   end with a new line. Closes [#1473].
 - Make documentation for `mosquitto_pub -l` match reality - blank lines are
   sent as empty messages. Closes [#1474].
-- Free memory in `mosquitto_sub` when quiting without having made a successful
+- Free memory in `mosquitto_sub` when quitting without having made a successful
   connection. Closes [#1513].
 
 # Build

@@ -550,7 +550,7 @@ int handle__connect(struct mosquitto *context)
 	}
 
 	clean_start = (connect_flags & 0x02) >> 1;
-	/* session_expiry_interval will be overriden if the properties are read later */
+	/* session_expiry_interval will be overridden if the properties are read later */
 	if(clean_start == false && protocol_version != PROTOCOL_VERSION_v5){
 		/* v3* has clean_start == false mean the session never expires */
 		context->session_expiry_interval = UINT32_MAX;

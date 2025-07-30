@@ -184,7 +184,7 @@ Changes:
 
 ### Dependencies
 
-mosquitto_ctrl and mosquitto_dynamic_secuity.so require the cJSON library. If
+mosquitto_ctrl and mosquitto_dynamic_security.so require the cJSON library. If
 it is not detected or desired, those features can be disabled.
 
 ## Plugins

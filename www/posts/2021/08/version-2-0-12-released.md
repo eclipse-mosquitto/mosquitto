@@ -44,7 +44,7 @@ and bugfix release.
   These clients are now rejected if their keepalive value exceeds
   `max_keepalive`. This option allows CVE-2020-13849, which is for the MQTT
   v3.1.1 protocol itself rather than an implementation, to be addressed.
-- Fix broker not quiting if e.g. the `password_file` is specified as a
+- Fix broker not quitting if e.g. the `password_file` is specified as a
   directory. Closes [#2241].
 - Fix listener `mount_point` not being removed on outgoing messages.
   Closes [#2244].

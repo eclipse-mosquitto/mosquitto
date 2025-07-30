@@ -180,7 +180,7 @@ overall behaviour of a topic without having to see every message, for example.
   trust OS provided CA certificates for use with TLS connections.
 
 # Client library fixes
-- Fix send quota being incorrecly reset on reconnect. Closes [#1822].
+- Fix send quota being incorrectly reset on reconnect. Closes [#1822].
 - Don't use logging until log mutex is initialised. Closes [#1819].
 - Fix missing mach/mach_time.h header on OS X. Closes [#1831].
 - Fix connect properties not being sent when the client automatically

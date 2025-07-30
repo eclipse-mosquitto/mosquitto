@@ -353,7 +353,7 @@ Broker:
   These clients are now rejected if their keepalive value exceeds
   max_keepalive. This option allows CVE-2020-13849, which is for the MQTT
   v3.1.1 protocol itself rather than an implementation, to be addressed.
-- Fix broker not quiting if e.g. the `password_file` is specified as a
+- Fix broker not quitting if e.g. the `password_file` is specified as a
   directory. Closes #2241.
 - Fix listener mount_point not being removed on outgoing messages.
   Closes #2244.
@@ -469,7 +469,7 @@ Broker:
 - Fix encrypted bridge connections incorrectly connecting when `bridge_cafile`
   is empty or invalid. Closes #2130.
 - Fix `tls_version` behaviour not matching documentation. It was setting the
-  exact TLS version to use, not the minimium TLS version to use. Closes #2110.
+  exact TLS version to use, not the minimum TLS version to use. Closes #2110.
 - Fix messages to `$` prefixed topics being rejected. Closes #2111.
 - Fix QoS 0 messages not being delivered when max_queued_bytes was configured.
   Closes #2123.
@@ -863,7 +863,7 @@ Client library features:
   trust OS provided CA certificates for use with TLS connections.
 
 Client library fixes:
-- Fix send quota being incorrecly reset on reconnect. Closes #1822.
+- Fix send quota being incorrectly reset on reconnect. Closes #1822.
 - Don't use logging until log mutex is initialised. Closes #1819.
 - Fix missing mach/mach_time.h header on OS X. Closes #1831.
 - Fix connect properties not being sent when the client automatically
@@ -1086,7 +1086,7 @@ Clients:
   end with a new line. Closes #1473.
 - Make documentation for `mosquitto_pub -l` match reality - blank lines are
   sent as empty messages. Closes #1474.
-- Free memory in `mosquitto_sub` when quiting without having made a successful
+- Free memory in `mosquitto_sub` when quitting without having made a successful
   connection. Closes #1513.
 
 Build:
@@ -1891,7 +1891,7 @@ Broker:
 - Fix mosquitto.db from becoming corrupted due to client messages being
   persisted with no stored message. Closes #424.
 - Fix bridge not restarting properly. Closes #428.
-- Fix unitialized memory in gets_quiet on Windows. Closes #426.
+- Fix uninitialized memory in gets_quiet on Windows. Closes #426.
 - Fix building with WITH_ADNS=no for systems that don't use glibc. Closes
   #415.
 - Fixes to readme.md.
@@ -2066,7 +2066,7 @@ Broker:
 Broker:
 - Fix incorrect bridge notification on initial connection. Closes #467096.
 - Build fixes for OpenBSD.
-- Fix incorrect behaviour for autosave_interval, most noticable for
+- Fix incorrect behaviour for autosave_interval, most noticeable for
   autosave_interval=1. Closes #465438.
 - Fix handling of outgoing QoS>0 messages for bridges that could not be sent
   because the bridge connection was down.
@@ -2515,7 +2515,7 @@ Client library:
 - Add support for verifying remote server certificate subject against the
   remote hostname.
 - Add mosquitto_reconnect_async() support and make asynchronous connections
-  truely asynchronous rather than simply deferred. DNS lookups are still
+  truly asynchronous rather than simply deferred. DNS lookups are still
   blocking, so asynchronous connections require an IP address instead of
   hostname.
 - Allow control of reconnection timeouts in mosquitto_loop_forever() and after
@@ -2912,7 +2912,7 @@ Other:
 0.14.1 - 20111117
 =================
 
-- Fix Python sytax errors (bug #891673).
+- Fix Python syntax errors (bug #891673).
 
 0.14 - 20111116
 ===============

@@ -148,7 +148,7 @@
 						keyword.</para>
 					<para><code>pattern [read|write|readwrite|deny] &lt;topic&gt;</code></para>
 
-					<para>The patterns available for substition are:</para>
+					<para>The patterns available for substitution are:</para>
 					<itemizedlist mark="circle">
 						<listitem><para>%c to match the client id of the client</para></listitem>
 						<listitem><para>%u to match the username of the client</para></listitem>
@@ -1546,7 +1546,7 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 							be chosen from the list of available PSK ciphers.
 							If you want to control which ciphers are available,
 							use this option.  The list of available ciphers can
-							be optained using the "openssl ciphers" command and
+							be obtained using the "openssl ciphers" command and
 							should be provided in the same format as the output
 							of that command.</para>
 					</listitem>

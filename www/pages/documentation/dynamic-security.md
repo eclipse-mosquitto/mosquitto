@@ -215,7 +215,7 @@ set explicitly, priorities will default to -1.
 For each of the group, role, and ACL objects, checks are made in priority order
 from the highest numerical value to the lowest numerical value. If two objects
 of the same type have the same priority, then they will be checked in
-lexographical order according to the username/groupname/rolename, but it is
+lexicographical order according to the username/groupname/rolename, but it is
 advised to use unique priorities per object type.
 
 When an event occurs that needs an ACL check, the ACLs for that ACL type are
@@ -451,7 +451,7 @@ they would be provided on the command line. For example:
   the port defaults to 1883. If the scheme is mqtts:// then the port defaults
   to 8883.
 * `--nodelay` : Disable Nagle's algorithm for the socket. This means that
-  latency of sent messages is reduced, which is particularly noticable for
+  latency of sent messages is reduced, which is particularly noticeable for
   small, reasonably infrequent messages. Using this option may result in more
   packets being sent than would normally be necessary.
 * `-p port` : Connect to the port specified. If not given, the default of 1883

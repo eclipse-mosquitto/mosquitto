@@ -9,7 +9,7 @@
 #
 # Modify the variable below to enable/disable features.
 #
-# Can also be overriden at the command line, e.g.:
+# Can also be overridden at the command line, e.g.:
 #
 # make WITH_TLS=no
 # =============================================================================

@@ -9,6 +9,6 @@
 .. type: text
 -->
 
-I'm pleased to annouce that the mosquitto website is now available at
+I'm pleased to announce that the mosquitto website is now available at
 <http://mosquitto.org/> so please update your bookmarks! I'll be updating the
 links here in a few days when the change has propagated.
