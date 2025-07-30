@@ -8,6 +8,7 @@ from persist_module_helper import *
 from typing import Optional
 
 import mqtt5_rc
+import mqtt5_props
 
 persist_help = persist_module()
 
@@ -22,14 +23,46 @@ subscriber_id = "test-will-subscriber"
 publisher_id = "test-will-publisher"
 helper_id = "test-helper"
 
+will_properties = mqtt5_props.gen_properties(
+    [
+        {"identifier": mqtt5_props.PROP_PAYLOAD_FORMAT_INDICATOR, "value": 1},
+        {"identifier": mqtt5_props.PROP_CONTENT_TYPE, "value": "text"},
+        {
+            "identifier": mqtt5_props.PROP_USER_PROPERTY,
+            "name": "test-user-property",
+            "value": "nothing important",
+        },
+    ]
+)
+
+will_properties_in_db = (
+    "["
+    '{"identifier":"payload-format-indicator","value":1}'
+    + ',{"identifier":"content-type","value":"text"}'
+    + ',{"identifier":"user-property","name":"test-user-property","value":"nothing important"}'
+    + "]"
+)
+
+send_will_disconnect_rc = mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG
+normal_disconnect_rc = mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION
+
 
 def do_test(
     session_expiry: int,
     will_qos: int,
     will_retain: bool,
+    will_delay: int = 0,
     disconnect_rc: Optional[int] = None,
 ):
     mid = 1
+
+    print(
+        f" {'persistent' if session_expiry > 0 else 'non persistent'} client"
+        f" with will qos = {will_qos}"
+        f", will_retain = {will_retain}"
+        f" and will delay = {will_delay}"
+        + (f" and disconnect rc = {disconnect_rc}" if disconnect_rc is not None else "")
+    )
 
     def check_will_received(do_subscribe: bool, expect_will_publish=bool):
         nonlocal mid
@@ -64,12 +97,6 @@ def do_test(
         mosq_test.do_ping(subscriber_sock)
         subscriber_sock.close()
 
-    print(
-        f" {'persistent' if session_expiry > 0 else 'non persistent'} client"
-        f" with will qos = {will_qos}"
-        f" and will_retain = {will_retain}"
-        + (f" and disconnect rc = {disconnect_rc}" if disconnect_rc is not None else "")
-    )
     expect_will_received = will_qos > 0
 
     conf_file = os.path.basename(__file__).replace(".py", f"_{port}.conf")
@@ -83,7 +110,13 @@ def do_test(
     rc = 1
 
     will_payload = b"My simple will message"
-    will_properties = b""
+    if will_delay:
+        will_delay_property = mqtt5_props.gen_uint32_prop(
+            mqtt5_props.PROP_WILL_DELAY_INTERVAL, will_delay
+        )
+    else:
+        will_delay_property = b""
+    will_delayed = will_delay > 0 and session_expiry > 0
 
     broker = mosq_test.start_broker(filename=conf_file, use_conf=True, port=port)
     stde = None
@@ -108,6 +141,7 @@ def do_test(
             will_qos=will_qos,
             will_retain=will_retain,
             will_payload=will_payload,
+            will_properties=will_properties + will_delay_property,
         )
         if disconnect_rc:
             if disconnect_rc == mqtt5_rc.MQTT_RC_SESSION_TAKEN_OVER:
@@ -128,7 +162,7 @@ def do_test(
                         reason_code=disconnect_rc, proto_ver=proto_ver
                     ),
                 )
-            will_sent = disconnect_rc != mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION
+            will_sent = disconnect_rc != normal_disconnect_rc and not will_delayed
         else:
             will_sent = False
 
@@ -168,14 +202,18 @@ def do_test(
                 topic,
                 will_qos,
                 will_retain,
-                properties=None,
+                properties=will_properties_in_db,
             )
 
         # Restart broker
         broker = mosq_test.start_broker(filename=conf_file, use_conf=True, port=port)
 
-        check_will_received(do_subscribe=False, expect_will_publish=will_qos > 0)
-        check_will_received(do_subscribe=True, expect_will_publish=will_retain)
+        check_will_received(
+            do_subscribe=False, expect_will_publish=will_qos > 0 and not will_delayed
+        )
+        check_will_received(
+            do_subscribe=True, expect_will_publish=will_retain and not will_delayed
+        )
 
         (broker_terminate_rc, stde2) = mosq_test.terminate_broker(broker)
         broker = None
@@ -208,23 +246,31 @@ def do_test(
 # If disconnect_rc is not set the client will not disconnect
 # session_expiry, will qos, will retain, disconnect_rc
 
+send_will_disconnect_rc = mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG
+
 # non persistent client connected during crash
 do_test(0, 0, 0)
 do_test(0, 1, 0)
 do_test(0, 0, 1)
 do_test(0, 1, 1)
 
+# non persistent client connected during crash, will delay does not matter
+do_test(0, 0, 0, will_delay=30)
+do_test(0, 1, 0, will_delay=30)
+do_test(0, 0, 1, will_delay=30)
+do_test(0, 1, 1, will_delay=30)
+
 # non persistent client disconnecting with will sent before crash
-do_test(0, 0, 0, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(0, 1, 0, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(0, 0, 1, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(0, 1, 1, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
+do_test(0, 0, 0, disconnect_rc=send_will_disconnect_rc)
+do_test(0, 1, 0, disconnect_rc=send_will_disconnect_rc)
+do_test(0, 0, 1, disconnect_rc=send_will_disconnect_rc)
+do_test(0, 1, 1, disconnect_rc=send_will_disconnect_rc)
 
 # non persistent client disconnecting without will sent before crash
-do_test(0, 0, 0, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(0, 1, 0, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(0, 0, 1, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(0, 1, 1, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
+do_test(0, 0, 0, disconnect_rc=normal_disconnect_rc)
+do_test(0, 1, 0, disconnect_rc=normal_disconnect_rc)
+do_test(0, 0, 1, disconnect_rc=normal_disconnect_rc)
+do_test(0, 1, 1, disconnect_rc=normal_disconnect_rc)
 
 # persistent client connected during crash
 do_test(60, 0, 0)
@@ -232,18 +278,30 @@ do_test(60, 1, 0)
 do_test(60, 0, 1)
 do_test(60, 1, 1)
 
+# persistent client connected during crash with a will delay of 30 seconds
+do_test(60, 0, 0, will_delay=30)
+do_test(60, 1, 0, will_delay=30)
+do_test(60, 0, 1, will_delay=30)
+do_test(60, 1, 1, will_delay=30)
+
 # persistent client disconnecting with will sent before crash
-do_test(60, 0, 0, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(60, 1, 0, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(60, 0, 1, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
-do_test(60, 1, 1, mqtt5_rc.MQTT_RC_DISCONNECT_WITH_WILL_MSG)
+do_test(60, 0, 0, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 1, 0, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 0, 1, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 1, 1, disconnect_rc=send_will_disconnect_rc)
 
 # persistent client disconnecting without will sent before crash
-do_test(60, 0, 0, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(60, 1, 0, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(60, 0, 1, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
-do_test(60, 1, 1, mqtt5_rc.MQTT_RC_NORMAL_DISCONNECTION)
+do_test(60, 0, 0, disconnect_rc=normal_disconnect_rc)
+do_test(60, 1, 0, disconnect_rc=normal_disconnect_rc)
+do_test(60, 0, 1, disconnect_rc=normal_disconnect_rc)
+do_test(60, 1, 1, disconnect_rc=normal_disconnect_rc)
+
+# persistent client disconnecting with will sent, but will delay
+do_test(60, 0, 0, will_delay=30, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 1, 0, will_delay=30, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 0, 1, will_delay=30, disconnect_rc=send_will_disconnect_rc)
+do_test(60, 1, 1, will_delay=30, disconnect_rc=send_will_disconnect_rc)
 
 # Remove will msg by session takeover through reconnect
-do_test(0, 1, 1, mqtt5_rc.MQTT_RC_SESSION_TAKEN_OVER)
-# do_test(60, 1, 1, mqtt5_rc.MQTT_RC_SESSION_TAKEN_OVER)
+do_test(0, 1, 1, disconnect_rc=mqtt5_rc.MQTT_RC_SESSION_TAKEN_OVER)
+# do_test(60, 1, 1, disconnect_rc=mqtt5_rc.MQTT_RC_SESSION_TAKEN_OVER)
