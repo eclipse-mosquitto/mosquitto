@@ -57,13 +57,6 @@ if(WITH_TLS)
 	set (LIBRARIES ${LIBRARIES} OpenSSL::SSL)
 endif()
 
-if(UNIX AND NOT APPLE AND NOT ANDROID)
-	find_library(LIBRT rt)
-	if(LIBRT)
-		set (LIBRARIES ${LIBRARIES} rt)
-	endif()
-endif()
-
 if(WIN32)
 	set (LIBRARIES ${LIBRARIES} ws2_32)
 endif()

@@ -22,7 +22,7 @@ ifeq ($(UNAME),AIX)
 endif
 
 ifeq ($(UNAME),Linux)
-	LOCAL_LDADD+=-lrt
+	LOCAL_LDADD+=
 	LOCAL_LDFLAGS+=-Wl,--dynamic-list=linker.syms
 endif
 
