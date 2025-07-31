@@ -154,6 +154,9 @@ obj-*/
 # Emacs generated files
 *~
 
+# VSCode generated files
+.vscode/
+
 # clangd
 .cache/
 
