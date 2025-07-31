@@ -37,7 +37,7 @@ I'm currently aware of:
 
 # Update
 I've uploaded test3 with a python fix, updated CMake scripts and fixed
-`max_inflight_messages` and `max_queued_mesages`.
+`max_inflight_messages` and `max_queued_messages`.
 
 [mosquitto-expt ppa]: https://launchpad.net/~mosquitto-dev/+archive/mosquitto-expt
 [openSUSE build service]: https://build.opensuse.org/project/show?project=home%3Aoojah%3Amqtt_expt

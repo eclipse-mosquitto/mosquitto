@@ -15,7 +15,7 @@ This is a bugfix release.
 
  * Fix incorrect bridge notification on initial connection. Closes [#467096].
  * Build fixes for OpenBSD.
- * Fix incorrect behaviour for `autosave_interval`, most noticable for
+ * Fix incorrect behaviour for `autosave_interval`, most noticeable for
    `autosave_interval=1`. Closes [#465438].
  * Fix handling of outgoing QoS&gt;0 messages for bridges that could not be
    sent because the bridge connection was down.

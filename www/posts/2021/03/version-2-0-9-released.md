@@ -28,7 +28,7 @@ bugfix releases and include a minor security fix.
 - Fix encrypted bridge connections incorrectly connecting when `bridge_cafile`
   is empty or invalid. Closes [#2130].
 - Fix `tls_version` behaviour not matching documentation. It was setting the
-  exact TLS version to use, not the minimium TLS version to use. Closes [#2110].
+  exact TLS version to use, not the minimum TLS version to use. Closes [#2110].
 - Fix messages to `$` prefixed topics being rejected. Closes [#2111].
 - Fix QoS 0 messages not being delivered when max_queued_bytes was configured.
   Closes [#2123].

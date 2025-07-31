@@ -95,7 +95,7 @@ available in the near future.
  * Add support for verifying remote server certificate subject against the
    remote hostname.
  * Add mosquitto_reconnect_async() support and make asynchronous connections
-   truely asynchronous rather than simply deferred. DNS lookups are still
+   truly asynchronous rather than simply deferred. DNS lookups are still
    blocking, so asynchronous connections require an IP address instead of
    hostname.
  * Allow control of reconnection timeouts in mosquitto_loop_forever() and after

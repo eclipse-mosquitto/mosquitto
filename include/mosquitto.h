@@ -1691,7 +1691,7 @@ libmosq_EXPORT int mosquitto_reconnect_delay_set(struct mosquitto *mosq, unsigne
 /*
  * Function: mosquitto_max_inflight_messages_set
  *
- * This function is deprected. Use the <mosquitto_int_option> function with the
+ * This function is deprecated. Use the <mosquitto_int_option> function with the
  * MOSQ_OPT_SEND_MAXIMUM option instead.
  *
  * Set the number of QoS 1 and 2 messages that can be "in flight" at one time.

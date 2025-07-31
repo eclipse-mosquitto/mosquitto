@@ -53,7 +53,7 @@ your config file then run as `mosquitto -c /path/to/mosquitto.conf`.
 
 To start your config file you define a listener and you will need to think
 about what authentication you require. It is not advised to run your broker
-with anonymous access when it is publically available.
+with anonymous access when it is publicly available.
 
 For details on how to do this, look at the
 [authentication methods](https://mosquitto.org/documentation/authentication-methods/)

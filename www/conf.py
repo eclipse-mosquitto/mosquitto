@@ -1154,7 +1154,7 @@ PRETTY_URLS = True
 # feature yet, it's faster and the output looks better.
 # USE_KATEX = False
 
-# KaTeX auto-render settings. If you want support for the $.$ syntax (wihch may
+# KaTeX auto-render settings. If you want support for the $.$ syntax (which may
 # conflict with running text!), just use this config:
 # KATEX_AUTO_RENDER = """
 # delimiters: [
@@ -1253,7 +1253,7 @@ COPY_SOURCES = False
 
 # Include preview image as a <figure><img></figure> at the top of the entry.
 # Requires FEED_PLAIN = False. If the preview image is found in the content,
-# it will not be included again. Image will be included as-is, aim to optmize
+# it will not be included again. Image will be included as-is, aim to optimize
 # the image source for Feedly, Apple News, Flipboard, and other popular clients.
 # FEED_PREVIEWIMAGE = True
 
