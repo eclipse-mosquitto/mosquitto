@@ -624,6 +624,74 @@ static int verify_will_options(struct mosquitto *context, uint8_t will, uint8_t 
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int handle_zero_length_clientid(struct mosquitto *context, char **clientid, bool *allow_zero_length_clientid,
+								 uint8_t clean_start)
+{
+	if(context->protocol == mosq_p_mqtt31){
+		send__connack(context, 0, CONNACK_REFUSED_IDENTIFIER_REJECTED, NULL);
+		return MOSQ_ERR_PROTOCOL;
+	}
+
+	/* mqtt311/mqtt5 */
+	mosquitto_FREE(*clientid);
+
+	if(db.config->per_listener_settings){
+		*allow_zero_length_clientid = context->listener->security_options->allow_zero_length_clientid;
+	}else{
+		*allow_zero_length_clientid = db.config->security_options.allow_zero_length_clientid;
+	}
+
+	if((context->protocol == mosq_p_mqtt311 && clean_start == 0) || *allow_zero_length_clientid == false){
+		uint8_t err_code = context->protocol == mosq_p_mqtt311 ? (uint8_t)CONNACK_REFUSED_IDENTIFIER_REJECTED : (uint8_t)MQTT_RC_UNSPECIFIED;
+		return send__connack_error_and_return(context, err_code, MOSQ_ERR_PROTOCOL);
+	}
+
+	*clientid = clientid_gen(&(uint16_t){0}, context->listener->security_options->auto_id_prefix,
+											 context->listener->security_options->auto_id_prefix_len);
+	if(*clientid == NULL){
+		return MOSQ_ERR_NOMEM;
+	}
+	context->assigned_id = true;
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int check_clientid_prefixes(struct mosquitto *context, const char* clientid)
+{
+	if(db.config->clientid_prefixes){
+		if(strncmp(db.config->clientid_prefixes, clientid, strlen(db.config->clientid_prefixes))){
+			uint8_t err_code = context->protocol == mosq_p_mqtt5 ? (uint8_t)MQTT_RC_NOT_AUTHORIZED : (uint8_t)CONNACK_REFUSED_NOT_AUTHORIZED;
+			return send__connack_error_and_return(context, err_code, MOSQ_ERR_AUTH);
+		}
+	}
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int read_and_verify_clientid_from_packet(struct mosquitto *context, char** clientid,
+												bool *allow_zero_length_clientid, uint8_t clean_start)
+{
+	int rc;
+	uint16_t slen;
+
+	if(packet__read_string(&context->in_packet, clientid, &slen)){
+		return MOSQ_ERR_PROTOCOL;
+	}
+
+	if(slen == 0){
+		rc = handle_zero_length_clientid(context, clientid, allow_zero_length_clientid, clean_start);
+		if (rc != MOSQ_ERR_SUCCESS) {
+			return rc;
+		}
+	}
+
+	rc = check_clientid_prefixes(context, *clientid);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		return rc;
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -905,55 +973,9 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-
-	if(packet__read_string(&context->in_packet, &clientid, &slen)){
-		rc = MOSQ_ERR_PROTOCOL;
+	rc = read_and_verify_clientid_from_packet(context, &clientid, &allow_zero_length_clientid, clean_start);
+	if (rc != MOSQ_ERR_SUCCESS) {
 		goto handle_connect_error;
-	}
-
-	if(slen == 0){
-		if(context->protocol == mosq_p_mqtt31){
-			send__connack(context, 0, CONNACK_REFUSED_IDENTIFIER_REJECTED, NULL);
-			rc = MOSQ_ERR_PROTOCOL;
-			goto handle_connect_error;
-		}else{ /* mqtt311/mqtt5 */
-			mosquitto_FREE(clientid);
-
-			if(db.config->per_listener_settings){
-				allow_zero_length_clientid = context->listener->security_options->allow_zero_length_clientid;
-			}else{
-				allow_zero_length_clientid = db.config->security_options.allow_zero_length_clientid;
-			}
-			if((context->protocol == mosq_p_mqtt311 && clean_start == 0) || allow_zero_length_clientid == false){
-				if(context->protocol == mosq_p_mqtt311){
-					send__connack(context, 0, CONNACK_REFUSED_IDENTIFIER_REJECTED, NULL);
-				}else{
-					send__connack(context, 0, MQTT_RC_UNSPECIFIED, NULL);
-				}
-				rc = MOSQ_ERR_PROTOCOL;
-				goto handle_connect_error;
-			}else{
-				clientid = clientid_gen(&slen, context->listener->security_options->auto_id_prefix, context->listener->security_options->auto_id_prefix_len);
-				if(!clientid){
-					rc = MOSQ_ERR_NOMEM;
-					goto handle_connect_error;
-				}
-				context->assigned_id = true;
-			}
-		}
-	}
-
-	/* clientid_prefixes check */
-	if(db.config->clientid_prefixes){
-		if(strncmp(db.config->clientid_prefixes, clientid, strlen(db.config->clientid_prefixes))){
-			if(context->protocol == mosq_p_mqtt5){
-				send__connack(context, 0, MQTT_RC_NOT_AUTHORIZED, NULL);
-			}else{
-				send__connack(context, 0, CONNACK_REFUSED_NOT_AUTHORIZED, NULL);
-			}
-			rc = MOSQ_ERR_AUTH;
-			goto handle_connect_error;
-		}
 	}
 
 	if(will){
