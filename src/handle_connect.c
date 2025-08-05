@@ -692,6 +692,77 @@ static int read_and_verify_clientid_from_packet(struct mosquitto *context, char*
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int set_username_from_packet(struct mosquitto *context, char **username)
+{
+	int rc;
+
+	rc = packet__read_string(&context->in_packet, username, &(uint16_t){0});
+	if(rc == MOSQ_ERR_NOMEM){
+		return MOSQ_ERR_NOMEM;
+	}
+	if(rc != MOSQ_ERR_SUCCESS){
+		if(context->protocol == mosq_p_mqtt31){
+			/* Username flag given, but no username. Ignore. */
+			/* NOTE: Removed setting of username_flag to zero as it is unused afterwards */
+		}else{
+			return MOSQ_ERR_PROTOCOL;
+		}
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int set_password_from_packet(struct mosquitto *context, char **password)
+{
+	int rc;
+
+	rc = packet__read_binary(&context->in_packet, (uint8_t **)password, &(uint16_t){0});
+	if(rc == MOSQ_ERR_NOMEM){
+		return MOSQ_ERR_NOMEM;
+	}
+
+	if(rc == MOSQ_ERR_MALFORMED_PACKET){
+		if(context->protocol == mosq_p_mqtt31){
+			/* Password flag given, but no password. Ignore. */
+		}else{
+			return MOSQ_ERR_PROTOCOL;
+		}
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
+static int read_and_verify_client_credentials_from_packet(struct mosquitto *context,
+														  char **username, uint8_t username_flag,
+														  char **password, uint8_t password_flag,
+														  const char* clientid)
+{
+	int rc;
+
+	if(username_flag){
+		rc = set_username_from_packet(context, username);
+		if (rc != MOSQ_ERR_SUCCESS) {
+			return rc;
+		}
+	}else{
+		if(context->protocol == mosq_p_mqtt311 || context->protocol == mosq_p_mqtt31){
+			if(password_flag){
+				/* username_flag == 0 && password_flag == 1 is forbidden */
+				log__printf(NULL, MOSQ_LOG_ERR, "Protocol error from %s: password without username, closing connection.", clientid);
+				return MOSQ_ERR_PROTOCOL;
+			}
+		}
+	}
+	if(password_flag){
+		rc = set_password_from_packet(context, password);
+		if (rc != MOSQ_ERR_SUCCESS) {
+			return rc;
+		}
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -895,7 +966,6 @@ int handle__connect(struct mosquitto *context)
 	uint8_t username_flag, password_flag;
 	char *username = NULL, *password = NULL;
 	int rc;
-	uint16_t slen;
 	mosquitto_property *properties = NULL;
 	void *auth_data = NULL;
 	uint16_t auth_data_len = 0;
@@ -960,9 +1030,6 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-	password_flag = connect_flags & 0x40;
-	username_flag = connect_flags & 0x80;
-
 	mosquitto_property_read_string(properties, MQTT_PROP_AUTHENTICATION_METHOD, &context->auth_method, false);
 	mosquitto_property_read_binary(properties, MQTT_PROP_AUTHENTICATION_DATA, &auth_data, &auth_data_len, false);
 	mosquitto_property_free_all(&properties);
@@ -999,43 +1066,12 @@ int handle__connect(struct mosquitto *context)
 		}
 	}
 
-	if(username_flag){
-		rc = packet__read_string(&context->in_packet, &username, &slen);
-		if(rc == MOSQ_ERR_NOMEM){
-			rc = MOSQ_ERR_NOMEM;
-			goto handle_connect_error;
-		}else if(rc != MOSQ_ERR_SUCCESS){
-			if(context->protocol == mosq_p_mqtt31){
-				/* Username flag given, but no username. Ignore. */
-				username_flag = 0;
-			}else{
-				rc = MOSQ_ERR_PROTOCOL;
-				goto handle_connect_error;
-			}
-		}
-	}else{
-		if(context->protocol == mosq_p_mqtt311 || context->protocol == mosq_p_mqtt31){
-			if(password_flag){
-				/* username_flag == 0 && password_flag == 1 is forbidden */
-				log__printf(NULL, MOSQ_LOG_ERR, "Protocol error from %s: password without username, closing connection.", clientid);
-				rc = MOSQ_ERR_PROTOCOL;
-				goto handle_connect_error;
-			}
-		}
-	}
-	if(password_flag){
-		rc = packet__read_binary(&context->in_packet, (uint8_t **)&password, &slen);
-		if(rc == MOSQ_ERR_NOMEM){
-			rc = MOSQ_ERR_NOMEM;
-			goto handle_connect_error;
-		}else if(rc == MOSQ_ERR_MALFORMED_PACKET){
-			if(context->protocol == mosq_p_mqtt31){
-				/* Password flag given, but no password. Ignore. */
-			}else{
-				rc = MOSQ_ERR_PROTOCOL;
-				goto handle_connect_error;
-			}
-		}
+	// Client credentials
+	password_flag = connect_flags & 0x40;
+	username_flag = connect_flags & 0x80;
+	rc = read_and_verify_client_credentials_from_packet(context, &username, username_flag, &password, password_flag, clientid);
+	if (rc != MOSQ_ERR_SUCCESS) {
+		goto handle_connect_error;
 	}
 
 	if(context->in_packet.pos != context->in_packet.remaining_length){
