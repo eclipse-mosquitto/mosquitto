@@ -763,6 +763,19 @@ static int read_and_verify_client_credentials_from_packet(struct mosquitto *cont
 	return MOSQ_ERR_SUCCESS;
 }
 
+static int check_additional_trailing_data(struct mosquitto *context, uint8_t protocol_version)
+{
+	if(context->in_packet.pos != context->in_packet.remaining_length){
+		/* Surplus data at end of packet, this must be an error. */
+		if(protocol_version == PROTOCOL_VERSION_v5){
+			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
+		}
+		return MOSQ_ERR_PROTOCOL;
+	}
+
+	return MOSQ_ERR_SUCCESS;
+}
+
 #ifdef WITH_TLS
 inline static int get_client_cert_and_subject_name(struct mosquitto *context, X509 **client_cert, X509_NAME **name)
 {
@@ -1074,12 +1087,8 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
-	if(context->in_packet.pos != context->in_packet.remaining_length){
-		/* Surplus data at end of packet, this must be an error. */
-		if(protocol_version == PROTOCOL_VERSION_v5){
-			send__connack(context, 0, MQTT_RC_MALFORMED_PACKET, NULL);
-		}
-		rc = MOSQ_ERR_PROTOCOL;
+	rc = check_additional_trailing_data(context, protocol_version);
+	if (rc != MOSQ_ERR_SUCCESS) {
 		goto handle_connect_error;
 	}
 
