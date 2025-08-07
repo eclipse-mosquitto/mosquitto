@@ -187,7 +187,7 @@ libmosqcommon_EXPORT int mosquitto_property_add_string(mosquitto_property **prop
  *
  * Parameters:
  *	proplist - pointer to mosquitto_property pointer, the list of properties
- *	identifier - property identifier (e.g. MQTT_PROP_USER_PROPERTY)
+ *	identifier - MQTT property identifier (e.g. MQTT_PROP_USER_PROPERTY from <mosquitto/mqtt_protocol.h>)
  *	name - string name for the new property, must be UTF-8 and zero terminated
  *	value - string value for the new property, must be UTF-8 and zero terminated
  *
@@ -672,7 +672,7 @@ libmosqcommon_EXPORT int mosquitto_property_copy_all(mosquitto_property **dest, 
  *
  * Parameters:
  *   command - MQTT command (e.g. CMD_CONNECT)
- *   identifier - MQTT property (e.g. MQTT_PROP_USER_PROPERTY)
+ *	identifier - MQTT property identifier (e.g. MQTT_PROP_USER_PROPERTY from <mosquitto/mqtt_protocol.h>)
  *
  * Returns:
  *   MOSQ_ERR_SUCCESS - if the identifier is valid for command
@@ -711,7 +711,7 @@ libmosqcommon_EXPORT int mosquitto_property_check_all(int command, const mosquit
  * separator, for example: payload-format-indicator.
  *
  * Parameters:
- *	identifier - valid MQTT property identifier integer
+ *	identifier - MQTT property identifier (e.g. MQTT_PROP_USER_PROPERTY from <mosquitto/mqtt_protocol.h>)
  *
  * Returns:
  *  A const string to the property name on success
