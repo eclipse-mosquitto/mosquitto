@@ -85,7 +85,7 @@ ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count);
 ssize_t net__write(struct mosquitto *mosq, const void *buf, size_t count);
 
 #ifdef WITH_TLS
-void net__print_ssl_error(struct mosquitto *mosq);
+void net__print_ssl_error(struct mosquitto *mosq, const char *msg);
 int net__socket_apply_tls(struct mosquitto *mosq);
 int net__socket_connect_tls(struct mosquitto *mosq);
 int mosquitto__verify_ocsp_status_cb(SSL * ssl, void *arg);
