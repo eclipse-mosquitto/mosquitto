@@ -549,7 +549,7 @@ void net__print_ssl_error(struct mosquitto *mosq, const char *msg)
 	char ebuf[256];
 	unsigned long e;
 	int num = 0;
-	char *msg_disp = msg == NULL ? "" : msg;
+	const char *msg_disp = msg == NULL ? "" : msg;
 	e = ERR_get_error();
 	while(e){
 		log__printf(mosq, MOSQ_LOG_ERR, "OpenSSL Error %s[%d]: %s", msg_disp, num, ERR_error_string(e, ebuf));
