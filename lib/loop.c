@@ -34,7 +34,7 @@ Contributors:
 #include "tls_mosq.h"
 #include "util_mosq.h"
 
-#if !defined(WIN32) && !defined(__SYMBIAN32__) && !defined(__QNX__)
+#if !defined(WIN32) && !defined(__QNX__)
 #define HAVE_PSELECT
 #endif
 
