@@ -32,6 +32,10 @@ Contributors:
 #include <termios.h>
 #include <time.h>
 
+#ifndef WIN32
+#  include <unistd.h>
+#endif
+
 #include "ctrl_shell.h"
 #include "ctrl_shell_internal.h"
 

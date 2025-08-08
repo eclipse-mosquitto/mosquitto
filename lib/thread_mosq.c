@@ -18,16 +18,19 @@ Contributors:
 
 #include "config.h"
 
-#ifndef WIN32
-#include <time.h>
-#endif
-
 #if defined(WITH_THREADING)
-#if defined(__linux__) || defined(__NetBSD__)
+#if defined(__linux__)
+#  define _GNU_SOURCE  /* Exposes pthread_setname_np on Linux */
+#  include <pthread.h>
+#elif defined(__NetBSD__)
 #  include <pthread.h>
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 #  include <pthread_np.h>
 #endif
+#endif
+
+#ifndef WIN32
+#include <time.h>
 #endif
 
 #include "mosquitto_internal.h"
