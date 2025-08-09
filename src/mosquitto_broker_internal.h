@@ -352,6 +352,10 @@ struct mosquitto__config {
 	uint16_t max_inflight_messages;
 	uint16_t max_keepalive;
 	uint8_t max_qos;
+	uint32_t packet_max_connect;
+	uint32_t packet_max_simple;
+	uint32_t packet_max_sub;
+	uint32_t packet_max_auth;
 	bool persistence;
 	char *persistence_location;
 	char *persistence_file;

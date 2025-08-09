@@ -453,8 +453,8 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 #ifdef WITH_BROKER
 		switch(mosq->in_packet.command & 0xF0){
 			case CMD_CONNECT:
-				if(mosq->in_packet.remaining_length > 100000){ /* Arbitrary limit, make configurable */
-					return MOSQ_ERR_MALFORMED_PACKET;
+				if(mosq->in_packet.remaining_length > db.config->packet_max_connect){
+					return MOSQ_ERR_OVERSIZE_PACKET;
 				}
 				break;
 
@@ -463,7 +463,9 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 			case CMD_PUBREL:
 			case CMD_PUBCOMP:
 			case CMD_UNSUBACK:
-				if(mosq->protocol != mosq_p_mqtt5 && mosq->in_packet.remaining_length != 2){
+				if(mosq->protocol == mosq_p_mqtt5 && mosq->in_packet.remaining_length > db.config->packet_max_simple){
+					return MOSQ_ERR_OVERSIZE_PACKET;
+				}else if(mosq->in_packet.remaining_length != 2){
 					return MOSQ_ERR_MALFORMED_PACKET;
 				}
 				break;
@@ -476,10 +478,25 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 				break;
 
 			case CMD_DISCONNECT:
-				if(mosq->protocol != mosq_p_mqtt5 && mosq->in_packet.remaining_length != 0){
+				if(mosq->protocol == mosq_p_mqtt5 && mosq->in_packet.remaining_length > db.config->packet_max_simple){
+					return MOSQ_ERR_OVERSIZE_PACKET;
+				}else if(mosq->in_packet.remaining_length != 0){
 					return MOSQ_ERR_MALFORMED_PACKET;
 				}
+
+			case CMD_SUBSCRIBE:
+			case CMD_UNSUBSCRIBE:
+				if(mosq->protocol == mosq_p_mqtt5 && mosq->in_packet.remaining_length > db.config->packet_max_sub){
+					return MOSQ_ERR_OVERSIZE_PACKET;
+				}
 				break;
+
+			case CMD_AUTH:
+				if(mosq->in_packet.remaining_length > db.config->packet_max_auth){
+					return MOSQ_ERR_OVERSIZE_PACKET;
+				}
+				break;
+
 		}
 
 		if(db.config->max_packet_size > 0 && mosq->in_packet.remaining_length+1 > db.config->max_packet_size){

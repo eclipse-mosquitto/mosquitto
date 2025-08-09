@@ -343,6 +343,11 @@ static void config__init_reload(struct mosquitto__config *config)
 	config->sys_interval = 10;
 	config->upgrade_outgoing_qos = false;
 	config->packet_buffer_size = 4096;
+
+	config->packet_max_auth = 100000;
+	config->packet_max_connect = 100000;
+	config->packet_max_sub = 100000;
+	config->packet_max_simple = 10000;
 }
 
 

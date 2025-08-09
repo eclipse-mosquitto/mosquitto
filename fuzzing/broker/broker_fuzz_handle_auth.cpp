@@ -16,6 +16,7 @@ Contributors:
    Roger Light - initial implementation and documentation.
 */
 
+#define kMaxInputLength 100000
 #include "fuzz_packet_read_base.h"
 
 extern "C" int fuzz_packet_read_init(struct mosquitto *context)
