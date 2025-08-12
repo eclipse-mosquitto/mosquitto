@@ -39,6 +39,7 @@ target_include_directories(libmosquitto_common
 	PUBLIC
 		"${mosquitto_SOURCE_DIR}/"
 		"${mosquitto_SOURCE_DIR}/include"
+		"${CJSON_INCLUDE_DIRS}"
 )
 
 target_link_libraries(libmosquitto_common

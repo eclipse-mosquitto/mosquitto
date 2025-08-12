@@ -29,6 +29,7 @@ target_include_directories(mosquitto_db_dump PRIVATE
 	"${mosquitto_SOURCE_DIR}/libcommon"
 	"${mosquitto_SOURCE_DIR}/src"
 	"${OPENSSL_INCLUDE_DIR}"
+	"${CJSON_INCLUDE_DIRS}"
 )
 
 if(WITH_BUNDLED_DEPS)

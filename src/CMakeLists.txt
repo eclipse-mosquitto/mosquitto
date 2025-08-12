@@ -110,7 +110,7 @@ if(WITH_HTTP_API)
 	if(MICROHTTPD_LIBRARY)
 		target_sources(mosquitto PRIVATE http_api.c)
 		target_compile_definitions(mosquitto PRIVATE "WITH_HTTP_API")
-		target_link_libraries(mosquitto PRIVATE microhttpd)
+		target_link_libraries(mosquitto PRIVATE ${MICROHTTPD_LIBRARY})
 	endif()
 endif()
 
@@ -248,6 +248,7 @@ target_include_directories(mosquitto
 		"${mosquitto_SOURCE_DIR}/lib"
 		"${mosquitto_SOURCE_DIR}/libcommon"
 		"${mosquitto_SOURCE_DIR}/src"
+		"${CJSON_INCLUDE_DIRS}"
 )
 if(WITH_BUNDLED_DEPS)
 	target_include_directories(mosquitto PRIVATE

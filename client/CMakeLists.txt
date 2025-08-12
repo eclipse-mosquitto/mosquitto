@@ -3,6 +3,7 @@ set(shared_src client_shared.c client_shared.h client_props.c)
 add_library(client-common INTERFACE)
 target_link_libraries(client-common INTERFACE common-options)
 target_include_directories(client-common INTERFACE
+	"${CJSON_INCLUDE_DIRS}"
 	"${OPENSSL_INCLUDE_DIR}"
 	"${mosquitto_SOURCE_DIR}"
 )

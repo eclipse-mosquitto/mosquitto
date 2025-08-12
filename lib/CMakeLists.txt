@@ -124,10 +124,15 @@ set_target_properties(libmosquitto PROPERTIES
 	OUTPUT_NAME mosquitto
 	VERSION ${VERSION}
 	SOVERSION 1
-	LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.version
-	LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/linker.version"
 	POSITION_INDEPENDENT_CODE 1
 )
+
+if(UNIX AND NOT APPLE)
+	set_target_properties(libmosquitto PROPERTIES
+		LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.version
+		LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/linker.version"
+	)
+endif()
 
 install(TARGETS libmosquitto
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"

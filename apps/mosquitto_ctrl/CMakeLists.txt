@@ -29,7 +29,10 @@ if(WITH_TLS)
 			"${mosquitto_SOURCE_DIR}"
 			"${mosquitto_SOURCE_DIR}/common"
 			"${mosquitto_SOURCE_DIR}/include"
+			"${CJSON_INCLUDE_DIRS}"
 		)
+		target_link_libraries(ctrl_shell PRIVATE OpenSSL::SSL)
+
 		add_library(ctrl_shell_io OBJECT
 			ctrl_shell_io.c
 		)
@@ -38,7 +41,9 @@ if(WITH_TLS)
 			"${mosquitto_SOURCE_DIR}"
 			"${mosquitto_SOURCE_DIR}/common"
 			"${mosquitto_SOURCE_DIR}/include"
+			"${CJSON_INCLUDE_DIRS}"
 		)
+		target_link_libraries(ctrl_shell_io PRIVATE OpenSSL::SSL)
 	endif()
 	add_executable(mosquitto_ctrl ${SRC})
 
@@ -49,6 +54,7 @@ if(WITH_TLS)
 		"${mosquitto_SOURCE_DIR}/plugins/common"
 		"${mosquitto_SOURCE_DIR}/plugins/dynamic-security"
 		"${ARGON2_INCLUDE_DIRS}"
+		"${CJSON_INCLUDE_DIRS}"
 	)
 	if(WITH_BUNDLED_DEPS)
 		target_include_directories(mosquitto_ctrl PRIVATE

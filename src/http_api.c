@@ -23,6 +23,9 @@ Contributors:
 #include <microhttpd.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifndef WIN32
+#  include <netdb.h>
+#endif
 
 #include "json_help.h"
 #include "mosquitto_broker_internal.h"

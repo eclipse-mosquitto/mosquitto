@@ -19,7 +19,9 @@ if(SQLITE3_FOUND)
 		will.c
 	)
 
-	set(INCLIST )
+	set(INCLIST
+		"${CJSON_INCLUDE_DIRS}"
+	)
 
 	set(LINKLIST
 		cJSON

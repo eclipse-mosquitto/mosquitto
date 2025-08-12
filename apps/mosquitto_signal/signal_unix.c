@@ -15,6 +15,7 @@ SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
 Contributors:
    Roger Light - initial implementation and documentation.
 */
+
 #include <dirent.h>
 #include <errno.h>
 #include <signal.h>
@@ -23,6 +24,10 @@ Contributors:
 #include <string.h>
 
 #include "mosquitto_signal.h"
+
+#ifndef PATH_MAX
+#  define PATH_MAX 4096
+#endif
 
 void signal_all(enum mosq_signal sig)
 {
@@ -41,7 +46,10 @@ void signal_all(enum mosq_signal sig)
 	}
 
 	while((d = readdir(dir))){
-		if(d->d_type == DT_DIR){
+#ifdef DT_DIR
+		if(d->d_type == DT_DIR)
+#endif
+		{
 			pid = atoi(d->d_name);
 			if(pid > 0){
 				snprintf(pathbuf, sizeof(pathbuf), "/proc/%s/cmdline", d->d_name);
@@ -87,9 +95,11 @@ void send_signal(int pid, enum mosq_signal msig)
 		case MSIG_TREE_PRINT:
 			sig = SIGUSR2;
 			break;
+#ifdef __linux__
 		case MSIG_XTREPORT:
 			sig = SIGRTMIN;
 			break;
+#endif
 		default:
 			return;
 	}

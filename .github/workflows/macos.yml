@@ -28,33 +28,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Print compiler versions
-        run: |
-          which clang
-          which clang++
-          clang --version
-
       - name: pin cmake to 3.x series
         uses: jwlawson/actions-setup-cmake@09fd9b0fb3b239b4b68d9256cd65adf8d6b91da0
         with:
           cmake-version: '3.31.6'
 
-      - name: vcpkg build
-        uses: johnwason/vcpkg-action@v6
-        id: vcpkg
-        with:
-          manifest-dir: ${{ github.workspace }}
-          triplet: x64-osx
-          token: ${{ github.token }}
-          github-binarycache: true
+      - name: Install Homebrew dependencies
+        run: |
+          brew update
+          brew install \
+            argon2 \
+            cjson \
+            cmake \
+            cunit \
+            docbook-xsl \
+            gcc \
+            libedit \
+            libmicrohttpd \
+            make \
+            openssl \
+            uthash
 
       - name: Configure CMake
         run: |
+          EDITLINE_PREFIX=$(brew --prefix libedit)
           cmake -B ${{github.workspace}}/build64 \
+            -G Ninja \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+            -DDOCUMENTATION=OFF \
             -DWITH_WEBSOCKETS=ON \
             -DWITH_TESTS=OFF \
-            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake \
-            -DVCPKG_MANIFEST_MODE=ON
+            -DCMAKE_INCLUDE_PATH="$EDITLINE_PREFIX/include" \
+            -DCMAKE_LIBRARY_PATH="$EDITLINE_PREFIX/lib" \
+            -DCMAKE_C_FLAGS="-I$EDITLINE_PREFIX/include" \
+            -DCMAKE_EXE_LINKER_FLAGS="-L$EDITLINE_PREFIX/lib" \
+            -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
       - name: Build
-        run: cmake --build ${{github.workspace}}/build64 --config ${{env.BUILD_TYPE}}
+        run: |
+          cmake --build ${{github.workspace}}/build64 \
+            --config ${{env.BUILD_TYPE}}
