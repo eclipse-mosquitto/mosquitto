@@ -2,16 +2,20 @@ add_subdirectory(libcommon)
 add_subdirectory(lib)
 add_subdirectory(apps)
 
-if(EDITLINE_FOUND)
-	add_library(editline_mock OBJECT editline_mock.cpp)
-	target_include_directories(editline_mock
+function(add_mosquitto_mock MOCK_NAME)
+	add_library(${MOCK_NAME}_mock OBJECT ${MOCK_NAME}_mock.cpp)
+	target_include_directories(${MOCK_NAME}_mock
 		PUBLIC
 			${mosquitto_SOURCE_DIR}/test/mock
 	)
+	target_link_libraries(${MOCK_NAME}_mock
+		PUBLIC
+			GTest::gmock
+	)
+endfunction()
+
+if(EDITLINE_FOUND)
+	add_mosquitto_mock(editline)
 endif()
 
-add_library(pthread_mock OBJECT pthread_mock.cpp)
-target_include_directories(pthread_mock
-    PUBLIC
-        ${mosquitto_SOURCE_DIR}/test/mock
-)
+add_mosquitto_mock(pthread)

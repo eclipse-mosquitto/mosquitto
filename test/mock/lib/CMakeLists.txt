@@ -25,3 +25,7 @@ target_include_directories(libmosquitto_mock
         ${mosquitto_SOURCE_DIR}/test/mock
         ${mosquitto_SOURCE_DIR}/test/mock/lib
 )
+target_link_libraries(libmosquitto_mock
+	PUBLIC
+		GTest::gmock
+)

@@ -43,6 +43,7 @@ jobs:
             cunit \
             docbook-xsl \
             gcc \
+            googletest \
             libedit \
             libmicrohttpd \
             make \
@@ -52,18 +53,22 @@ jobs:
       - name: Configure CMake
         run: |
           EDITLINE_PREFIX=$(brew --prefix libedit)
-          cmake -B ${{github.workspace}}/build64 \
+          cmake -B ${{github.workspace}}/build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
             -DDOCUMENTATION=OFF \
-            -DWITH_WEBSOCKETS=ON \
-            -DWITH_TESTS=OFF \
-            -DCMAKE_INCLUDE_PATH="$EDITLINE_PREFIX/include" \
-            -DCMAKE_LIBRARY_PATH="$EDITLINE_PREFIX/lib" \
+            -DCMAKE_INCLUDE_PATH="-I$EDITLINE_PREFIX/include" \
+            -DCMAKE_LIBRARY_PATH="-I$EDITLINE_PREFIX/lib" \
             -DCMAKE_C_FLAGS="-I$EDITLINE_PREFIX/include" \
+            -DCMAKE_CXX_FLAGS="-I$EDITLINE_PREFIX/include" \
             -DCMAKE_EXE_LINKER_FLAGS="-L$EDITLINE_PREFIX/lib" \
             -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
       - name: Build
         run: |
-          cmake --build ${{github.workspace}}/build64 \
+          cmake --build ${{github.workspace}}/build \
             --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build/
+        run: ctest --output-on-failure --repeat until-pass:5
