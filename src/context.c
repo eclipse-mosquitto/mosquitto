@@ -235,7 +235,9 @@ void context__disconnect(struct mosquitto *context)
 				context__add_to_disused(context);
 			}
 		}else{
-			session_expiry__add(context);
+			if (!context->expiry_list_item) {
+				session_expiry__add(context);
+			}
 		}
 	}
 	keepalive__remove(context);
