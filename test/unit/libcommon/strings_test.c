@@ -125,7 +125,9 @@ static void TEST_mosquitto_strerror(void)
 static void TEST_mosquitto_connack_string(void)
 {
 	const char *str;
-	uint8_t used[] = {0, 1, 2, 3, 4, 5};
+	uint8_t used[] = {0, 1, 2, 3, 4, 5, 128,129, 130,
+		131, 132, 133, 134, 135, 136, 137, 138, 140,
+		144, 149, 151, 153, 154, 155, 156, 157, 159};
 
 	/* Iterate over all possible codes, checking we have a place holder for all
 	 * unused codes, and that all used codes do not have place holder text. */
@@ -148,6 +150,42 @@ static void TEST_mosquitto_connack_string(void)
 			}else{
 				CU_ASSERT_STRING_EQUAL(str, "Connection Refused: unknown reason");
 				if(strcmp(str, "Connection Refused: unknown reason")){
+					printf("%d: %s\n", code, str);
+				}
+			}
+		}
+	}
+}
+
+static void TEST_mosquitto_disconnect_string(void)
+{
+	const char *str;
+	uint8_t used[] = {{0, 4,
+		128, 129, 130, 131, 135, 137, 139, 141, 142,
+		143, 144, 147, 148, 149, 150, 151, 152, 153,
+		154, 155, 156, 157, 158, 159, 160, 161, 162};
+
+	/* Iterate over all possible codes, checking we have a place holder for all
+	 * unused codes, and that all used codes do not have place holder text. */
+	for(int code=0; code<256; code++){
+		str = mosquitto_connack_string(code);
+		CU_ASSERT_PTR_NOT_NULL(str);
+		if(str){
+			bool is_used = false;
+			for(size_t i=0; i<sizeof(used); i++){
+				if(code == used[i]){
+					is_used = true;
+					break;
+				}
+			}
+			if(is_used){
+				CU_ASSERT_STRING_NOT_EQUAL(str, "Disconnect: unknown reason");
+				if(!strcmp(str, "Disconnect: unknown reason.")){
+					printf("%d: %s\n", code, str);
+				}
+			}else{
+				CU_ASSERT_STRING_EQUAL(str, "Disconnect: unknown reason");
+				if(strcmp(str, "Disconnect: unknown reason")){
 					printf("%d: %s\n", code, str);
 				}
 			}
@@ -274,6 +312,7 @@ int init_strings_tests(void)
 			|| !CU_add_test(test_suite, "mosquitto_strerror", TEST_mosquitto_strerror)
 			|| !CU_add_test(test_suite, "mosquitto_connack_string", TEST_mosquitto_connack_string)
 			|| !CU_add_test(test_suite, "mosquitto_reason_string", TEST_mosquitto_reason_string)
+			|| !CU_add_test(test_suite, "mosquitto_disconnect_string", TEST_mosquitto_disconnect_string)
 			|| !CU_add_test(test_suite, "mosquitto_string_to_command", TEST_mosquitto_string_to_command)
 			|| !CU_add_test(test_suite, "mosquitto_string_to_property_info", TEST_string_to_property_info)
 			){

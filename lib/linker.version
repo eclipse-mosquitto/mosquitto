@@ -41,6 +41,7 @@ MOSQ_1.0 {
 		mosquitto_user_data_set;
 		mosquitto_strerror;
 		mosquitto_connack_string;
+		mosquitto_disconnect_string;
 		mosquitto_tls_set;
 		mosquitto_tls_opts_set;
 		mosquitto_tls_psk_set;

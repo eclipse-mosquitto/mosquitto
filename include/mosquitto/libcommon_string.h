@@ -53,8 +53,23 @@ libmosqcommon_EXPORT const char *mosquitto_strerror(int mosq_errno);
  *
  * Returns:
  *	A constant string describing the result.
+ *  Codes 0-5 are the standard MQTT v3.x connection results, while others codes are MQTT v5 connection results.
  */
 libmosqcommon_EXPORT const char *mosquitto_connack_string(int connack_code);
+
+/*
+ * Function: mosquitto_disconnect_string
+ *
+ * Call to obtain a const string description of an MQTT disconnect result.
+ *
+ * Parameters:
+ *	disconnect_code - an MQTT disconnect result.
+ *
+ * Returns:
+ *	A constant string describing the result.
+ *  Codes 0 is a normal disconnection
+ */
+libmosqcommon_EXPORT const char *mosquitto_disconnect_string(int disconnect_code);
 
 /*
  * Function: mosquitto_reason_string

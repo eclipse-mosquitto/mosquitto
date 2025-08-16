@@ -106,12 +106,8 @@ static void on_connect(struct mosquitto *mosq, void *obj, int reason_code, int f
 			ctrl->response_topic = NULL;
 		}
 	}else{
-		if(ctrl->cfg.protocol_version == MQTT_PROTOCOL_V5){
-			if(reason_code == MQTT_RC_UNSUPPORTED_PROTOCOL_VERSION){
-				fprintf(stderr, "Connection error: %s. Try connecting to an MQTT v5 broker, or use MQTT v3.x mode.\n", mosquitto_reason_string(reason_code));
-			}else{
-				fprintf(stderr, "Connection error: %s\n", mosquitto_reason_string(reason_code));
-			}
+		if(ctrl->cfg.protocol_version == MQTT_PROTOCOL_V5 && reason_code == MQTT_RC_UNSUPPORTED_PROTOCOL_VERSION){
+			fprintf(stderr, "Connection error: %s. Try connecting to an MQTT v5 broker, or use MQTT v3.x mode.\n", mosquitto_connack_string(reason_code));
 		}else{
 			fprintf(stderr, "Connection error: %s\n", mosquitto_connack_string(reason_code));
 		}
