@@ -319,7 +319,7 @@ const char *mosquitto_disconnect_string(int disconnect_code) {
 			return "Disconnected: Wildcard Subscriptions not supported";
 		default:
 			// Unknown reason
-			return "Disconnected: Unknown reason";
+			return "Disconnected: unknown reason";
 	}
 }
 

@@ -168,7 +168,7 @@ static void TEST_mosquitto_disconnect_string(void)
 	/* Iterate over all possible codes, checking we have a place holder for all
 	 * unused codes, and that all used codes do not have place holder text. */
 	for(int code=0; code<256; code++){
-		str = mosquitto_connack_string(code);
+		str = mosquitto_disconnect_string(code);
 		CU_ASSERT_PTR_NOT_NULL(str);
 		if(str){
 			bool is_used = false;
@@ -179,13 +179,13 @@ static void TEST_mosquitto_disconnect_string(void)
 				}
 			}
 			if(is_used){
-				CU_ASSERT_STRING_NOT_EQUAL(str, "Disconnect: unknown reason");
-				if(!strcmp(str, "Disconnect: unknown reason.")){
+				CU_ASSERT_STRING_NOT_EQUAL(str, "Disconnected: unknown reason");
+				if(!strcmp(str, "Disconnected: unknown reason.")){
 					printf("%d: %s\n", code, str);
 				}
 			}else{
-				CU_ASSERT_STRING_EQUAL(str, "Disconnect: unknown reason");
-				if(strcmp(str, "Disconnect: unknown reason")){
+				CU_ASSERT_STRING_EQUAL(str, "Disconnected: unknown reason");
+				if(strcmp(str, "Disconnected: unknown reason")){
 					printf("%d: %s\n", code, str);
 				}
 			}
