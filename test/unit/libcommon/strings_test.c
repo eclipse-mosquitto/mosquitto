@@ -160,7 +160,7 @@ static void TEST_mosquitto_connack_string(void)
 static void TEST_mosquitto_disconnect_string(void)
 {
 	const char *str;
-	uint8_t used[] = {{0, 4,
+	uint8_t used[] = {0, 4,
 		128, 129, 130, 131, 135, 137, 139, 141, 142,
 		143, 144, 147, 148, 149, 150, 151, 152, 153,
 		154, 155, 156, 157, 158, 159, 160, 161, 162};
