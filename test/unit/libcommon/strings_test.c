@@ -178,15 +178,16 @@ static void TEST_mosquitto_disconnect_string(void)
 					break;
 				}
 			}
+			#define DISCONNECT_DEFAULT_STRING "Disconnected: unknown reason"
 			if(is_used){
-				CU_ASSERT_STRING_NOT_EQUAL(str, "Disconnected: unknown reason");
-				if(!strcmp(str, "Disconnected: unknown reason.")){
-					printf("%d: %s\n", code, str);
+				CU_ASSERT_STRING_NOT_EQUAL(str, DISCONNECT_DEFAULT_STRING);
+				if(!strcmp(str, DISCONNECT_DEFAULT_STRING)){
+					printf("%d: '%s' is not equal to '%s'\n", code, str, DISCONNECT_DEFAULT_STRING);
 				}
 			}else{
-				CU_ASSERT_STRING_EQUAL(str, "Disconnected: unknown reason");
-				if(strcmp(str, "Disconnected: unknown reason")){
-					printf("%d: %s\n", code, str);
+				CU_ASSERT_STRING_EQUAL(str, DISCONNECT_DEFAULT_STRING);
+				if(strcmp(str, DISCONNECT_DEFAULT_STRING)){
+					printf("%d: '%s' is equal to '%s' (it shouldn't be equal)\n", code, str, DISCONNECT_DEFAULT_STRING);
 				}
 			}
 		}
