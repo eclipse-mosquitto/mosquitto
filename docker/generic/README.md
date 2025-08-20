@@ -2,12 +2,21 @@
 Containers built with this Dockerfile build as source from published tarballs.
 
 ## Mount Points
-Three docker volumes have been created in the image to be used for configuration, persistent storage and logs.
+A docker mount point has been created in the image to be used for configuration.
 ```
 /mosquitto/config
+```
+
+Two docker volumes have been created in the image to be used for persistent storage and logs.
+```
 /mosquitto/data
 /mosquitto/log
 ```
+
+## User/Group
+
+The image runs mosquitto under the mosquitto user and group, which are created
+with a uid and gid of 1883.
 
 ## Running without a configuration file
 Mosquitto 2.0 requires you to configure listeners and authentication before it
