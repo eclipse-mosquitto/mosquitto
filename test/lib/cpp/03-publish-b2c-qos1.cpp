@@ -7,6 +7,8 @@
 class mosquittopp_test : public mosqpp::mosquittopp
 {
 	public:
+		volatile bool done = false;
+
 		mosquittopp_test(const char *id);
 
 		void on_connect(int rc);
@@ -51,7 +53,7 @@ void mosquittopp_test::on_message(const struct mosquitto_message *msg)
 		exit(1);
 	}
 
-	exit(0);
+	this->done = true;
 }
 
 int main(int argc, char *argv[])
@@ -69,7 +71,7 @@ int main(int argc, char *argv[])
 
 	mosq->connect("localhost", port, 60);
 
-	while(1){
+	while(!mosq->done){
 		mosq->loop();
 	}
 	delete mosq;
@@ -77,6 +79,6 @@ int main(int argc, char *argv[])
 	delete mosq;
 	mosqpp::lib_cleanup();
 
-	return 1;
+	return 0;
 }
 

@@ -59,7 +59,7 @@ void mosquittopp_test::on_message(const struct mosquitto_message *msg)
 		exit(1);
 	}
 
-	disconnect();
+	run = 0;
 }
 
 int main(int argc, char *argv[])
@@ -78,6 +78,18 @@ int main(int argc, char *argv[])
 
 	mosq->connect("localhost", port, 60);
 
+	while(run == -1){
+		mosq->loop(100, 1);
+	}
+
+	/* Drain the PUBREL and PUBCOMP messages. */
+	for(int i = 0; i < 2; i++){
+		mosq->loop();
+	}
+
+	run = -1;
+	mosq->disconnect();
+	/* Wait for disconnect to complete. */
 	while(run == -1){
 		mosq->loop(100, 1);
 	}
