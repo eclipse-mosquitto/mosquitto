@@ -318,8 +318,11 @@ ifeq ($(WITH_EC),yes)
 endif
 
 ifeq ($(WITH_ADNS),yes)
-	BROKER_LDADD:=$(BROKER_LDADD) -lanl
 	BROKER_CPPFLAGS:=$(BROKER_CPPFLAGS) -DWITH_ADNS
+	NEED_LIBANL := $(shell printf '#include <stdlib.h>\n#include <netdb.h>\nint main(){return getaddrinfo_a(0, NULL, 0, NULL);}'| $(CC) -D_GNU_SOURCE -o /dev/null -x c - 2>/dev/null || echo YES)
+	ifeq ($(NEED_LIBANL),YES)
+		BROKER_LDADD:=$(BROKER_LDADD) -lanl
+	endif
 endif
 
 ifeq ($(WITH_CONTROL),yes)
