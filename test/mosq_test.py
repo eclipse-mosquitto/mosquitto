@@ -3,6 +3,7 @@ import base64
 import errno
 import hashlib
 import os
+import platform
 import socket
 import subprocess
 import struct
@@ -31,25 +32,29 @@ def get_build_root():
     return result
 
 def env_add_ld_library_path(env=None):
-    p = ":".join([
-        get_build_root() + '/libcommon',
-        get_build_root() + '/lib',
-        get_build_root() + '/lib/cpp',
-        os.getenv("LD_LIBRARY_PATH", "")
+    if platform.system() == 'Windows':
+        pathsep = ';'
+        pathvar = 'PATH'
+    elif platform.system() == 'Darwin':
+        pathsep = ':'
+        pathvar = 'DYLIB_LIBRARY_PATH'
+    else:
+        pathsep = ':'
+        pathvar = 'LD_LIBRARY_PATH'
+        
+    p = pathsep.join([
+        str(Path(get_build_root(), 'libcommon')),
+        str(Path(get_build_root(), 'lib')),
+        str(Path(get_build_root(), 'lib', 'cpp')),
+        os.getenv(pathvar, "")
     ])
 
     if env is None:
         env = {
-            'LD_LIBRARY_PATH': p,
-            'DYLIB_LIBRARY_PATH': p,
+            pathvar: p,
         }
     else:
-        for v in ['LD_LIBRARY_PATH', 'DYLIB_LIBRARY_PATH']:
-            try:
-                val = env[v]
-                env[v] = ":".join([val, p])
-            except KeyError:
-                env[v] = p
+        env[pathvar] = p
 
     return env
 
