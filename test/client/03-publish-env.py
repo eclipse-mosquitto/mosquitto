@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-
+import platform
 from mosq_test_helper import *
 
 def do_test(proto_ver, env):
@@ -16,7 +16,6 @@ def do_test(proto_ver, env):
     else:
         V = 'mqttv31'
 
-    env = mosq_test.env_add_ld_library_path(env)
     cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-p', str(port),
             '-q', '1',
@@ -61,12 +60,21 @@ def do_test(proto_ver, env):
             exit(rc)
 
 
-env = {'HOME': str(source_dir / 'data')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+if platform.system() == 'Windows':
+    env = mosq_test.env_add_ld_library_path()
+    env['USERPROFILE'] = str(source_dir / 'data' / '.config')
+    do_test(proto_ver=3, env=env)
+    do_test(proto_ver=4, env=env)
+    do_test(proto_ver=5, env=env)
+else:
+    env = mosq_test.env_add_ld_library_path()
+    env['HOME'] = str(source_dir / 'data')
+    do_test(proto_ver=3, env=env)
+    do_test(proto_ver=4, env=env)
+    do_test(proto_ver=5, env=env)
 
-env = {'XDG_CONFIG_HOME': str(source_dir / 'data/.config')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = str(source_dir / 'data/.config')
+    do_test(proto_ver=3, env=env)
+    do_test(proto_ver=4, env=env)
+    do_test(proto_ver=5, env=env)

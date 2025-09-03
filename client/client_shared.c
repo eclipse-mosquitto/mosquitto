@@ -1310,17 +1310,16 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 					cfg->session_expiry_interval = UINT32_MAX;
 				}else{
 					char *endptr = NULL;
-					long long session_expiry_interval = strtoll(argv[i+1], &endptr, 0);
+					cfg->session_expiry_interval = strtoll(argv[i+1], &endptr, 0);
 					if(endptr == argv[i+1] || endptr[0] != '\0'){
 						/* Entirety of argument wasn't a number */
 						fprintf(stderr, "Error: session-expiry-interval not a number.\n\n");
 						return 1;
 					}
-					if(session_expiry_interval > UINT32_MAX || session_expiry_interval < -1){
+					if(cfg->session_expiry_interval > UINT32_MAX || cfg->session_expiry_interval < -1){
 						fprintf(stderr, "Error: session-expiry-interval out of range.\n\n");
 						return 1;
 					}
-					cfg->session_expiry_interval = session_expiry_interval;
 					if(cfg->session_expiry_interval == -1){
 						/* Convenience value for infinity. */
 						cfg->session_expiry_interval = UINT32_MAX;
