@@ -15,3 +15,7 @@ target_include_directories(pthread_mock
     PUBLIC
         ${mosquitto_SOURCE_DIR}/test/mock
 )
+target_link_libraries(pthread_mock
+	PUBLIC
+		GTest::gmock_main
+)

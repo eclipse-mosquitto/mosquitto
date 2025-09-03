@@ -2,6 +2,10 @@
 #include <cstdlib>
 #include <cstring>
 
+#ifdef WIN32
+#  include <winsock2.h>
+#endif
+
 #include <mosquitto/libmosquittopp.h>
 
 static int run = -1;

@@ -3,7 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mosquitto.h>
-#include <sys/select.h>
+
+#ifdef WIN32
+#  include <winsock2.h>
+#else
+#  include <sys/select.h>
+#endif
 
 static int run = -1;
 

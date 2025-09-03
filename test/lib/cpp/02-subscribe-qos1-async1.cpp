@@ -2,6 +2,10 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef WIN32
+#  include <windows.h>
+#endif
+
 #include <mosquitto/libmosquittopp.h>
 
 /* mosquitto_connect_async() test, with mosquitto_loop_start() called before mosquitto_connect_async(). */
@@ -78,9 +82,15 @@ int main(int argc, char *argv[])
 	}
 
 	/* 50 millis to be system polite */
+#ifndef WIN32
 	struct timespec tv = { 0, (long)50e6 };
+#endif
 	while(should_run){
+#ifdef WIN32
+		Sleep(50);
+#else
 		nanosleep(&tv, NULL);
+#endif
 	}
 
 	mosq->disconnect();

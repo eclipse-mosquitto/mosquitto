@@ -3,7 +3,11 @@
 #include <CUnit/CUnit.h>
 #include <CUnit/Basic.h>
 
-#include <arpa/inet.h>
+#ifdef WIN32
+#  include <winsock2.h>
+#else
+#  include <arpa/inet.h>
+#endif
 
 #include "packet_mosq.h"
 

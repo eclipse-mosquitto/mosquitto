@@ -4,6 +4,9 @@
 	"dependencies": [
 		"argon2",
 		"cjson",
+		"cunit",
+		"dlfcn-win32",
+		"gtest",
 		"libmicrohttpd",
 		"openssl",
 		"pthreads",

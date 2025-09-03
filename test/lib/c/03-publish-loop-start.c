@@ -84,9 +84,15 @@ int main(int argc, char *argv[])
 	}
 
 	mosquitto_loop_start(mosq);
+#ifndef WIN32
 	struct timespec tv = { 0, 50e6 };
+#endif
 	while(run == -1){
+#ifdef WIN32
+		Sleep(50);
+#else
 		nanosleep(&tv, NULL);
+#endif
 	}
 
 	mosquitto_destroy(mosq);

@@ -47,6 +47,9 @@ add_executable(persist-read-test
 target_compile_definitions(persist-read-test PRIVATE TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" WITH_PERSISTENCE WITH_BROKER)
 target_include_directories(persist-read-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(persist-read-test PRIVATE persistence-read-obj libmosquitto_common)
+if(WIN32)
+	target_link_libraries(persist-read-test PRIVATE ws2_32)
+endif()
 add_test(NAME unit-persist-read-test COMMAND persist-read-test)
 
 # persist-write-test
@@ -77,6 +80,9 @@ add_executable(persist-write-test
 target_compile_definitions(persist-write-test PRIVATE TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}" WITH_PERSISTENCE WITH_BROKER WITH_SYS_TREE)
 target_include_directories(persist-write-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(persist-write-test PRIVATE persistence-write-obj OpenSSL::SSL libmosquitto_common)
+if(WIN32)
+	target_link_libraries(persist-write-test PRIVATE ws2_32)
+endif()
 add_test(NAME unit-persist-write-test COMMAND persist-write-test)
 
 # subs-test
@@ -96,7 +102,13 @@ add_executable(subs-test
     subs_stubs.c
     subs_test.c
 )
-
 target_compile_definitions(subs-test PRIVATE WITH_PERSISTENCE WITH_BROKER WITH_SYS_TREE)
 target_link_libraries(subs-test PRIVATE common-unit-test-header subs-obj libmosquitto_common OpenSSL::SSL)
+if(WIN32)
+	target_link_libraries(subs-test PRIVATE ws2_32)
+	if(WITH_THREADING)
+		target_link_libraries(subs-test PRIVATE PThreads4W::PThreads4W)
+	endif()
+endif()
+
 add_test(NAME unit-subs-test COMMAND subs-test)

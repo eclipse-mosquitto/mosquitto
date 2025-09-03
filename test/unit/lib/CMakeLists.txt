@@ -15,4 +15,10 @@ add_executable(lib-test
 
 target_include_directories(lib-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(lib-test PRIVATE common-unit-test-header OpenSSL::SSL libmosquitto_common)
+if(WIN32)
+	target_link_libraries(lib-test PRIVATE ws2_32)
+	if(WITH_THREADING)
+		target_link_libraries(lib-test PRIVATE PThreads4W::PThreads4W)
+	endif()
+endif()
 add_test(NAME unit-lib-test COMMAND lib-test)
