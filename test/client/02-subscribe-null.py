@@ -20,7 +20,7 @@ def do_test(proto_ver):
         'XDG_CONFIG_HOME':'/tmp/missing'
     }
     env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_sub',
+    cmd = [mosq_test.get_client_path('mosquitto_sub'),
             '-p', str(port),
             '-q', '1',
             '-t', '02/sub/null/test',

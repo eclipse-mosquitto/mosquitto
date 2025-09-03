@@ -20,7 +20,7 @@ def do_test(proto_ver):
         'XDG_CONFIG_HOME':'/tmp/missing'
     }
     env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-L', f'mqtt://localhost:{port}/03/pub/url/test',
             '-m', 'message',
             '-V', V

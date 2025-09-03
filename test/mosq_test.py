@@ -62,11 +62,9 @@ def env_add_ld_library_path(env=None):
     ])
 
     if env is None:
-        env = {
-            pathvar: p,
-        }
-    else:
-        env[pathvar] = p
+        env = os.environ.copy()
+
+    env[pathvar] = p
 
     return env
 

@@ -37,4 +37,4 @@ def argv_test(cmd, args, stderr_expected, rc_expected):
     if client.returncode != rc_expected:
         raise mosq_test.TestError(f"Return code of {cmd}: {client.returncode} != {rc_expected}, stderr: {stde}")
     if stderr_expected is not None and stde != stderr_expected.strip():
-        raise mosq_test.TestError(f"Error log no as expected, got:\n{stde}\nExpected:\n{stderr_expected}")
+        raise mosq_test.TestError(f"Error log not as expected, got:\n{stde}\nExpected:\n{stderr_expected}")

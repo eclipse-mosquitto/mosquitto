@@ -16,10 +16,8 @@ def do_test(proto_ver, env):
     else:
         V = 'mqttv31'
 
-    env = mosq_test.env_add_ld_library_path(env)
-
     payload = "message"
-    cmd = [mosq_test.get_build_root() + '/client/mosquitto_rr',
+    cmd = [mosq_test.get_client_path('mosquitto_rr'),
             '-p', str(port),
             '-q', '1',
             '-t', '04/rr/qos1/test/request',
@@ -76,12 +74,14 @@ def do_test(proto_ver, env):
             exit(rc)
 
 
-env = {'HOME': str(source_dir / 'data')}
+env = mosq_test.env_add_ld_library_path()
+env['HOME'] = str(source_dir / 'data')
 do_test(proto_ver=3, env=env)
 do_test(proto_ver=4, env=env)
 do_test(proto_ver=5, env=env)
 
-env = {'XDG_CONFIG_HOME': str(source_dir / 'data/.config')}
+env = mosq_test.env_add_ld_library_path()
+env['XDG_CONFIG_HOME'] = str(source_dir / 'data/.config')
 do_test(proto_ver=3, env=env)
 do_test(proto_ver=4, env=env)
 do_test(proto_ver=5, env=env)

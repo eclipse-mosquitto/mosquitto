@@ -31,7 +31,7 @@ def do_test(proto_ver):
 
     payload = "abcdefghijklmnopqrstuvwxyz0123456789"*1821
 
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-p', str(ports[0]),
             '-q', '1',
             '-t', '03/pub/qos1/test',

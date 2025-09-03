@@ -24,12 +24,10 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
     payload = "message"
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_rr',
+    cmd = [mosq_test.get_client_path('mosquitto_rr'),
             '-p', str(ports[0]),
             '-q', '1',
             '-t', '04/rr/qos1/test/request',
