@@ -44,6 +44,31 @@ option(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
 option(WITH_TLS "Include SSL/TLS support?" ON)
 option(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
 option(WITH_TESTS "Enable tests" ON)
+if(WITH_TESTS)
+	find_package(GTest REQUIRED)
+	include(GoogleTest)
+	enable_testing()
+	
+	function(add_python_tests_from_current_directory2 PREFIX PY_TEST_FILES EXCLUDE_LIST)
+		foreach(PY_TEST_FILE ${PY_TEST_FILES})
+			get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
+			if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST)
+				continue()
+			endif()
+			add_test(NAME ${PREFIX}-${PY_TEST_NAME} COMMAND python3 ${PY_TEST_FILE})
+			set_tests_properties(${PREFIX}-${PY_TEST_NAME}
+				PROPERTIES
+					ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
+			)
+		endforeach()
+	endfunction()
+	
+	function(add_python_tests_from_current_directory PREFIX EXCLUDE_LIST)
+		file(GLOB PY_TEST_FILES [0-9][0-9]-*.py)
+		add_python_tests_from_current_directory2("${PREFIX}" "${PY_TEST_FILES}" "${EXCLUDE_LIST}")
+	endfunction()
+endif()
+
 option(INC_MEMTRACK "Include memory tracking support?" ON)
 if (WITH_TLS)
 	find_package(OpenSSL REQUIRED)
@@ -232,8 +257,5 @@ install(
 # Testing
 # ========================================
 if(WITH_TESTS)
-	find_package(GTest REQUIRED)
-	include(GoogleTest)
-	enable_testing()
 	add_subdirectory(test)
 endif()
