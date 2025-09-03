@@ -5,7 +5,7 @@
 from mosq_test_helper import *
 
 def do_test(args, rc_expected, response=None, input=None):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_signal/mosquitto_signal"]
+    proc = subprocess.run([mosquitto_signal_path]
                     + args,
                     capture_output=True, encoding='utf-8', timeout=2, input=input)
 

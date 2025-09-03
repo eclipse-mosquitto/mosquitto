@@ -19,9 +19,10 @@ def client_check(port, username, password, rc):
 
 
 def passwd_cmd(args, response=None, input=None, expected_rc=0):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_passwd/mosquitto_passwd"]
+    proc = subprocess.run([mosquitto_passwd_path]
                     + args,
-                    capture_output=True, encoding='utf-8', timeout=2, input=input)
+                    capture_output=True, encoding='utf-8', timeout=2, input=input,
+                    env=mosq_test.env_add_ld_library_path())
 
     if response is not None:
         if proc.stdout != response and proc.stderr != response:

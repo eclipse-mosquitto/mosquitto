@@ -21,11 +21,12 @@ def check_db(port, counts):
         f"DB_CHUNK_CLIENT:     {counts[5]}\n"
 
     cmd = [
-        mosq_test.get_build_root()+'/apps/db_dump/mosquitto_db_dump',
+        mosquitto_db_dump_path,
         '--stats',
-        f'{port}/mosquitto.db'
+        Path(str(port), 'mosquitto.db')
     ]
-    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8')
+    env = mosq_test.env_add_ld_library_path()
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8', env=env)
     if res.stdout != stdout:
         print(res.stdout)
         raise mosq_test.TestError
@@ -53,7 +54,7 @@ def do_test(counts):
 
         # Set up persistent client session, including a subscription
         cmd = [
-            mosq_test.get_build_root()+'/client/mosquitto_sub',
+            mosq_test.get_client_path("mosquitto_sub"),
             '-c',
             '-i', 'client-id',
             '-p', str(port),
@@ -65,7 +66,7 @@ def do_test(counts):
 
         # Publish a retained message which is also queued for the subscriber
         cmd = [
-            mosq_test.get_build_root()+'/client/mosquitto_pub',
+            mosq_test.get_client_path("mosquitto_pub"),
             '-p', str(port),
             '-q', '1',
             '-t', 'sub-topic',
@@ -85,7 +86,7 @@ def do_test(counts):
         print(e)
     finally:
         os.remove(conf_file)
-        os.remove(f"{port}/mosquitto.db")
+        os.remove(Path(str(port), "mosquitto.db"))
         shutil.rmtree(str(port))
         if broker is not None:
             broker.terminate()

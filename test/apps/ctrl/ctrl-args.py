@@ -5,7 +5,7 @@
 from mosq_test_helper import *
 
 def do_test(args, rc_expected, response=None):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2)
 

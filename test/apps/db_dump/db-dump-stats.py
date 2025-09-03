@@ -11,7 +11,7 @@ def do_test(file, counts):
         f"DB_CHUNK_CLIENT:     {counts[5]}\n"
 
     cmd = [
-        mosq_test.get_build_root()+'/apps/db_dump/mosquitto_db_dump',
+        mosquitto_db_dump_path,
             '--stats',
             f'{test_dir}/apps/db_dump/data/{file}'
     ]

@@ -8,7 +8,7 @@ import shutil
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write(f"plugin_opt_config_file {ports[0]}/dynamic-security.json\n")
+        f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
@@ -26,9 +26,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
                  ]
     else:
         opts += ["-p", str(ports[1])]
-        opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+        opts += ["--cafile", Path(ssl_dir, "all-ca.crt")]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2, input=input)
 
@@ -42,9 +42,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
         raise ValueError(args)
 
 def ctrl_dynsec_file_cmd(args, ports, response=None):
-    opts = ["-f", f"{ports[0]}/dynamic-security.json"]
+    opts = ["-f", Path(str(ports[0]), "dynamic-security.json")]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8')
 
@@ -67,11 +67,11 @@ if not os.path.exists(str(ports[0])):
     os.mkdir(str(ports[0]))
 
 # Generate initial dynsec file
-ctrl_dynsec_cmd(["init", f"{ports[0]}/dynamic-security.json", "admin", "admin"], ports)
+ctrl_dynsec_cmd(["init", Path(str(ports[0]), "dynamic-security.json"), "admin", "admin"], ports)
 try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
-    os.chown(f"{ports[0]}/dynamic-security.json", 65534, 65534)
+    os.chown(Path(str(ports[0]), "dynamic-security.json"), 65534, 65534)
 except PermissionError:
     pass
 
@@ -226,7 +226,7 @@ except mosq_test.TestError:
 finally:
     os.remove(conf_file)
     try:
-        os.remove(f"{ports[0]}/dynamic-security.json")
+        os.remove(Path(str(ports[0]), "dynamic-security.json"))
         pass
     except FileNotFoundError:
         pass

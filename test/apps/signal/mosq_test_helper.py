@@ -18,3 +18,5 @@ ssl_dir = test_dir / "ssl"
 import mosq_test
 import subprocess
 import os
+
+mosquitto_signal_path = Path(mosq_test.get_build_root(), "apps", "mosquitto_signal", mosq_test.get_build_type(), "mosquitto_signal")

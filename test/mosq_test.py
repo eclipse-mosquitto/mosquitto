@@ -31,6 +31,18 @@ def get_build_root():
         result = str(Path(__file__).resolve().parents[1])
     return result
 
+def get_build_type():
+    if platform.system() == 'Windows':
+        buildtype = os.environ.get('BUILD_TYPE')
+        if buildtype is None:
+            buildtype = 'RelWithDebInfo'
+    else:
+        buildtype = ''
+    return buildtype
+    
+def get_client_path(name):
+    return str(Path(get_build_root(), "client", get_build_type(), name))
+    
 def env_add_ld_library_path(env=None):
     if platform.system() == 'Windows':
         pathsep = ';'
@@ -43,9 +55,9 @@ def env_add_ld_library_path(env=None):
         pathvar = 'LD_LIBRARY_PATH'
         
     p = pathsep.join([
-        str(Path(get_build_root(), 'libcommon')),
-        str(Path(get_build_root(), 'lib')),
-        str(Path(get_build_root(), 'lib', 'cpp')),
+        str(Path(get_build_root(), 'libcommon', get_build_type())),
+        str(Path(get_build_root(), 'lib', get_build_type())),
+        str(Path(get_build_root(), 'lib', 'cpp', get_build_type())),
         os.getenv(pathvar, "")
     ])
 
@@ -70,8 +82,9 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
     global vg_index
     global vg_logfiles
 
+    broker_path = Path(get_build_root(), 'src', get_build_type(), 'mosquitto')
     if use_conf == True:
-        cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+        cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
 
         if port == 0:
             port = 1888
@@ -79,9 +92,12 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
             cmd += ['-p', str(port)]
     else:
         if cmd is None and port != 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-p', str(port)]
+            cmd = [broker_path, '-v', '-p', str(port)]
         elif cmd is None and port == 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+            cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
+
+    if env is None:
+        env = env_add_ld_library_path()
 
     if os.environ.get('MOSQ_USE_VALGRIND') is not None:
         logfile = filename+'.'+str(vg_index)+'.vglog'
@@ -908,7 +924,7 @@ def client_test(client_cmd, client_args, callback, cb_data):
 
     sock = listen_sock(port)
 
-    args = [get_build_root() + "/test/lib/" + client_cmd, str(port)]
+    args = [Path(get_build_root(), "test", "lib", get_build_type(), client_cmd), str(port)]
     if client_args is not None:
         args = args + client_args
 

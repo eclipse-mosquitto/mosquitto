@@ -10,12 +10,12 @@ def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write("enable_control_api true\n")
         f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write(f"plugin_opt_config_file {ports[0]}/dynamic-security.json\n")
+        f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        f.write(f"certfile {Path(ssl_dir, 'server.crt')}\n")
+        f.write(f"keyfile {Path(ssl_dir, 'server.key')}\n")
 
 def ctrl_cmd(cmd, args, ports, response=None):
     opts = ["-u", "admin",
@@ -30,10 +30,10 @@ def ctrl_cmd(cmd, args, ports, response=None):
         capture_output = False
     else:
         opts += ["-p", str(ports[1])]
-        opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+        opts += ["--cafile", str(Path(ssl_dir, "all-ca.crt"))]
         capture_output = True
 
-    proc = subprocess.run([mosq_test.get_build_root() + "/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + opts + [cmd] + args,
                     env=env, capture_output=True, encoding='utf-8')
 
@@ -56,7 +56,7 @@ if not os.path.exists(str(ports[0])):
     os.mkdir(str(ports[0]))
 
 # Generate initial dynsec file
-ctrl_cmd("dynsec", ["init", f"{ports[0]}/dynamic-security.json", "admin", "admin"], ports)
+ctrl_cmd("dynsec", ["init", Path(str(ports[0]), "dynamic-security.json"), "admin", "admin"], ports)
 ctrl_cmd("broker", ["help"], ports)
 
 # Then start broker
@@ -79,7 +79,7 @@ except Exception as err:
 finally:
     os.remove(conf_file)
     try:
-        os.remove(f"{ports[0]}/dynamic-security.json")
+        os.remove(Path(str(ports[0]), "dynamic-security.json"))
         pass
     except FileNotFoundError:
         pass

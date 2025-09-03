@@ -6,12 +6,13 @@ from mosq_test_helper import *
 def do_test(file, json_expected):
 
     cmd = [
-        mosq_test.get_build_root() + '/apps/db_dump/mosquitto_db_dump',
+        mosquitto_db_dump_path,
         '--json',
-        f'{test_dir}/apps/db_dump/data/{file}'
+        Path(test_dir, "apps", "db_dump", "data", file)
     ]
 
-    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3, encoding='utf-8')
+    env = mosq_test.env_add_ld_library_path()
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3, encoding='utf-8', env=env)
     json_result = json.loads(res.stdout)
     if json.dumps(json_result) != json.dumps(json_expected):
         print(json.dumps(json_result))
