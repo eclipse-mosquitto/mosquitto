@@ -26,10 +26,8 @@ def argv_test(cmd, args, stderr_expected, rc_expected):
 
     port = mosq_test.get_port()
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
     cmd = [mosq_test.get_client_path(cmd)] + args
 
     client = subprocess.run(cmd, capture_output=True, encoding='utf-8', env=env)

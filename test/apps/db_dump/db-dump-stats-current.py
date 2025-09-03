@@ -47,10 +47,8 @@ def do_test(counts):
 
     try:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port, use_conf=True)
-        env = {
-            'XDG_CONFIG_HOME':'/tmp/missing'
-        }
-        env = mosq_test.env_add_ld_library_path(env)
+        env = mosq_test.env_add_ld_library_path()
+        env['XDG_CONFIG_HOME'] = '/tmp/missing'
 
         # Set up persistent client session, including a subscription
         cmd = [

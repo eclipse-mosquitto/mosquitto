@@ -9,10 +9,8 @@ def do_test(proto_ver):
 
     port = mosq_test.get_port()
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
     if proto_ver == 5:
         V = 'mqttv5'
     elif proto_ver == 4:

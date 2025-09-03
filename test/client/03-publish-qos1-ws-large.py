@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#
+import platform
 
 from mosq_test_helper import *
 
@@ -24,10 +24,8 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
 
     payload = "abcdefghijklmnopqrstuvwxyz0123456789"*1821
 
@@ -80,6 +78,10 @@ def do_test(proto_ver):
             exit(rc)
 
 
+if platform.system() == 'Windows':
+    # This causes [WinError 206] The filename or extension is too long
+    exit(0)
+    
 do_test(proto_ver=3)
 do_test(proto_ver=4)
 do_test(proto_ver=5)
