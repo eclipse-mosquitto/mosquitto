@@ -18,5 +18,5 @@ def do_test(conn, data):
     conn.close()
 
 
-mosq_test.client_test("c/04-retain-qos0.test", [], do_test, None)
-mosq_test.client_test("cpp/04-retain-qos0.test", [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "04-retain-qos0.exe"), [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "04-retain-qos0.exe"), [], do_test, None)

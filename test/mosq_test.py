@@ -953,7 +953,7 @@ def client_test(client_cmd, client_args, callback, cb_data):
     if client_args is not None:
         args = args + client_args
 
-    client = start_client(filename=client_cmd.replace('/', '-'), cmd=args)
+    client = start_client(filename=client_cmd.name, cmd=args)
 
     try:
         (conn, address) = sock.accept()

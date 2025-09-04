@@ -26,5 +26,5 @@ def do_test(conn, data):
     mosq_test.expect_packet(conn, "pingreq", pingreq_packet)
 
 
-mosq_test.client_test("c/01-keepalive-pingreq.test", [], do_test, None)
-mosq_test.client_test("cpp/01-keepalive-pingreq.test", [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "01-keepalive-pingreq.exe"), [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "01-keepalive-pingreq.exe"), [], do_test, None)

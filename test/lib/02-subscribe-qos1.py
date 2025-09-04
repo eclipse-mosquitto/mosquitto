@@ -12,6 +12,7 @@
 # SUBACK message with the accepted QoS set to 1. On receiving the SUBACK
 # message, the client should send a DISCONNECT message.
 
+import platform
 from mosq_test_helper import *
 
 def do_test(conn, data):
@@ -29,9 +30,11 @@ def do_test(conn, data):
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)
 
 
-mosq_test.client_test("c/02-subscribe-qos1.test", [], do_test, None)
-mosq_test.client_test("c/02-subscribe-qos1-async1.test", [], do_test, None)
-mosq_test.client_test("c/02-subscribe-qos1-async2.test", [], do_test, None)
-mosq_test.client_test("cpp/02-subscribe-qos1.test", [], do_test, None)
-mosq_test.client_test("cpp/02-subscribe-qos1-async1.test", [], do_test, None)
-# FIXME - CI fails here, connection refused mosq_test.client_test("cpp/02-subscribe-qos1-async2.test", [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "02-subscribe-qos1.exe"), [], do_test, None)
+if platform.system() != 'Windows': # FIXME
+    mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "02-subscribe-qos1-async1.exe"), [], do_test, None)
+    mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "02-subscribe-qos1-async2.exe"), [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "02-subscribe-qos1.exe"), [], do_test, None)
+if platform.system() != 'Windows': # FIXME
+    mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "02-subscribe-qos1-async1.exe"), [], do_test, None)
+# FIXME - CI fails here, connection refused mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "02-subscribe-qos1-async2.exe"), [], do_test, None)

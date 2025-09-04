@@ -19,5 +19,5 @@ def do_test(conn, data):
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)
 
 
-mosq_test.client_test("c/02-unsubscribe.test", [], do_test, None)
-mosq_test.client_test("cpp/02-unsubscribe.test", [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "02-unsubscribe.exe"), [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "02-unsubscribe.exe"), [], do_test, None)

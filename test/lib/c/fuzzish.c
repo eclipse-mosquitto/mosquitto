@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
 
 	mosquitto_int_option(mosq, MOSQ_OPT_PROTOCOL_VERSION, proto_ver);
 
-	rc = mosquitto_connect(mosq, "localhost", port, 60);
+	rc = mosquitto_connect(mosq, "127.0.0.1", port, 60);
 	if(rc != MOSQ_ERR_SUCCESS){
 		printf("bad connect\n");
 		return rc;

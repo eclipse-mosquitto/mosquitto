@@ -36,13 +36,13 @@ def do_test(testdir):
     sock = mosq_test.listen_sock(port);
 
     env = dict(os.environ)
-    client1 = mosq_test.start_client(filename=f"{testdir}-03-request-response-correlation-1.log", cmd=[f"{testdir}/03-request-response-correlation-1.test", str(port)])
+    client1 = mosq_test.start_client(filename=f"{testdir}-03-request-response-correlation-1.log", cmd=[Path(mosq_test.get_build_root(), 'test', 'lib', testdir, mosq_test.get_build_type(), '03-request-response-correlation-1.exe'), str(port)])
 
     try:
         (conn1, address) = sock.accept()
         conn1.settimeout(10)
 
-        client2 = mosq_test.start_client(filename=f"{testdir}-03-request-response-2.log", cmd=[f"{testdir}/03-request-response-2.test", str(port)])
+        client2 = mosq_test.start_client(filename=f"{testdir}-03-request-response-2.log", cmd=[Path(mosq_test.get_build_root(), 'test', 'lib', testdir, mosq_test.get_build_type(), '03-request-response-2.exe'), str(port)])
         (conn2, address) = sock.accept()
         conn2.settimeout(10)
 

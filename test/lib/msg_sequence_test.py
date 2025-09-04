@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 # Test whether a valid CONNECT results in the correct CONNACK packet.
+from collections import deque
+from mosq_test_helper import *
+from os import walk
 
 import atexit
-from mosq_test_helper import *
 import importlib
-from os import walk
-import socket
 import json
-from collections import deque
 import mosq_test
+import platform
+import socket
 
 send = 1
 recv = 2
@@ -90,9 +91,9 @@ class MsgSequence(object):
 
         env = mosq_test.env_add_ld_library_path()
         cmd = [
-                mosq_test.get_build_root() + '/test/lib/c/fuzzish.test',
-                str(port), str(self.proto_ver), str(self.clean_start)
-                ]
+            Path(mosq_test.get_build_root(), 'test', 'lib', 'c', mosq_test.get_build_type(), 'fuzzish.exe'),
+            str(port), str(self.proto_ver), str(self.clean_start)
+        ]
         if os.environ.get('MOSQ_USE_VALGRIND') is not None:
             logfile = 'seq.'+str(vg_index)+'.vglog'
             cmd = ['/snap/bin/valgrind', '-q', '--trace-children=yes', '--leak-check=full', '--show-leak-kinds=all', '--log-file='+logfile] + cmd
@@ -108,7 +109,8 @@ class MsgSequence(object):
         self.sock.close()
         self.client.terminate()
         self.client.wait()
-        if self.client.returncode != 0:
+        if (platform.system() != 'Windows' and self.client.returncode != 0) \
+                or (platform.system() == 'Windows' and self.client.returncode != 1):
             raise RuntimeError
 
     def _add(self, action, message, comment=""):
@@ -158,7 +160,7 @@ class MsgSequence(object):
         try:
             if self._puback_check() and self.expect_disconnect:
                 raise ValueError("Still connected")
-        except ConnectionResetError:
+        except (ConnectionResetError, ConnectionAbortedError):
             if self.expect_disconnect:
                 pass
             else:

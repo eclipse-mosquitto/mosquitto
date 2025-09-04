@@ -18,5 +18,5 @@ def do_test(conn, data):
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)
 
-mosq_test.client_test("c/01-con-discon-success.test", [], do_test, None)
-mosq_test.client_test("cpp/01-con-discon-success.test", [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "01-con-discon-success.exe"), [], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "01-con-discon-success.exe"), [], do_test, None)
