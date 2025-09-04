@@ -80,7 +80,7 @@ ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin", "-i", "10000"], 
 ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin"], ports)
 
 # Then start broker
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0], nolog=True)
+broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0])
 
 try:
     rc = 1

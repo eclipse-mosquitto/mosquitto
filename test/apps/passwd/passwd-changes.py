@@ -55,7 +55,7 @@ except PermissionError:
     pass
 
 # Then start broker
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port, nolog=True)
+broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
 try:
     rc = 1

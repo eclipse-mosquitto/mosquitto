@@ -45,12 +45,12 @@ def do_success_test(create_db_of_version: list[int]):
                 print("broker not terminated")
                 if rc == 0:
                     rc = 1
-                (_, stde) = broker.communicate()
+                stde = mosq_test.broker_log(broker)
 
         rc += persist_help.cleanup(port)
 
         if rc:
-            print(stde.decode("utf-8"))
+            print(stde)
             exit(rc)
 
 

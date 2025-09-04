@@ -52,9 +52,8 @@ def do_test(allow_anonymous, password_file, username, expect_success):
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             print("proto_ver=%d, allow_anonymous=%d, password_file=%d, username=%d" % (proto_ver, allow_anonymous, password_file, username))
             exit(rc)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Test whether connections to a unix socket work
-
+import platform
 from mosq_test_helper import *
 
 def write_config(filename, port):
@@ -43,10 +43,12 @@ def do_test():
             os.remove(f"{port}.sock")
         except FileNotFoundError:
             pass
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
+
+if platform.system() == 'Windows':
+    exit(0)
 
 do_test()
 exit(0)

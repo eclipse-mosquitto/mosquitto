@@ -37,9 +37,8 @@ finally:
         print("broker not terminated")
         if rc == 0: rc=1
     os.remove(conf_file)
-    (stdo, stde) = broker.communicate()
     if rc:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
 
 exit(rc)
 

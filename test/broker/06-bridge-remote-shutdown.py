@@ -72,10 +72,10 @@ def do_test(proto_ver):
         rc2, stde2 = mosq_test.terminate_broker(local_broker)
         if rc or rc1 or rc2:
             print(f"Remote broker first run rc={rc1}")
-            print(stde1.decode('utf-8'))
+            print(stde1)
 
             print(f"Local broker rc={rc2}")
-            print(stde2.decode('utf-8'))
+            print(stde2)
         try: 
             os.remove(conf_file)
         except OSError:

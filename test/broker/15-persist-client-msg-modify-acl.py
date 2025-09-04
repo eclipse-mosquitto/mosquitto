@@ -182,14 +182,14 @@ def do_test(test_case_name: str, additional_config_entries: dict):
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1
-            (_, stde) = broker.communicate()
+            mosq_test.broker_log(broker)
         os.remove(acl_file)
         os.remove(conf_file)
         rc += persist_help.cleanup(port)
 
         print(f"{test_case_name}")
         if rc:
-            print(stde.decode("utf-8"))
+            print(stde)
         assert rc == 0, f"rc: {rc}"
 
 

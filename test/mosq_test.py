@@ -8,6 +8,7 @@ import socket
 import subprocess
 import struct
 import sys
+import tempfile
 import time
 import uuid
 
@@ -76,7 +77,15 @@ def listen_sock(port):
     sock.listen(5)
     return sock
 
-def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, nolog=False, checkhost="localhost", env=None, check_port=True, cmd_args=None, timeout=0.1):
+def broker_log(broker):
+    try:
+        broker.mosq_log.seek(0)
+        return broker.mosq_log.read().decode('utf-8')
+    except AttributeError:
+        return None
+        
+
+def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, checkhost="localhost", env=None, check_port=True, cmd_args=None, timeout=0.1):
     global vg_index
     global vg_logfiles
 
@@ -116,25 +125,23 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
 
     #print(port)
     #print(cmd)
-    if nolog:
-        stderr = subprocess.DEVNULL
-    else:
-        stderr = subprocess.PIPE
+    stderr = tempfile.TemporaryFile(prefix=str(port), suffix=".log")
 
     broker = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr, env=env)
+    broker.mosq_log = stderr
 
     if expect_fail:
         try:
             broker.wait(timeout*10)
             if expect_fail_log is not None:
-                (_, stde) = broker.communicate()
-                if expect_fail_log not in stde.decode('utf-8'):
+                stde = broker_log(broker)
+                if expect_fail_log not in stde:
                     print(f"{expect_fail_log} not found in log.")
-                    print(stde.decode('utf-8'))
+                    print(stde)
                     raise ValueError()
         except subprocess.TimeoutExpired:
             _, errs = terminate_broker(broker)
-            print(f"Broker did not fail to start:\n{errs.decode('utf-8')}")
+            print(f"Broker did not fail to start:\n{errs}")
             raise
         return broker
 
@@ -158,6 +165,7 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
 
     if expect_fail == False:
         outs, errs = broker.communicate(timeout=timeout)
+        errs = broker_log(broker)
         print("FAIL: unable to start broker: %s" % errs)
         raise IOError
     else:
@@ -194,7 +202,7 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
 
 def terminate_broker(broker):
     broker.terminate()
-    (_, stde) = broker.communicate()
+    std = broker_log(broker)
     if wait_for_subprocess(broker):
         print("broker not terminated")
         return (1, stde)

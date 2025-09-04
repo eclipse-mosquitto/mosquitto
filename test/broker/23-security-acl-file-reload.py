@@ -51,9 +51,8 @@ def do_test(write_config_func):
         os.remove(conf_file)
         os.remove(f"{port}.acl")
         broker.terminate()
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test(write_config_default)

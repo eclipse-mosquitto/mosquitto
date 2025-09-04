@@ -90,9 +90,8 @@ def do_test(proto_ver, per_listener, username):
         os.remove(conf_file)
         os.remove(acl_file)
         os.remove(persistence_file)
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

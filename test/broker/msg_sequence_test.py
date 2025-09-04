@@ -325,7 +325,7 @@ def main(protocol):
     port = mosq_test.get_port()
     conf_file = 'msg_sequence_test.conf'
     write_config(conf_file, port, protocol)
-    broker = mosq_test.start_broker(filename=conf_file, port=port, use_conf=True, nolog=True)
+    broker = mosq_test.start_broker(filename=conf_file, port=port, use_conf=True)
 
     rc = 0
     try:
@@ -340,9 +340,8 @@ def main(protocol):
             rc = broker.returncode
             print(f"Broker exited with code {rc}. If there are no obvious errors this may be due to an ASAN build having leaks, which must be fixed.")
             print("The easiest way to reproduce this is to run the broker with `mosquitto -p 1888`, rerun the test, then quit the broker.")
-        (stdo, stde) = broker.communicate()
     if rc:
-        #print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
         exit(rc)
 
 if __name__ == "__main__":

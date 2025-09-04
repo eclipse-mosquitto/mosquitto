@@ -60,7 +60,7 @@ try:
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
-    (stdo1, stde1) = broker.communicate()
+    stde1 = mosq_test.broker_log(broker)
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
     sock = mosq_test.do_client_connect(connect_packet, connack_packet2, timeout=20, port=port)
@@ -77,9 +77,8 @@ finally:
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
-    (stdo, stde) = broker.communicate()
     if rc:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
     if os.path.exists('mosquitto-%d.db' % (port)):
         os.unlink('mosquitto-%d.db' % (port))
         pass

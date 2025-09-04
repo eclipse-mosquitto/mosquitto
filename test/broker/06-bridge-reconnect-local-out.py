@@ -101,9 +101,8 @@ def do_test(proto_ver):
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
         local_broker.terminate()
         if mosq_test.wait_for_subprocess(local_broker):
             print("local_broker not terminated")
@@ -114,8 +113,7 @@ def do_test(proto_ver):
             pass
 
         if rc:
-            (stdo, stde) = local_broker.communicate()
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(local_broker))
             if pub:
                 (stdo, stde) = pub.communicate()
                 print(stdo.decode('utf-8'))

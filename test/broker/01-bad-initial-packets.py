@@ -67,9 +67,8 @@ def do_test(port):
         os.remove(conf_file)
         broker.terminate()
         broker.wait()
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

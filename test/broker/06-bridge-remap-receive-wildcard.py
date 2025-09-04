@@ -98,10 +98,9 @@ def do_test(proto_ver):
 
         broker.terminate()
         broker.wait()
-        (stdo, stde) = broker.communicate()
         ssock.close()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

@@ -40,9 +40,9 @@ def do_test(data):
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
-        if rc != 0 or expect_log not in stde.decode('utf-8'):
-            print(stde.decode('utf-8'))
+        stde = mosq_test.broker_log(broker)
+        if rc != 0 or expect_log not in stde:
+            print(stde)
             rc = 1
             raise ValueError(rc)
 

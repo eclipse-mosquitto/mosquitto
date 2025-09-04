@@ -94,12 +94,12 @@ finally:
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (_, stde) = broker.communicate()
+        stde = mosq_test.broker_log(broker)
     os.remove(conf_file)
     rc += persist_help.cleanup(port)
 
     if rc:
-        print(stde.decode('utf-8'))
+        print(stde)
 
 
 exit(rc)
