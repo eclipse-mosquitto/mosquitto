@@ -33,7 +33,7 @@ def get_build_root():
 
 def get_build_type():
     if platform.system() == 'Windows':
-        buildtype = os.environ.get('BUILD_TYPE')
+        buildtype = os.environ.get('CMAKE_CONFIG_TYPE')
         if buildtype is None:
             buildtype = 'RelWithDebInfo'
     else:
