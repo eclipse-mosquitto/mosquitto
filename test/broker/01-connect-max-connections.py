@@ -20,7 +20,7 @@ def test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_
     # Try to open an 11th connection
     try:
         sock_bad = mosq_test.do_client_connect(connect_packet_bad, connack_packet_bad, port=port)
-    except (ConnectionResetError, BrokenPipeError):
+    except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
         # Expected behaviour
         pass
     except OSError as e:

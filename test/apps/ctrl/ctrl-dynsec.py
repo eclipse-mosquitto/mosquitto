@@ -72,7 +72,7 @@ try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
     os.chown(Path(str(ports[0]), "dynamic-security.json"), 65534, 65534)
-except PermissionError:
+except (PermissionError, AttributeError):
     pass
 
 ctrl_dynsec_file_cmd(["help"], ports) # get the help, don't check the response though

@@ -10,6 +10,7 @@ def do_test(file, stderr, rc_expected):
     ]
 
     env = mosq_test.env_add_ld_library_path()
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8', env=env)
     if res.stderr != stderr:
         print(res.stderr)
         raise mosq_test.TestError

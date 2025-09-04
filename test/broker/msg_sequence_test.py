@@ -2,13 +2,15 @@
 
 # Test whether a valid CONNECT results in the correct CONNACK packet.
 
-from mosq_test_helper import *
-import importlib
-from os import walk
-import socket
-import json
 from collections import deque
+from mosq_test_helper import *
+from os import walk
+
+import importlib
+import json
+import platform
 import mosq_test
+import socket
 
 send = 1
 recv = 2

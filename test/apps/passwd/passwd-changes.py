@@ -50,7 +50,7 @@ try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
     os.chown(pw_file, 65534, 65534)
-except PermissionError:
+except (PermissionError, AttributeError):
     pass
 
 # Then start broker
