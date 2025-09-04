@@ -5,7 +5,6 @@
 # options being set.
 
 from mosq_test_helper import *
-import signal
 
 def write_acl(filename):
     with open(filename, 'w') as f:
@@ -182,17 +181,17 @@ def do_test(per_listener_settings):
         client_check(None, None, 5, ports[0]) # Should fail
         client_check(None, None, 5, ports[1]) # Should fail
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         client_check("test-username", "cnwTICONIURW", 0, ports[0]) # Should succeed
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         client_check("test-username", "cnwTICONIURW", 0, ports[0]) # Should succeed
 
         rc = 0
     except Exception as err:
         print(err)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         os.remove(conf_file)
         os.remove(acl_file)

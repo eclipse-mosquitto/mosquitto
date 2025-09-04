@@ -4,6 +4,7 @@ import errno
 import hashlib
 import os
 import platform
+import signal
 import socket
 import subprocess
 import struct
@@ -11,6 +12,9 @@ import sys
 import tempfile
 import time
 import uuid
+
+if platform.system() == 'Windows':
+    import win32event
 
 import traceback
 
@@ -201,8 +205,15 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
 
 
 def terminate_broker(broker):
-    broker.terminate()
-    std = broker_log(broker)
+    if platform.system() == 'Windows':
+        try:
+            evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_shutdown")
+            win32event.PulseEvent(evt)
+        except Exception:
+            broker.terminate()
+    else:
+        broker.terminate()
+    stde = broker_log(broker)
     if wait_for_subprocess(broker):
         print("broker not terminated")
         return (1, stde)
@@ -210,6 +221,17 @@ def terminate_broker(broker):
         return (0, stde)
 
 
+def reload_broker(broker):
+    if platform.system() == 'Windows':
+        try:
+            evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_reload")
+            win32event.PulseEvent(evt)
+        except Exception:
+            pass
+    else:
+        broker.send_signal(signal.SIGHUP)
+    
+    
 def pub_helper(port, proto_ver=4):
     connect_packet = gen_connect("pub-helper", proto_ver=proto_ver)
     connack_packet = gen_connack(rc=0, proto_ver=proto_ver)

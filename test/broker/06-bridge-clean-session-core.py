@@ -176,7 +176,7 @@ def do_test(proto_ver, cs, lcs=None):
 
         tprint("Normal bi-dir bridging works. continuing")
 
-        broker_b.terminate()
+        mosq_test.terminate_broker(broker_b)
         if mosq_test.wait_for_subprocess(broker_b):
             print("broker_b not terminated")
             broker_termination_success = False
@@ -212,7 +212,7 @@ def do_test(proto_ver, cs, lcs=None):
         tprint("Stage 1 complete, repeating in other direction")
 
         # ok, now repeat in the other direction...
-        broker_a.terminate()
+        mosq_test.terminate_broker(broker_a)
         if mosq_test.wait_for_subprocess(broker_a):
             print("broker_a not terminated")
             broker_termination_success = False
@@ -247,8 +247,8 @@ def do_test(proto_ver, cs, lcs=None):
     finally:
         os.remove(conf_file_a)
         os.remove(conf_file_b)
-        broker_a.terminate()
-        broker_b.terminate()
+        mosq_test.terminate_broker(broker_a)
+        mosq_test.terminate_broker(broker_b)
         if mosq_test.wait_for_subprocess(broker_a):
             print("broker_a not terminated")
             success = False

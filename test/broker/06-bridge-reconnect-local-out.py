@@ -55,7 +55,7 @@ def do_test(proto_ver):
         time.sleep(5)
     else:
         time.sleep(0.5)
-    local_broker.terminate()
+    mosq_test.terminate_broker(local_broker)
     if mosq_test.wait_for_subprocess(local_broker):
         print("local_broker not terminated")
         if rc == 0: rc=1
@@ -97,13 +97,13 @@ def do_test(proto_ver):
     finally:
         os.remove(conf_file)
         time.sleep(1)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
         if rc:
             print(mosq_test.broker_log(broker))
-        local_broker.terminate()
+        mosq_test.terminate_broker(local_broker)
         if mosq_test.wait_for_subprocess(local_broker):
             print("local_broker not terminated")
             if rc == 0: rc=1

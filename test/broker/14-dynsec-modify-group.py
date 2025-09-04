@@ -153,7 +153,7 @@ try:
     command_check(sock, get_group_command2, get_group_response2, "get group 2a")
 
     # Kill broker and restart, checking whether our changes were saved.
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     broker_terminate_rc = 0
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
@@ -193,7 +193,7 @@ finally:
     except FileNotFoundError:
         pass
     os.rmdir(f"{port}")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

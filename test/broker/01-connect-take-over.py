@@ -26,7 +26,7 @@ except mosq_test.TestError:
 except Exception as e:
     print(e)
 finally:
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

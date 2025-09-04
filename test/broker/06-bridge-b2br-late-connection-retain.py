@@ -69,7 +69,7 @@ def do_test(proto_ver):
         mosq_test.do_send_receive(client, publish_packet, puback_packet, "puback")
         client.close()
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
@@ -102,7 +102,7 @@ def do_test(proto_ver):
         except NameError:
             pass
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

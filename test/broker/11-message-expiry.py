@@ -68,7 +68,7 @@ try:
     mosq_test.do_send_receive(helper, publish2s_packet, puback2s_packet, "puback 2")
     mosq_test.do_send_receive(helper, publish3_packet, puback3_packet, "puback 3")
 
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
@@ -93,7 +93,7 @@ except mosq_test.TestError:
     pass
 finally:
     os.remove(conf_file)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

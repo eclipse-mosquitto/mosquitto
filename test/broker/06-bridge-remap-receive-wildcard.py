@@ -96,7 +96,7 @@ def do_test(proto_ver):
         except NameError:
             pass
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         ssock.close()
         if rc:

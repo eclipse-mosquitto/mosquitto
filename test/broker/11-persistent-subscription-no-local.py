@@ -67,7 +67,7 @@ try:
     # Send a ping and wait for the the response to make sure the puback2a_packet was processed by the broker
     mosq_test.do_ping(sock)
 
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
@@ -92,7 +92,7 @@ finally:
     if rc and stde1:
         print(stde1.decode('utf-8'))
 
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

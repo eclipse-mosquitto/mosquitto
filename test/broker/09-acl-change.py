@@ -3,7 +3,6 @@
 # Check whether messages deliver or not after some access is revoked.
 
 from mosq_test_helper import *
-import signal
 
 def write_config(filename, port, per_listener):
     with open(filename, 'w') as f:
@@ -90,7 +89,7 @@ try:
 
     # Reload ACLs with topic/two now disabled
     write_acl(acl_file, False)
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     sock = mosq_test.do_client_connect(connect1_packet, connack1b_packet, port=port)
     sock.settimeout(10)
@@ -113,7 +112,7 @@ except mosq_test.TestError:
 finally:
     os.remove(conf_file)
     os.remove(acl_file)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

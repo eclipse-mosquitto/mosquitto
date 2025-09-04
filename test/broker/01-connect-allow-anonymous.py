@@ -81,7 +81,7 @@ def do_test(use_conf, write_config, expect_success):
         if write_config is not None:
             os.remove(conf_file)
             pass
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

@@ -3,7 +3,6 @@
 # Test whether a plugin can subscribe to the reload event
 
 from mosq_test_helper import *
-import signal
 
 def write_config(filename, port, per_listener_settings="false"):
     with open(filename, 'w') as f:
@@ -30,7 +29,7 @@ def do_test(per_listener_settings):
 
     try:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=10, port=port)
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
 
         mosq_test.expect_packet(sock, "reload message", reload_packet)
         #mosq_test.expect_packet(sock, "reload message", reload_packet)
@@ -44,7 +43,7 @@ def do_test(per_listener_settings):
         pass
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         if rc:
             print(mosq_test.broker_log(broker))

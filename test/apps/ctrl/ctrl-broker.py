@@ -84,7 +84,7 @@ finally:
     except FileNotFoundError:
         pass
     shutil.rmtree(f"{ports[0]}")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

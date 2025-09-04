@@ -76,7 +76,7 @@ def do_test(proto_ver, host):
         print(e)
     finally:
         proxy.terminate()
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

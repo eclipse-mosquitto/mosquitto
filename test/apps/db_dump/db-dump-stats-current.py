@@ -87,7 +87,7 @@ def do_test(counts):
         os.remove(Path(str(port), "mosquitto.db"))
         shutil.rmtree(str(port))
         if broker is not None:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
 
     exit(rc)
 

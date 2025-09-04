@@ -3,7 +3,6 @@
 from mosq_test_helper import *
 import json
 import shutil
-import signal
 
 def write_config(filename, pw_file, port):
     with open(filename, 'w') as f:
@@ -70,7 +69,7 @@ try:
 
     # Update password
     passwd_cmd(["-H", "sha512-pbkdf2", "-b", pw_file, "user1", "newpass"])
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -83,7 +82,7 @@ try:
 
     # New user
     passwd_cmd(["-b", pw_file, "newuser", "goodpass"])
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -97,7 +96,7 @@ try:
     # Delete user
     passwd_cmd(["-D", pw_file, "user2"])
     passwd_cmd(["-D", pw_file, "user2"], response="Warning: User user2 not found in password file.\n", expected_rc=1)
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -116,7 +115,7 @@ except Exception as err:
 finally:
     os.remove(conf_file)
     os.remove(pw_file)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

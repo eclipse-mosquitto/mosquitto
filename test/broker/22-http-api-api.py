@@ -153,7 +153,7 @@ except Exception as e:
 finally:
     os.remove(conf_file)
     os.remove(f"{mqtt_port}.sock")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

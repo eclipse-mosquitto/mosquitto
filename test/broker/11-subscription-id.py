@@ -56,7 +56,7 @@ try:
     mosq_test.do_send_receive(sock, helper_publish_packet, helper_puback_packet, "helper puback")
     sock.close()
 
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
@@ -73,7 +73,7 @@ except mosq_test.TestError:
     pass
 finally:
     os.remove(conf_file)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

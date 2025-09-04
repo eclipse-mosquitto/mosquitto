@@ -47,7 +47,7 @@ finally:
     except FileNotFoundError:
         pass
     os.rmdir(f"{port}")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     broker.wait()
     if rc:
         print(mosq_test.broker_log(broker))

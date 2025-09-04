@@ -228,13 +228,13 @@ def do_test(test_case_name: str, bridging_add_config: dict, target_add_config: d
         rc = broker_terminate_rc
     finally:
         if broker is not None:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1
             stde = mosq_test.broker_log(broker)
         if bridge_target_broker is not None:
-            bridge_target_broker.terminate()
+            mosq_test.terminate_broker(bridge_target_broker)
             if mosq_test.wait_for_subprocess(bridge_target_broker):
                 if rc == 0:
                     rc = 1

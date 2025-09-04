@@ -331,12 +331,12 @@ def main(protocol):
     try:
         rc = do_test(hostname=hostname, port=port, protocol=protocol)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        if broker.returncode != 0:
+        if (platform.system() != 'Windows' and broker.returncode != 0) or (platform.system() == 'Windows' and broker.returncode != 1):
             rc = broker.returncode
             print(f"Broker exited with code {rc}. If there are no obvious errors this may be due to an ASAN build having leaks, which must be fixed.")
             print("The easiest way to reproduce this is to run the broker with `mosquitto -p 1888`, rerun the test, then quit the broker.")
