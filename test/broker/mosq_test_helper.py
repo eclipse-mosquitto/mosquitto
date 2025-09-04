@@ -9,6 +9,7 @@ cmd_subfolder = os.path.realpath(
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
+import mosq_plugins
 import mosq_test
 import mqtt5_opts
 import mqtt5_props

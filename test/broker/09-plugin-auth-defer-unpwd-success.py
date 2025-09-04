@@ -8,8 +8,8 @@ from mosq_test_helper import *
 def write_config(filename, port, plugin_ver):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write("auth_plugin c/auth_plugin_v%d.so\n" % (plugin_ver))
-        f.write("auth_plugin c/auth_plugin_v2.so\n")
+        f.write(f"auth_plugin {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugin_ver))}\n")
+        f.write(f"auth_plugin {mosq_plugins.gen_test_plugin_path('auth_plugin_v2')}\n")
         f.write("allow_anonymous false\n")
 
 def do_test(plugin_ver):

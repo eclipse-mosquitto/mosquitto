@@ -7,7 +7,7 @@ from mosq_test_helper import *
 def write_config(filename, port, plugver):
     with open(filename, 'w') as f:
         f.write(f"listener {port}\n")
-        f.write(f"auth_plugin c/bad_v{plugver}.so\n")
+        f.write(f"auth_plugin {mosq_plugins.gen_test_plugin_path('bad_v%d' % (plugver))}\n")
         f.write("allow_anonymous false\n")
 
 def do_test(plugver):

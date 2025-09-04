@@ -108,7 +108,7 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         # Default listener
 
         # Listeners
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("plugin_opt_test true\n")
         f.write("auth_plugin_deny_special_chars false\n")
 

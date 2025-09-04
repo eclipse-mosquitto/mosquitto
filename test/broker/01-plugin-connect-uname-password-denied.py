@@ -8,7 +8,7 @@ from mosq_test_helper import *
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/password-file/mosquitto_password_file.so\n")
+        f.write(f"plugin {mosq_plugins.PASSWORD_FILE_PLUGIN_PATH}\n")
         f.write("plugin_opt_password_file %s/%s\n" % (Path(__file__).resolve().parent, filename.replace('.conf', '.pwfile')))
         f.write("allow_anonymous false\n")
 

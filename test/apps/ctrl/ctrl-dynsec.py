@@ -7,13 +7,13 @@ import shutil
 
 def write_config(filename, ports):
     with open(filename, 'w') as f:
-        f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
+        f.write(f"global_plugin {mosq_plugins.DYNSEC_PLUGIN_PATH}\n")
         f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        f.write(f"certfile {Path(ssl_dir, 'server.crt')}\n")
+        f.write(f"keyfile {Path(ssl_dir, 'server.key')}\n")
 
 def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     opts = ["-u", "admin",

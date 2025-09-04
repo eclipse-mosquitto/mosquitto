@@ -9,7 +9,7 @@ def write_config(filename, port, per_listener):
         f.write("per_listener_settings %s\n" % (per_listener))
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/acl-file/mosquitto_acl_file.so\n")
+        f.write(f"plugin {mosq_plugins.ACL_FILE_PLUGIN_PATH}\n")
         f.write("plugin_opt_acl_file %s\n" % (filename.replace('.conf', '.acl')))
 
 def write_acl(filename, global_en, user_en, pattern_en):

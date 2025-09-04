@@ -8,8 +8,8 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous false\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write("plugin_opt_config_file %d/dynamic-security.json\n" % (port))
+        f.write(f"plugin {mosq_plugins.DYNSEC_PLUGIN_PATH}\n")
+        f.write(f"plugin_opt_config_file {Path(str(port), 'dynamic-security.json')}\n")
 
 
 port = mosq_test.get_port()

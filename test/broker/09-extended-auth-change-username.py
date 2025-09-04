@@ -10,7 +10,7 @@ def write_config(filename, acl_file, port, per_listener):
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
         f.write("acl_file %s\n" % (acl_file))
-        f.write("auth_plugin c/auth_plugin_extended_single.so\n")
+        f.write(f"auth_plugin {mosq_plugins.gen_test_plugin_path('auth_plugin_extended_single')}\n")
 
 def write_acl(filename):
     with open(filename, 'w') as f:

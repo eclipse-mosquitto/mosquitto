@@ -9,7 +9,7 @@ def write_config(filename, port1, port2, protocol_version):
     with open(filename, 'w') as f:
         f.write("log_type all\n")
         f.write("listener %d\n" % (port2))
-        f.write("plugin c/plugin_evt_persist_client_update.so\n")
+        f.write(f"plugin {mosq_plugins.gen_test_plugin_path('plugin_evt_persist_client_update')}\n")
         f.write("allow_anonymous true\n")
         f.write("persistent_client_expiration 1d\n")
         f.write("\n")

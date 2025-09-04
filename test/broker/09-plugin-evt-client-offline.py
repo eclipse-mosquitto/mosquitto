@@ -5,7 +5,7 @@ from mosq_test_helper import *
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write("plugin c/plugin_evt_client_offline.so\n")
+        f.write(f"plugin {mosq_plugins.gen_test_plugin_path('plugin_evt_client_offline')}\n")
         f.write("allow_anonymous true\n")
 
 

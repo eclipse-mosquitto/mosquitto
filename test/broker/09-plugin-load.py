@@ -7,7 +7,7 @@ from mosq_test_helper import *
 def write_config1(filename, ports, per_listener_settings, plugver):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("listener %d\n" % (ports[0]))
         f.write("plugin_use auth\n")
         f.write("listener %d\n" % (ports[1]))
@@ -18,7 +18,7 @@ def write_config1(filename, ports, per_listener_settings, plugver):
 def write_config2(filename, ports, per_listener_settings, plugver):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("listener %d\n" % (ports[0]))
         f.write("listener %d\n" % (ports[1]))
         f.write("plugin_use auth\n")
