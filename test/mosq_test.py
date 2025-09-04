@@ -229,18 +229,15 @@ def expect_packet(sock, name, expected):
         rlen = 1
 
     packet_recvd = b""
-    try:
-        while len(packet_recvd) < rlen:
-            data = sock.recv(rlen-len(packet_recvd))
-            if len(data) == 0:
-                try:
-                    s = f"when reading {name} from {sock.getpeername()}"
-                except OSError:
-                    s = f"when reading {name} from {sock}"
-                raise BrokenPipeError(s)
-            packet_recvd += data
-    except socket.timeout:
-        pass
+    while len(packet_recvd) < rlen:
+        data = sock.recv(rlen-len(packet_recvd))
+        if len(data) == 0:
+            try:
+                s = f"when reading {name} from {sock.getpeername()}"
+            except OSError:
+                s = f"when reading {name} from {sock}"
+            raise BrokenPipeError(s)
+        packet_recvd += data
 
     if packet_matches(name, packet_recvd, expected):
         return True
