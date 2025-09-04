@@ -14,6 +14,7 @@ add_executable(bridge-topic-test
 target_compile_definitions(bridge-topic-test PRIVATE WITH_BRIDGE WITH_BROKER)
 target_link_libraries(bridge-topic-test PRIVATE bridge-topic-obj common-unit-test-header libmosquitto_common OpenSSL::SSL)
 add_test(NAME unit-bridge-topic-test COMMAND bridge-topic-test)
+test_set_windows_path(unit-bridge-topic-test)
 
 # keepalive-test
 add_executable(keepalive-test
@@ -23,6 +24,7 @@ add_executable(keepalive-test
 target_compile_definitions(keepalive-test PRIVATE WITH_BROKER)
 target_link_libraries(keepalive-test PRIVATE common-unit-test-header libmosquitto_common OpenSSL::SSL)
 add_test(NAME unit-keepalive-test COMMAND keepalive-test)
+test_set_windows_path(unit-keepalive-test)
 
 # persist-read-test
 add_library(persistence-read-obj
@@ -51,6 +53,7 @@ if(WIN32)
 	target_link_libraries(persist-read-test PRIVATE ws2_32)
 endif()
 add_test(NAME unit-persist-read-test COMMAND persist-read-test)
+test_set_windows_path(unit-persist-read-test)
 
 # persist-write-test
 add_library(persistence-write-obj
@@ -84,6 +87,7 @@ if(WIN32)
 	target_link_libraries(persist-write-test PRIVATE ws2_32)
 endif()
 add_test(NAME unit-persist-write-test COMMAND persist-write-test)
+test_set_windows_path(unit-persist-write-test)
 
 # subs-test
 add_library(subs-obj
@@ -112,3 +116,4 @@ if(WIN32)
 endif()
 
 add_test(NAME unit-subs-test COMMAND subs-test)
+test_set_windows_path(unit-subs-test)

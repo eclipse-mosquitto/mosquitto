@@ -48,6 +48,17 @@ if(WITH_TESTS)
 	find_package(GTest REQUIRED)
 	include(GoogleTest)
 	enable_testing()
+
+	function(test_set_windows_path TEST_NAME)
+		if(WIN32)
+			set(PATHMOD
+				"PATH=path_list_prepend:$<TARGET_FILE_DIR:libmosquitto_common>"
+				"PATH=path_list_prepend:$<TARGET_FILE_DIR:libmosquitto>"
+				"PATH=path_list_prepend:${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin"
+			)
+			set_property(TEST ${TEST_NAME} PROPERTY ENVIRONMENT_MODIFICATION "${PATHMOD}")
+		endif()
+	endfunction()
 	
 	function(add_python_tests_from_current_directory2 PREFIX PY_TEST_FILES EXCLUDE_LIST)
 		foreach(PY_TEST_FILE ${PY_TEST_FILES})
@@ -60,6 +71,7 @@ if(WITH_TESTS)
 				PROPERTIES
 					ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
 			)
+			test_set_windows_path(${PREFIX}-${PY_TEST_NAME})
 		endforeach()
 	endfunction()
 	

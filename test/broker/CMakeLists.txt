@@ -35,5 +35,6 @@ foreach(PERSIST_TYPE ${PERSIST_LIST})
             PROPERTIES
                 ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
         )
+		test_set_windows_path(broker-${PY_TEST_NAME}-${PERSIST_TYPE})
     endforeach()
 endforeach()
