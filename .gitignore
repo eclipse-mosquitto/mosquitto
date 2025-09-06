@@ -75,6 +75,9 @@ fuzzing/corpora/db_dump_seed_corpus.zip
 fuzzing/lib/lib_fuzz_pub_topic_check2
 fuzzing/lib/lib_fuzz_sub_topic_check2
 fuzzing/lib/lib_fuzz_utf8
+fuzzing/libcommon/libcommon_fuzz_property
+fuzzing/libcommon/libcommon_fuzz_property.pb.cc
+fuzzing/libcommon/libcommon_fuzz_property.pb.h
 fuzzing/libcommon/libcommon_fuzz_pub_topic_check2
 fuzzing/libcommon/libcommon_fuzz_sub_topic_check2
 fuzzing/libcommon/libcommon_fuzz_topic_matching

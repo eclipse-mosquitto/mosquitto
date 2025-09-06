@@ -4,6 +4,7 @@ include ${R}/fuzzing/config.mk
 .PHONY: all clean
 
 FUZZERS:= \
+	libcommon_fuzz_property \
 	libcommon_fuzz_pub_topic_check2 \
 	libcommon_fuzz_sub_topic_check2 \
 	libcommon_fuzz_topic_matching \
@@ -18,6 +19,13 @@ PROTOBUF_LIBS=/usr/local/lib/libprotobuf-mutator-libfuzzer.a /usr/local/lib/libp
 PROTOC?=/src/libprotobuf-mutator/external.protobuf/bin/protoc
 
 all: $(FUZZERS)
+
+libcommon_fuzz_property.pb.cc : libcommon_fuzz_property.proto
+	$(PROTOC) --cpp_out=. $^
+
+libcommon_fuzz_property : libcommon_fuzz_property.cpp libcommon_fuzz_property.pb.cc
+	$(CXX) $(LOCAL_CXXFLAGS) $(LOCAL_CPPFLAGS) $(LOCAL_LDFLAGS) -o $@ $^ $(LOCAL_LIBADD) $(PROTOBUF_LIBS)
+	install $@ ${OUT}/$@
 
 libcommon_fuzz_pub_topic_check2 : libcommon_fuzz_pub_topic_check2.cpp
 	$(CXX) $(LOCAL_CXXFLAGS) $(LOCAL_CPPFLAGS) $(LOCAL_LDFLAGS) -o $@ $^ $(LOCAL_LIBADD)

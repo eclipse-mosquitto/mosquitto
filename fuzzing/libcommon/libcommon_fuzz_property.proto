@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+package fuzz_property;
+
+message Property {
+	message StringPair {
+		required string name = 1;
+		required string value = 2;
+	}
+
+	required uint32 identifier = 1;
+	oneof data {
+		uint32 uint8_value = 2;
+		uint32 uint16_value = 3;
+		uint32 uint32_value = 4;
+		uint32 varint_value = 5;
+		bytes binary_value = 6;
+		string string_value = 7;
+		StringPair stringpair_value = 8;
+	}
+}
+
+message FuzzerInput {
+	repeated Property properties = 1;
+}
