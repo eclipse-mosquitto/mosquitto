@@ -25,6 +25,11 @@ cmake -DBUILD_SHARED_LIBS=OFF -DENABLE_CJSON_TEST=OFF -DCMAKE_C_FLAGS=-fPIC .
 make
 make install
 
+cd ${SRC}/libprotobuf-mutator
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug .
+make
+make install
+
 # Build broker and library static libraries
 cd ${SRC}/mosquitto
 make WITH_STATIC_LIBRARIES=yes WITH_DOCS=no WITH_FUZZING=yes WITH_EDITLINE=no WITH_HTTP_API=no

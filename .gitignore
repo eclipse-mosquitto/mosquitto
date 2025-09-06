@@ -67,7 +67,6 @@ fuzzing/broker/broker_fuzz_read_handle
 fuzzing/broker/broker_fuzz_second_packet
 fuzzing/broker/broker_fuzz_second_packet_with_init
 fuzzing/broker/broker_fuzz_test_config
-
 fuzzing/corpora/broker/*
 fuzzing/corpora/broker_packet_seed_corpus.zip
 fuzzing/corpora/client/*
@@ -76,6 +75,13 @@ fuzzing/corpora/db_dump_seed_corpus.zip
 fuzzing/lib/lib_fuzz_pub_topic_check2
 fuzzing/lib/lib_fuzz_sub_topic_check2
 fuzzing/lib/lib_fuzz_utf8
+fuzzing/libcommon/libcommon_fuzz_pub_topic_check2
+fuzzing/libcommon/libcommon_fuzz_sub_topic_check2
+fuzzing/libcommon/libcommon_fuzz_topic_matching
+fuzzing/libcommon/libcommon_fuzz_topic_matching.pb.cc
+fuzzing/libcommon/libcommon_fuzz_topic_matching.pb.h
+fuzzing/libcommon/libcommon_fuzz_topic_tokenise
+fuzzing/libcommon/libcommon_fuzz_utf8
 fuzzing/plugins/dynamic-security/dynsec_fuzz_load
 
 lib/cpp/libmosquittopp.so*

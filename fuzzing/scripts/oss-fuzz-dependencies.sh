@@ -21,4 +21,5 @@
 # currently part of fuzz testing. Once it is part of fuzz testing, sqlite will
 # need to be built statically.
 apt-get update && apt-get install -y libargon2-dev libedit-dev libtool-bin make libmicrohttpd-dev libsqlite3-dev
+git clone https://github.com/google/libprotobuf-mutator ${SRC}/libprotobuf-mutator
 git clone https://github.com/ralight/cJSON ${SRC}/cJSON
