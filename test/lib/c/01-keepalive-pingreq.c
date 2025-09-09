@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	}
 	mosquitto_connect_callback_set(mosq, on_connect);
 
-	rc = mosquitto_connect(mosq, "localhost", port, 5);
+	rc = mosquitto_connect(mosq, "127.0.0.1", port, 5);
 	if(rc != MOSQ_ERR_SUCCESS){
 		return rc;
 	}

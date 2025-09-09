@@ -89,7 +89,7 @@ def broker_log(broker):
         return None
         
 
-def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, checkhost="localhost", env=None, check_port=True, cmd_args=None, timeout=0.1):
+def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, checkhost="127.0.0.1", env=None, check_port=True, cmd_args=None, timeout=0.1):
     global vg_index
     global vg_logfiles
 
@@ -339,7 +339,7 @@ def do_receive_send(sock, receive_packet, send_packet, error_string="receive sen
         raise ValueError
 
 
-def client_connect_only(hostname="localhost", port=1888, timeout=10, protocol="mqtt"):
+def client_connect_only(hostname="127.0.0.1", port=1888, timeout=10, protocol="mqtt"):
     if protocol == "websockets":
         addr = (hostname, port)
         sock = socket.create_connection(addr, timeout=timeout)
@@ -358,7 +358,7 @@ def client_connect_only_unix(path, timeout=10):
     sock.connect(path)
     return sock
 
-def do_client_connect(connect_packet, connack_packet, hostname="localhost", port=1888, timeout=10, connack_error="connack", protocol="mqtt"):
+def do_client_connect(connect_packet, connack_packet, hostname="127.0.0.1", port=1888, timeout=10, connack_error="connack", protocol="mqtt"):
     sock = client_connect_only(hostname, port, timeout, protocol)
 
     return do_send_receive(sock, connect_packet, connack_packet, connack_error)

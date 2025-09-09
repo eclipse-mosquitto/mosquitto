@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		return rc;
 	}
 
-	rc = mosq->connect_async("localhost", port, 60);
+	rc = mosq->connect_async("127.0.0.1", port, 60);
 	if(rc){
 		printf("connect_async failed: %s\n", mosquitto_strerror(rc));
 		return rc;

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	mosquitto_disconnect_callback_set(mosq, on_disconnect);
 	mosquitto_subscribe_callback_set(mosq, on_subscribe);
 
-	rc = mosquitto_connect_async(mosq, "localhost", port, 60);
+	rc = mosquitto_connect_async(mosq, "127.0.0.1", port, 60);
 	if(rc){
 		printf("connect_async failed: %s\n", mosquitto_strerror(rc));
 	}

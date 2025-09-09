@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	mosquitto_username_pw_set(mosq, "oibvvwqw", "#'^2hg9a&nm38*us");
 	mosquitto_will_set(mosq, "will-topic", strlen("will message"), "will message", 2, false);
 
-	rc = mosquitto_connect(mosq, "localhost", port, 60);
+	rc = mosquitto_connect(mosq, "127.0.0.1", port, 60);
 	if(rc != MOSQ_ERR_SUCCESS){
 		return rc;
 	}

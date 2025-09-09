@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 	mosq = new mosquittopp_test("loop-test");
 	mosq->int_option(MOSQ_OPT_PROTOCOL_VERSION, MQTT_PROTOCOL_V5);
 
-	mosq->connect_v5("localhost", port, 60, NULL, NULL);
+	mosq->connect_v5("127.0.0.1", port, 60, NULL, NULL);
 
 	do_loop(mosq);
 

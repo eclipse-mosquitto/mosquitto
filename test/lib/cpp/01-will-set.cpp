@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	mosq = new mosquittopp_test("01-will-set");
 	mosq->will_set("topic/on/unexpected/disconnect", strlen("will message"), "will message", 1, true);
 
-	mosq->connect("localhost", port, 60);
+	mosq->connect("127.0.0.1", port, 60);
 
 	while(run == -1){
 		mosq->loop();

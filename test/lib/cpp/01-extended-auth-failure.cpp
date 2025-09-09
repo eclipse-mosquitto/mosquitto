@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	mosq->int_option(MOSQ_OPT_PROTOCOL_VERSION, 5);
 
 	mosquitto_property_add_int32(&props, MQTT_PROP_MAXIMUM_PACKET_SIZE, 1000);
-	rc = mosq->connect_v5("localhost", port, 60, NULL, props);
+	rc = mosq->connect_v5("127.0.0.1", port, 60, NULL, props);
 	mosquitto_property_free_all(&props);
 	if(rc != MOSQ_ERR_SUCCESS){
 		return rc;

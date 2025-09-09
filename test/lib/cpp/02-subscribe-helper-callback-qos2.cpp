@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	mosqpp::lib_init();
 
 	mosqpp::subscribe_callback(
-			cb, &mydata, "qos2/test", QOS, "localhost", port,
+			cb, &mydata, "qos2/test", QOS, "127.0.0.1", port,
 			"subscribe-qos2-test", 60, true, NULL, NULL, NULL, NULL);
 
 	mosqpp::lib_cleanup();

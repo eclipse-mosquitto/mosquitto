@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	mosq = new mosquittopp_test("publish-qos2-test");
 	mosq->message_retry_set(3);
 
-	mosq->connect("localhost", port, 60);
+	mosq->connect("127.0.0.1", port, 60);
 
 	while(run == -1){
 		mosq->loop();
