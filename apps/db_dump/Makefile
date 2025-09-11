@@ -65,5 +65,7 @@ clean :
 	-rm -f $(OBJS) $(BROKER_OBJS)  mosquitto_db_dump mosquitto_db_dump.a *.gcda *.gcno
 
 install:
+	$(INSTALL) -d "${DESTDIR}$(prefix)/bin"
+	$(INSTALL) ${STRIP_OPTS} mosquitto_db_dump "${DESTDIR}${prefix}/bin/mosquitto_db_dump"
 
 uninstall:

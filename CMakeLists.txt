@@ -224,6 +224,7 @@ install(
 	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_unsubscribe.h
 	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquitto_will.h
 	${mosquitto_SOURCE_DIR}/include/mosquitto/libmosquittopp.h
+	${mosquitto_SOURCE_DIR}/include/mosquitto/mqtt_protocol.h
 	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/mosquitto"
 )
 
