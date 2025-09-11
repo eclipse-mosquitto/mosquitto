@@ -259,9 +259,8 @@ int net__socket_close(struct mosquitto *mosq)
 	}
 
 #ifdef WITH_BROKER
-	if(mosq->listener){
+	if(mosq->listener && mosq->state != mosq_cs_duplicate && mosq->state != mosq_cs_disused){
 		mosq->listener->client_count--;
-		mosq->listener = NULL;
 	}
 #endif
 
