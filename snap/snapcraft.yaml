@@ -22,6 +22,10 @@ apps:
     command: usr/bin/mosquitto_ctrl
     plugs: [home, network]
 
+  db_dump:
+    command: usr/bin/mosquitto_db_dump
+    plugs: [home]
+
   pub:
     command: usr/bin/mosquitto_pub
     plugs: [home, network]
@@ -90,6 +94,7 @@ parts:
     prime:
       - usr/sbin/mosquitto
       - usr/bin/mosquitto_ctrl
+      - usr/bin/mosquitto_db_dump
       - usr/bin/mosquitto_pub
       - usr/bin/mosquitto_rr
       - usr/bin/mosquitto_signal
@@ -99,12 +104,14 @@ parts:
       - usr/include/mosquitto/*.h
       - usr/include/mosquitto_broker.h
       - usr/include/mosquitto_plugin.h
+      - usr/include/mosquittopp.h
       - usr/include/mqtt_protocol.h
       - usr/lib/*-linux-gnu/libcjson.so*
       - usr/lib/*-linux-gnu/libcrypto.so*
       - usr/lib/*-linux-gnu/libmicrohttpd.so*
       - usr/lib/*-linux-gnu/libmosquitto.so*
       - usr/lib/*-linux-gnu/libmosquitto_common.so*
+      - usr/lib/*-linux-gnu/libmosquittopp.so*
       - usr/lib/*-linux-gnu/libssl.so*
       - usr/lib/*-linux-gnu/mosquitto_acl_file.so*
       - usr/lib/*-linux-gnu/mosquitto_dynamic_security.so*
