@@ -8,7 +8,9 @@ DISTFILES= \
 	client/ \
 	cmake/ \
 	common/ \
+	dashboard/ \
 	deps/ \
+	docker/ \
 	examples/ \
 	include/ \
 	installer/ \

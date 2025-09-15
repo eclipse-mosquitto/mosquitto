@@ -1,23 +1,41 @@
-FROM alpine:3.22
+FROM ubuntu:24.04
 
 LABEL maintainer="Roger Light <roger@atchoo.org>" \
     description="Eclipse Mosquitto MQTT Broker"
 
-COPY mosq.tar.gz /tmp
+ENV VERSION=2.1.0 \
+    DOWNLOAD_SHA256=zzz \
+    GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7
 
 RUN set -x && \
-    apk --no-cache add --virtual build-deps \
-        argon2-dev \
-        build-base \
-        cjson-dev \
+    apt-get update && \
+    apt-get install -y \
+        build-essential \
         cmake \
         gnupg \
+        libargon2-dev \
+        libcjson-dev \
         libedit-dev \
         libmicrohttpd-dev \
-        linux-headers \
-        openssl-dev \
-        sqlite-dev \
-        util-linux-dev && \
+        libssl-dev \
+        libsqlite3-dev && \
+    wget https://mosquitto.org/files/source/mosquitto-${VERSION}.tar.gz -O /tmp/mosq.tar.gz && \
+    echo "$DOWNLOAD_SHA256  /tmp/mosq.tar.gz" | sha256sum -c - && \
+    wget https://mosquitto.org/files/source/mosquitto-${VERSION}.tar.gz.asc -O /tmp/mosq.tar.gz.asc && \
+    export GNUPGHOME="$(mktemp -d)" && \
+    found=''; \
+    for server in \
+        hkps://keys.openpgp.org \
+        hkp://keyserver.ubuntu.com:80 \
+        pgp.mit.edu \
+    ; do \
+        echo "Fetching GPG key $GPG_KEYS from $server"; \
+        gpg --keyserver "$server" --keyserver-options timeout=10 --recv-keys "$GPG_KEYS" && found=yes && break; \
+    done; \
+    test -z "$found" && echo >&2 "error: failed to fetch GPG key $GPG_KEYS" && exit 1; \
+    gpg --batch --verify /tmp/mosq.tar.gz.asc /tmp/mosq.tar.gz && \
+    gpgconf --kill all && \
+    rm -rf "$GNUPGHOME" /tmp/mosq.tar.gz.asc && \
     mkdir -p /build/mosq && \
     tar --strip=1 -xf /tmp/mosq.tar.gz -C /build/mosq && \
     rm /tmp/mosq.tar.gz && \
@@ -31,8 +49,8 @@ RUN set -x && \
         WITH_WEBSOCKETS=yes \
         prefix=/usr \
         binary && \
-    addgroup -S -g 1883 mosquitto 2>/dev/null && \
-    adduser -S -u 1883 -D -H -h /var/empty -s /sbin/nologin -G mosquitto -g mosquitto mosquitto 2>/dev/null && \
+    addgroup --system --quiet --gid 1883 mosquitto 2>/dev/null && \
+    adduser --system --quiet --no-create-home --ingroup mosquitto --uid 1883 --home /var/empty --shell /usr/sbin/nologin mosquitto 2>/dev/null && \
     mkdir -p /mosquitto/config /mosquitto/data /mosquitto/log && \
     install -d /usr/sbin/ && \
     install -s -m755 /build/mosq/client/mosquitto_pub /usr/bin/mosquitto_pub && \
@@ -48,20 +66,21 @@ RUN set -x && \
     install -s -m755 /build/mosq/plugins/password-file/mosquitto_password_file.so /usr/lib/mosquitto_password_file.so && \
     install -s -m755 /build/mosq/plugins/persist-sqlite/mosquitto_persist_sqlite.so /usr/lib/mosquitto_persist_sqlite.so && \
     install -s -m755 /build/mosq/plugins/sparkplug-aware/mosquitto_sparkplug_aware.so /usr/lib/mosquitto_sparkplug_aware.so && \
-    install -m644 /build/mosq/docker/local/mosquitto.conf /mosquitto/config/mosquitto.conf && \
+    install -m644 /build/mosq/docker/2.1-ubuntu/mosquitto.conf /mosquitto/config/mosquitto.conf && \
     install -d /usr/share/mosquitto && \
     cp -r /build/mosq/dashboard/src /usr/share/mosquitto/dashboard && \
     install -Dm644 /build/mosq/epl-v20 /usr/share/licenses/mosquitto/epl-v20 && \
     install -Dm644 /build/mosq/edl-v10 /usr/share/licenses/mosquitto/edl-v10 && \
     chown -R mosquitto:mosquitto /mosquitto && \
-    apk --no-cache add \
-        argon2-libs \
+    apt-get install \
         ca-certificates \
-        cjson \
-        libmicrohttpd \
-        sqlite-libs \
-        tzdata && \
-    apk del build-deps && \
+        libargon2-1 \
+        libcjson1 \
+        libmicrohttpd12 \
+        libsqlite3-0 && \
+    apt-get clean && \
+    apt-get remove --purge --auto-remove -y build-essential cmake gnupg && \
+    rm -rf /var/lib/apt/lists/* && \
     rm -rf /build
 
 VOLUME ["/mosquitto/data", "/mosquitto/log"]
