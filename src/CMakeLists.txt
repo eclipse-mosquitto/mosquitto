@@ -105,10 +105,13 @@ endif()
 
 option(WITH_HTTP_API
 	"Include http_api support for listeners?" ON)
-option(HTTP_API_DIR
-	"Default http_api directory" "")
+set(HTTP_API_DIR "Default http_api directory" CACHE STRING "")
 if(WITH_HTTP_API)
-	find_library(MICROHTTPD_LIBRARY NAMES microhttpd)
+	if(WIN32)
+		find_library(MICROHTTPD_LIBRARY NAMES microhttpd-dll)
+	else()
+		find_library(MICROHTTPD_LIBRARY NAMES microhttpd)
+	endif()
 	if(MICROHTTPD_LIBRARY)
 		target_sources(mosquitto PRIVATE http_api.c)
 		target_compile_definitions(mosquitto PRIVATE "WITH_HTTP_API")

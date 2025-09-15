@@ -130,6 +130,30 @@ Section "Files" SecInstall
 	File "..\include\mosquitto\libmosquittopp.h"
 	File "..\include\mosquitto\mqtt_protocol.h"
 
+	SetOutPath "$INSTDIR\dashboard"
+	File "..\dashboard\src\assert.js
+	File "..\dashboard\src\chart.umd.js
+	File "..\dashboard\src\chartjs-plugin-zoom.min.js
+	File "..\dashboard\src\consts.js
+	File "..\dashboard\src\dashboard.js
+	File "..\dashboard\src\hammer.min.js
+	File "..\dashboard\src\index.html
+	File "..\dashboard\src\index.js
+	File "..\dashboard\src\listeners.html
+	File "..\dashboard\src\listeners.js
+	File "..\dashboard\src\queue.js
+	File "..\dashboard\src\sidebar.js
+	File "..\dashboard\src\styles.css
+	File "..\dashboard\src\tailwind
+	File "..\dashboard\src\tailwind.config.js
+	File "..\dashboard\src\tailwind\styles.css
+	File "..\dashboard\src\utils.js
+
+	SetOutPath "$INSTDIR\dashboard\media"
+	File "..\dashboard\src\media\favicon-16x16.png
+	File "..\dashboard\src\media\favicon-32x32.png
+	File "..\dashboard\src\media\mosquitto-logo.png
+
 	WriteUninstaller "$INSTDIR\Uninstall.exe"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mosquitto64" "DisplayName" "Eclipse Mosquitto MQTT broker (64 bit)"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mosquitto64" "DisplayIcon" "$INSTDIR\mosquitto.ico"
@@ -241,6 +265,30 @@ Section "Uninstall"
 	RMDir "$INSTDIR\devel\mosquitto"
 	RMDir "$INSTDIR\devel"
 
+	Delete "$INSTDIR\dashboard\media\favicon-16x16.png"
+	Delete "$INSTDIR\dashboard\media\favicon-32x32.png"
+	Delete "$INSTDIR\dashboard\media\mosquitto-logo.png"
+	RMDir "$INSTDIR\dashboard\media"
+
+	Delete "$INSTDIR\dashboard\assert.js
+	Delete "$INSTDIR\dashboard\chart.umd.js
+	Delete "$INSTDIR\dashboard\chartjs-plugin-zoom.min.js
+	Delete "$INSTDIR\dashboard\consts.js
+	Delete "$INSTDIR\dashboard\dashboard.js
+	Delete "$INSTDIR\dashboard\hammer.min.js
+	Delete "$INSTDIR\dashboard\index.html
+	Delete "$INSTDIR\dashboard\index.js
+	Delete "$INSTDIR\dashboard\listeners.html
+	Delete "$INSTDIR\dashboard\listeners.js
+	Delete "$INSTDIR\dashboard\queue.js
+	Delete "$INSTDIR\dashboard\sidebar.js
+	Delete "$INSTDIR\dashboard\styles.css
+	Delete "$INSTDIR\dashboard\tailwind
+	Delete "$INSTDIR\dashboard\tailwind.config.js
+	Delete "$INSTDIR\dashboard\tailwind\styles.css
+	Delete "$INSTDIR\dashboard\utils.js
+	RMDir "$INSTDIR\dashboard"
+
 	Delete "$INSTDIR\Uninstall.exe"
 	RMDir "$INSTDIR"
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Mosquitto64"
@@ -256,3 +304,4 @@ LangString DESC_SecService ${LANG_ENGLISH} "Install mosquitto as a Windows servi
 	!insertmacro MUI_DESCRIPTION_TEXT ${SecInstall} $(DESC_SecInstall)
 	!insertmacro MUI_DESCRIPTION_TEXT ${SecService} $(DESC_SecService)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
+

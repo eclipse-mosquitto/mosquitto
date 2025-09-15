@@ -60,6 +60,10 @@ extern struct metric metrics[mosq_metric_max];
 #define DIR_SEP '/'
 #endif
 
+#ifndef S_ISREG
+#define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
+#endif
+
 static char *http__canonical_filename(
 		const char *url,
 		const char *http_dir,
