@@ -105,12 +105,17 @@ endif()
 
 option(WITH_HTTP_API
 	"Include http_api support for listeners?" ON)
+option(HTTP_API_DIR
+	"Default http_api directory" "")
 if(WITH_HTTP_API)
 	find_library(MICROHTTPD_LIBRARY NAMES microhttpd)
 	if(MICROHTTPD_LIBRARY)
 		target_sources(mosquitto PRIVATE http_api.c)
 		target_compile_definitions(mosquitto PRIVATE "WITH_HTTP_API")
 		target_link_libraries(mosquitto PRIVATE ${MICROHTTPD_LIBRARY})
+		if(HTTP_API_DIR)
+			target_compile_definitions(mosquitto PRIVATE "HTTP_API_DIR=\"${HTTP_API_DIR}\"")
+		endif()
 	endif()
 endif()
 

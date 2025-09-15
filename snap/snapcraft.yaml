@@ -22,10 +22,6 @@ apps:
     command: usr/bin/mosquitto_ctrl
     plugs: [home, network]
 
-  db_dump:
-    command: usr/bin/mosquitto_db_dump
-    plugs: [home]
-
   pub:
     command: usr/bin/mosquitto_pub
     plugs: [home, network]
@@ -70,7 +66,7 @@ parts:
     plugin: cmake
     cmake-parameters:
       - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DHTTP_API_DIR=\\\"/snap/mosquitto/current/dashboard/\\\"
+      - -DHTTP_API_DIR="/snap/mosquitto/current/dashboard/"
       - -DWITH_TESTS=OFF
     source: https://github.com/eclipse-mosquitto/mosquitto
     source-type: git
