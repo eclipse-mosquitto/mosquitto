@@ -451,17 +451,28 @@ int http_api__start(struct mosquitto__listener *listener)
 		if(rp->ai_family == AF_INET6){
 			flags |= MHD_USE_IPv6;
 		}
-		listener->mhd = MHD_start_daemon(flags, port, NULL, NULL, &http_api_handler, listener,
-				MHD_OPTION_SOCK_ADDR, rp->ai_addr,
-				MHD_OPTION_HTTPS_MEM_CERT, x509_cert,
-				MHD_OPTION_HTTPS_MEM_KEY, x509_key,
-				MHD_OPTION_END);
+		if(x509_cert && x509_key){
+			listener->mhd = MHD_start_daemon(flags, port, NULL, NULL, &http_api_handler, listener,
+					MHD_OPTION_SOCK_ADDR, rp->ai_addr,
+					MHD_OPTION_HTTPS_MEM_CERT, x509_cert,
+					MHD_OPTION_HTTPS_MEM_KEY, x509_key,
+					MHD_OPTION_END);
+		}else{
+			listener->mhd = MHD_start_daemon(flags, port, NULL, NULL, &http_api_handler, listener,
+					MHD_OPTION_SOCK_ADDR, rp->ai_addr,
+					MHD_OPTION_END);
+		}
 		freeaddrinfo(ainfo);
 	}else{
-		listener->mhd = MHD_start_daemon(flags | MHD_USE_DUAL_STACK, port, NULL, NULL, &http_api_handler, listener,
-				MHD_OPTION_HTTPS_MEM_CERT, x509_cert,
-				MHD_OPTION_HTTPS_MEM_KEY, x509_key,
-				MHD_OPTION_END);
+		if(x509_cert && x509_key){
+			listener->mhd = MHD_start_daemon(flags | MHD_USE_DUAL_STACK, port, NULL, NULL, &http_api_handler, listener,
+					MHD_OPTION_HTTPS_MEM_CERT, x509_cert,
+					MHD_OPTION_HTTPS_MEM_KEY, x509_key,
+					MHD_OPTION_END);
+		}else{
+			listener->mhd = MHD_start_daemon(flags | MHD_USE_DUAL_STACK, port, NULL, NULL, &http_api_handler, listener,
+					MHD_OPTION_END);
+		}
 	}
 
 	mosquitto_FREE(x509_cert);
