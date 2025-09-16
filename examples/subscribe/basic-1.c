@@ -14,10 +14,6 @@
 void on_connect(struct mosquitto *mosq, void *obj, int reason_code)
 {
 	int rc;
-	/* Print out the connection result. mosquitto_connack_string() produces an
-	 * appropriate string for MQTT v3.x clients, the equivalent for MQTT v5.0
-	 * clients is mosquitto_reason_string().
-	 */
 	printf("on_connect: %s\n", mosquitto_connack_string(reason_code));
 	if(reason_code != 0){
 		/* If the connection fails for any reason, we don't want to keep on

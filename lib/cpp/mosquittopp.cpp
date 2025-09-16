@@ -168,6 +168,11 @@ const char* connack_string(int connack_code)
 	return mosquitto_connack_string(connack_code);
 }
 
+const char* disconnect_string(int connack_code)
+{
+	return mosquitto_disconnect_string(connack_code);
+}
+
 int property_check_command(int command, int identifier)
 {
 	return mosquitto_property_check_command(command, identifier);

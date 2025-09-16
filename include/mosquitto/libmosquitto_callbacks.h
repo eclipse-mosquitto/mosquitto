@@ -53,8 +53,9 @@ extern "C" {
  * Callback Parameters:
  *  mosq - the mosquitto instance making the callback.
  *  obj - the user data provided in <mosquitto_new>
- *  rc -  the return code of the connection response. The values are defined by
- *        the MQTT protocol version in use.
+ *  rc -  the return code of the connection response.
+ *        Decodable with <mosquitto_connack_string>.
+ *        The values are defined by the MQTT protocol version in use.
  *        For MQTT v5.0, look at section 3.2.2.2 Connect Reason code: https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html
  *        For MQTT v3.1.1, look at section 3.2.2.3 Connect Return code: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  *
@@ -78,8 +79,9 @@ libmosq_EXPORT void mosquitto_connect_callback_set(struct mosquitto *mosq, LIBMO
  * Callback Parameters:
  *  mosq - the mosquitto instance making the callback.
  *  obj - the user data provided in <mosquitto_new>
- *  rc -  the return code of the connection response. The values are defined by
- *        the MQTT protocol version in use.
+ *  rc -  the return code of the connection response.
+ *        Decodable with <mosquitto_connack_string>.
+ *        The values are defined by the MQTT protocol version in use.
  *        For MQTT v5.0, look at section 3.2.2.2 Connect Reason code: https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html
  *        For MQTT v3.1.1, look at section 3.2.2.3 Connect Return code: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  *  flags - the connect flags.
@@ -108,8 +110,9 @@ libmosq_EXPORT void mosquitto_connect_with_flags_callback_set(struct mosquitto *
  * Callback Parameters:
  *  mosq - the mosquitto instance making the callback.
  *  obj - the user data provided in <mosquitto_new>
- *  rc -  the return code of the connection response. The values are defined by
- *        the MQTT protocol version in use.
+ *  rc -  the return code of the connection response.
+ *        Decodable with <mosquitto_connack_string>.
+ *        The values are defined by the MQTT protocol version in use.
  *        For MQTT v5.0, look at section 3.2.2.2 Connect Reason code: https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html
  *        For MQTT v3.1.1, look at section 3.2.2.3 Connect Return code: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  *  flags - the connect flags.
@@ -155,9 +158,12 @@ libmosq_EXPORT void mosquitto_pre_connect_callback_set(struct mosquitto *mosq, L
  * Callback Parameters:
  *  mosq - the mosquitto instance making the callback.
  *  obj -  the user data provided in <mosquitto_new>
- *  rc -   integer value indicating the reason for the disconnect. A value of 0
- *         means the client has called <mosquitto_disconnect>. Any other value
- *         indicates that the disconnect is unexpected.
+ *  rc -   integer value indicating the reason for the disconnect.
+ *         Decodable with <mosquitto_disconnect_string>.
+ *         A value of 0 means the client has called <mosquitto_disconnect>.
+ *         Any other value indicates that the disconnect is unexpected.
+ *         For MQTT v5.0, look at section 3.14.2.1 Connect Reason code: https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html
+ *         For MQTT v3.1.1, look at section 3.14 Disconnect notification: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  */
 typedef void (*LIBMOSQ_CB_disconnect)(struct mosquitto *mosq, void *obj, int rc);
 libmosq_EXPORT void mosquitto_disconnect_callback_set(struct mosquitto *mosq, LIBMOSQ_CB_disconnect on_disconnect);
@@ -180,9 +186,12 @@ libmosq_EXPORT void mosquitto_disconnect_callback_set(struct mosquitto *mosq, LI
  * Callback Parameters:
  *  mosq - the mosquitto instance making the callback.
  *  obj -  the user data provided in <mosquitto_new>
- *  rc -   integer value indicating the reason for the disconnect. A value of 0
- *         means the client has called <mosquitto_disconnect>. Any other value
- *         indicates that the disconnect is unexpected.
+ *  rc -   integer value indicating the reason for the disconnect.
+ *         Decodable with <mosquitto_disconnect_string>.
+ *         A value of 0 means the client has called <mosquitto_disconnect>.
+ *         Any other value indicates that the disconnect is unexpected.
+ *         For MQTT v5.0, look at section 3.14.2.1 Connect Reason code: https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html
+ *         For MQTT v3.1.1, look at section 3.14 Disconnect notification: http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  *  props - list of MQTT 5 properties, or NULL
  */
 typedef void (*LIBMOSQ_CB_disconnect_v5)(struct mosquitto *mosq, void *obj, int rc, const mosquitto_property *props);
@@ -246,6 +255,7 @@ libmosq_EXPORT void mosquitto_publish_callback_set(struct mosquitto *mosq, LIBMO
  *  obj -  the user data provided in <mosquitto_new>
  *  mid -  the message id of the sent message.
  *  reason_code - the MQTT 5 reason code
+ *                Decodable with <mosquitto_reason_string>.
  *  props - list of MQTT 5 properties, or NULL
  */
 typedef void (*LIBMOSQ_CB_publish_v5)(struct mosquitto *mosq, void *obj, int mid, int reason_code, const mosquitto_property *props);

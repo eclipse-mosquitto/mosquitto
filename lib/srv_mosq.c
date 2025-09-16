@@ -48,7 +48,7 @@ static void srv_callback(void *arg, int status, int timeouts, unsigned char *abu
 		}
 	}else{
 		log__printf(mosq, MOSQ_LOG_ERR, "Error: SRV lookup failed (%d).", status);
-		/* FIXME - calling on_disconnect here isn't correct. */
+		/* FIXME - calling on_disconnect here isn't correct. Error code is also incorrect*/
 		callback__on_disconnect(mosq, MOSQ_ERR_LOOKUP, NULL);
 	}
 }

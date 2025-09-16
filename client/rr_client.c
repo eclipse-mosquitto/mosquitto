@@ -119,7 +119,7 @@ void my_connect_callback(struct mosquitto *mosq, void *obj, int result, int flag
 	}else{
 		client_state = rr_s_disconnect;
 		if(result){
-			err_printf(&cfg, "Connection error: %s\n", mosquitto_reason_string(result));
+			err_printf(&cfg, "Connection error: %s\n", mosquitto_connack_string(result));
 		}
 		mosquitto_disconnect_v5(mosq, 0, cfg.disconnect_props);
 	}
