@@ -366,6 +366,13 @@ void context__remove_from_by_id(struct mosquitto *context)
 		return;
 	}
 
+	if(context->in_by_id == true){
+		HASH_FIND(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), context_found);
+		if(context_found){
+			HASH_DELETE(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context_found);
+		}
+	}
+
 	if(context->in_by_id){
 		HASH_FIND(hh_id, db.contexts_by_id, context->id, strlen(context->id), context_found);
 		if(context_found == context){

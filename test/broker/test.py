@@ -196,6 +196,7 @@ tests = [
     (1, './09-plugin-evt-tick.py'),
     (1, './09-plugin-evt-unsubscribe.py'),
     (1, './09-plugin-delayed-auth.py'),
+    (1, './09-plugin-delayed-extended-auth.py'),
     (3, './09-plugin-load.py'),
     (1, './09-plugin-publish.py'),
     (1, './09-plugin-unsupported.py'),

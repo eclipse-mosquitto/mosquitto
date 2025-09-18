@@ -865,9 +865,9 @@ BROKER_EXPORT void mosquitto_complete_basic_auth(const char *clientid, int resul
 		return;
 	}
 
-	HASH_FIND(hh_id, db.contexts_by_id_delayed_auth, clientid, strlen(clientid), context);
-	if(context){
-		HASH_DELETE(hh_id, db.contexts_by_id_delayed_auth, context);
+	HASH_FIND(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, clientid, strlen(clientid), context);
+	if(context && context->state == mosq_cs_delayed_auth){
+		HASH_DELETE(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context);
 		if(result == MOSQ_ERR_SUCCESS){
 			connect__on_authorised(context, NULL, 0);
 		}else{
@@ -880,6 +880,64 @@ BROKER_EXPORT void mosquitto_complete_basic_auth(const char *clientid, int resul
 			context->session_expiry_interval = MQTT_SESSION_EXPIRY_IMMEDIATE;
 			will__clear(context);
 			do_disconnect(context, MOSQ_ERR_AUTH);
+		}
+	}
+}
+
+
+BROKER_EXPORT void mosquitto_complete_extended_auth(const char *clientid, int result, void *auth_data_out, uint16_t auth_data_out_len)
+{
+	struct mosquitto *context;
+
+	if(clientid == NULL){
+		return;
+	}
+
+	HASH_FIND(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, clientid, strlen(clientid), context);
+	if(context && (context->state == mosq_cs_delayed_ext_auth || context->state == mosq_cs_delayed_ext_reauth)){
+		HASH_DELETE(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context);
+		if(result == MOSQ_ERR_SUCCESS){
+			if(context->state == mosq_cs_delayed_ext_auth){
+				connect__on_authorised(context, auth_data_out, auth_data_out_len);
+			}else{
+				mosquitto__set_state(context, mosq_cs_active);
+				send__auth(context, MQTT_RC_SUCCESS, auth_data_out, auth_data_out_len);
+				SAFE_FREE(auth_data_out);
+			}
+		}else if(result == MOSQ_ERR_AUTH_CONTINUE){
+			if(context->state == mosq_cs_delayed_ext_auth){
+				mosquitto__set_state(context, mosq_cs_authenticating);
+			}else{
+				mosquitto__set_state(context, mosq_cs_reauthenticating);
+			}
+			send__auth(context, MQTT_RC_CONTINUE_AUTHENTICATION, auth_data_out, auth_data_out_len);
+			SAFE_FREE(auth_data_out);
+		}else{
+			SAFE_FREE(auth_data_out);
+			if(context->state == mosq_cs_delayed_ext_auth && context->will){
+				/* Free will without sending if this is our first authentication attempt */
+				will__clear(context);
+			}
+			if(result == MOSQ_ERR_AUTH){
+				if(context->state == mosq_cs_delayed_ext_auth){
+					send__connack(context, 0, MQTT_RC_NOT_AUTHORIZED, NULL);
+					mosquitto_FREE(context->id);
+				}else{
+					send__disconnect(context, MQTT_RC_NOT_AUTHORIZED, NULL);
+				}
+			}else if(result == MOSQ_ERR_NOT_SUPPORTED){
+				/* Client has requested extended authentication, but we don't support it. */
+				if(context->state == mosq_cs_delayed_ext_auth){
+					send__connack(context, 0, MQTT_RC_BAD_AUTHENTICATION_METHOD, NULL);
+					mosquitto_FREE(context->id);
+				}else{
+					send__disconnect(context, MQTT_RC_BAD_AUTHENTICATION_METHOD, NULL);
+				}
+			}else{
+				if(context->state == mosq_cs_delayed_ext_auth){
+					mosquitto_FREE(context->id);
+				}
+			}
 		}
 	}
 }

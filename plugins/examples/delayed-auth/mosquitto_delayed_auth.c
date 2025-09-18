@@ -20,6 +20,7 @@ Contributors:
  * This is an example plugin showing how to carry out delayed authentication.
  * The "authentication" in this example makes no checks whatsoever, but delays
  * the response by 5 seconds, and randomly chooses whether it should succeed.
+ * The example supports basic and extended authentication.
  *
  * Compile with:
  *   gcc -I<path to mosquitto-repo/include> -fPIC -shared mosquitto_delayed_auth.c -o mosquitto_delayed_auth.so
@@ -33,6 +34,7 @@ Contributors:
 
 
 #include <limits.h>
+#include <mosquitto/broker.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -54,6 +56,7 @@ struct client_list {
 	UT_hash_handle hh;
 	char *id;
 	time_t request_time;
+	bool basic_auth;
 };
 
 static mosquitto_plugin_id_t *mosq_pid = NULL;
@@ -71,16 +74,9 @@ static bool authentication_check(struct client_list *client, time_t now)
 }
 
 
-static int basic_auth_callback(int event, void *event_data, void *userdata)
+static int start_auth(int event, const char *id)
 {
-	struct mosquitto_evt_basic_auth *ed = event_data;
 	static struct client_list *client;
-	const char *id;
-
-	UNUSED(event);
-	UNUSED(userdata);
-
-	id = mosquitto_client_id(ed->client);
 
 	HASH_FIND(hh, clients, id, strlen(id), client);
 	if(client){
@@ -97,12 +93,47 @@ static int basic_auth_callback(int event, void *event_data, void *userdata)
 			return MOSQ_ERR_NOMEM;
 		}
 		client->request_time = time(NULL);
-		HASH_ADD_KEYPTR(hh, clients, client->id, strlen(client->id), client);
+		if(event == MOSQ_EVT_BASIC_AUTH){
+			mosquitto_log_printf(MOSQ_LOG_DEBUG, "Starting basic auth for %s at %ld", client->id, time(NULL));
+			client->basic_auth = true;
+		}else{
+			mosquitto_log_printf(MOSQ_LOG_DEBUG, "Starting extended auth for %s at %ld", client->id, time(NULL));
+			client->basic_auth = false;
+		}
 
-		mosquitto_log_printf(MOSQ_LOG_DEBUG, "Starting auth for %s at %ld", client->id, time(NULL));
+		HASH_ADD_KEYPTR(hh, clients, client->id, strlen(client->id), client);
 	}
 
 	return MOSQ_ERR_AUTH_DELAYED;
+
+}
+
+
+static int basic_auth_callback(int event, void *event_data, void *userdata)
+{
+	struct mosquitto_evt_basic_auth *ed = event_data;
+	const char *id;
+
+	UNUSED(event);
+	UNUSED(userdata);
+
+	id = mosquitto_client_id(ed->client);
+
+	return start_auth(event, id);
+}
+
+
+static int extended_auth_callback(int event, void *event_data, void *userdata)
+{
+	struct mosquitto_evt_extended_auth *ed = event_data;
+	const char *id;
+
+	UNUSED(event);
+	UNUSED(userdata);
+
+	id = mosquitto_client_id(ed->client);
+
+	return start_auth(event, id);
 }
 
 
@@ -128,9 +159,17 @@ static int tick_callback(int event, void *event_data, void *userdata)
 				r = random() % 1000;
 #endif
 				if(r > 740){
-					mosquitto_complete_basic_auth(client->id, MOSQ_ERR_AUTH);
+					if(client->basic_auth){
+						mosquitto_complete_basic_auth(client->id, MOSQ_ERR_AUTH);
+					}else{
+						mosquitto_complete_extended_auth(client->id, MOSQ_ERR_AUTH, NULL, 0);
+					}
 				}else{
-					mosquitto_complete_basic_auth(client->id, MOSQ_ERR_SUCCESS);
+					if(client->basic_auth){
+						mosquitto_complete_basic_auth(client->id, MOSQ_ERR_SUCCESS);
+					}else{
+						mosquitto_complete_extended_auth(client->id, MOSQ_ERR_SUCCESS, NULL, 0);
+					}
 				}
 				mosquitto_log_printf(MOSQ_LOG_DEBUG, "Completing auth for %s at %ld", client->id, now);
 				HASH_DELETE(hh, clients, client);
@@ -159,6 +198,10 @@ int mosquitto_plugin_init(mosquitto_plugin_id_t *identifier, void **user_data, s
 	mosquitto_plugin_set_info(identifier, PLUGIN_NAME, PLUGIN_VERSION);
 
 	rc = mosquitto_callback_register(mosq_pid, MOSQ_EVT_BASIC_AUTH, basic_auth_callback, NULL, NULL);
+	if(rc){
+		return rc;
+	}
+	rc = mosquitto_callback_register(mosq_pid, MOSQ_EVT_EXT_AUTH_START, extended_auth_callback, NULL, NULL);
 	if(rc){
 		return rc;
 	}

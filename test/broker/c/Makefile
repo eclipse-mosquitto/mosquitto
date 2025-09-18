@@ -13,6 +13,7 @@ PLUGIN_SRC = \
 	auth_plugin_acl_sub_denied.c \
 	auth_plugin_context_params.c \
 	auth_plugin_delayed.c \
+	auth_plugin_delayed_extended.c \
 	auth_plugin_extended_multiple.c \
 	auth_plugin_extended_reauth.c \
 	auth_plugin_extended_single.c \
