@@ -337,5 +337,6 @@ def main(protocol):
         #print(stde.decode('utf-8'))
         exit(rc)
 
-#main(protocol="websockets")
-main(protocol="mqtt")
+if __name__ == "__main__":
+    #main(protocol="websockets")
+    main(protocol="mqtt")
