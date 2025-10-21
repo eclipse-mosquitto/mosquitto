@@ -409,11 +409,6 @@ int main(int argc, char *argv[])
 {
 	struct mosquitto__config config;
 	int rc;
-#ifdef WIN32
-	SYSTEMTIME st;
-#else
-	struct timeval tv;
-#endif
 
 	mosquitto_time_init();
 	cjson_init();
