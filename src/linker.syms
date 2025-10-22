@@ -41,6 +41,8 @@
 	mosquitto_persist_retain_msg_delete;
 	mosquitto_persist_retain_msg_set;
 	mosquitto_persistence_location;
+	mosquitto_plugin_publish;
+	mosquitto_plugin_publish_copy;
 	mosquitto_plugin_set_info;
 	mosquitto_property_add_binary;
 	mosquitto_property_add_byte;

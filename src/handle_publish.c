@@ -64,32 +64,18 @@ static int process_bad_message(struct mosquitto *context, struct mosquitto__base
 }
 
 
-int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_msg *base_msg, uint16_t mid, int dup, uint32_t *message_expiry_interval)
+static int handle__accepted_publish_plugin(struct mosquitto__base_msg *base_msg)
 {
+	return sub__messages_queue("plugin", base_msg->data.topic, base_msg->data.qos, base_msg->data.retain, &base_msg);
+}
+
+
+static int handle__accepted_publish_client(struct mosquitto *context, struct mosquitto__base_msg *base_msg, uint16_t mid, int dup, uint32_t *message_expiry_interval)
+{
+	struct mosquitto__client_msg *cmsg_stored = NULL;
+	struct mosquitto__base_msg *stored = NULL;
 	int rc;
 	int rc2;
-	struct mosquitto__base_msg *stored = NULL;
-	struct mosquitto__client_msg *cmsg_stored = NULL;
-
-	{
-		rc = plugin__handle_message_in(context, &base_msg->data);
-		if(rc == MOSQ_ERR_ACL_DENIED){
-			log__printf(NULL, MOSQ_LOG_DEBUG,
-					"Denied PUBLISH from %s (d%d, q%d, r%d, m%d, '%s', ... (%ld bytes))",
-					context->id, dup, base_msg->data.qos, base_msg->data.retain, base_msg->data.source_mid, base_msg->data.topic,
-					(long)base_msg->data.payloadlen);
-
-			return process_bad_message(context, base_msg, MQTT_RC_NOT_AUTHORIZED);
-		}else if(rc == MOSQ_ERR_QUOTA_EXCEEDED){
-			log__printf(NULL, MOSQ_LOG_DEBUG,
-					"Rejected PUBLISH from %s, quota exceeded.", context->id);
-
-			return process_bad_message(context, base_msg, MQTT_RC_QUOTA_EXCEEDED);
-		}else if(rc != MOSQ_ERR_SUCCESS){
-			db__msg_store_free(base_msg);
-			return rc;
-		}
-	}
 
 	if(base_msg->data.qos > 0){
 		db__message_store_find(context, base_msg->data.source_mid, &cmsg_stored);
@@ -107,7 +93,7 @@ int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_m
 	}
 
 	if(!cmsg_stored){
-		if(base_msg->data.qos > 0 && context->msgs_in.inflight_quota == 0){
+		if(base_msg->data.qos > 0 && context && context->msgs_in.inflight_quota == 0){
 			/* Client isn't allowed any more incoming messages, so fail early */
 			db__msg_store_free(base_msg);
 			return MOSQ_ERR_RECEIVE_MAXIMUM_EXCEEDED;
@@ -192,6 +178,41 @@ int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_m
 
 	db__message_write_queued_in(context);
 	return rc;
+}
+
+
+int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_msg *base_msg, uint16_t mid, int dup, uint32_t *message_expiry_interval)
+{
+	int rc;
+	const char *clientid = context?context->id:"plugin";
+
+	/* context == NULL happens if mosquitto_plugin_publish*() is used message */
+
+	{
+		rc = plugin__handle_message_in(context, &base_msg->data);
+		if(rc == MOSQ_ERR_ACL_DENIED){
+			log__printf(NULL, MOSQ_LOG_DEBUG,
+					"Denied PUBLISH from %s (d%d, q%d, r%d, m%d, '%s', ... (%ld bytes))",
+					clientid, dup, base_msg->data.qos, base_msg->data.retain, base_msg->data.source_mid, base_msg->data.topic,
+					(long)base_msg->data.payloadlen);
+
+			return process_bad_message(context, base_msg, MQTT_RC_NOT_AUTHORIZED);
+		}else if(rc == MOSQ_ERR_QUOTA_EXCEEDED){
+			log__printf(NULL, MOSQ_LOG_DEBUG,
+					"Rejected PUBLISH from %s, quota exceeded.", clientid);
+
+			return process_bad_message(context, base_msg, MQTT_RC_QUOTA_EXCEEDED);
+		}else if(rc != MOSQ_ERR_SUCCESS){
+			db__msg_store_free(base_msg);
+			return rc;
+		}
+	}
+
+	if(context){
+		return handle__accepted_publish_client(context, base_msg, mid, dup, message_expiry_interval);
+	}else{
+		return handle__accepted_publish_plugin(base_msg);
+	}
 }
 
 

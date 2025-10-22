@@ -115,7 +115,6 @@ static void read_message_expiry_interval(mosquitto_property **proplist, uint32_t
 static void queue_plugin_msgs(void)
 {
 	struct mosquitto__base_msg *base_msg, *base_tmp;
-	struct mosquitto *context;
 	uint32_t message_expiry;
 
 	for(base_msg = db.plugin_msgs; base_msg && (base_tmp = base_msg->hh.next, 1); base_msg = base_tmp){
@@ -123,24 +122,29 @@ static void queue_plugin_msgs(void)
 
 		read_message_expiry_interval(&base_msg->data.properties, &message_expiry);
 
-		if(base_msg->data.source_id){
-			HASH_FIND(hh_id, db.contexts_by_id, base_msg->data.source_id, strlen(base_msg->data.source_id), context);
-			mosquitto_FREE(base_msg->data.source_id);
-			if(context){
-				single_publish(context, base_msg, message_expiry);
+		if(base_msg->origin == mosq_mo_plugin){
+			handle__accepted_publish(NULL, base_msg, 0, 0, &message_expiry);
+		}else{
+			if(base_msg->data.source_id){
+				struct mosquitto *context;
+				HASH_FIND(hh_id, db.contexts_by_id, base_msg->data.source_id, strlen(base_msg->data.source_id), context);
+				mosquitto_FREE(base_msg->data.source_id);
+				if(context){
+					single_publish(context, base_msg, message_expiry);
+				}else{
+					db__msg_store_free(base_msg);
+				}
 			}else{
+				db__messages_easy_queue(NULL,
+						base_msg->data.topic,
+						base_msg->data.qos,
+						base_msg->data.payloadlen,
+						base_msg->data.payload,
+						base_msg->data.retain,
+						message_expiry,
+						&base_msg->data.properties);
 				db__msg_store_free(base_msg);
 			}
-		}else{
-			db__messages_easy_queue(NULL,
-					base_msg->data.topic,
-					base_msg->data.qos,
-					base_msg->data.payloadlen,
-					base_msg->data.payload,
-					base_msg->data.retain,
-					message_expiry,
-					&base_msg->data.properties);
-			db__msg_store_free(base_msg);
 		}
 	}
 }

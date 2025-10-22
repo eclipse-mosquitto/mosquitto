@@ -102,6 +102,7 @@ typedef int (*FUNC_auth_plugin_psk_key_get_v2)(void *, const char *, const char 
 enum mosquitto_msg_origin {
 	mosq_mo_client = 0,
 	mosq_mo_broker = 1,
+	mosq_mo_plugin = 2,
 };
 
 struct mosquitto__plugin_lib {
@@ -693,6 +694,7 @@ int handle__publish(struct mosquitto *context);
 int handle__subscribe(struct mosquitto *context);
 int handle__unsubscribe(struct mosquitto *context);
 int handle__auth(struct mosquitto *context);
+int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_msg *base_msg, uint16_t mid, int dup, uint32_t *message_expiry_interval);
 
 /* ============================================================
  * Database handling
