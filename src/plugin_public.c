@@ -219,7 +219,7 @@ BROKER_EXPORT int mosquitto_broker_publish(
 		bool retain,
 		mosquitto_property *properties)
 {
-	struct mosquitto__message_v5 *msg;
+	struct mosquitto__base_msg *base_msg;
 
 	if(topic == NULL
 			|| payloadlen < 0
@@ -229,35 +229,31 @@ BROKER_EXPORT int mosquitto_broker_publish(
 		return MOSQ_ERR_INVAL;
 	}
 
-	msg = mosquitto_malloc(sizeof(struct mosquitto__message_v5));
-	if(msg == NULL){
+	base_msg = mosquitto_calloc(1, sizeof(struct mosquitto__base_msg));
+	if(base_msg == NULL){
 		return MOSQ_ERR_NOMEM;
 	}
 
-	msg->next = NULL;
-	msg->prev = NULL;
 	if(clientid){
-		msg->clientid = mosquitto_strdup(clientid);
-		if(msg->clientid == NULL){
-			mosquitto_FREE(msg);
+		base_msg->data.source_id = mosquitto_strdup(clientid);
+		if(base_msg->data.source_id == NULL){
+			mosquitto_FREE(base_msg);
 			return MOSQ_ERR_NOMEM;
 		}
-	}else{
-		msg->clientid = NULL;
 	}
-	msg->topic = mosquitto_strdup(topic);
-	if(msg->topic == NULL){
-		mosquitto_FREE(msg->clientid);
-		mosquitto_FREE(msg);
+	base_msg->data.topic = mosquitto_strdup(topic);
+	if(base_msg->data.topic == NULL){
+		mosquitto_FREE(base_msg->data.source_id);
+		mosquitto_FREE(base_msg);
 		return MOSQ_ERR_NOMEM;
 	}
-	msg->payloadlen = payloadlen;
-	msg->payload = payload;
-	msg->qos = qos;
-	msg->retain = retain;
-	msg->properties = properties;
+	base_msg->data.payloadlen = (uint32_t)payloadlen;
+	base_msg->data.payload = payload;
+	base_msg->data.qos = (uint8_t)qos;
+	base_msg->data.retain = retain;
+	base_msg->data.properties = properties;
 
-	DL_APPEND(db.plugin_msgs, msg);
+	base_msg__dl_append(&db.plugin_msgs, base_msg);
 
 	loop__update_next_event(1);
 	return MOSQ_ERR_SUCCESS;

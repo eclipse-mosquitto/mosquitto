@@ -3,6 +3,7 @@ add_executable(mosquitto
 	../plugins/acl-file/acl_check.c
 	../plugins/acl-file/acl_parse.c
 	../lib/alias_mosq.c ../lib/alias_mosq.h
+	base_msg.c
 	bridge.c bridge_topic.c
 	broker_control.c
 	conf.c

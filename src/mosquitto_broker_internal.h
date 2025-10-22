@@ -502,7 +502,7 @@ struct mosquitto_db {
 #ifdef WITH_KQUEUE
 	int kqueuefd;
 #endif
-	struct mosquitto__message_v5 *plugin_msgs;
+	struct mosquitto__base_msg *plugin_msgs;
 #ifdef WITH_TLS
 	/* tls_keylog can't be in the config struct because it is used
 	   before the config is allocated. Config probably
@@ -739,6 +739,8 @@ void db__msg_add_to_queued_stats(struct mosquitto_msg_data *msg_data, struct mos
 uint64_t db__new_msg_id(void);
 void db__expire_all_messages(struct mosquitto *context);
 void db__check_acl_of_all_messages(struct mosquitto *context);
+void base_msg__dl_append(struct mosquitto__base_msg **head, struct mosquitto__base_msg *add_msg);
+void base_msg__dl_delete(struct mosquitto__base_msg **head, struct mosquitto__base_msg *del_msg);
 
 /* ============================================================
  * Subscription functions

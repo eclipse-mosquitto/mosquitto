@@ -46,6 +46,7 @@ endif
 
 OBJS=	mosquitto.o \
 		acl_file.o \
+		base_msg.o \
 		bridge.o \
 		bridge_topic.o \
 		broker_control.o \

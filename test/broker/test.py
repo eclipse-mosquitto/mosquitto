@@ -32,6 +32,7 @@ tests = [
     (1, './02-shared-qos0-v5.py'),
     (1, './02-subhier-crash.py'),
     (1, './02-subpub-b2c-topic-alias.py'),
+	(1, './02-subpub-duplicate-sub.py'),
     (1, './02-subpub-qos0-long-topic.py'),
     (1, './02-subpub-qos0-oversize-payload.py'),
     (1, './02-subpub-qos0-queued-bytes.py'),
