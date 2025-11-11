@@ -947,12 +947,13 @@
 
                 <!-- system metrics -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                     <div class="card">
                         <div class="card-header">
                             <h3 class="text-base font-semibold">System Metrics</h3>
                         </div>
-                        <div class="card-content">
-                            <div class="space-y-1 text-sm font-mono text-gray-700" id="system-metrics">
+                        <div class="card-content overflow-x-auto">
+                            <div class="inline-block min-w-max space-y-1 text-sm font-mono text-gray-700 whitespace-nowrap" id="system-metrics">
                                 <div>$SYS/broker/clients/total <span id="systopic-clients-total">?</span></div>
                                 <div>$SYS/broker/clients/disconnected <span id="systopic-clients-disconnected">?</span></div>
                                 <div>$SYS/broker/clients/connected <span id="systopic-clients-connected">?</span></div>
@@ -971,8 +972,8 @@
                         <div class="card-header">
                             <h3 class="text-base font-semibold">Traffic Metrics</h3>
                         </div>
-                        <div class="card-content">
-                            <div class="space-y-1 text-sm font-mono text-gray-700" id="message-metrics">
+                        <div class="card-content overflow-x-auto">
+                            <div class="inline-block min-w-max space-y-1 text-sm font-mono text-gray-700 whitespace-nowrap pr-6" id="message-metrics">
                                 <div>$SYS/broker/load/messages/received/1min <span id="systopic-messages-received-1min">?</span></div>
                                 <div>$SYS/broker/load/messages/received/10min <span id="systopic-messages-received-10min">?</span></div>
                                 <div>$SYS/broker/load/messages/received/15min <span id="systopic-messages-received-15min">?</span></div>
