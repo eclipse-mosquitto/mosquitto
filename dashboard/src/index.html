@@ -110,73 +110,385 @@
 
                 <!-- metrics grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 gap-4">
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 200 200" width="30" height="30">
+                                    <!-- outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">clients online</div>
+                                <p class="text-gray-600">
+                                    Number of currently connected clients. Topic: <code>$SYS/broker/clients/connected</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">clients online</div>
                             <div class="metric-value" id="clients-connected">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">clients total</div>
+                                <p class="text-gray-600">
+                                    The total number of active and inactive clients currently connected and registered on the broker. Topic: <code>$SYS/broker/clients/total</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">clients total</div>
                             <div class="metric-value" id="clients-total">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">clients expired</div>
+                                <p class="text-gray-600">
+                                    The number of disconnected persistent clients that have been expired and removed through the <code>persistent_client_expiration</code> option. Topic: <code>$SYS/broker/clients/expired</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">clients expired</div>
                             <div class="metric-value" id="clients-expired">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">clients offline</div>
+                                <p class="text-gray-600">
+                                    The total number of persistent clients (with clean session disabled) that are registered at the broker but are currently disconnected. Topic: <code>$SYS/broker/clients/disconnected</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">clients offline</div>
                             <div class="metric-value" id="clients-disconnected">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">max simulataneius clientst</div>
+                                <p class="text-gray-600">
+                                    The maximum number of clients that have been connected to the broker at the same time. Topic: <code>$SYS/broker/clients/maximum</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">max simultaneous clients</div>
                             <div class="metric-value" id="clients-maximum">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">connection sockets</div>
+                                <p class="text-gray-600">
+                                    Number of open socket connections on the broker. Topic: <code>$SYS/broker/connections/socket/count</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">connection sockets</div>
                             <div class="metric-value" id="connection-sockets">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">total subscriptions</div>
+                                <p class="text-gray-600">
+                                    The total number of subscriptions active on the broker. Topic: <code>$SYS/broker/subscriptions/count</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">total subscriptions</div>
                             <div class="metric-value" id="total-subscriptions">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">messages published to the broker</div>
+                                <p class="text-gray-600">
+                                    The total number of PUBLISH messages received since the broker started. Topic: <code>$SYS/broker/publish/messages/received</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">messages published to the broker</div>
                             <div class="metric-value" id="messages-published-to-broker">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">messages published by the broker</div>
+                                <p class="text-gray-600">
+                                    The total number of PUBLISH messages sent since the broker started. Topic: <code>$SYS/broker/publish/messages/sent</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">messages published by the broker</div>
                             <div class="metric-value" id="messages-published-by-broker">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">publishes dropped</div>
+                                <p class="text-gray-600">
+                                    The total number of publish messages that have been dropped due to inflight/queuing limits. See the <code>max_inflight_messages</code> and <code>max_queued_messages</code> options in mosquitto.conf for more information. Topic: <code>$SYS/broker/publish/messages/dropped</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">publishes dropped</div>
                             <div class="metric-value" id="messages-dropped">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">messages retained</div>
+                                <p class="text-gray-600">
+                                    The total number of retained messages active on the broker. Topic: <code>$SYS/broker/retained messages/count</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">messages retained</div>
                             <div class="metric-value" id="messages-retained">?</div>
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card relative">
+                        <details class="group absolute top-2 right-2">
+                            <summary
+                              class="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white/80
+                                     hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                              aria-label="more info"
+                            >
+                                <!-- info icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="30" height="30">
+                                    <!-- Outer circle -->
+                                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgb(107 114 128)" stroke-width="16" stroke-linecap="round"/>
+                                    <!-- Dot on top of the "i" -->
+                                    <circle cx="100" cy="65" r="12" fill="rgb(107 114 128)"/>
+                                    <!-- Vertical line of the "i" -->
+                                    <rect x="88" y="90" width="24" height="55" rx="12" fill="rgb(107 114 128)"/>
+                                </svg>
+                            </summary>
+
+                            <!-- popup panel -->
+                            <div class="group-open:block hidden absolute right-0 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 text-sm shadow-lg z-10">
+                                <div class="font-medium mb-1">messages stored</div>
+                                <p class="text-gray-600">
+                                    The number of messages currently held in the message store. This includes retained messages and messages queued for durable clients. Topic: <code>$SYS/broker/store/messages/count</code>
+                                </p>
+                            </div>
+                        </details>
+
                         <div class="card-content">
                             <div class="metric-label">messages stored</div>
                             <div class="metric-value" id="messages-stored">?</div>
