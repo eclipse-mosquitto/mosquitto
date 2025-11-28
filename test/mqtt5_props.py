@@ -73,7 +73,7 @@ def prop_finalise(props):
     return pack_varint(len(props)) + props
 
 
-def gen_properties(properties_dict: list[dict]):
+def gen_properties(properties_dict: dict) -> bytes:
     props = b""
     if properties_dict is None:
         return props
@@ -209,8 +209,8 @@ def unpack_property(b: bytes):
         return "REASON_STRING", value, pack_len + 1
     elif id == SUBSCRIPTION_IDENTIFIER:
         value, pack_len = unpack_varint(b[1:])
-        return "REASON_STRING", value, pack_len + 1
-    elif id == USER_PROPERTY:
+        return "SUBSCRIPTION_IDENTIFIER", value, pack_len + 1
+    elif id == PROP_USER_PROPERTY:
         name, pack_name_len = unpack_string(b[1:])
         value, pack_value_len = unpack_varint(b[1 + pack_name_len :])
         return (

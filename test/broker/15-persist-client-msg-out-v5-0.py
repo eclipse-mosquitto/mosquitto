@@ -28,16 +28,16 @@ connack_packet1 = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
 connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
 mid = 1
 
-sub_props = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 1)
-subscribe_packet0 = mosq_test.gen_subscribe(mid, topic0, qos=0, proto_ver=proto_ver, properties=sub_props)
+sub_props0 = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 1)
+subscribe_packet0 = mosq_test.gen_subscribe(mid, topic0, qos=0, proto_ver=proto_ver, properties=sub_props0)
 suback_packet0 = mosq_test.gen_suback(mid=mid, qos=0, proto_ver=proto_ver)
 
-sub_props = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 2)
-subscribe_packet1 = mosq_test.gen_subscribe(mid, topic1, qos=1, proto_ver=proto_ver, properties=sub_props)
+sub_props1 = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 2)
+subscribe_packet1 = mosq_test.gen_subscribe(mid, topic1, qos=1, proto_ver=proto_ver, properties=sub_props1)
 suback_packet1 = mosq_test.gen_suback(mid=mid, qos=1, proto_ver=proto_ver)
 
-sub_props = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 3)
-subscribe_packet2 = mosq_test.gen_subscribe(mid, topic2, qos=2, proto_ver=proto_ver, properties=sub_props)
+sub_props2 = mqtt5_props.gen_varint_prop(mqtt5_props.SUBSCRIPTION_IDENTIFIER, 3)
+subscribe_packet2 = mosq_test.gen_subscribe(mid, topic2, qos=2, proto_ver=proto_ver, properties=sub_props2)
 suback_packet2 = mosq_test.gen_suback(mid=mid, qos=2, proto_ver=proto_ver)
 
 connect_packet_helper = mosq_test.gen_connect(helper_id, proto_ver=proto_ver, clean_session=True)
@@ -45,9 +45,12 @@ publish_packet0 = mosq_test.gen_publish(topic=topic0, qos=0, payload="message", 
 mid = 1
 publish_packet1 = mosq_test.gen_publish(topic=topic1, qos=1, payload="message", mid=mid, proto_ver=proto_ver)
 puback_packet = mosq_test.gen_puback(mid=mid, proto_ver=proto_ver)
+publish_received1 = mosq_test.gen_publish(topic=topic1, qos=1, payload="message", mid=mid, proto_ver=proto_ver, properties=sub_props1)
+
 mid = 2
-publish_packet2 = mosq_test.gen_publish(topic=topic2, qos=2, payload="message", mid=mid, proto_ver=proto_ver)
 pubrec_packet = mosq_test.gen_pubrec(mid=mid, proto_ver=proto_ver)
+publish_packet2 = mosq_test.gen_publish(topic=topic2, qos=2, payload="message", mid=mid, proto_ver=proto_ver)
+publish_received2 = mosq_test.gen_publish(topic=topic2, qos=2, payload="message", mid=mid, proto_ver=proto_ver, properties=sub_props2)
 pubrel_packet = mosq_test.gen_pubrel(mid=mid, proto_ver=proto_ver)
 pubcomp_packet = mosq_test.gen_pubcomp(mid=mid, proto_ver=proto_ver)
 
@@ -81,8 +84,8 @@ try:
     sock = mosq_test.do_client_connect(connect_packet, connack_packet2, timeout=5, port=port, connack_error="connack 2")
 
     # Does the client get the messages
-    mosq_test.do_receive_send(sock, publish_packet1, puback_packet, "publish 1")
-    mosq_test.do_receive_send(sock, publish_packet2, pubrec_packet, "publish 2")
+    mosq_test.do_receive_send(sock, publish_received1, puback_packet, "publish received 1")
+    mosq_test.do_receive_send(sock, publish_received2, pubrec_packet, "publish received 2")
     mosq_test.do_receive_send(sock, pubrel_packet, pubcomp_packet, "pubrel 2")
     # Send ping and wait for the PINGRESP to make sure the broker has processed all sent pubcomp
     mosq_test.do_ping(sock)
