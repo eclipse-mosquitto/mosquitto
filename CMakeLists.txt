@@ -103,7 +103,7 @@ option(WITH_CLIENTS "Build clients?" ON)
 option(WITH_BROKER "Build broker?" ON)
 option(WITH_APPS "Build apps?" ON)
 option(WITH_PLUGINS "Build plugins?" ON)
-option(DOCUMENTATION "Build documentation?" ON)
+option(WITH_DOCS "Build documentation?" ON)
 
 add_subdirectory(lib)
 if (WITH_CLIENTS)
@@ -122,9 +122,9 @@ if (WITH_PLUGINS)
 	add_subdirectory(plugins)
 endif (WITH_PLUGINS)
 
-if (DOCUMENTATION)
+if (WITH_DOCS)
 	add_subdirectory(man)
-endif (DOCUMENTATION)
+endif (WITH_DOCS)
 
 # ========================================
 # Install config file
