@@ -18,6 +18,8 @@ Contributors:
 
 #include "config.h"
 
+#ifdef WITH_HTTP_API
+
 #include <assert.h>
 #include <errno.h>
 #include <microhttpd.h>
@@ -31,8 +33,6 @@ Contributors:
 #include "mosquitto_broker_internal.h"
 #include "mosquitto/mqtt_protocol.h"
 #include "sys_tree.h"
-
-#ifdef WITH_HTTP_API
 
 #ifndef HTTP_API_DIR
 #  define HTTP_API_DIR ""
