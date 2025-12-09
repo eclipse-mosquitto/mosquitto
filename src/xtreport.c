@@ -33,7 +33,6 @@ Contributors:
 #include "mosquitto_internal.h"
 #include "net_mosq.h"
 
-
 static void client_cost(FILE *fptr, struct mosquitto *context, int fn_index)
 {
 	long pkt_count, pkt_bytes;
