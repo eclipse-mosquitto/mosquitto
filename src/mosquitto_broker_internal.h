@@ -847,7 +847,9 @@ void service_install(void);
 void service_uninstall(void);
 void service_run(void);
 
+#ifdef WIN32
 DWORD WINAPI SigThreadProc(void* data);
+#endif
 #endif
 
 /* ============================================================
