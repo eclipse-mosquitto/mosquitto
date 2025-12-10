@@ -16,17 +16,27 @@
 # Contributors:
 #    Roger Light - initial implementation and documentation.
 
+set -e
 
 # Note that sqlite3 is required as a build dep of a plugin which is not
 # currently part of fuzz testing. Once it is part of fuzz testing, sqlite will
 # need to be built statically.
 apt-get update && apt-get install -y \
+	cmake \
 	libargon2-dev \
 	libedit-dev \
 	liblzma-dev \
 	libmicrohttpd-dev \
 	libsqlite3-dev \
 	libtool-bin \
-	make
-git clone https://github.com/google/libprotobuf-mutator ${SRC}/libprotobuf-mutator
+	libz-dev \
+	make \
+	ninja-build \
+	pkg-config
 git clone https://github.com/ralight/cJSON ${SRC}/cJSON
+git clone https://github.com/google/libprotobuf-mutator ${SRC}/libprotobuf-mutator
+
+mkdir ${SRC}/LPM
+cd ${SRC}/LPM
+cmake ../libprotobuf-mutator -GNinja -DLIB_PROTO_MUTATOR_DOWNLOAD_PROTOBUF=ON -DLIB_PROTO_MUTATOR_TESTING=OFF -DCMAKE_BUILD_TYPE=Release
+ninja

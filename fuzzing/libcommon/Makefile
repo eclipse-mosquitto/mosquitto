@@ -11,11 +11,15 @@ FUZZERS:= \
 	libcommon_fuzz_topic_tokenise \
 	libcommon_fuzz_utf8
 
-LOCAL_CPPFLAGS+=-I${R}/include/ -I/usr/local/include/libprotobuf-mutator -I/src/libprotobuf-mutator/external.protobuf/include
+LOCAL_CPPFLAGS+=-I${R}/include/ -I${SRC}/libprotobuf-mutator -I${SRC}/LPM/external.protobuf/include
 LOCAL_CXXFLAGS+=-g -Wall -Werror -pthread -Wno-deprecated-builtins
 LOCAL_LDFLAGS+=
 LOCAL_LIBADD+=$(LIB_FUZZING_ENGINE) -lssl -lcrypto ${R}/libcommon/libmosquitto_common.a -Wl,-Bstatic -largon2 -Wl,-Bdynamic
-PROTOBUF_LIBS=/usr/local/lib/libprotobuf-mutator-libfuzzer.a /usr/local/lib/libprotobuf-mutator.a /src/libprotobuf-mutator/external.protobuf/lib/libprotobufd.a
+PROTOBUF_LIBS=${SRC}/LPM/src/libfuzzer/libprotobuf-mutator-libfuzzer.a \
+			  ${SRC}/LPM/src/libprotobuf-mutator.a \
+			  -Wl,--start-group \
+			  ${SRC}/LPM/external.protobuf/lib/lib*.a \
+			  -Wl,--end-group
 PROTOC?=/src/libprotobuf-mutator/external.protobuf/bin/protoc
 
 all: $(FUZZERS)
