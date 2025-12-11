@@ -915,6 +915,9 @@ int mosquitto_acl_check(struct mosquitto *context, const char *topic, uint32_t p
 int mosquitto_basic_auth(struct mosquitto *context);
 int mosquitto_psk_key_get(struct mosquitto *context, const char *hint, const char *identity, char *key, int max_key_len);
 
+void  set_server_ext_data(SSL* ssl, struct mosquitto* context, struct mosquitto__listener* listener);
+unsigned int psk_server_callback(SSL* ssl, const char* identity, unsigned char* psk, unsigned int max_psk_len);
+
 int mosquitto_security_init_default(void);
 int mosquitto_security_apply_default(void);
 int mosquitto_security_cleanup_default(void);

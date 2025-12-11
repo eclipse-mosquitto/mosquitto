@@ -34,6 +34,11 @@ Contributors:
 #include <errno.h>
 #include <sys/stat.h>
 
+#ifdef WITH_TLS
+#  include "tls_mosq.h"
+#  include <openssl/err.h>
+#endif
+
 #ifndef WIN32
 #  include <sys/socket.h>
 #endif
@@ -158,6 +163,53 @@ static int callback_mqtt(
 					}
 				}
 #endif
+
+#ifdef WITH_TLS
+				/* TLS init */
+				if (mosq->listener->ssl_ctx) {
+#ifdef WITH_TLS
+					BIO* bior, *biow;
+					int rc;
+					char ebuf[256];
+					unsigned long e;
+#endif
+					mosq->ssl = SSL_new(mosq->listener->ssl_ctx);
+					if (!mosq->ssl) {
+						context__cleanup(mosq, true);
+						return -1;
+					}
+					set_server_ext_data(mosq->ssl, mosq, mosq->listener);
+					mosq->want_write = true;
+					bior = BIO_new(BIO_s_mem());
+					biow = BIO_new(BIO_s_mem());
+					SSL_set_bio(mosq->ssl, bior, biow);
+					
+					ERR_clear_error();
+					rc = SSL_accept(mosq->ssl);
+					if (rc != 1) {
+						rc = SSL_get_error(mosq->ssl, rc);
+						if (rc == SSL_ERROR_WANT_READ) {
+							/* We always want to read. */
+						}
+						else if (rc == SSL_ERROR_WANT_WRITE) {
+							mosq->want_write = true;
+						}
+						else {
+							if (db.config->connection_messages == true) {
+								e = ERR_get_error();
+								while (e) {
+									log__printf(NULL, MOSQ_LOG_NOTICE,
+										"Client connection from %s failed: %s.",
+										mosq->address, ERR_error_string(e, ebuf));
+									e = ERR_get_error();
+								}
+							}
+							context__cleanup(mosq, true);
+							return -1;
+						}
+					}
+				}
+#endif
 				u->mosq = mosq;
 			}else{
 				return -1;
@@ -225,7 +277,40 @@ static int callback_mqtt(
 
 			while(mosq->out_packet && !lws_send_pipe_choked(mosq->wsi)){
 				packet = mosq->out_packet;
-				count = lws_write(wsi, &packet->payload[packet->pos], packet->to_process, LWS_WRITE_BINARY);
+
+				if(packet->pos == 0 && packet->to_process == packet->packet_length){
+					/* First time this packet has been dealt with.
+					 * libwebsockets requires that the payload has
+					 * LWS_PRE space available before the
+					 * actual data.
+					 * We've already made the payload big enough to allow this,
+					 * but need to move it into position here. */
+					memmove(&packet->payload[LWS_PRE], packet->payload, packet->packet_length);
+					packet->pos += LWS_PRE;
+				}
+#ifdef WITH_TLS
+				if (mosq->ssl) {
+					/* encrypt data to ssl */
+					int ret = SSL_write(mosq->ssl, &packet->payload[packet->pos], packet->to_process);
+					if (ret < 0) {
+						len = 0;
+					}
+					char buff[1024];
+					int send;
+					do {
+						send = BIO_read(SSL_get_wbio(mosq->ssl), buff + LWS_PRE, ARRAYSIZE(buff) - LWS_PRE);
+						if (send > 0)
+						{
+							rc = lws_write(wsi, buff + LWS_PRE, send, LWS_WRITE_BINARY);
+							if (rc < 0)
+								return -1;
+						}
+					} while (send > 0);
+					count = packet->packet_length - LWS_PRE;
+				}
+				else
+#endif
+					count = lws_write(wsi, &packet->payload[packet->pos], packet->to_process, LWS_WRITE_BINARY);
 				if(count < 0){
 					if(mosq->state == mosq_cs_disconnect_ws
 							|| mosq->state == mosq_cs_disconnecting
@@ -281,6 +366,24 @@ static int callback_mqtt(
 			mosq = u->mosq;
 			pos = 0;
 			buf = (uint8_t *)in;
+#ifdef WITH_TLS
+			if (mosq->ssl) {
+				/* write encrypted data, read unencrypted */
+				BIO_write(SSL_get_rbio(mosq->ssl), buf, (int)len);
+				int ret = SSL_read(mosq->ssl, buf, (int)len);
+				if (ret < 0)
+					len = 0; /* read pending */
+				else
+					len = (size_t)ret;
+				/* write handshake data if present */
+				char buff[1024];
+				int send;
+				do { 
+					send = BIO_read(SSL_get_wbio(mosq->ssl), buff + LWS_PRE, ARRAYSIZE(buff) - LWS_PRE);
+					count = lws_write(wsi, buff + LWS_PRE, send, LWS_WRITE_BINARY);
+				} while (send > 0);
+			}
+#endif
 			metrics__int_inc(mosq_counter_bytes_received, (int64_t)len);
 			while(pos < len){
 				if(!mosq->in_packet.command){
@@ -699,7 +802,8 @@ void mosq_websockets_init(struct mosquitto__listener *listener, const struct mos
 	info.protocols = p;
 	info.gid = -1;
 	info.uid = -1;
-#ifdef WITH_TLS
+#if defined(WITH_TLS) 
+#  if defined(LWS_WITH_TLS)
 	if(listener->cafile){
 		info.ssl_ca_filepath = listener->cafile;
 	}else if(listener->capath){
@@ -718,6 +822,29 @@ void mosq_websockets_init(struct mosquitto__listener *listener, const struct mos
 	if(listener->require_certificate){
 		info.options |= LWS_SERVER_OPTION_REQUIRE_VALID_OPENSSL_CLIENT_CERT;
 	}
+#  endif /* LWS_WITH_TLS */
+
+#  ifdef FINAL_WITH_TLS_PSK
+	if (listener->psk_hint) {
+		if (listener->certfile == NULL || listener->keyfile == NULL) {
+			if (net__tls_server_ctx(listener)) {
+				return;
+			}
+		}
+
+		SSL_CTX_set_psk_server_callback(listener->ssl_ctx, psk_server_callback);
+		if (listener->psk_hint) {
+			int rc;
+			rc = SSL_CTX_use_psk_identity_hint(listener->ssl_ctx, listener->psk_hint);
+			if (rc == 0) {
+				log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to set TLS PSK hint.");
+				net__print_ssl_error(NULL, "error during initialization");
+				return;
+			}
+		}
+	}
+#  endif /* FINAL_WITH_TLS_PSK */
+
 #endif
 
 	info.options |= LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT;
