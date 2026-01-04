@@ -234,6 +234,7 @@ error:
 	mosquitto__free(chunk->source.id);
 	mosquitto__free(chunk->source.username);
 	mosquitto__free(chunk->topic);
+	mosquitto__free(chunk->payload);
 	mosquitto__free(prop_packet.payload);
 	return 1;
 }
