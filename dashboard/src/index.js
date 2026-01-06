@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function checkNormalBannerImage(bannerImage, bannerCard) {
-  const imageSrc = "https://mosquitto.org/banner"; // no extension on the file - it can svg or png
+  const imageSrc = "https://mosquitto.org/banner/image"; // no extension on the file - it can svg or png
   const probe = new Image();
   probe.onload = () => {
     bannerImage.src = imageSrc;
@@ -17,7 +17,7 @@ function checkNormalBannerImage(bannerImage, bannerCard) {
 
 function checkSvgBannerImage(bannerImage, bannerCard, bannerLink, bannerInner) {
   // if a full fledged svg found, display it and remove the default link
-  const svgSrc = "https://mosquitto.org/banner.svg";
+  const svgSrc = "https://mosquitto.org/banner/image.svg";
   const svgProbe = new Image();
   svgProbe.onload = () => {
     bannerImage.src = svgSrc;
