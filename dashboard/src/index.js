@@ -8,7 +8,6 @@ function checkNormalBannerImage(bannerImage, bannerCard) {
   const probe = new Image();
   probe.onload = () => {
     bannerImage.src = imageSrc;
-    bannerCard.classList.remove("hidden");
   };
   probe.onerror = () => {
     console.warn("Banner-image didn't loaded");
@@ -27,7 +26,6 @@ function checkSvgBannerImage(bannerImage, bannerCard, bannerLink, bannerInner) {
       .then((r) => r.text())
       .then((svg) => {
         bannerInner.innerHTML = svg;
-        bannerCard.classList.remove("hidden");
         bannerLink.removeAttribute("href");
       })
       .catch((error) =>
