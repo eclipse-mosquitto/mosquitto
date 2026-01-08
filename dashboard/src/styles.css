@@ -857,10 +857,6 @@ video {
   width: 20rem;
 }
 
-.w-auto {
-  width: auto;
-}
-
 .w-full {
   width: 100%;
 }
@@ -872,10 +868,6 @@ video {
 
 .max-w-7xl {
   max-width: 80rem;
-}
-
-.max-w-none {
-  max-width: none;
 }
 
 .flex-1 {
