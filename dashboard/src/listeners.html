@@ -9,7 +9,7 @@
     <link rel="icon" type="image/x-icon" href="media/favicon-32x32.png" sizes="32x32">
 </head>
 <body class="min-h-screen bg-gray-50">
-    <div id="menu-overlay" class="fixed inset-0 z-40 hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="menu-overlay" class="fixed inset-0 z-40 opacity-0 transition-opacity duration-300"></div>
 
     <!-- sliding menu panel -->
     <div id="sliding-menu" class="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
@@ -47,6 +47,22 @@
             </div>
         </div>
     </div>
+    <script>
+        const isSidebarOpen = sessionStorage.getItem("isSidebarOpen") === "true";
+        const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+        const openSidebar = isSidebarOpen && isDesktop;
+
+        if (openSidebar) {
+            document.documentElement.classList.add("sidebar-open", "sidebar-preload");
+        }
+
+        // remove sidebar-preload class after at least one paint so that it does not block animations when we press on the "menu" button
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              document.documentElement.classList.remove("sidebar-preload");
+            });
+        });
+    </script>
     <div id="main-content" class="transition-all duration-300 ease-in-out">
         <div class="p-6">
             <div class="max-w-7xl mx-auto space-y-6">

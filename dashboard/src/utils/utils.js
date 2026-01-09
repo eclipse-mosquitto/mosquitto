@@ -161,3 +161,7 @@ async function copyToClipboard(textToCopy) {
     dummyTextArea.remove();
   }
 }
+
+function isMobile() {
+  return window.innerWidth < 1024;
+}

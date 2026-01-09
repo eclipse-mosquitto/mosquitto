@@ -10,6 +10,13 @@
   background-color: #fd602e;
 }
 
+#menu-overlay {
+  transition: opacity 300ms;
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0,0,0,0.45);
+}
+
 @media (min-width: 1024px) {
     #menu-overlay {
         display: none;
@@ -23,6 +30,33 @@
     #broker-info-icon {
         display: block;
     }
+}
+
+#sliding-menu {
+    transform: translateX(-100%);
+    transition: transform 300ms;
+}
+.sidebar-open #sliding-menu { transform: translateX(0); }
+
+@media (max-width: 1023px) {
+    .sidebar-open #menu-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    .sidebar-open #main-content {
+      margin-left: 320px;
+    }
+}
+/* lock scroll on mobile when sidebar open */
+.sidebar-lock-scroll {
+    overflow: hidden;
+}
+
+.sidebar-preload #sliding-menu {
+    transition: none;
 }
 
 @media (max-width: 1024px) {

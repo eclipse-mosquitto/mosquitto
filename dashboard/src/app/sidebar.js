@@ -5,7 +5,13 @@ class Sidebar {
     this.slidingMenu = document.getElementById("sliding-menu");
     this.menuOverlay = document.getElementById("menu-overlay");
     this.mainContent = document.getElementById("main-content");
-    this.isOpen = false;
+    this.root = document.documentElement;
+    this.isOpen = sessionStorage.getItem("isSidebarOpen") === "true";
+
+    // !isMobile() becase we don't want the sidebar to be preloaded as open on mobile - there is no space anyway
+    if (!isMobile() && this.isOpen) {
+      this.openMenu(); // the initial open of the sidebar is hanlded by the inlined preload script but calling openMenu will properly set hamburger icon to be an arrow icon
+    }
 
     this.bindEvents();
   }
@@ -22,9 +28,7 @@ class Sidebar {
     });
 
     window.addEventListener("resize", () => {
-      if (this.isOpen) {
-        this.updateLayout();
-      }
+      this.syncUi();
     });
   }
 
@@ -36,51 +40,29 @@ class Sidebar {
     }
   }
 
+  syncUi() {
+    document
+      .getElementById("hamburger-icon")
+      .classList.toggle("hidden", this.isOpen);
+    document
+      .getElementById("arrow-icon")
+      .classList.toggle("hidden", !this.isOpen);
+
+    const showOverlay = this.isOpen && isMobile();
+    document.body.classList.toggle("sidebar-lock-scroll", showOverlay);
+  }
+
   openMenu() {
     this.isOpen = true;
-
-    document.getElementById("hamburger-icon").classList.add("hidden");
-    document.getElementById("arrow-icon").classList.remove("hidden");
-
-    const isMobile = window.innerWidth < 1024;
-
-    if (isMobile) {
-      document.body.style.overflow = "hidden";
-      this.menuOverlay.classList.remove("hidden");
-      setTimeout(() => {
-        this.menuOverlay.classList.remove("opacity-0");
-        this.menuOverlay.classList.add("opacity-100");
-      }, 10);
-    } else {
-      this.mainContent.style.marginLeft = "320px";
-    }
-
-    this.slidingMenu.classList.remove("-translate-x-full");
-    this.slidingMenu.classList.add("translate-x-0");
+    sessionStorage.setItem("isSidebarOpen", "true");
+    this.root.classList.add("sidebar-open");
+    this.syncUi();
   }
 
   closeMenu() {
     this.isOpen = false;
-
-    document.getElementById("hamburger-icon").classList.remove("hidden");
-    document.getElementById("arrow-icon").classList.add("hidden");
-    document.body.style.overflow = "";
-    this.menuOverlay.classList.remove("opacity-100");
-    this.menuOverlay.classList.add("opacity-0");
-    setTimeout(() => {
-      this.menuOverlay.classList.add("hidden");
-    }, 300);
-
-    this.mainContent.style.marginLeft = "0";
-
-    this.slidingMenu.classList.remove("translate-x-0");
-    this.slidingMenu.classList.add("-translate-x-full");
-  }
-
-  updateLayout() {
-    if (this.isOpen) {
-      this.closeMenu();
-      setTimeout(() => this.openMenu(), 50);
-    }
+    sessionStorage.setItem("isSidebarOpen", "false");
+    this.root.classList.remove("sidebar-open");
+    this.syncUi();
   }
 }
