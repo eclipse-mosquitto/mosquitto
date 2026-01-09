@@ -1350,10 +1350,10 @@ class MosquittoDashboard {
     lastDataPoint,
     isUpdatingAllCharts,
   ) {
-    if (datapoint || isUpdatingAllCharts) {
+    if (datapoint !== undefined || isUpdatingAllCharts) {
       this.updateChartInner(
         id,
-        datapoint || lastDataPoint,
+        datapoint !== undefined ? datapoint : lastDataPoint,
         timestampMilliseconds,
         dashboardDataObject,
       );
@@ -1368,7 +1368,11 @@ class MosquittoDashboard {
     firstSubChartId,
     secondSubChartId,
   ) {
-    if (firstChartDatapoint || secondChartDatapoint || isUpdatingAllCharts) {
+    if (
+      firstChartDatapoint !== undefined ||
+      secondChartDatapoint !== undefined ||
+      isUpdatingAllCharts
+    ) {
       this.updateOverviewChartInner(id, firstSubChartId, secondSubChartId);
     }
   }
