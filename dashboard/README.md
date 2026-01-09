@@ -10,7 +10,7 @@ npm -g install tailwindcss@3
 2) Go into `src` and run tailwind to generate a CSS file based on tailwind classes used in `index.html`:
 
 ```sh
-tailwindcss -i ./tailwind/styles.css -o ./styles.css
+tailwindcss -i ./css/styles.css -o ./tailwind/styles.css
 ```
 
 3) Run mosquitto http api mock
