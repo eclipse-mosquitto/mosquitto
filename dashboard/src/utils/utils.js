@@ -19,13 +19,16 @@ function toAsyncAndWaitAfter(task, delay = 0) {
   };
 }
 
-async function fetchData(endpoint) {
+async function fetchData(endpoint, opts = {}) {
   if (!endpoint) {
     throw new Error("No endpoint provided to fetch data function");
   }
 
   let data;
-  const res = await fetch(endpoint);
+  const res = await fetch(endpoint, {
+    ...opts,
+    headers: { Accept: "application/json" },
+  });
   if (res.ok) {
     data = await res.json();
   } else {
@@ -164,4 +167,12 @@ async function copyToClipboard(textToCopy) {
 
 function isMobile() {
   return window.innerWidth < 1024;
+}
+
+function registerAbortController(abortController) {
+  // in firefox the below doesn't help unfortunately: a general netrowk error is being thrown even before the below callback is executed. A proper implementation would require aborying in-flight requets right before the navigation but it's not worth the effort. Currently you will see an alert for a quick moment when spam-clicking onto the "listern" tab in the sidebar on firefox
+  const abortCallback = () => {
+    abortController.abort();
+  };
+  window.addEventListener("pagehide", abortCallback, { once: true });
 }

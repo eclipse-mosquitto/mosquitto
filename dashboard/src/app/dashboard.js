@@ -1,5 +1,8 @@
 class MosquittoDashboard {
   constructor(headless = false) {
+    this.abort = new AbortController();
+    registerAbortController(this.abort, this);
+
     this.headlessMode = !!headless;
 
     !this.headlessMode && window.Chart.register(window.ChartZoom); // chartjs comes from lib/
@@ -1483,7 +1486,10 @@ class MosquittoDashboard {
     const nowTimestampMilliseconds = new Date().getTime();
     let sysTopics = null;
     try {
-      sysTopics = await fetchData(SYSTOPIC_ENDPOINT);
+      sysTopics = await fetchData(SYSTOPIC_ENDPOINT, {
+        signal: this.abort.signal,
+        cache: "no-store",
+      });
       this.version = sysTopics?.["$SYS/broker/version"];
 
       this.previousDataFetchFailed = false;
@@ -1492,12 +1498,16 @@ class MosquittoDashboard {
       this.setBrokerStatus();
     } catch (error) {
       const errorMsg = `Error fetching sys topics: ${error?.message}`;
-      console.error(errorMsg);
+      if (this.abort.signal.aborted || error?.name === "AbortError") {
+        console.log("Fetching systopics aborted");
+      } else {
+        console.error(errorMsg);
+        if (!this.previousDataFetchFailed) {
+          alert(errorMsg);
+        }
+      }
       this.brokerOnline = false;
       this.setBrokerStatus();
-      if (!this.previousDataFetchFailed) {
-        alert(errorMsg);
-      }
       this.previousDataFetchFailed = true;
     }
     if (!sysTopics) {

@@ -1,15 +1,28 @@
 class Listeners {
   constructor() {
+    this.abort = new AbortController();
+    registerAbortController(this.abort, this);
     this.init();
   }
 
   async init() {
     try {
-      const listeners = await fetchData(LISTENERS_ENDPOINT);
+      const listeners = await fetchData(LISTENERS_ENDPOINT, {
+        signal: this.abort.signal,
+        cache: "no-store",
+      });
       this.displayListeners(listeners);
     } catch (error) {
-      console.error("Error fetching listeners:", error);
-      alert(`Error loading listeners: ${error}`);
+      if (
+        this.pageHiding ||
+        this.abort.signal.aborted ||
+        error?.name === "AbortError"
+      ) {
+        console.log("Fetching listeners aborted");
+      } else {
+        console.error("Error fetching listeners:", error);
+        alert(`Error loading listeners: ${error}`);
+      }
     }
   }
 
