@@ -78,6 +78,9 @@ class MosquittoDashboard {
   composeDashboardObject() {
     const dashboardDataObject = {
       charts: {
+        "chart-messages-dropped":
+          this.getChartDataFromStore("chart-messages-dropped") ||
+          this.createChartDataObject(),
         "chart-messages-sent":
           this.getChartDataFromStore("chart-messages-sent") ||
           this.createChartDataObject(),
@@ -498,6 +501,13 @@ class MosquittoDashboard {
   initializeCharts() {
     let id = "";
 
+    id = "chart-messages-dropped";
+    this.charts[id] = this.createLineChart(
+      id,
+      "Dropped Messages",
+      MAIN_CHART_COLOR,
+      this.dashboardDataObject.options.chartDataType,
+    );
     id = "chart-messages-sent";
     this.charts[id] = this.createLineChart(
       id,
@@ -982,6 +992,7 @@ class MosquittoDashboard {
       this.updateLastSysTopics(topic, sysTopics[topic]);
       htmlIdsToUpdate["messages-dropped"] = sysTopics[topic];
       htmlIdsToUpdate["systopic-messages-dropped"] = sysTopics[topic];
+      chartIdsToUpdate["chart-messages-dropped"] = sysTopics[topic];
     }
 
     topic = "$SYS/broker/publish/messages/received";
@@ -1364,6 +1375,10 @@ class MosquittoDashboard {
 
   getLastChartsDataPoints(dashboardDataObject) {
     const lastChartsDataPoints = {
+      "chart-messages-dropped":
+        dashboardDataObject.lastSysTopics[
+          "$SYS/broker/publish/messages/dropped"
+        ],
       "chart-messages-sent":
         dashboardDataObject.lastSysTopics["$SYS/broker/messages/sent"],
       "chart-messages-received":
@@ -1392,6 +1407,16 @@ class MosquittoDashboard {
   ) {
     const lastDataPoints = this.getLastChartsDataPoints(dashboardDataObject);
     let id = "";
+
+    id = "chart-messages-dropped";
+    this.updateChart(
+      id,
+      chartData[id],
+      timestampMilliseconds,
+      dashboardDataObject,
+      lastDataPoints[id],
+      isUpdatingAllCharts,
+    );
 
     id = "chart-messages-sent";
     this.updateChart(

@@ -546,6 +546,58 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="metric-label">messages dropped</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container">
+                                <canvas id="chart-messages-dropped"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- chart navigation -->
+                        <div class="flex items-center justify-start">
+                            <div class="inline-flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200">
+                                <!-- zoom controls -->
+                                <button class="nav-btn" data-chart="chart-messages-dropped" data-action="zoom-in" title="Zoom In">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                    </svg>
+                                </button>
+                                <button class="nav-btn" data-chart="chart-messages-dropped" data-action="zoom-out" title="Zoom Out">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"/>
+                                    </svg>
+                                </button>
+
+                                <div class="nav-separator"></div>
+
+                                <!-- pan controls -->
+                                <button class="nav-btn" data-chart="chart-messages-dropped" data-action="pan-left" title="Pan Left">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                    </svg>
+                                </button>
+                                <button class="nav-btn" data-chart="chart-messages-dropped" data-action="pan-right" title="Pan Right">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </button>
+
+                                <div class="nav-separator"></div>
+
+                                <!-- reset -->
+                                <button class="nav-btn" data-chart="chart-messages-dropped" data-action="reset" title="Reset View">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
                         <div class="card-header">
                             <div class="metric-label">messages sent</div>
@@ -595,8 +647,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="card">
                         <div class="card-header">
                             <div class="metric-label">messages received</div>
@@ -646,8 +698,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="card">
                         <div class="card-header">
                             <div class="metric-label">messages sent per minute</div>
@@ -697,8 +749,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="card">
                         <div class="card-header">
                             <div class="metric-label">messages received per minute</div>
@@ -748,8 +800,8 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
+
                 </div>
 
                 <!-- total messages overview chart -->
