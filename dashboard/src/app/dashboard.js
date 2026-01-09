@@ -1,3 +1,6 @@
+const MAIN_CHART_COLOR = "#fd602e";
+const SUPPLEMENTARY_CHART_COLOR = "#6366f1";
+
 class MosquittoDashboard {
   constructor(headless = false) {
     this.abort = new AbortController();
@@ -127,7 +130,12 @@ class MosquittoDashboard {
     );
   }
 
-  createLineChart(canvasId, label, color = "#6366f1", chartDataType) {
+  createLineChart(
+    canvasId,
+    label,
+    color = SUPPLEMENTARY_CHART_COLOR,
+    chartDataType,
+  ) {
     const labelsType = chartDataType === "raw" ? "rawLabels" : "smoothedLabels";
     const dataType = chartDataType === "raw" ? "rawData" : "smoothedData";
     const ctx = document.getElementById(canvasId).getContext("2d");
@@ -239,8 +247,8 @@ class MosquittoDashboard {
             data: this.dashboardDataObject.charts["chart-messages-sent"].data[
               dataType
             ],
-            borderColor: "#6366f1",
-            backgroundColor: "#6366f1" + "20",
+            borderColor: SUPPLEMENTARY_CHART_COLOR,
+            backgroundColor: SUPPLEMENTARY_CHART_COLOR + "20",
             borderWidth: 2,
             fill: false,
             tension: 0.4,
@@ -249,8 +257,8 @@ class MosquittoDashboard {
             label: "Messages Received",
             data: this.dashboardDataObject.charts["chart-messages-received"]
               .data[dataType],
-            borderColor: "#fd602e",
-            backgroundColor: "#fd602e" + "20",
+            borderColor: MAIN_CHART_COLOR,
+            backgroundColor: MAIN_CHART_COLOR + "20",
             borderWidth: 2,
             fill: false,
             tension: 0.4,
@@ -334,8 +342,8 @@ class MosquittoDashboard {
             label: "Messages Sent per Minute",
             data: this.dashboardDataObject.charts["chart-messages-sent-rate"]
               .data[dataType],
-            borderColor: "#6366f1",
-            backgroundColor: "#6366f1" + "20",
+            borderColor: SUPPLEMENTARY_CHART_COLOR,
+            backgroundColor: SUPPLEMENTARY_CHART_COLOR + "20",
             borderWidth: 2,
             fill: false,
             tension: 0.4,
@@ -345,8 +353,8 @@ class MosquittoDashboard {
             data: this.dashboardDataObject.charts[
               "chart-messages-received-rate"
             ].data[dataType],
-            borderColor: "#fd602e",
-            backgroundColor: "#fd602e" + "20",
+            borderColor: MAIN_CHART_COLOR,
+            backgroundColor: MAIN_CHART_COLOR + "20",
             borderWidth: 2,
             fill: false,
             tension: 0.4,
@@ -494,42 +502,42 @@ class MosquittoDashboard {
     this.charts[id] = this.createLineChart(
       id,
       "Messages Sent",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-messages-received";
     this.charts[id] = this.createLineChart(
       id,
       "Messages Received",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-messages-sent-rate";
     this.charts[id] = this.createLineChart(
       id,
       "Sent Rate",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-messages-received-rate";
     this.charts[id] = this.createLineChart(
       id,
       "Received Rate",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-clients-connected";
     this.charts[id] = this.createLineChart(
       id,
       "Connected Clients",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-clients-disconnected";
     this.charts[id] = this.createLineChart(
       id,
       "Disconnected Persistent Clients",
-      "#fd602e",
+      MAIN_CHART_COLOR,
       this.dashboardDataObject.options.chartDataType,
     );
     id = "chart-message-overview";
