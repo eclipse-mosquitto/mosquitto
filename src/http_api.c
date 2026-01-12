@@ -407,11 +407,23 @@ static enum MHD_Result http_api_handler(void *cls, struct MHD_Connection
 
 int http_api__start_local(struct mosquitto__listener *listener)
 {
+	listener->security_options = mosquitto_calloc(1, sizeof(struct mosquitto__security_options));
+	if(listener->security_options == NULL){
+		return MOSQ_ERR_NOMEM;
+	}
+	
 	listener->host = mosquitto_strdup("127.0.0.1");
 	if(!listener->host){
+		mosquitto_FREE(listener->security_options);
 		return MOSQ_ERR_NOMEM;
 	}
 	listener->port = 9883;
+
+	if(db.config->security_options.allow_anonymous == -1){
+		listener->security_options.allow_anonymous = true;
+	}else{
+		listener->security_options.allow_anonymous = db.config->security_options.allow_anonymous;
+	}
 
 	if(listener->http_dir == NULL && strlen(HTTP_API_DIR) > 1){
 #ifdef WIN32
