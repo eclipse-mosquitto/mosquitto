@@ -43,6 +43,7 @@ set(PLUGINS
     plugin_control
     plugin_evt_client_offline
     plugin_evt_message_in
+    plugin_evt_message_in_publish
     plugin_evt_message_out
     plugin_evt_persist_client_update
     plugin_evt_psk_key

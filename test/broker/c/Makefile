@@ -52,6 +52,7 @@ PLUGIN_SRC = \
 	plugin_control.c \
 	plugin_evt_client_offline.c \
 	plugin_evt_message_in.c \
+	plugin_evt_message_in_publish.c \
 	plugin_evt_message_out.c \
 	plugin_evt_psk_key.c \
 	plugin_evt_reload.c \

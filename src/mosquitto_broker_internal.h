@@ -102,6 +102,7 @@ typedef int (*FUNC_auth_plugin_psk_key_get_v2)(void *, const char *, const char 
 enum mosquitto_msg_origin {
 	mosq_mo_client = 0,
 	mosq_mo_broker = 1,
+	mosq_mo_plugin = 2,
 };
 
 struct mosquitto__plugin_lib {
@@ -502,7 +503,7 @@ struct mosquitto_db {
 #ifdef WITH_KQUEUE
 	int kqueuefd;
 #endif
-	struct mosquitto__message_v5 *plugin_msgs;
+	struct mosquitto__base_msg *plugin_msgs;
 #ifdef WITH_TLS
 	/* tls_keylog can't be in the config struct because it is used
 	   before the config is allocated. Config probably
@@ -693,6 +694,7 @@ int handle__publish(struct mosquitto *context);
 int handle__subscribe(struct mosquitto *context);
 int handle__unsubscribe(struct mosquitto *context);
 int handle__auth(struct mosquitto *context);
+int handle__accepted_publish(struct mosquitto *context, struct mosquitto__base_msg *base_msg, uint16_t mid, int dup, uint32_t *message_expiry_interval);
 
 /* ============================================================
  * Database handling
@@ -739,6 +741,8 @@ void db__msg_add_to_queued_stats(struct mosquitto_msg_data *msg_data, struct mos
 uint64_t db__new_msg_id(void);
 void db__expire_all_messages(struct mosquitto *context);
 void db__check_acl_of_all_messages(struct mosquitto *context);
+void base_msg__dl_append(struct mosquitto__base_msg **head, struct mosquitto__base_msg *add_msg);
+void base_msg__dl_delete(struct mosquitto__base_msg **head, struct mosquitto__base_msg *del_msg);
 
 /* ============================================================
  * Subscription functions

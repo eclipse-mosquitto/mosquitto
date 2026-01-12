@@ -40,6 +40,10 @@ bool db__ready_for_flight(struct mosquitto *context, enum mosquitto_msg_directio
 	bool valid_bytes;
 	bool valid_count;
 
+	if(!context){
+		return true;
+	}
+
 	if(dir == mosq_md_out){
 		msgs = &context->msgs_out;
 	}else{
@@ -1514,7 +1518,7 @@ int db__message_write_queued_in(struct mosquitto *context)
 	struct mosquitto__client_msg *client_msg, *tmp;
 	int rc;
 
-	if(context->state != mosq_cs_active){
+	if(!context || context->state != mosq_cs_active){
 		return MOSQ_ERR_SUCCESS;
 	}
 

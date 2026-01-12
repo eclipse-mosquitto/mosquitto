@@ -149,6 +149,9 @@
 - Plugins can now use the `next_s` and `next_ms` members of the tick event data
   struct to set a minimum interval that the broker will wait before calling the
   tick callback again.
+- Add `mosquitto_plugin_publish()` and `mosquitto_plugin_publish_copy()`.
+  These allow plugins to publish messages on the broker that will also be
+  consumed by other plugins in their message-in events.
 
 # Plugins
 - Add acl-file plugin.
