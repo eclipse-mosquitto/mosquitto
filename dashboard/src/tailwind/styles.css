@@ -1007,8 +1007,8 @@ video {
   white-space: nowrap;
 }
 
-.break-all {
-  word-break: break-all;
+.break-words {
+  overflow-wrap: break-word;
 }
 
 .rounded {
