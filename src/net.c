@@ -672,7 +672,7 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 			for(int i=0; i<sk_X509_NAME_num(cert_names); i++){
 				sk_X509_NAME_push(ca_names, X509_NAME_dup(sk_X509_NAME_value(cert_names, i)));
 			}
-			sk_X509_NAME_free(cert_names);
+			sk_X509_NAME_pop_free(cert_names, X509_NAME_free);
 		}
 
 	}
@@ -681,6 +681,7 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 		if(rc == 0){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load CA certificates. Check capath \"%s\".", listener->capath);
 			net__print_ssl_error(NULL, NULL);
+			sk_X509_NAME_pop_free(ca_names, X509_NAME_free);
 			return MOSQ_ERR_TLS;
 		}
 

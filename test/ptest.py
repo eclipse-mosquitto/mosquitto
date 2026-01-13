@@ -50,10 +50,20 @@ class PTestCase():
             ansi_reset = ""
         print(f"{self.runtime:0.3f}s : {stat} : {ansi_col}{self.path}/{cmd}{ansi_reset}")
 
+    def print_timed_out(self, col):
+        cmd = " ".join(self.run_args)
+        if sys.stdout.isatty():
+            ansi_col = f"\033[38:5:{col}m"
+            ansi_reset = "\033[0m"
+        else:
+            ansi_col = ""
+            ansi_reset = ""
+        print(f"{self.runtime:0.3f}s : ⏳ : {ansi_col}{self.path}/{cmd}{ansi_reset}")
+
     def print_log(self):
         (stdo, stde) = self.proc.communicate()
-        print(stdo.decode('utf-8'))
-        print(stde.decode('utf-8'))
+        print(f"stdo: {stdo.decode('utf-8')}")
+        print(f"stde: {stde.decode('utf-8')}")
 
 
 class PTest():
@@ -158,9 +168,13 @@ class PTest():
                     else:
                         passed = passed + 1
                         t.print_result(0, COLOUR_PASS)
-                elif t.runtime > 180: # 3 minutes max
-                    t.proc.terminate()
+                elif t.runtime > 30: # 3 minutes max
+                    t.print_timed_out(226-6*t.attempts)
+                    t.proc.kill()
                     t.proc.wait()
+                    print(f"{t.proc}")
+                    print(f"{t.proc.returncode}")
+                    t.print_log()
 
         print("Passed: %d\nRetried: %d\nFailed: %d\nTotal: %d\nTotal time: %0.2f" % (passed, retried, failed, passed+failed, time.time()-start_time))
         if failed > 0:

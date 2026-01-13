@@ -156,12 +156,14 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         f.write("port %d\n" % (ports[3]))
 
 def client_check(username, password, rc, port):
+    print(f"client check {username} {password} {rc} {port}")
     connect_packet = mosq_test.gen_connect(client_id="client-id", username=username, password=password)
     connack_packet = mosq_test.gen_connack(rc=rc)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     sock.close()
 
 def do_test(per_listener_settings):
+    print(f"test {per_listener_settings}")
     proto_ver = 5
     ports = mosq_test.get_port(4)
     conf_file = os.path.basename(__file__).replace('.py', '.conf')
@@ -170,6 +172,7 @@ def do_test(per_listener_settings):
     write_config(conf_file, ports, per_listener_settings, 2, acl_file)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0])
+    print(f"broker {broker}")
 
     rc = 1
     try:
@@ -192,6 +195,7 @@ def do_test(per_listener_settings):
     except Exception as err:
         print(err)
     finally:
+        print("finally")
         broker.terminate()
         broker.wait()
         os.remove(conf_file)
