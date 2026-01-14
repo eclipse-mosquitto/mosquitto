@@ -20,7 +20,7 @@ def test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_
     # Try to open an 11th connection
     try:
         sock_bad = mosq_test.do_client_connect(connect_packet_bad, connack_packet_bad, port=port)
-    except (ConnectionResetError, BrokenPipeError):
+    except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
         # Expected behaviour
         pass
     except OSError as e:
@@ -66,13 +66,12 @@ def do_test():
         pass
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
     return rc
 
 sys.exit(do_test())

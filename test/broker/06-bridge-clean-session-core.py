@@ -176,11 +176,11 @@ def do_test(proto_ver, cs, lcs=None):
 
         tprint("Normal bi-dir bridging works. continuing")
 
-        broker_b.terminate()
+        mosq_test.terminate_broker(broker_b)
         if mosq_test.wait_for_subprocess(broker_b):
             print("broker_b not terminated")
             broker_termination_success = False
-        (stdo_b1, stde_b1) = broker_b.communicate()
+        stde_b1 = mosq_test.broker_log(broker_b)
 
         # as we're _terminating_ the connections should close ~straight away
         tprint("terminated B", time.time())
@@ -212,11 +212,11 @@ def do_test(proto_ver, cs, lcs=None):
         tprint("Stage 1 complete, repeating in other direction")
 
         # ok, now repeat in the other direction...
-        broker_a.terminate()
+        mosq_test.terminate_broker(broker_a)
         if mosq_test.wait_for_subprocess(broker_a):
             print("broker_a not terminated")
             broker_termination_success = False
-        (stdo_a1, stde_a1) = broker_a.communicate()
+        stde_a1 = mosq_test.broker_log(broker_a)
         time.sleep(0.5)
 
         mosq_test.do_send_receive(client_b, pub_b2.p, pub_b2.ack, "puback_b2")
@@ -247,16 +247,14 @@ def do_test(proto_ver, cs, lcs=None):
     finally:
         os.remove(conf_file_a)
         os.remove(conf_file_b)
-        broker_a.terminate()
-        broker_b.terminate()
+        mosq_test.terminate_broker(broker_a)
+        mosq_test.terminate_broker(broker_b)
         if mosq_test.wait_for_subprocess(broker_a):
             print("broker_a not terminated")
             success = False
         if mosq_test.wait_for_subprocess(broker_b):
             print("broker_b not terminated")
             success = False
-        (stdo_a, stde_a) = broker_a.communicate()
-        (stdo_b, stde_b) = broker_b.communicate()
         # Must be after terminating!
         try:
             os.remove(persistence_file_a)
@@ -268,13 +266,9 @@ def do_test(proto_ver, cs, lcs=None):
             print("persistence file b didn't exist, skipping remove")
         if not success:
             print("Test failed, dumping broker A logs: ")
-            if stde_a1:
-                print(stde_a1.decode('utf-8'))
-            print(stde_a.decode('utf-8'))
+            print(mosq_test.broker_log(broker_a))
             print("Test failed, dumping broker B logs: ")
-            if stde_b1:
-                print(stde_b1.decode('utf-8'))
-            print(stde_b.decode('utf-8'))
+            print(mosq_test.broker_log(broker_b))
             exit(1)
 
 if sys.argv[3] == "True":

@@ -3,12 +3,18 @@ import base64
 import errno
 import hashlib
 import os
+import platform
+import signal
 import socket
 import subprocess
 import struct
 import sys
+import tempfile
 import time
 import uuid
+
+if platform.system() == 'Windows':
+    import win32event
 
 import traceback
 
@@ -30,26 +36,40 @@ def get_build_root():
         result = str(Path(__file__).resolve().parents[1])
     return result
 
+def get_build_type():
+    if platform.system() == 'Windows':
+        buildtype = os.environ.get('CMAKE_CONFIG_TYPE')
+        if buildtype is None:
+            buildtype = 'RelWithDebInfo'
+    else:
+        buildtype = ''
+    return buildtype
+    
+def get_client_path(name):
+    return str(Path(get_build_root(), "client", get_build_type(), name))
+    
 def env_add_ld_library_path(env=None):
-    p = ":".join([
-        get_build_root() + '/libcommon',
-        get_build_root() + '/lib',
-        get_build_root() + '/lib/cpp',
-        os.getenv("LD_LIBRARY_PATH", "")
+    if platform.system() == 'Windows':
+        pathsep = ';'
+        pathvar = 'PATH'
+    elif platform.system() == 'Darwin':
+        pathsep = ':'
+        pathvar = 'DYLIB_LIBRARY_PATH'
+    else:
+        pathsep = ':'
+        pathvar = 'LD_LIBRARY_PATH'
+        
+    p = pathsep.join([
+        str(Path(get_build_root(), 'libcommon', get_build_type())),
+        str(Path(get_build_root(), 'lib', get_build_type())),
+        str(Path(get_build_root(), 'lib', 'cpp', get_build_type())),
+        os.getenv(pathvar, "")
     ])
 
     if env is None:
-        env = {
-            'LD_LIBRARY_PATH': p,
-            'DYLIB_LIBRARY_PATH': p,
-        }
-    else:
-        for v in ['LD_LIBRARY_PATH', 'DYLIB_LIBRARY_PATH']:
-            try:
-                val = env[v]
-                env[v] = ":".join([val, p])
-            except KeyError:
-                env[v] = p
+        env = os.environ.copy()
+
+    env[pathvar] = p
 
     return env
 
@@ -61,12 +81,21 @@ def listen_sock(port):
     sock.listen(5)
     return sock
 
-def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, nolog=False, checkhost="localhost", env=None, check_port=True, cmd_args=None, timeout=0.1):
+def broker_log(broker):
+    try:
+        broker.mosq_log.seek(0)
+        return broker.mosq_log.read().decode('utf-8')
+    except AttributeError:
+        return None
+        
+
+def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, checkhost="127.0.0.1", env=None, check_port=True, cmd_args=None, timeout=0.1):
     global vg_index
     global vg_logfiles
 
+    broker_path = Path(get_build_root(), 'src', get_build_type(), 'mosquitto')
     if use_conf == True:
-        cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+        cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
 
         if port == 0:
             port = 1888
@@ -74,9 +103,12 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
             cmd += ['-p', str(port)]
     else:
         if cmd is None and port != 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-p', str(port)]
+            cmd = [broker_path, '-v', '-p', str(port)]
         elif cmd is None and port == 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+            cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
+
+    if env is None:
+        env = env_add_ld_library_path()
 
     if os.environ.get('MOSQ_USE_VALGRIND') is not None:
         logfile = filename+'.'+str(vg_index)+'.vglog'
@@ -97,25 +129,23 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
 
     #print(port)
     #print(cmd)
-    if nolog:
-        stderr = subprocess.DEVNULL
-    else:
-        stderr = subprocess.PIPE
+    stderr = tempfile.TemporaryFile(prefix=str(port), suffix=".log")
 
     broker = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr, env=env)
+    broker.mosq_log = stderr
 
     if expect_fail:
         try:
             broker.wait(timeout*10)
             if expect_fail_log is not None:
-                (_, stde) = broker.communicate()
-                if expect_fail_log not in stde.decode('utf-8'):
+                stde = broker_log(broker)
+                if expect_fail_log not in stde:
                     print(f"{expect_fail_log} not found in log.")
-                    print(stde.decode('utf-8'))
+                    print(stde)
                     raise ValueError()
         except subprocess.TimeoutExpired:
             _, errs = terminate_broker(broker)
-            print(f"Broker did not fail to start:\n{errs.decode('utf-8')}")
+            print(f"Broker did not fail to start:\n{errs}")
             raise
         return broker
 
@@ -139,6 +169,7 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
 
     if expect_fail == False:
         outs, errs = broker.communicate(timeout=timeout)
+        errs = broker_log(broker)
         print("FAIL: unable to start broker: %s" % errs)
         raise IOError
     else:
@@ -174,8 +205,15 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
 
 
 def terminate_broker(broker):
-    broker.terminate()
-    (_, stde) = broker.communicate()
+    if platform.system() == 'Windows':
+        try:
+            evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_shutdown")
+            win32event.PulseEvent(evt)
+        except Exception:
+            broker.terminate()
+    else:
+        broker.terminate()
+    stde = broker_log(broker)
     if wait_for_subprocess(broker):
         print("broker not terminated")
         return (1, stde)
@@ -183,6 +221,17 @@ def terminate_broker(broker):
         return (0, stde)
 
 
+def reload_broker(broker):
+    if platform.system() == 'Windows':
+        try:
+            evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_reload")
+            win32event.PulseEvent(evt)
+        except Exception:
+            pass
+    else:
+        broker.send_signal(signal.SIGHUP)
+    
+    
 def pub_helper(port, proto_ver=4):
     connect_packet = gen_connect("pub-helper", proto_ver=proto_ver)
     connack_packet = gen_connack(rc=0, proto_ver=proto_ver)
@@ -210,18 +259,15 @@ def expect_packet(sock, name, expected):
         rlen = 1
 
     packet_recvd = b""
-    try:
-        while len(packet_recvd) < rlen:
-            data = sock.recv(rlen-len(packet_recvd))
-            if len(data) == 0:
-                try:
-                    s = f"when reading {name} from {sock.getpeername()}"
-                except OSError:
-                    s = f"when reading {name} from {sock}"
-                raise BrokenPipeError(s)
-            packet_recvd += data
-    except socket.timeout:
-        pass
+    while len(packet_recvd) < rlen:
+        data = sock.recv(rlen-len(packet_recvd))
+        if len(data) == 0:
+            try:
+                s = f"when reading {name} from {sock.getpeername()}"
+            except OSError:
+                s = f"when reading {name} from {sock}"
+            raise BrokenPipeError(s)
+        packet_recvd += data
 
     if packet_matches(name, packet_recvd, expected):
         return True
@@ -293,7 +339,7 @@ def do_receive_send(sock, receive_packet, send_packet, error_string="receive sen
         raise ValueError
 
 
-def client_connect_only(hostname="localhost", port=1888, timeout=10, protocol="mqtt"):
+def client_connect_only(hostname="127.0.0.1", port=1888, timeout=10, protocol="mqtt"):
     if protocol == "websockets":
         addr = (hostname, port)
         sock = socket.create_connection(addr, timeout=timeout)
@@ -312,7 +358,7 @@ def client_connect_only_unix(path, timeout=10):
     sock.connect(path)
     return sock
 
-def do_client_connect(connect_packet, connack_packet, hostname="localhost", port=1888, timeout=10, connack_error="connack", protocol="mqtt"):
+def do_client_connect(connect_packet, connack_packet, hostname="127.0.0.1", port=1888, timeout=10, connack_error="connack", protocol="mqtt"):
     sock = client_connect_only(hostname, port, timeout, protocol)
 
     return do_send_receive(sock, connect_packet, connack_packet, connack_error)
@@ -905,11 +951,11 @@ def client_test(client_cmd, client_args, callback, cb_data):
 
     sock = listen_sock(port)
 
-    args = [get_build_root() + "/test/lib/" + client_cmd, str(port)]
+    args = [Path(get_build_root(), "test", "lib", get_build_type(), client_cmd), str(port)]
     if client_args is not None:
         args = args + client_args
 
-    client = start_client(filename=client_cmd.replace('/', '-'), cmd=args)
+    client = start_client(filename=client_cmd.name, cmd=args)
 
     try:
         (conn, address) = sock.accept()

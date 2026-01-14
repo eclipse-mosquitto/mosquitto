@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	mosq->will_set("will/topic", strlen("will-payload"), "will-payload", 1, true);
 	mosq->will_set("will/topic", strlen("will-payload"), "will-payload", 1, true);
 
-	mosq->connect("localhost", port, 60);
+	mosq->connect("127.0.0.1", port, 60);
 
 	while(run == -1){
 		mosq->loop();

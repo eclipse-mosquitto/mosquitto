@@ -9,6 +9,7 @@ cmd_subfolder = os.path.realpath(
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
+import mosq_plugins
 import mosq_test
 import mqtt5_opts
 import mqtt5_props
@@ -68,14 +69,14 @@ def do_test_broker_failure(
             expect_fail=True,
             cmd_args=cmd_args,
         )
-        (stdo, stde) = broker.communicate()
+        stde = mosq_test.broker_log(broker)
         if broker.returncode != rc_expected:
             print(f"Expected broker return code {rc_expected}, got {broker.returncode}")
-            print(stde.decode("utf-8"))
+            print(stde)
             return rc
 
         if error_log_entry is not None:
-            error_log = stde.decode("utf-8")
+            error_log = stde
             if error_log_entry not in error_log:
                 print(
                     f"Error log entry: '{error_log_entry}' not found in '{error_log}'"
@@ -83,6 +84,7 @@ def do_test_broker_failure(
                 return rc
 
         if stdout_entry is not None:
+            (stdo, _) = broker.communicate()
             stdout_log = stdo.decode("utf-8")
             if stdout_entry not in stdout_log:
                 print(

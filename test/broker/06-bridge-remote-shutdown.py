@@ -9,7 +9,7 @@ def write_config(filename, port1, port2, protocol_version):
     with open(filename, 'w') as f:
         f.write("log_type all\n")
         f.write("listener %d\n" % (port2))
-        f.write("plugin c/plugin_evt_persist_client_update.so\n")
+        f.write(f"plugin {mosq_plugins.gen_test_plugin_path('plugin_evt_persist_client_update')}\n")
         f.write("allow_anonymous true\n")
         f.write("persistent_client_expiration 1d\n")
         f.write("\n")
@@ -72,10 +72,10 @@ def do_test(proto_ver):
         rc2, stde2 = mosq_test.terminate_broker(local_broker)
         if rc or rc1 or rc2:
             print(f"Remote broker first run rc={rc1}")
-            print(stde1.decode('utf-8'))
+            print(stde1)
 
             print(f"Local broker rc={rc2}")
-            print(stde2.decode('utf-8'))
+            print(stde2)
         try: 
             os.remove(conf_file)
         except OSError:

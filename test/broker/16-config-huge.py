@@ -5,7 +5,6 @@
 # options being set.
 
 from mosq_test_helper import *
-import signal
 
 def write_acl(filename):
     with open(filename, 'w') as f:
@@ -109,7 +108,7 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         # Default listener
 
         # Listeners
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("plugin_opt_test true\n")
         f.write("auth_plugin_deny_special_chars false\n")
 
@@ -182,17 +181,17 @@ def do_test(per_listener_settings):
         client_check(None, None, 5, ports[0]) # Should fail
         client_check(None, None, 5, ports[1]) # Should fail
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         client_check("test-username", "cnwTICONIURW", 0, ports[0]) # Should succeed
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         client_check("test-username", "cnwTICONIURW", 0, ports[0]) # Should succeed
 
         rc = 0
     except Exception as err:
         print(err)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         os.remove(conf_file)
         os.remove(acl_file)
@@ -206,8 +205,7 @@ def do_test(per_listener_settings):
             rc = 1
         if rc:
             print(f"per_listener_settings:{per_listener_settings}")
-            (_, stde) = broker.communicate()
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test("false")

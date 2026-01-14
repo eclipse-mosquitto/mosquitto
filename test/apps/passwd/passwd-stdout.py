@@ -5,9 +5,10 @@
 from mosq_test_helper import *
 
 def do_test(args, rc_expected, response=None, input=None):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_passwd/mosquitto_passwd"]
+    proc = subprocess.run([mosquitto_passwd_path]
                     + args,
-                    capture_output=True, encoding='utf-8', timeout=2, input=input)
+                    capture_output=True, encoding='utf-8', timeout=2, input=input,
+                    env=mosq_test.env_add_ld_library_path())
 
     if response is not None:
         if proc.stdout[0:len(response)] != response:

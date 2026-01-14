@@ -9,11 +9,9 @@ def do_test():
 
     port = mosq_test.get_port()
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_sub',
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
+    cmd = [mosq_test.get_client_path('mosquitto_sub'),
             '-p', str(port),
             '-q', '0',
             '-t', 'retain-handling',

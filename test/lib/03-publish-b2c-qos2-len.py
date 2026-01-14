@@ -28,24 +28,24 @@ data['mid'] = 56
 # No reason code, no properties
 data['pubrel_packet'] = mosq_test.gen_pubrel(data['mid'])
 data['label'] = "qos2 len 2"
-mosq_test.client_test("c/03-publish-b2c-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-b2c-qos2-len.test", [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
 
 # Reason code, no properties
 data['pubrel_packet'] = mosq_test.gen_pubrel(data['mid'], proto_ver=5, reason_code=0x00)
 data['label'] = "qos2 len 3"
-mosq_test.client_test("c/03-publish-b2c-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-b2c-qos2-len.test", [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
 
 # Reason code, empty properties
 data['pubrel_packet'] = mosq_test.gen_pubrel(data['mid'], proto_ver=5, reason_code=0x00, properties="")
 data['label'] = "qos2 len 4"
-mosq_test.client_test("c/03-publish-b2c-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-b2c-qos2-len.test", [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
 
 # Reason code, one property
 props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
 data['pubrel_packet'] = mosq_test.gen_pubrel(data['mid'], proto_ver=5, reason_code=0x00, properties=props)
 data['label'] = "qos2 len >5"
-mosq_test.client_test("c/03-publish-b2c-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-b2c-qos2-len.test", [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "03-publish-b2c-qos2-len.exe"), [], do_test, data)

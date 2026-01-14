@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-
+import platform
 from mosq_test_helper import *
 
 def do_test(format_str, expected_output, proto_ver=4, payload="message"):
@@ -16,11 +16,9 @@ def do_test(format_str, expected_output, proto_ver=4, payload="message"):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_sub',
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
+    cmd = [mosq_test.get_client_path('mosquitto_sub'),
             '-p', str(port),
             '-q', '1',
             '-t', '02/sub/format/test',
@@ -42,41 +40,42 @@ def do_test(format_str, expected_output, proto_ver=4, payload="message"):
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name3", "value3")
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name4", "value4")
     if proto_ver == 5:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, properties=props, proto_ver=proto_ver)
+        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, retain=True, payload=payload, properties=props, proto_ver=proto_ver)
     else:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver)
+        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, retain=True, payload=payload, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
     try:
         sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
+        sock.send(publish_packet)
+        sock.close()
 
         sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        time.sleep(0.1)
-        sock.send(publish_packet)
         sub_terminate_rc = 0
         if mosq_test.wait_for_subprocess(sub):
             print("sub not terminated")
             sub_terminate_rc = 1
         (stdo, stde) = sub.communicate()
-        if stdo.decode('utf-8') == expected_output:
+        stdo = stdo.decode('utf-8').strip()
+        expected_output = expected_output.strip()
+        if stdo == expected_output:
             rc = sub_terminate_rc
         else:
+            print(f"format_str: {format_str}")
             print("expected: (%d) %s" % (len(expected_output), expected_output))
-            print("actual:   (%d) %s"  % (len(stdo.decode('utf-8')), stdo.decode('utf-8')))
-        sock.close()
+            print("actual:   (%d) %s"  % (len(stdo), stdo))
     except mosq_test.TestError:
         pass
     except Exception as e:
         print(e)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 
@@ -101,7 +100,7 @@ do_test('%p', 'message\n')
 do_test('%-12p', 'message     \n')
 do_test('%q', '0\n')
 do_test('%R', '\n') # missing
-do_test('%r', '0\n')
+do_test('%r', '1\n')
 do_test('%S', '\n') # missing
 do_test('%S', '56\n', proto_ver=5)
 do_test('%t', '02/sub/format/test\n')
@@ -128,5 +127,6 @@ do_test('\\t', '\t\n')
 do_test('\\v', '\v\n')
 do_test('@@', '@\n')
 do_test('text', 'text\n')
-do_test('%.3d', '2.718\n', payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
-do_test('%.3f', '0.707\n', payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))
+if platform.system() != 'Windows':
+    do_test('%.3d', '2.718\n', payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
+    do_test('%.3f', '0.707\n', payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))

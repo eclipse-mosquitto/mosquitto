@@ -3,12 +3,11 @@
 # Test whether a plugin can subscribe to the tick event
 
 from mosq_test_helper import *
-import signal
 
 def write_config1(filename, ports, per_listener_settings, plugver):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("listener %d\n" % (ports[0]))
         f.write("plugin_use auth\n")
         f.write("listener %d\n" % (ports[1]))
@@ -19,7 +18,7 @@ def write_config1(filename, ports, per_listener_settings, plugver):
 def write_config2(filename, ports, per_listener_settings, plugver):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load auth c/auth_plugin_v%d.so\n" % (plugver))
+        f.write(f"plugin_load auth {mosq_plugins.gen_test_plugin_path('auth_plugin_v%d' % (plugver))}\n")
         f.write("listener %d\n" % (ports[0]))
         f.write("listener %d\n" % (ports[1]))
         f.write("plugin_use auth\n")
@@ -61,7 +60,7 @@ def do_test(per_listener_settings, plugver):
             # Now swap auth around so ports[0] has no plugin but ports[1] does
             write_config2(conf_file, ports, per_listener_settings, plugver)
 
-            broker.send_signal(signal.SIGHUP)
+            mosq_test.reload_broker(broker)
 
             client_check("test-username", "cnwTICONIURW", 5, ports[0]) # Should fail
             client_check("test-username", "cnwTICONIURW", 0, ports[1]) # Should succeed
@@ -80,7 +79,7 @@ def do_test(per_listener_settings, plugver):
 
             # Check config works as before - plugin reloading disabled
 
-            broker.send_signal(signal.SIGHUP)
+            mosq_test.reload_broker(broker)
 
             client_check("test-username", "cnwTICONIURW", 0, ports[0]) # Should succeed
             client_check("test-username", "cnwTICONIURW", 5, ports[1]) # Should fail
@@ -99,12 +98,11 @@ def do_test(per_listener_settings, plugver):
         print(err)
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         if rc:
             print(f"per_listener_settings:{per_listener_settings} plugver:{plugver}")
-            (stdo, stde) = broker.communicate()
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 print("T1")

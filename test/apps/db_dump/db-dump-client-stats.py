@@ -10,12 +10,13 @@ def do_test(file, counts):
         f"  {counts[4]}\n"
 
     cmd = [
-        mosq_test.get_build_root()+'/apps/db_dump/mosquitto_db_dump',
+        mosquitto_db_dump_path,
         '--client-stats',
-        f'{test_dir}/apps/db_dump/data/{file}'
+        Path(test_dir, "apps", "db_dump", "data", file)
     ]
+    env = mosq_test.env_add_ld_library_path()
 
-    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8')
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8', env=env)
     if res.stdout != stdout:
         print(res.stdout)
         print(stdout)

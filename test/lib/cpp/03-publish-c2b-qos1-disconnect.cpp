@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 	mosq = new mosquittopp_test("publish-qos1-test");
 
-	mosq->connect("localhost", port, 60);
+	mosq->connect("127.0.0.1", port, 60);
 
 	while(run == -1){
 		mosq->loop();

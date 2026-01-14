@@ -6,8 +6,7 @@ from mosq_test_helper import *
 
 def write_file(filename):
     with open(filename, 'w') as f:
-        f.write("line1\n")
-        f.write("line2\n")
+        f.write("somedata")
 
 
 def do_test(proto_ver):
@@ -23,12 +22,10 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
-
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    print(data_file)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
+    cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-p', str(port),
             '-q', '1',
             '-t', '03/pub/file/test',
@@ -36,7 +33,7 @@ def do_test(proto_ver):
             '-V', V
             ]
 
-    publish_packet = mosq_test.gen_publish("03/pub/file/test", qos=0, payload="line1\nline2\n", proto_ver=proto_ver)
+    publish_packet = mosq_test.gen_publish("03/pub/file/test", qos=0, payload="somedata", proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
@@ -60,13 +57,12 @@ def do_test(proto_ver):
         print(e)
     finally:
         os.remove(data_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)
 

@@ -2,10 +2,11 @@
 
 # Test parsing of command line args and errors. Does not test arg functionality.
 
+import platform
 from mosq_test_helper import *
 
 def do_test(args, rc_expected, response=None):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2)
 
@@ -137,20 +138,28 @@ do_test(["dynsec", "createClient", "client", "-p"], 3, response="Error: -p argum
 
 # Missing file
 env["HOME"] = "/tmp"
+env["USERPROFILE"] = "D:"
 do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.\n")
 
 # Invalid file
-env["XDG_CONFIG_HOME"] = "."
-with open("mosquitto_ctrl", "w") as f:
-    f.write(f"--cert {ssl_dir}/client.crt\n")
+if platform.system() == 'Windows':
+    envvar = "USERPROFILE"
+    filename = "mosquitto_ctrl.conf"
+else:
+    envvar = "XDG_CONFIG_HOME"
+    filename = "mosquitto_ctrl"
+
+env[envvar] = "."
+with open(filename, "w") as f:
+    f.write(f"--cert {ssl_dir / 'client.crt'}\n")
     f.write(f"--key\n")
 do_test(["broker"], 1, response="Error: --key argument given but no file specified.\n\n")
 
 # Empty file
-env["XDG_CONFIG_HOME"] = "."
-with open("mosquitto_ctrl", "w") as f:
+env[envvar] = "."
+with open(filename, "w") as f:
     pass
 do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.\n")
-os.remove("mosquitto_ctrl")
+os.remove(filename)
 
 exit(0)

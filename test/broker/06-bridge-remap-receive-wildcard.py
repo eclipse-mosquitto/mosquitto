@@ -96,12 +96,11 @@ def do_test(proto_ver):
         except NameError:
             pass
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
-        (stdo, stde) = broker.communicate()
         ssock.close()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

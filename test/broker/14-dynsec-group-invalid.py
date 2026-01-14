@@ -11,8 +11,8 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write("plugin_opt_config_file %d/dynamic-security.json\n" % (port))
+        f.write(f"plugin {mosq_plugins.DYNSEC_PLUGIN_PATH}\n")
+        f.write(f"plugin_opt_config_file {Path(str(port), 'dynamic-security.json')}\n")
 
 
 port = mosq_test.get_port()
@@ -419,13 +419,12 @@ finally:
     except FileNotFoundError:
         pass
     os.rmdir(f"{port}")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
-    (stdo, stde) = broker.communicate()
     if rc:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
 
 
 exit(rc)

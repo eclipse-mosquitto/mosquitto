@@ -25,11 +25,9 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
+    cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-o', conf_file
             ]
 
@@ -63,13 +61,12 @@ def do_test(proto_ver):
         print(e)
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)
 

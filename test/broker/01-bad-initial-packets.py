@@ -3,6 +3,7 @@
 # Test whether non-CONNECT packets as an initial packet can cause excess memory use
 
 from mosq_test_helper import *
+import platform
 import psutil
 
 def write_config(filename, port):
@@ -65,13 +66,15 @@ def do_test(port):
         pass
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
+
+if platform.system() == 'Windows':
+    exit(0)
 
 port = mosq_test.get_port()
 

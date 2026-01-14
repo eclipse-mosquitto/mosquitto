@@ -7,13 +7,13 @@ import shutil
 
 def write_config(filename, ports):
     with open(filename, 'w') as f:
-        f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write(f"plugin_opt_config_file {ports[0]}/dynamic-security.json\n")
+        f.write(f"global_plugin {mosq_plugins.DYNSEC_PLUGIN_PATH}\n")
+        f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        f.write(f"certfile {Path(ssl_dir, 'server.crt')}\n")
+        f.write(f"keyfile {Path(ssl_dir, 'server.key')}\n")
 
 def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     opts = ["-u", "admin",
@@ -26,9 +26,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
                  ]
     else:
         opts += ["-p", str(ports[1])]
-        opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+        opts += ["--cafile", Path(ssl_dir, "all-ca.crt")]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2, input=input)
 
@@ -42,9 +42,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
         raise ValueError(args)
 
 def ctrl_dynsec_file_cmd(args, ports, response=None):
-    opts = ["-f", f"{ports[0]}/dynamic-security.json"]
+    opts = ["-f", Path(str(ports[0]), "dynamic-security.json")]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosquitto_ctrl_path]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8')
 
@@ -67,12 +67,12 @@ if not os.path.exists(str(ports[0])):
     os.mkdir(str(ports[0]))
 
 # Generate initial dynsec file
-ctrl_dynsec_cmd(["init", f"{ports[0]}/dynamic-security.json", "admin", "admin"], ports)
+ctrl_dynsec_cmd(["init", Path(str(ports[0]), "dynamic-security.json"), "admin", "admin"], ports)
 try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
-    os.chown(f"{ports[0]}/dynamic-security.json", 65534, 65534)
-except PermissionError:
+    os.chown(Path(str(ports[0]), "dynamic-security.json"), 65534, 65534)
+except (PermissionError, AttributeError):
     pass
 
 ctrl_dynsec_file_cmd(["help"], ports) # get the help, don't check the response though
@@ -80,7 +80,7 @@ ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin", "-i", "10000"], 
 ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin"], ports)
 
 # Then start broker
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0], nolog=True)
+broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0])
 
 try:
     rc = 1
@@ -226,12 +226,12 @@ except mosq_test.TestError:
 finally:
     os.remove(conf_file)
     try:
-        os.remove(f"{ports[0]}/dynamic-security.json")
+        os.remove(Path(str(ports[0]), "dynamic-security.json"))
         pass
     except FileNotFoundError:
         pass
     shutil.rmtree(f"{ports[0]}")
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

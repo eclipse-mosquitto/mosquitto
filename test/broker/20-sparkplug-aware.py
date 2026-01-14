@@ -12,7 +12,7 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/sparkplug-aware/mosquitto_sparkplug_aware.so\n")
+        f.write(f"plugin {mosq_plugins.SPARKPLUG_AWARE_PLUGIN_PATH}\n")
 
 def proc(port, proto_ver):
     group_id = str(uuid.uuid4())
@@ -241,13 +241,12 @@ def do_tests():
         print(e)
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 if __name__ == '__main__':

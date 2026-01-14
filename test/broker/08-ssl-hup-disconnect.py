@@ -6,7 +6,6 @@
 # https://github.com/eclipse/mosquitto/issues/1402
 
 from mosq_test_helper import *
-import signal
 
 if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")
@@ -50,7 +49,7 @@ def do_test(option):
         ssock.connect(("localhost", port))
         mosq_test.do_send_receive(ssock, connect_packet, connack_packet, "connack")
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         time.sleep(1)
 
         # This will fail if we've been disconnected
@@ -63,13 +62,12 @@ def do_test(option):
     finally:
         os.remove(conf_file)
         os.remove(pw_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test("use_identity_as_username")

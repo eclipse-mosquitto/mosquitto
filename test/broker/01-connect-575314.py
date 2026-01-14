@@ -3,11 +3,15 @@
 # Check for performance of processing user-property on CONNECT
 
 from mosq_test_helper import *
+from psutil import Process as ProcessInfo
 
 def do_test():
+    num_connects = 1000
+    num_props = 5000
+    
     rc = 1
     props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
-    for i in range(0, 5000):
+    for i in range(0, num_props):
         props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
     connect_packet_slow = mosq_test.gen_connect("connect-user-property", proto_ver=5, properties=props)
     connect_packet_fast = mosq_test.gen_connect("a"*65000, proto_ver=5)
@@ -17,33 +21,37 @@ def do_test():
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
     try:
-        t_start = time.monotonic()
-        sock = mosq_test.do_client_connect(connect_packet_slow, connack_packet, port=port)
-        t_stop = time.monotonic()
-        sock.close()
+        broker_info = ProcessInfo(broker.pid)
+        cpu_user_start = broker_info.cpu_times().user
 
-        t_diff_slow = t_stop - t_start
+        for i in range(num_connects):
+            sock = mosq_test.do_client_connect(connect_packet_slow, connack_packet, port=port)
+            sock.close()
+        cpu_user_end = broker_info.cpu_times().user
+        cpu_user_with_props = cpu_user_end - cpu_user_start
+        cpu_user_start = cpu_user_end
 
-        t_start = time.monotonic()
-        sock = mosq_test.do_client_connect(connect_packet_fast, connack_packet, port=port)
-        t_stop = time.monotonic()
-        sock.close()
+        for i in range(num_connects):
+            sock = mosq_test.do_client_connect(connect_packet_fast, connack_packet, port=port)
+            sock.close()
+        cpu_user_end = broker_info.cpu_times().user
+        cpu_user_without_props = cpu_user_end - cpu_user_start
 
-        t_diff_fast = t_stop - t_start
         # 20 is chosen as a factor that works in plain mode and running under
         # valgrind. The slow performance manifests as a factor of >100. Fast is <10.
-        if t_diff_slow / t_diff_fast < 20:
+        if cpu_user_with_props / cpu_user_without_props < 10.0:
             rc = 0
+        else:
+            print(f"CPU usage ratio with/without properties is {cpu_user_with_props / cpu_user_without_props}")
     except mosq_test.TestError:
         pass
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

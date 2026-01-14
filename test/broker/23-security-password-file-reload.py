@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
-import signal
 
 def write_config_default(filename, port):
     with open(filename, 'w') as f:
@@ -13,7 +12,7 @@ def write_config_default(filename, port):
 def write_config_plugin(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/password-file/mosquitto_password_file.so\n")
+        f.write(f"plugin {mosq_plugins.PASSWORD_FILE_PLUGIN_PATH}\n")
         f.write(f"plugin_opt_password_file {port}.password\n")
         f.write("allow_anonymous true\n")
 
@@ -39,7 +38,7 @@ def do_test(write_config_func):
         with open(f"{port}.password", "wt") as f:
             f.write("test:bad\n")
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         # Broker should terminate
         if mosq_test.wait_for_subprocess(broker) == 0 and broker.returncode == 3:
             rc = 0
@@ -50,10 +49,9 @@ def do_test(write_config_func):
     finally:
         os.remove(conf_file)
         os.remove(f"{port}.password")
-        broker.terminate()
-        (stdo, stde) = broker.communicate()
+        mosq_test.terminate_broker(broker)
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test(write_config_default)

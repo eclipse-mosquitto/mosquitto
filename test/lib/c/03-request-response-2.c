@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	mosquitto_publish_callback_set(mosq, on_publish);
 	mosquitto_message_v5_callback_set(mosq, on_message_v5);
 
-	rc = mosquitto_connect(mosq, "localhost", port, 60);
+	rc = mosquitto_connect(mosq, "127.0.0.1", port, 60);
 	if(rc != MOSQ_ERR_SUCCESS){
 		return rc;
 	}

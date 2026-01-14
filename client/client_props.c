@@ -175,22 +175,36 @@ int cfg_parse_property(struct mosq_config *cfg, int argc, char *argv[], int *idx
 			}
 			rc = mosquitto_property_add_int16(proplist, identifier, (uint16_t )tmpl);
 			break;
-		case MQTT_PROP_TYPE_INT32:
-			tmpl = atol(value);
-			if(tmpl < 0 || tmpl > UINT32_MAX){
-				fprintf(stderr, "Error: Property value (%ld) out of range for property %s.\n\n", tmpl, propname);
+		case MQTT_PROP_TYPE_INT32: {
+			char* endptr = NULL;
+			long long tmpll = strtoll(value, &endptr, 0);
+			if (endptr == value || endptr[0] != '\0') {
+				/* Entirety of argument wasn't a number */
+				fprintf(stderr, "Error: Property value '%s' not a number.\n\n", value);
+				return 1;
+			}
+			if (tmpll < 0 || tmpll > UINT32_MAX) {
+				fprintf(stderr, "Error: Property value (%lld) out of range for property %s.\n\n", tmpll, propname);
 				return MOSQ_ERR_INVAL;
 			}
-			rc = mosquitto_property_add_int32(proplist, identifier, (uint32_t )tmpl);
+			rc = mosquitto_property_add_int32(proplist, identifier, (uint32_t)tmpll);
 			break;
-		case MQTT_PROP_TYPE_VARINT:
-			tmpl = atol(value);
-			if(tmpl < 0 || tmpl > UINT32_MAX){
-				fprintf(stderr, "Error: Property value (%ld) out of range for property %s.\n\n", tmpl, propname);
+		}
+		case MQTT_PROP_TYPE_VARINT: {
+			char* endptr = NULL;
+			long long tmpll = strtoll(value, &endptr, 0);
+			if (endptr == value || endptr[0] != '\0') {
+				/* Entirety of argument wasn't a number */
+				fprintf(stderr, "Error: Property value '%s' not a number.\n\n", value);
+				return 1;
+			}
+			if (tmpll < 0 || tmpll > UINT32_MAX) {
+				fprintf(stderr, "Error: Property value (%lld) out of range for property %s.\n\n", tmpll, propname);
 				return MOSQ_ERR_INVAL;
 			}
-			rc = mosquitto_property_add_varint(proplist, identifier, (uint32_t )tmpl);
+			rc = mosquitto_property_add_varint(proplist, identifier, (uint32_t )tmpll);
 			break;
+		}
 		case MQTT_PROP_TYPE_BINARY:
 			szt = strlen(value);
 			if(szt > UINT16_MAX){

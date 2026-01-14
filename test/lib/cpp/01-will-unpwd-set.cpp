@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	mosq->username_pw_set("oibvvwqw", "#'^2hg9a&nm38*us");
 	mosq->will_set("will-topic", strlen("will message"), "will message", 2, false);
 
-	mosq->connect("localhost", port, 60);
+	mosq->connect("127.0.0.1", port, 60);
 
 	while(run == -1){
 		mosq->loop();

@@ -35,13 +35,13 @@ def do_test(data, expect_log):
         pass
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
-        if rc != 0 or expect_log not in stde.decode('utf-8'):
-            print(stde.decode('utf-8'))
+        stde = mosq_test.broker_log(broker)
+        if rc != 0 or expect_log not in stde:
+            print(stde)
             exit(1)
 
 do_test(b"PROXY TCP4 192.0.2.5 127.0.0.1 6275 1234\r\n", "New client connected from 192.0.2.5:6275")

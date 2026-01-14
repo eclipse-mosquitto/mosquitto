@@ -9,7 +9,7 @@ def write_config(filename, port, per_listener_settings="false"):
     with open(filename, "w") as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
         f.write("listener %d\n" % (port))
-        f.write("plugin c/plugin_evt_psk_key.so\n")
+        f.write(f"plugin {mosq_plugins.gen_test_plugin_path('plugin_evt_psk_key')}\n")
         f.write("psk_hint myhint\n")
         f.write("allow_anonymous true\n")
 
@@ -106,11 +106,10 @@ def do_test(per_listener_settings):
         print(err)
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode("utf-8"))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

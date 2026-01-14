@@ -3,8 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <mosquitto.h>
+
+#ifdef WIN32
+#  define strcasecmp(A, B) _stricmp((A), (B))
+#else
+#  include <strings.h>
+#endif
 
 #define UNUSED(A) (void)(A)
 
@@ -370,12 +375,17 @@ static void on_log(struct mosquitto *mosq, void *obj, int level, const char *str
 
 static void setup_signal_handler(void)
 {
+#ifdef WIN32
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
+#else
 	struct sigaction act = { 0 };
 
 	act.sa_handler = &signal_handler;
 	if(sigaction(SIGTERM, &act, NULL) < 0){
 		exit(1);
 	}
+#endif
 }
 
 
@@ -433,7 +443,7 @@ int main(int argc, char *argv[])
 
 	mosquitto_int_option(mosq, MOSQ_OPT_PROTOCOL_VERSION, proto_ver);
 
-	rc = mosquitto_connect(mosq, "localhost", port, 60);
+	rc = mosquitto_connect(mosq, "127.0.0.1", port, 60);
 	if(rc != MOSQ_ERR_SUCCESS){
 		printf("bad connect\n");
 		return rc;

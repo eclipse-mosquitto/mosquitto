@@ -9,7 +9,7 @@ def write_config(filename, port, per_listener):
         f.write("per_listener_settings %s\n" % (per_listener))
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/acl-file/mosquitto_acl_file.so\n")
+        f.write(f"plugin {mosq_plugins.ACL_FILE_PLUGIN_PATH}\n")
         f.write("plugin_opt_acl_file %s\n" % (filename.replace('.conf', '.acl')))
 
 def write_acl(filename, global_en, user_en, pattern_en):
@@ -81,13 +81,12 @@ def acl_test(port, per_listener, global_en, user_en, pattern_en):
     finally:
         os.remove(conf_file)
         os.remove(acl_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 def do_test(port, per_listener):

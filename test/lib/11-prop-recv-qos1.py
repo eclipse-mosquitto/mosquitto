@@ -27,5 +27,5 @@ def do_test(conn, data):
     conn.close()
 
 
-mosq_test.client_test("c/11-prop-recv.test", ["1"], do_test, None)
-mosq_test.client_test("cpp/11-prop-recv.test", ["1"], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "11-prop-recv.exe"), ["1"], do_test, None)
+mosq_test.client_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "11-prop-recv.exe"), ["1"], do_test, None)

@@ -3,7 +3,6 @@
 from mosq_test_helper import *
 import json
 import shutil
-import signal
 
 def write_config(filename, pw_file, port):
     with open(filename, 'w') as f:
@@ -19,9 +18,10 @@ def client_check(port, username, password, rc):
 
 
 def passwd_cmd(args, response=None, input=None, expected_rc=0):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_passwd/mosquitto_passwd"]
+    proc = subprocess.run([mosquitto_passwd_path]
                     + args,
-                    capture_output=True, encoding='utf-8', timeout=2, input=input)
+                    capture_output=True, encoding='utf-8', timeout=2, input=input,
+                    env=mosq_test.env_add_ld_library_path())
 
     if response is not None:
         if proc.stdout != response and proc.stderr != response:
@@ -50,11 +50,11 @@ try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
     os.chown(pw_file, 65534, 65534)
-except PermissionError:
+except (PermissionError, AttributeError):
     pass
 
 # Then start broker
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port, nolog=True)
+broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
 try:
     rc = 1
@@ -69,7 +69,7 @@ try:
 
     # Update password
     passwd_cmd(["-H", "sha512-pbkdf2", "-b", pw_file, "user1", "newpass"])
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -82,7 +82,7 @@ try:
 
     # New user
     passwd_cmd(["-b", pw_file, "newuser", "goodpass"])
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -96,7 +96,7 @@ try:
     # Delete user
     passwd_cmd(["-D", pw_file, "user2"])
     passwd_cmd(["-D", pw_file, "user2"], response="Warning: User user2 not found in password file.\n", expected_rc=1)
-    broker.send_signal(signal.SIGHUP)
+    mosq_test.reload_broker(broker)
 
     client_check(port, "user1", "badpass", 5)
     client_check(port, "user1", "newpass", 0)
@@ -115,7 +115,7 @@ except Exception as err:
 finally:
     os.remove(conf_file)
     os.remove(pw_file)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1

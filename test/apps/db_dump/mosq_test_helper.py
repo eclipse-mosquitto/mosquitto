@@ -18,3 +18,5 @@ ssl_dir = test_dir / "ssl"
 import mosq_test
 import subprocess
 import os
+
+mosquitto_db_dump_path = Path(mosq_test.get_build_root(), 'apps', 'db_dump', mosq_test.get_build_type(), 'mosquitto_db_dump')

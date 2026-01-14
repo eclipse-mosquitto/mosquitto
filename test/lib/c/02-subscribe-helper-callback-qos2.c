@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	mosquitto_lib_init();
 
 	mosquitto_subscribe_callback(
-			cb, NULL, "qos2/test", QOS, "localhost", port,
+			cb, NULL, "qos2/test", QOS, "127.0.0.1", port,
 			"subscribe-qos2-test", 60, true, NULL, NULL, NULL, NULL);
 
 	mosquitto_lib_cleanup();

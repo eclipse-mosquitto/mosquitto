@@ -7,7 +7,7 @@ from mosq_test_helper import *
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write("plugin c/kick_last_client.so\n")
+        f.write(f"plugin {mosq_plugins.gen_test_plugin_path('kick_last_client')}\n")
         f.write("allow_anonymous true\n")
         f.write("log_type all\n")
 
@@ -41,14 +41,13 @@ def do_test():
     except mosq_test.TestError:
         pass
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	mosquitto_disconnect_callback_set(mosq, on_disconnect);
 	mosquitto_subscribe_callback_set(mosq, on_subscribe);
 
-	rc = mosquitto_connect_async(mosq, "localhost", port, 60);
+	rc = mosquitto_connect_async(mosq, "127.0.0.1", port, 60);
 	if(rc){
 		printf("connect_async failed: %s\n", mosquitto_strerror(rc));
 	}
@@ -105,9 +105,15 @@ int main(int argc, char *argv[])
 	}
 
 	/* 50 millis to be system polite */
+#ifndef WIN32
 	struct timespec tv = { 0, 50e6 };
+#endif
 	while(should_run){
+#ifdef WIN32
+		Sleep(50);
+#else
 		nanosleep(&tv, NULL);
+#endif
 	}
 
 	mosquitto_disconnect(mosq);

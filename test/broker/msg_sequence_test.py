@@ -2,13 +2,15 @@
 
 # Test whether a valid CONNECT results in the correct CONNACK packet.
 
-from mosq_test_helper import *
-import importlib
-from os import walk
-import socket
-import json
 from collections import deque
+from mosq_test_helper import *
+from os import walk
+
+import importlib
+import json
+import platform
 import mosq_test
+import socket
 
 send = 1
 recv = 2
@@ -325,24 +327,23 @@ def main(protocol):
     port = mosq_test.get_port()
     conf_file = 'msg_sequence_test.conf'
     write_config(conf_file, port, protocol)
-    broker = mosq_test.start_broker(filename=conf_file, port=port, use_conf=True, nolog=True)
+    broker = mosq_test.start_broker(filename=conf_file, port=port, use_conf=True)
 
     rc = 0
     try:
         rc = do_test(hostname=hostname, port=port, protocol=protocol)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        if broker.returncode != 0:
+        if (platform.system() != 'Windows' and broker.returncode != 0) or (platform.system() == 'Windows' and broker.returncode != 1):
             rc = broker.returncode
             print(f"Broker exited with code {rc}. If there are no obvious errors this may be due to an ASAN build having leaks, which must be fixed.")
             print("The easiest way to reproduce this is to run the broker with `mosquitto -p 1888`, rerun the test, then quit the broker.")
-        (stdo, stde) = broker.communicate()
     if rc:
-        #print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
         exit(rc)
 
 if __name__ == "__main__":

@@ -154,10 +154,9 @@ finally:
     brokerMonitor.join()
     rq.join()
     cq.join()
-    broker.terminate()
-    (stdo, stde) = broker.communicate()
+    mosq_test.terminate_broker(broker)
     if rc:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
 
 exit(rc)
 

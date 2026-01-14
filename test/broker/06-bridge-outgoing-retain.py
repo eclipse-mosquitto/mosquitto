@@ -94,14 +94,13 @@ def do_test(proto_ver, outgoing_retain):
         except NameError:
             pass
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         ssock.close()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test(proto_ver=4, outgoing_retain="true")

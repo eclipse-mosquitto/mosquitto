@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#
+import platform
 
 from mosq_test_helper import *
 
@@ -24,14 +24,12 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    env = {
-        'XDG_CONFIG_HOME':'/tmp/missing'
-    }
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    env['XDG_CONFIG_HOME'] = '/tmp/missing'
 
     payload = "abcdefghijklmnopqrstuvwxyz0123456789"*1821
 
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    cmd = [mosq_test.get_client_path('mosquitto_pub'),
             '-p', str(ports[0]),
             '-q', '1',
             '-t', '03/pub/qos1/test',
@@ -68,18 +66,21 @@ def do_test(proto_ver):
     except Exception as e:
         print(e)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)
 
 
+if platform.system() == 'Windows':
+    # This causes [WinError 206] The filename or extension is too long
+    exit(0)
+    
 do_test(proto_ver=3)
 do_test(proto_ver=4)
 do_test(proto_ver=5)

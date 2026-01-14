@@ -19,7 +19,7 @@ def do_test(start_broker):
 
     port = mosq_test.get_port()
     if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port, nolog=True)
+        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
     try:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=5, port=port)
@@ -79,13 +79,12 @@ def do_test(start_broker):
         pass
     finally:
         if start_broker:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             if mosq_test.wait_for_subprocess(broker):
                 print("broker not terminated")
                 if rc == 0: rc=1
-            (stdo, stde) = broker.communicate()
             if rc:
-                print(stde.decode('utf-8'))
+                print(mosq_test.broker_log(broker))
                 exit(rc)
         else:
             return rc

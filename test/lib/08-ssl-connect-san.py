@@ -27,15 +27,15 @@ def do_test(client_cmd, host):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=f"{ssl_dir}/all-ca.crt")
-    context.load_cert_chain(certfile=f"{ssl_dir}/server-san.crt", keyfile=f"{ssl_dir}/server-san.key")
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=Path(ssl_dir, "all-ca.crt"))
+    context.load_cert_chain(certfile=Path(ssl_dir, "server-san.crt"), keyfile=Path(ssl_dir, "server-san.key"))
     ssock = context.wrap_socket(sock, server_side=True)
     ssock.settimeout(10)
     ssock.bind(('', port))
     ssock.listen(5)
 
-    client_args = [mosq_test.get_build_root() + "/test/lib/" + client_cmd, str(port), host]
-    client = mosq_test.start_client(filename=client_cmd.replace('/', '-'), cmd=client_args)
+    client_args = [client_cmd, str(port), host]
+    client = mosq_test.start_client(filename=client_cmd.name, cmd=client_args)
 
     try:
         (conn, address) = ssock.accept()
@@ -57,7 +57,7 @@ def do_test(client_cmd, host):
         if rc:
             exit(rc)
 
-do_test("c/08-ssl-connect-san.test", "localhost")
-do_test("cpp/08-ssl-connect-san.test", "localhost")
-do_test("c/08-ssl-connect-san.test", "127.0.0.1")
-do_test("cpp/08-ssl-connect-san.test", "127.0.0.1")
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "08-ssl-connect-san.exe"), "localhost")
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "08-ssl-connect-san.exe"), "localhost")
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "08-ssl-connect-san.exe"), "127.0.0.1")
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "08-ssl-connect-san.exe"), "127.0.0.1")

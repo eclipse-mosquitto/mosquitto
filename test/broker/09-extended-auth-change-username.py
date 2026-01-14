@@ -10,7 +10,7 @@ def write_config(filename, acl_file, port, per_listener):
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
         f.write("acl_file %s\n" % (acl_file))
-        f.write("auth_plugin c/auth_plugin_extended_single.so\n")
+        f.write(f"auth_plugin {mosq_plugins.gen_test_plugin_path('auth_plugin_extended_single')}\n")
 
 def write_acl(filename):
     with open(filename, 'w') as f:
@@ -74,13 +74,12 @@ def do_test(per_listener):
     finally:
         os.remove(conf_file)
         os.remove(acl_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 

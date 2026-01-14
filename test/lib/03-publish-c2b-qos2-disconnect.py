@@ -29,7 +29,7 @@ def do_test(client_cmd):
     client_args = [client_cmd, str(port)]
     env = mosq_test.env_add_ld_library_path()
 
-    client = mosq_test.start_client(filename=client_cmd.replace('/', '-'), cmd=client_args, env=env)
+    client = mosq_test.start_client(filename=client_cmd.name, cmd=client_args, env=env)
 
     try:
         (conn, address) = sock.accept()
@@ -71,5 +71,5 @@ def do_test(client_cmd):
             rc=1
             exit(1)
 
-do_test("c/03-publish-c2b-qos2-disconnect.test")
-do_test("cpp/03-publish-c2b-qos2-disconnect.test")
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "c", mosq_test.get_build_type(), "03-publish-c2b-qos2-disconnect.exe"))
+do_test(Path(mosq_test.get_build_root(), "test", "lib", "cpp", mosq_test.get_build_type(), "03-publish-c2b-qos2-disconnect.exe"))

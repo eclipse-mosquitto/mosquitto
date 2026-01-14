@@ -3,7 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mosquitto.h>
-#include <sys/select.h>
+
+#ifdef WIN32
+#  include <winsock2.h>
+#else
+#  include <sys/select.h>
+#endif
 
 static int run = -1;
 
@@ -124,7 +129,7 @@ int main(int argc, char *argv[])
 	mosquitto_subscribe_v5_callback_set(mosq, on_subscribe_v5);
 	mosquitto_message_v5_callback_set(mosq, on_message_v5);
 
-	rc = mosquitto_connect_bind_v5(mosq, "localhost", port, 60, NULL, NULL);
+	rc = mosquitto_connect_bind_v5(mosq, "127.0.0.1", port, 60, NULL, NULL);
 	if(rc != MOSQ_ERR_SUCCESS){
 		return rc;
 	}
