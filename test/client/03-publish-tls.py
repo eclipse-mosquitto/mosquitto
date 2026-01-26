@@ -82,5 +82,5 @@ def do_test(address, insecure_option, expect_ssl_fail):
 
 
 do_test("127.0.0.1", None, False)
-do_test("127.0.0.2", None, True)
-do_test("127.0.0.2", "--insecure", False)
+do_test(mosq_test.get_non_loopback_ip(), None, True)
+do_test(mosq_test.get_non_loopback_ip(), "--insecure", False)

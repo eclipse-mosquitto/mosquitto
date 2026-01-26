@@ -1,5 +1,13 @@
 include(FindPackageHandleStandardArgs)
 
+set(FIND_PATH_OPTS "")
+if(APPLE)
+	list(APPEND FIND_PATH_OPTS
+		NO_CMAKE_SYSTEM_PATH
+        NO_SYSTEM_ENVIRONMENT_PATH
+    )
+endif()
+
 # Checks an environment variable; note that the first check
 # does not require the usual CMake $-sign.
 if(DEFINED env{EDITLINE_DIR})
@@ -11,6 +19,7 @@ find_path(
 		editline/readline.h
 	HINTS
 		EDITLINE_DIR
+	${FIND_PATH_OPTS}
 )
 
 find_library(EDITLINE_LIBRARY
@@ -38,6 +47,7 @@ else()
 			readline/readline.h
 		HINTS
 			READLINE_DIR
+		${FIND_PATH_OPTS}
 	)
 
 	find_library(READLINE_LIBRARY

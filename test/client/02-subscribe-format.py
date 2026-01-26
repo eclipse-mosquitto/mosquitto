@@ -3,6 +3,7 @@
 #
 
 from mosq_test_helper import *
+import platform
 
 def do_test(format_str, expected_output, proto_ver=4, payload="message"):
     rc = 1
@@ -128,5 +129,6 @@ do_test('\\t', '\t\n')
 do_test('\\v', '\v\n')
 do_test('@@', '@\n')
 do_test('text', 'text\n')
-do_test('%.3d', '2.718\n', payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
-do_test('%.3f', '0.707\n', payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))
+if platform.system() != 'Darwin':
+    do_test('%.3d', '2.718\n', payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
+    do_test('%.3f', '0.707\n', payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))

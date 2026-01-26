@@ -938,6 +938,23 @@ def client_test(client_cmd, client_args, callback, cb_data):
             exit(rc)
 
 
+def get_non_loopback_ip():
+    # https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        # Explicitly not 127.0.0.1 - we want something that doesn't match a
+        # certificate SAN
+        IP = '127.0.0.2'
+    finally:
+        s.close()
+    return IP
+
+
 # =============================================
 # Websockets wrapper
 # =============================================

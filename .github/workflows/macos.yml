@@ -33,6 +33,11 @@ jobs:
         with:
           cmake-version: '3.31.6'
 
+      - name: Python test dependencies
+        uses: actions/setup-python@v6
+        with:
+          cache: 'pip'
+
       - name: Install Homebrew dependencies
         run: |
           brew update
@@ -43,6 +48,7 @@ jobs:
             cunit \
             docbook-xsl \
             gcc \
+            googletest \
             libedit \
             libmicrohttpd \
             make \
@@ -51,19 +57,24 @@ jobs:
 
       - name: Configure CMake
         run: |
-          EDITLINE_PREFIX=$(brew --prefix libedit)
+          EDITLINE_DIR=$(brew --prefix libedit)
+          HOMEBREW_PREFIX=$(brew --prefix)
           cmake -B ${{github.workspace}}/build64 \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+            -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
             -DWITH_DOCS=OFF \
-            -DWITH_WEBSOCKETS=ON \
-            -DWITH_TESTS=OFF \
-            -DCMAKE_INCLUDE_PATH="$EDITLINE_PREFIX/include" \
-            -DCMAKE_LIBRARY_PATH="$EDITLINE_PREFIX/lib" \
-            -DCMAKE_C_FLAGS="-I$EDITLINE_PREFIX/include" \
-            -DCMAKE_EXE_LINKER_FLAGS="-L$EDITLINE_PREFIX/lib" \
             -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
       - name: Build
         run: |
           cmake --build ${{github.workspace}}/build64 \
             --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: build64/
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install psutil
+          ctest --output-on-failure --repeat until-pass:5

@@ -88,4 +88,4 @@ def do_test(address):
             exit(rc)
 
 do_test("127.0.0.1")
-do_test("127.0.0.2") # tests non-matching certificate hostname with bridge_insecure
+do_test(mosq_test.get_non_loopback_ip()) # tests non-matching certificate hostname with bridge_insecure

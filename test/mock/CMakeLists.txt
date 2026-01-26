@@ -7,6 +7,7 @@ if(EDITLINE_FOUND)
 	target_include_directories(editline_mock
 		PUBLIC
 			${mosquitto_SOURCE_DIR}/test/mock
+			${LINEEDITING_INCLUDE_DIRS}
 	)
 	target_link_libraries(editline_mock PRIVATE GTest::gmock)
 endif()
