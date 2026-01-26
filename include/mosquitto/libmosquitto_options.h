@@ -172,9 +172,12 @@ libmosq_EXPORT int mosquitto_int_option(struct mosquitto *mosq, enum mosq_opt_t 
  *	MOSQ_OPT_TLS_KEYFORM - Configure the client to treat the keyfile
  *	          differently depending on its type.  Must be set
  *	          before <mosquitto_connect>.
- *	          Set as either "pem" or "engine", to determine from where the
+ *	          Set as "pem", "engine", or "uri" to determine from where the
  *	          private key for a TLS connection will be obtained. Defaults to
  *	          "pem", a normal private key file.
+ *	          "engine" allows private keys operations via an OpenSSL engine.
+ *	          "uri" is available with OpenSSL 3.0 or later, and allows keys
+ *	          to be referenced through OpenSSL provider URIs such as pkcs11: URIs.
  *
  *	MOSQ_OPT_TLS_ENGINE_KPASS_SHA1 - Where the TLS Engine requires the use of
  *	          a password to be accessed, this option allows a hex encoded

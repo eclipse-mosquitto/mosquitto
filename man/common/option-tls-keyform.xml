@@ -3,10 +3,15 @@
 	<listitem>
 		<para>
 			Specifies the type of private key in use when making TLS
-			connections.. This can be "pem" or "engine". This parameter is
+			connections. This can be "pem", "engine", or "uri". This parameter is
 			useful when a TPM module is being used and the private key has been
 			created with it. Defaults to "pem", which means normal private key
 			files are used.
+		</para>
+		<para>
+			The "engine" option allows private keys operations via an OpenSSL engine.
+			The "uri" option is available with OpenSSL 3.0 or later, and allows
+			keys to be referenced through OpenSSL provider URIs such as pkcs11: URIs.
 		</para>
 		<para>
 			See also <option>--tls-engine</option>.

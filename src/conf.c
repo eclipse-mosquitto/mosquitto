@@ -2691,6 +2691,8 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					cur_listener->tls_keyform = mosq_k_pem;
 					if(!strcmp(keyform, "engine")){
 						cur_listener->tls_keyform = mosq_k_engine;
+					}else if(!strcmp(keyform, "uri")){
+						cur_listener->tls_keyform = mosq_k_uri;
 					}
 					mosquitto_FREE(keyform);
 #else

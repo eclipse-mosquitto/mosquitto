@@ -58,6 +58,9 @@ Contributors:
 #include <openssl/engine.h>
 #include <openssl/err.h>
 #include <openssl/ui.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/store.h>
+#endif
 #include <tls_mosq.h>
 #endif
 
@@ -681,7 +684,9 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 	int ret;
 #if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
 	ENGINE *engine = NULL;
-	EVP_PKEY *pkey;
+#endif
+#if (!defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000) || OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_PKEY *pkey = NULL; /* Holds the EVP_PKEY when engine (API level < 3) or provider (Version >= 3) is used */
 #endif
 	uint8_t tls_alpn_wire[256];
 	uint8_t tls_alpn_len;
@@ -854,11 +859,54 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 						return MOSQ_ERR_TLS;
 					}
 					if(SSL_CTX_use_PrivateKey(mosq->ssl_ctx, pkey) <= 0){
+						EVP_PKEY_free(pkey);
 						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to use engine private key file \"%s\".", mosq->tls_keyfile);
 						ENGINE_FINISH(engine);
 						net__print_ssl_error(mosq, "while trying to use the private key");
 						return MOSQ_ERR_TLS;
 					}
+					EVP_PKEY_free(pkey);
+#endif
+				}else if(mosq->tls_keyform == mosq_k_uri){
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+					OSSL_STORE_CTX *store_ctx = NULL;
+					OSSL_STORE_INFO *info = NULL;
+
+					store_ctx = OSSL_STORE_open(mosq->tls_keyfile, NULL, NULL, NULL, NULL);
+					if(!store_ctx){
+						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to open key URI \"%s\".", mosq->tls_keyfile);
+						net__print_ssl_error(mosq, "while trying to open the key URI");
+						return MOSQ_ERR_TLS;
+					}
+
+					while(!OSSL_STORE_eof(store_ctx)){
+						info = OSSL_STORE_load(store_ctx);
+						if(info){
+							if(OSSL_STORE_INFO_get_type(info) == OSSL_STORE_INFO_PKEY){
+								pkey = OSSL_STORE_INFO_get1_PKEY(info);
+								OSSL_STORE_INFO_free(info);
+								break;
+							}
+							OSSL_STORE_INFO_free(info);
+						}else if(!OSSL_STORE_eof(store_ctx)){
+							log__printf(mosq, MOSQ_LOG_ERR, "Error: Failed to load object from URI \"%s\".", mosq->tls_keyfile);
+							net__print_ssl_error(mosq, "while trying to load from the key URI");
+						}
+					}
+					OSSL_STORE_close(store_ctx);
+
+					if(!pkey){
+						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to load private key from URI \"%s\".", mosq->tls_keyfile);
+						net__print_ssl_error(mosq, "while trying to load the private key from URI");
+						return MOSQ_ERR_TLS;
+					}
+					if(SSL_CTX_use_PrivateKey(mosq->ssl_ctx, pkey) <= 0){
+						EVP_PKEY_free(pkey);
+						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to use private key from URI \"%s\".", mosq->tls_keyfile);
+						net__print_ssl_error(mosq, "while trying to use the private key from URI");
+						return MOSQ_ERR_TLS;
+					}
+					EVP_PKEY_free(pkey);
 #endif
 				}else{
 					ret = SSL_CTX_use_PrivateKey_file(mosq->ssl_ctx, mosq->tls_keyfile, SSL_FILETYPE_PEM);

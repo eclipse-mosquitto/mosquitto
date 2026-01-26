@@ -222,6 +222,7 @@ struct mosquitto_message_all {
 enum mosquitto__keyform {
 	mosq_k_pem = 0,
 	mosq_k_engine = 1,
+	mosq_k_uri = 2,
 };
 #endif
 

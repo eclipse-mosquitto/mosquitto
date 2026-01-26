@@ -505,7 +505,7 @@ static void print_usage(void)
 	printf("            communication.\n");
 	printf(" --cert : client certificate for authentication, if required by server.\n");
 	printf(" --key : client private key for authentication, if required by server.\n");
-	printf(" --keyform : keyfile type, can be either \"pem\" or \"engine\".\n");
+	printf(" --keyform : keyfile type, can be \"pem\", \"engine\", or \"uri\".\n");
 	printf(" --ciphers : openssl compatible list of TLS ciphers to support.\n");
 	printf(" --tls-version : TLS protocol version, can be one of tlsv1.3 or tlsv1.2.\n");
 	printf("                 Defaults to tlsv1.2 if available.\n");
