@@ -17,7 +17,7 @@ def do_send(port, socks, payload):
     sock.connect(("127.0.0.1", port))
     try:
         sock.send(payload)
-    except ConnectionResetError:
+    except (ConnectionResetError, BrokenPipeError):
         pass
 
 def do_test(port):
