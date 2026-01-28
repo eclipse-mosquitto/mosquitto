@@ -140,6 +140,8 @@ enum mosquitto_client_state {
 	mosq_cs_authenticating = 20, /* Client has sent CONNECT but is still undergoing extended authentication */
 	mosq_cs_reauthenticating = 21, /* Client is undergoing reauthentication and shouldn't do anything else until complete */
 	mosq_cs_delayed_auth = 22, /* Client is awaiting an authentication result from a plugin */
+	mosq_cs_delayed_ext_auth = 23, /* Client is awaiting an extended authentication result from a plugin */
+	mosq_cs_delayed_ext_reauth = 24, /* Client is awaiting a reauthentication result from a plugin */
 };
 
 enum mosquitto__protocol {
@@ -459,6 +461,7 @@ struct mosquitto {
 #ifdef WITH_BROKER
 	UT_hash_handle hh_id;
 	UT_hash_handle hh_sock;
+	UT_hash_handle hh_id_delayed_auth;
 	struct mosquitto *for_free_next;
 	struct session_expiry_list *expiry_list_item;
 	uint16_t remote_port;

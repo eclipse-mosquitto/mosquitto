@@ -1202,7 +1202,7 @@ int handle__connect(struct mosquitto *context)
 	}
 
 	/* Check for an existing delayed auth check, reject if present */
-	HASH_FIND(hh_id, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), found_context);
+	HASH_FIND(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), found_context);
 	if(found_context){
 		rc = MOSQ_ERR_UNKNOWN;
 		goto handle_connect_error;
@@ -1222,6 +1222,10 @@ int handle__connect(struct mosquitto *context)
 			rc = send__auth(context, MQTT_RC_CONTINUE_AUTHENTICATION, auth_data_out, auth_data_out_len);
 			SAFE_FREE(auth_data_out);
 			return rc;
+		}else if(rc == MOSQ_ERR_AUTH_DELAYED){
+			mosquitto__set_state(context, mosq_cs_delayed_ext_auth);
+			HASH_ADD_KEYPTR(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), context);
+			return MOSQ_ERR_SUCCESS;
 		}else{
 			SAFE_FREE(auth_data_out);
 			will__clear(context);
@@ -1252,7 +1256,7 @@ int handle__connect(struct mosquitto *context)
 					break;
 				case MOSQ_ERR_AUTH_DELAYED:
 					mosquitto__set_state(context, mosq_cs_delayed_auth);
-					HASH_ADD_KEYPTR(hh_id, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), context);
+					HASH_ADD_KEYPTR(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), context);
 					return MOSQ_ERR_SUCCESS;
 					break;
 				case MOSQ_ERR_AUTH:

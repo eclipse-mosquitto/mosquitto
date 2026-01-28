@@ -20,6 +20,7 @@
 	mosquitto_client_username;
 	mosquitto_client_will_set;
 	mosquitto_complete_basic_auth;
+	mosquitto_complete_extended_auth;
 	mosquitto_control_command_reply;
 	mosquitto_control_generic_callback;
 	mosquitto_control_send_response;

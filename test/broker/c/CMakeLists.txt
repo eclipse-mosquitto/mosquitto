@@ -4,6 +4,7 @@ set(PLUGINS
     auth_plugin_acl_sub_denied
     auth_plugin_context_params
     auth_plugin_delayed
+    auth_plugin_delayed_extended
     auth_plugin_extended_multiple
     auth_plugin_extended_reauth
     auth_plugin_extended_single

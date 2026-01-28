@@ -909,6 +909,36 @@ mosq_EXPORT int mosquitto_broker_publish_copy(
  */
 mosq_EXPORT void mosquitto_complete_basic_auth(const char *clientid, int result);
 
+/* Function: mosquitto_complete_extended_auth
+ *
+ * Complete a delayed extended authentication request.
+ *
+ * Useful for plugins that subscribe to the MOSQ_EVT_EXT_AUTH_START and
+ * MOSQ_EVT_EXT_AUTH_CONTINUE events. If your plugin makes authentication
+ * requests that are not "instant", in particular if they communciate with an
+ * external service, then instead of blocking for a reply and returning
+ * MOSQ_ERR_SUCCESS, MOSQ_ERR_AUTH_CONTINUE, or MOSQ_ERR_AUTH, the plugin can
+ * return MOSQ_ERR_AUTH_DELAYED. This means that the plugin is promising to
+ * tell the broker the authentication result in the future. Once the plugin has
+ * an answer, it should call `mosquitto_complete_extended_auth()`, passing the
+ * client id, result, and any additional auth data. Note that it is possible to
+ * pass MOSQ_ERR_AUTH_CONTINUE to procede with additional authentication steps.
+ *
+ * Parameters:
+ *  clientid          - ID of the client being authenticated
+ *  result            - authentication result. This will typically be
+ *                      MOSQ_ERR_SUCCESS, MOSQ_ERR_AUTH_CONTINUE, or MOSQ_ERR_AUTH.
+ *                      Other error codes can be used if more appropriate, and
+ *                      the client connection will still be rejected. e.g.,
+ *                      MOSQ_ERR_NOMEM.
+ *  auth_data_out     - optional auth_data bytes. Mosquitto will free any data
+ *                      passed here, so string literals for example are not valid.
+ *                      May be NULL.
+ *  auth_data_out_len - auth data length in bytes. May be 0 if no data is sent.
+ *
+ */
+mosq_EXPORT void mosquitto_complete_extended_auth(const char *clientid, int result, void *auth_data_out, uint16_t auth_data_out_len);
+
 
 /* Function: mosquitto_broker_node_id_set
  *

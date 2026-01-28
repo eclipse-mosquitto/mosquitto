@@ -18,6 +18,7 @@ Contributors:
 
 #include "config.h"
 
+#include <mosquitto/defs.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -139,6 +140,15 @@ int handle__auth(struct mosquitto *context)
 		rc = send__auth(context, MQTT_RC_CONTINUE_AUTHENTICATION, auth_data_out, auth_data_out_len);
 		SAFE_FREE(auth_data_out);
 		return rc;
+	}else if(rc == MOSQ_ERR_AUTH_DELAYED){
+		SAFE_FREE(auth_data_out);
+		if(context->state == mosq_cs_authenticating){
+			mosquitto__set_state(context, mosq_cs_delayed_ext_auth);
+		}else{
+			mosquitto__set_state(context, mosq_cs_delayed_ext_reauth);
+		}
+		HASH_ADD_KEYPTR(hh_id_delayed_auth, db.contexts_by_id_delayed_auth, context->id, strlen(context->id), context);
+		return MOSQ_ERR_SUCCESS;
 	}else{
 		SAFE_FREE(auth_data_out);
 		if(context->state == mosq_cs_authenticating && context->will){
