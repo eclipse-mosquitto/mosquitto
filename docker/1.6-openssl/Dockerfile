@@ -1,13 +1,20 @@
 FROM alpine:3.22
 
-LABEL maintainer="Roger Light <roger@atchoo.org>" \
-    description="Eclipse Mosquitto MQTT Broker"
-
 ENV VERSION=1.6.15 \
     DOWNLOAD_SHA256=5ff2271512f745bf1a451072cd3768a5daed71e90c5179fae12b049d6c02aa0f \
     GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7 \
     LWS_VERSION=4.2.1 \
     LWS_SHA256=842da21f73ccba2be59e680de10a8cce7928313048750eb6ad73b6fa50763c51
+
+LABEL \
+    org.opencontainers.image.authors="Roger Light <roger@atchoo.org>" \
+    org.opencontainers.image.title="mosquitto " \
+    org.opencontainers.image.description="Eclipse Mosquitto MQTT Broker" \
+    org.opencontainers.image.url="https://mosquitto.org/" \
+    org.opencontainers.image.documentation="https://mosquitto.org/documentation/" \
+    org.opencontainers.image.source="https://github.com/eclipse-mosquitto/mosquitto" \
+    org.opencontainers.image.licenses="EPL-2.0" \
+    org.opencontainers.image.version=${VERSION}
 
 RUN set -x && \
     apk --no-cache add --virtual build-deps \

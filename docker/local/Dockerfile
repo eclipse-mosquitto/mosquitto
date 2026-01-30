@@ -1,7 +1,16 @@
 FROM alpine:3.22
 
-LABEL maintainer="Roger Light <roger@atchoo.org>" \
-    description="Eclipse Mosquitto MQTT Broker"
+ARG VERSION
+
+LABEL \
+    org.opencontainers.image.authors="Roger Light <roger@atchoo.org>" \
+    org.opencontainers.image.title="mosquitto " \
+    org.opencontainers.image.description="Eclipse Mosquitto MQTT Broker" \
+    org.opencontainers.image.url="https://mosquitto.org/" \
+    org.opencontainers.image.documentation="https://mosquitto.org/documentation/" \
+    org.opencontainers.image.source="https://github.com/eclipse-mosquitto/mosquitto" \
+    org.opencontainers.image.licenses="EPL-2.0" \
+    org.opencontainers.image.version=${VERSION}
 
 COPY mosq.tar.gz /tmp
 
