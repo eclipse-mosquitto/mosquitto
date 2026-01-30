@@ -24,6 +24,7 @@
 	<group choice='req'>
 		<arg choice='plain'><replaceable>pem</replaceable></arg>
 		<arg choice='plain'><replaceable>engine</replaceable></arg>
+		<arg choice='plain'><replaceable>uri</replaceable></arg>
 	</group></arg>
 	<arg><option>--tls-engine-kpass-sha1</option> <replaceable>kpass-sha1</replaceable></arg>
 	<sbr/>

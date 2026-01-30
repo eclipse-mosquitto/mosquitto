@@ -623,7 +623,7 @@ int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 	}
 #ifdef WITH_TLS
 	if(cfg->keyform && mosquitto_string_option(mosq, MOSQ_OPT_TLS_KEYFORM, cfg->keyform)){
-		fprintf(stderr, "Error: Problem setting key form, it must be one of 'pem' or 'engine'.\n");
+		fprintf(stderr, "Error: Problem setting key form, it must be one of 'pem', 'engine', or 'uri'.\n");
 		return 1;
 	}
 	if(cfg->cafile || cfg->capath){

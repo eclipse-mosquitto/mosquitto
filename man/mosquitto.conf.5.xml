@@ -1882,6 +1882,8 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 							to enable certificate based TLS encryption. If
 							<option>tls_keyform</option> is "engine" this represents
 							the engine handle of the private key.
+							If <option>tls_keyform</option> is "uri" this represents
+							the OpenSSL provider URI for the key, e.g. pkcs11: URIs.
 						</para>
 						<para>
 							The private key pointed to by this option will be
@@ -1928,14 +1930,18 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
-					<term><option>tls_keyform</option> [ pem | engine ]</term>
+					<term><option>tls_keyform</option> [ pem | engine | uri ]</term>
 					<listitem>
 						<para>Specifies the type of private key in use when
-							making TLS connections.. This can be "pem" or
-							"engine". This parameter is useful when a TPM
+							making TLS connections. This can be "pem", "engine",
+							or "uri". This parameter is useful when a TPM
 							module is being used and the private key has been
 							created with it. Defaults to "pem", which means
 							normal private key files are used.</para>
+						<para>The "engine" option is only available with OpenSSL &lt; 3.0.
+							The "uri" option is only available with OpenSSL &gt;= 3.0,
+							and allows the key to be obtained from URIs such as
+							pkcs11: URIs.</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>

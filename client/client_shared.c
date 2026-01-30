@@ -1370,6 +1370,11 @@ static int client_tls_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 		SSL_CTX_set_keylog_callback(cfg->ssl_ctx, tls_keylog_callback);
 	}
 
+	/* keyform must be known before calling mosquitto_tls_set() */
+	if(cfg->keyform && mosquitto_string_option(mosq, MOSQ_OPT_TLS_KEYFORM, cfg->keyform)){
+		err_printf(cfg, "Error: Problem setting key form, it must be one of 'pem', 'engine' or 'uri'.\n");
+		return 1;
+	}
 	if(cfg->cafile || cfg->capath){
 		rc = mosquitto_tls_set(mosq, cfg->cafile, cfg->capath, cfg->certfile, cfg->keyfile, NULL);
 		if(rc){
@@ -1400,10 +1405,6 @@ static int client_tls_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 	}
 	if(cfg->tls_engine && mosquitto_string_option(mosq, MOSQ_OPT_TLS_ENGINE, cfg->tls_engine)){
 		err_printf(cfg, "Error: Problem setting TLS engine, is %s a valid engine?\n", cfg->tls_engine);
-		return 1;
-	}
-	if(cfg->keyform && mosquitto_string_option(mosq, MOSQ_OPT_TLS_KEYFORM, cfg->keyform)){
-		err_printf(cfg, "Error: Problem setting key form, it must be one of 'pem' or 'engine'.\n");
 		return 1;
 	}
 	if(cfg->tls_engine_kpass_sha1 && mosquitto_string_option(mosq, MOSQ_OPT_TLS_ENGINE_KPASS_SHA1, cfg->tls_engine_kpass_sha1)){

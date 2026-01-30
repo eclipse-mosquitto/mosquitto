@@ -36,7 +36,7 @@ do_test(["-i"], 1, response="Error: -i argument given but no id specified.\n\n")
 do_test(["--keyform"], 1, response="Error: --keyform argument given but no keyform specified.\n\n")
 do_test(["--keyform", "key"], 1, response="Error: If keyform is set, keyfile must be also specified.\n")
 do_test(["--keyform", "key", "--cafile", "file", "--cert", "file", "--key", "file", "broker", "listListeners"], 1,
-        response="Error: Problem setting key form, it must be one of 'pem' or 'engine'.\n")
+        response="Error: Problem setting key form, it must be one of 'pem', 'engine', or 'uri'.\n")
 do_test(['-L'], 1, response="Error: -L argument given but no URL specified.\n\n")
 do_test(['-L', 'invalid://'], 1, response="Error: Unsupported URL scheme.\n\n")
 do_test(['-L', 'mqtt://localhost'], 1, response="Error: Invalid URL for -L argument specified - topic missing.\n")

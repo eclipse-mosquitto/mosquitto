@@ -182,6 +182,7 @@ int mosquitto_tls_set(struct mosquitto *mosq, const char *cafile, const char *ca
 
 	mosquitto_FREE(mosq->tls_keyfile);
 	if(keyfile){
+		/* For engine and URI keyforms, skip file validation as they may not be regular files */
 		if(mosq->tls_keyform == mosq_k_pem){
 			fptr = mosquitto_fopen(keyfile, "rt", false);
 			if(fptr){
@@ -342,14 +343,20 @@ int mosquitto_string_option(struct mosquitto *mosq, enum mosq_opt_t option, cons
 			break;
 
 		case MOSQ_OPT_TLS_KEYFORM:
-#if defined(WITH_TLS) && !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
+#ifdef WITH_TLS
 			if(!value){
 				return MOSQ_ERR_INVAL;
 			}
 			if(!strcasecmp(value, "pem")){
 				mosq->tls_keyform = mosq_k_pem;
+#if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
 			}else if(!strcasecmp(value, "engine")){
 				mosq->tls_keyform = mosq_k_engine;
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+			}else if(!strcasecmp(value, "uri")){
+				mosq->tls_keyform = mosq_k_uri;
+#endif
 			}else{
 				return MOSQ_ERR_INVAL;
 			}

@@ -65,6 +65,9 @@ Contributors:
 #ifdef WITH_TLS
 #  include "tls_mosq.h"
 #  include <openssl/err.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#  include <openssl/store.h>
+#endif
 static int tls_ex_index_context = -1;
 static int tls_ex_index_listener = -1;
 #endif
@@ -563,13 +566,62 @@ int net__load_certificates(struct mosquitto__listener *listener)
 		net__print_ssl_error(NULL, NULL);
 		return MOSQ_ERR_TLS;
 	}
-	if(listener->tls_engine == NULL || listener->tls_keyform == mosq_k_pem){
+	if(listener->tls_keyform == mosq_k_pem){
 		rc = SSL_CTX_use_PrivateKey_file(listener->ssl_ctx, listener->keyfile, SSL_FILETYPE_PEM);
 		if(rc != 1){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load server key file \"%s\". Check keyfile.", listener->keyfile);
 			net__print_ssl_error(NULL, NULL);
 			return MOSQ_ERR_TLS;
 		}
+	}else if(listener->tls_keyform == mosq_k_uri){
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		OSSL_STORE_CTX *store = NULL;
+		OSSL_STORE_INFO *info = NULL;
+		EVP_PKEY *pkey = NULL;
+
+		store = OSSL_STORE_open(listener->keyfile, NULL, NULL, NULL, NULL);
+		if(!store){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to open key URI \"%s\".", listener->keyfile);
+			net__print_ssl_error(NULL, NULL);
+			return MOSQ_ERR_TLS;
+		}
+
+		while(!OSSL_STORE_eof(store)){
+			info = OSSL_STORE_load(store);
+			if(info == NULL){
+				if(!OSSL_STORE_eof(store)){
+					log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load key from URI \"%s\".", listener->keyfile);
+					net__print_ssl_error(NULL, NULL);
+				}
+				continue;
+			}
+			if(OSSL_STORE_INFO_get_type(info) == OSSL_STORE_INFO_PKEY){
+				pkey = OSSL_STORE_INFO_get1_PKEY(info);
+				OSSL_STORE_INFO_free(info);
+				if(pkey){
+					break;
+				}
+			}
+			OSSL_STORE_INFO_free(info);
+		}
+		OSSL_STORE_close(store);
+
+		if(!pkey){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: No private key found in URI \"%s\".", listener->keyfile);
+			return MOSQ_ERR_TLS;
+		}
+
+		rc = SSL_CTX_use_PrivateKey(listener->ssl_ctx, pkey);
+		EVP_PKEY_free(pkey);
+		if(rc != 1){
+			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to use private key from URI \"%s\".", listener->keyfile);
+			net__print_ssl_error(NULL, NULL);
+			return MOSQ_ERR_TLS;
+		}
+#else
+		log__printf(NULL, MOSQ_LOG_ERR, "Error: 'uri' keyform requires OpenSSL 3.0 or later.");
+		return MOSQ_ERR_NOT_SUPPORTED;
+#endif
 	}
 	rc = SSL_CTX_check_private_key(listener->ssl_ctx);
 	if(rc != 1){
