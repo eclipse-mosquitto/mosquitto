@@ -1,3 +1,10 @@
+2.1.1 - xxxx-xx-xx
+==================
+
+# Broker
+- Fix PUID/PGID checking for docker
+
+
 2.1.0 - 2026-01-29
 ==================
 

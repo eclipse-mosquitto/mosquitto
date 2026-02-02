@@ -101,7 +101,10 @@ static int set_umask(void)
 static int check_uid(const char *s, const char *name)
 {
 	char *endptr = NULL;
-	long id = strtol(s, &endptr, 10);
+	long id;
+
+	errno = 0;
+	id = strtol(s, &endptr, 10);
 	if(errno || endptr == s || *endptr != '\0'){
 		log__printf(NULL, MOSQ_LOG_ERR, "Error: %s not a valid ID '%s'", name, s);
 		return -1;
