@@ -1005,6 +1005,7 @@ static int handle_username_from_cert_options(struct mosquitto *context, char **u
 	}else
 #endif /* WITH_TLS */
 	{
+#ifdef WITH_TLS
 		if(context->listener->use_identity_as_username && context->listener->require_certificate){
 			mosquitto_FREE(*username);
 			mosquitto_FREE(*password);
@@ -1012,7 +1013,9 @@ static int handle_username_from_cert_options(struct mosquitto *context, char **u
 			if(!context->username){
 				return send__connack_bad_username_or_password_error(context, MOSQ_ERR_AUTH);
 			}
-		}else{
+		}else
+#endif
+		{
 			/* FIXME - these ensure the mosquitto_clientid() and
 			* mosquitto_client_username() functions work, but is hacky */
 			context->username = *username;
@@ -1076,12 +1079,14 @@ int handle__connect(struct mosquitto *context)
 		goto handle_connect_error;
 	}
 
+#ifdef WITH_TLS
 	if(context->in_packet.command == 0x16 && context->listener->ssl_ctx == NULL){ /* 0x16 is TLS handshake client hello */
 		log__printf(NULL, MOSQ_LOG_NOTICE, "Client from %s:%d appears to be using TLS to connect to a non-TLS listener.",
 				context->address, context->remote_port);
 		rc = MOSQ_ERR_PROTOCOL;
 		goto handle_connect_error;
 	}
+#endif
 
 	rc = read_protocol_name(context, protocol_name);
 	if(rc != MOSQ_ERR_SUCCESS){

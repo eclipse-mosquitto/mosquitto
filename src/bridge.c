@@ -854,8 +854,10 @@ void bridge__cleanup(struct mosquitto *context)
 	mosquitto_FREE(context->bridge->local_clientid);
 	mosquitto_FREE(context->bridge->local_username);
 	mosquitto_FREE(context->bridge->local_password);
+#ifdef WITH_TLS
 	mosquitto_FREE(context->bridge->tls_certfile);
 	mosquitto_FREE(context->bridge->tls_keyfile);
+#endif
 
 	if(context->bridge->remote_clientid != context->id){
 		mosquitto_FREE(context->bridge->remote_clientid);

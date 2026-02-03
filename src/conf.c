@@ -2978,6 +2978,7 @@ static int config__check_proxy(struct mosquitto__config *config)
 		struct mosquitto__listener *l = &config->listeners[i];
 
 		if(l->enable_proxy_protocol == 2){
+#ifdef WITH_TLS
 			if(l->use_subject_as_username){
 				log__printf(NULL, MOSQ_LOG_ERR, "Error: use_subject_as_username cannot be used with `enable_proxy_protocol 2`.");
 				return MOSQ_ERR_INVAL;
@@ -2987,6 +2988,7 @@ static int config__check_proxy(struct mosquitto__config *config)
 				log__printf(NULL, MOSQ_LOG_ERR, "Error: certfile and keyfile cannot be used with `enable_proxy_protocol 2`.");
 				return MOSQ_ERR_INVAL;
 			}
+#endif
 		}
 	}
 

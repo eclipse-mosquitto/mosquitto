@@ -14,6 +14,9 @@
 - Fix incorrect linking of libmosquitto_common.so for the acl and password
   file plugins. Closes #3460.
 
+# Build
+- Fix building with WITH_TLS=no
+
 
 2.1.0 - 2026-01-29
 ==================
