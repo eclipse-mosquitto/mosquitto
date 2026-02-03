@@ -170,10 +170,12 @@ static int callback_mqtt(
 				u->mosq = NULL;
 				return -1;
 			}
+			mosq->listener->client_count++;
 			if(mosq->listener->max_connections > 0 && mosq->listener->client_count > mosq->listener->max_connections){
 				if(db.config->connection_messages == true){
 					log__printf(NULL, MOSQ_LOG_NOTICE, "Client connection from %s denied: max_connections exceeded.", mosq->address);
 				}
+				mosq->listener->client_count--;
 				mosquitto__free(mosq->address);
 				mosquitto__free(mosq);
 				u->mosq = NULL;
@@ -194,6 +196,7 @@ static int callback_mqtt(
 					HASH_DELETE(hh_sock, db.contexts_by_sock, mosq);
 					mosq->sock = INVALID_SOCKET;
 					mux__delete(mosq);
+					mosq->listener->client_count--;
 				}
 				mosq->wsi = NULL;
 #ifdef WITH_TLS
