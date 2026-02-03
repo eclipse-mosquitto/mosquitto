@@ -1,4 +1,4 @@
-2.0.23 - 2026-01-14
+2.0.23 - 2026-xx-xx
 ===================
 
 Broker:
@@ -13,6 +13,7 @@ Broker:
 - Fix potential crash on startup if a malicious/corrupt persistence file from
   mosquitto 1.5 or earlier is loaded. Closes #3439.
 - Limit auto_id_prefix to 50 characters. Closes #3440.
+- Fix max_connections not being honoured on websockets listeners. Closes #3455.
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
