@@ -196,7 +196,6 @@ static int callback_mqtt(
 					HASH_DELETE(hh_sock, db.contexts_by_sock, mosq);
 					mosq->sock = INVALID_SOCKET;
 					mux__delete(mosq);
-					mosq->listener->client_count--;
 				}
 				mosq->wsi = NULL;
 #ifdef WITH_TLS
