@@ -25,6 +25,7 @@ Contributors:
 #  include <ws2tcpip.h>
 #else
 #  include <arpa/inet.h>
+#  include <netinet/in.h>
 #endif
 
 #include "callbacks.h"
