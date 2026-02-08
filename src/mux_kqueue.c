@@ -185,11 +185,10 @@ int mux_kqueue__handle(void)
 			for(int i=0; i<event_count; i++){
 				context = event_list[i].udata;
 				if(context->ident == id_client){
+					loop_handle_reads_writes(context, event_list[i].filter);
 					if(event_list[i].flags & (EV_EOF | EV_ERROR)){
 						do_disconnect(context, MOSQ_ERR_CONN_LOST);
-						continue;
 					}
-					loop_handle_reads_writes(context, event_list[i].filter);
 				}else if(context->ident == id_listener){
 					listensock = event_list[i].udata;
 
