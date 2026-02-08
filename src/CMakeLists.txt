@@ -126,7 +126,7 @@ endif()
 option(USE_LIBWRAP "Include tcp-wrappers support?" OFF)
 
 if(USE_LIBWRAP)
-	target_sources(mosquitto wrap)
+	target_link_libraries(mosquitto PRIVATE wrap)
 	target_compile_definitions(mosquitto PRIVATE "WITH_WRAP")
 endif()
 
