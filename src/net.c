@@ -50,7 +50,11 @@ Contributors:
 #endif
 
 #ifdef WITH_UNIX_SOCKETS
-#  include "sys/un.h"
+#  ifdef WIN32
+#    include <afunix.h>
+#  else
+#    include <sys/un.h>
+#  endif
 #endif
 
 #ifdef __QNX__
@@ -936,7 +940,9 @@ static int net__socket_listen_unix(struct mosquitto__listener *listener)
 	struct sockaddr_un addr;
 	int sock;
 	int rc;
+#ifndef WIN32
 	mode_t old_mask;
+#endif
 
 	if(listener->unix_socket_path == NULL){
 		return MOSQ_ERR_INVAL;
@@ -946,7 +952,11 @@ static int net__socket_listen_unix(struct mosquitto__listener *listener)
 		return MOSQ_ERR_INVAL;
 	}
 
+#ifdef WIN32
+	DeleteFile(listener->unix_socket_path);
+#else
 	unlink(listener->unix_socket_path);
+#endif
 	log__printf(NULL, MOSQ_LOG_INFO, "Opening unix listen socket on path %s.", listener->unix_socket_path);
 	memset(&addr, 0, sizeof(struct sockaddr_un));
 	addr.sun_family = AF_UNIX;
@@ -967,9 +977,13 @@ static int net__socket_listen_unix(struct mosquitto__listener *listener)
 	listener->socks[listener->sock_count-1] = sock;
 
 
+#ifndef WIN32
 	old_mask = umask(0007);
+#endif
 	rc = bind(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_un));
+#ifndef WIN32
 	umask(old_mask);
+#endif
 
 	if(rc == -1){
 		net__print_error(MOSQ_LOG_ERR, "Error binding unix socket: %s");

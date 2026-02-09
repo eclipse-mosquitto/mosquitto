@@ -68,7 +68,7 @@ else()
 endif()
 
 option(WITH_UNIX_SOCKETS "Include Unix Domain Socket support?" ON)
-if(WITH_UNIX_SOCKETS AND NOT WIN32)
+if(WITH_UNIX_SOCKETS)
 	add_definitions("-DWITH_UNIX_SOCKETS")
 endif()
 

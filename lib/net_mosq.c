@@ -46,7 +46,11 @@ Contributors:
 #endif
 
 #ifdef WITH_UNIX_SOCKETS
-#  include <sys/un.h>
+#  ifdef WIN32
+#    include <afunix.h>
+#  else
+#    include <sys/un.h>
+#  endif
 #endif
 
 #ifdef __QNX__
@@ -538,10 +542,12 @@ static int net__try_connect_unix(const char *host, mosq_sock_t *sock)
 	if(s < 0){
 		return MOSQ_ERR_ERRNO;
 	}
+#ifndef WIN32
 	rc = net__socket_nonblock(&s);
 	if(rc){
 		return rc;
 	}
+#endif
 
 	rc = connect(s, (struct sockaddr *)&addr, sizeof(struct sockaddr_un));
 	if(rc < 0){
