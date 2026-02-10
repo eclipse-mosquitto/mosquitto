@@ -681,7 +681,6 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 	int ret;
 #if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
 	ENGINE *engine = NULL;
-	EVP_PKEY *pkey;
 #endif
 	uint8_t tls_alpn_wire[256];
 	uint8_t tls_alpn_len;
@@ -830,6 +829,7 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 			if(mosq->tls_keyfile){
 				if(mosq->tls_keyform == mosq_k_engine){
 #if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
+					EVP_PKEY *pkey;
 					UI_METHOD *ui_method = net__get_ui_method();
 					if(mosq->tls_engine_kpass_sha1){
 						if(!ENGINE_ctrl_cmd(engine, ENGINE_SECRET_MODE, ENGINE_SECRET_MODE_SHA, NULL, NULL, 0)){
