@@ -184,6 +184,7 @@ endif()
 if(WITH_ADNS)
 	cmake_push_check_state()
 	set(ANL_CODE "
+		#define _GNU_SOURCE
 		#include <stdlib.h>
 		#include <netdb.h>
 		int main(){
