@@ -76,11 +76,14 @@
 				<term><option>-c</option></term>
 				<listitem>
 					<para>
-						Create a new password file. If the file already
-						exists, it will be overwritten. If the filename
-						is specified as a dash <option>-</option>
-						then the output will be to stdout. This only really
-						makes sense with <option>-b</option>.
+						Create a new password file. It is an error if the
+						file already exists. If the filename is specified as
+						a dash <option>-</option> then the output will be to
+						stdout. This only really makes sense with
+						<option>-b</option>.
+						Without this, the password file must exist and user
+						is added, updated, or deleted as per file contents and
+						-D option.
 					</para>
 				</listitem>
 			</varlistentry>

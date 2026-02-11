@@ -117,7 +117,7 @@ static void print_usage(void)
 	printf("       mosquitto_passwd [-H argon2id | -H sha512-pbkdf2] [-c] -b passwordfile username password\n");
 	printf("       mosquitto_passwd -U passwordfile\n");
 	printf(" -b : run in batch mode to allow passing passwords on the command line.\n");
-	printf(" -c : create a new password file. This will overwrite existing files.\n");
+	printf(" -c : create a new password file, ie. file must not exist. Without this, file must exist.\n");
 	printf(" -D : delete the username rather than adding/updating its password.\n");
 	printf(" -H : specify the hashing algorithm. Defaults to argon2id, which is recommended.\n");
 	printf("      Mosquitto 2.0 and earlier defaulted to sha512-pbkdf2.\n");
