@@ -21,6 +21,9 @@
 				<arg choice='plain'><option>-H</option> <replaceable>hash</replaceable></arg>
 			</group>
 			<group>
+				<arg choice='plain'><option>-I</option> <replaceable>iterations</replaceable></arg>
+			</group>
+			<group>
 				<arg choice='plain'><option>-c</option></arg>
 				<arg choice='plain'><option>-D</option></arg>
 			</group>
@@ -31,6 +34,9 @@
 			<command>mosquitto_passwd</command>
 			<group>
 				<arg choice='plain'><option>-H</option> <replaceable>hash</replaceable></arg>
+			</group>
+			<group>
+				<arg choice='plain'><option>-I</option> <replaceable>iterations</replaceable></arg>
 			</group>
 			<arg choice='plain'><option>-b</option></arg>
 			<arg choice='plain'><replaceable>passwordfile</replaceable></arg>
@@ -106,6 +112,16 @@
 						<replaceable>sha512</replaceable> option is provided for
 						creating password files for use with Mosquitto 1.6
 						and earlier.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-I</option></term>
+				<listitem>
+					<para>
+						Specify the number of iterations to use for
+						generating <replaceable>sha512-pbkdf2</replaceable>
+						hashes. Defaults to 1000.
 					</para>
 				</listitem>
 			</varlistentry>

@@ -118,11 +118,11 @@ static void print_usage(void)
 {
 	printf("mosquitto_passwd is a tool for managing password files for mosquitto.\n\n");
 #ifndef WITH_ARGON2
-	printf("Usage: mosquitto_passwd [-H sha512 | -H sha512-pbkdf2] [-c | -D] passwordfile username\n");
-	printf("       mosquitto_passwd [-H sha512 | -H sha512-pbkdf2] [-c] -b passwordfile username password\n");
+	printf("Usage: mosquitto_passwd [-H sha512 | -H sha512-pbkdf2] [-I iterations] [-c | -D] passwordfile username\n");
+	printf("       mosquitto_passwd [-H sha512 | -H sha512-pbkdf2] [-I iterations] [-c] -b passwordfile username password\n");
 #else
-	printf("Usage: mosquitto_passwd [-H argon2id | -H sha512-pbkdf2] [-c | -D] passwordfile username\n");
-	printf("       mosquitto_passwd [-H argon2id | -H sha512-pbkdf2] [-c] -b passwordfile username password\n");
+	printf("Usage: mosquitto_passwd [-H argon2id | -H sha512-pbkdf2] [-I iterations] [-c | -D] passwordfile username\n");
+	printf("       mosquitto_passwd [-H argon2id | -H sha512-pbkdf2] [-I iterations] [-c] -b passwordfile username password\n");
 #endif
 	printf("       mosquitto_passwd -U passwordfile\n");
 	printf(" -b : run in batch mode to allow passing passwords on the command line.\n");
@@ -135,6 +135,7 @@ static void print_usage(void)
 	printf("      Mosquitto 2.x and earlier defaulted to sha512-pbkdf2.\n"); // FIXME - substitute last version with pbkdf2 default
 #endif
 	printf("      Mosquitto 1.6 and earlier defaulted to sha512.\n");
+	printf(" -I : specify the number of iterations for sha512-pbkdf2 algorithm. Defaults to 1000.\n");
 	printf(" -U : update a plain text password file to use hashed passwords.\n");
 	printf("\nSee https://mosquitto.org/ for more information.\n\n");
 }
