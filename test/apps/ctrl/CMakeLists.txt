@@ -44,6 +44,11 @@ function(add_ctrl_shell_test TEST_NAME)
 		${mosquitto_SOURCE_DIR}/test/mock/apps/mosquitto_ctrl
 		${mosquitto_SOURCE_DIR}/test/mock/lib
 	)
+	if(WITH_BUNDLED_DEPS)
+                target_include_directories(${TEST_NAME} PRIVATE
+			"${mosquitto_SOURCE_DIR}/deps"
+		)
+	endif()
 	target_link_libraries(${TEST_NAME} PRIVATE
 		GTest::gmock_main
 		editline_mock
@@ -78,6 +83,11 @@ function(add_ctrl_shell_test_real_editline TEST_NAME)
 		${mosquitto_SOURCE_DIR}/test/mock/apps/mosquitto_ctrl
 		${mosquitto_SOURCE_DIR}/test/mock/lib
 	)
+	if(WITH_BUNDLED_DEPS)
+		target_include_directories(${TEST_NAME} PRIVATE
+			"${mosquitto_SOURCE_DIR}/deps"
+		)
+	endif()
 	target_link_libraries(${TEST_NAME} PRIVATE
 		LineEditing::LineEditing
 		GTest::gmock_main
