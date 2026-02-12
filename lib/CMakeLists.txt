@@ -127,7 +127,7 @@ set_target_properties(libmosquitto PROPERTIES
 	POSITION_INDEPENDENT_CODE 1
 )
 
-if(UNIX AND NOT APPLE)
+if(UNIX AND NOT APPLE AND NOT AIX)
 	set_target_properties(libmosquitto PROPERTIES
 		LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/linker.version
 		LINK_FLAGS "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/linker.version"
