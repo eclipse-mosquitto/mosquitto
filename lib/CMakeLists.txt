@@ -160,6 +160,7 @@ if(WITH_STATIC_LIBRARIES)
 		"${mosquitto_SOURCE_DIR}"
 		"${mosquitto_SOURCE_DIR}/include"
 		"${mosquitto_SOURCE_DIR}/lib"
+		"${mosquitto_SOURCE_DIR}/libcommon"
 	)
 
 	set_target_properties(libmosquitto_static PROPERTIES
