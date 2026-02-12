@@ -11,6 +11,8 @@ set_target_properties(mosquittopp PROPERTIES
 target_include_directories(mosquittopp
 	PUBLIC
 		"${mosquitto_SOURCE_DIR}/include"
+	PRIVATE
+		"${CJSON_INCLUDE_DIRS}"
 )
 
 target_link_libraries(mosquittopp
@@ -50,6 +52,7 @@ if(WITH_STATIC_LIBRARIES)
 		"${mosquitto_SOURCE_DIR}/include"
 		"${mosquitto_SOURCE_DIR}/lib"
 		"${mosquitto_SOURCE_DIR}/lib/cpp"
+		"${CJSON_INCLUDE_DIRS}"
 	)
 
 	target_link_libraries(mosquittopp_static PRIVATE ${LIBRARIES})
