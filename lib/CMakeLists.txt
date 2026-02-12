@@ -148,6 +148,12 @@ if(WITH_STATIC_LIBRARIES)
 		)
 	endif()
 
+	if(WITH_BUNDLED_DEPS)
+		target_include_directories(libmosquitto_static PRIVATE
+			"${mosquitto_SOURCE_DIR}/deps"
+		)
+	endif()
+
 	target_link_libraries(libmosquitto_static PRIVATE ${LIBRARIES})
 
 	target_include_directories(libmosquitto_static PRIVATE
