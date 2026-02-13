@@ -20,13 +20,22 @@ def do_test(plugin_ver):
     connect_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="test-username", password="wrong")
     connack_packet = mosq_test.gen_connack(rc=5)
 
+    connect_packet_binary_pw1 = mosq_test.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06\x08")
+    connect_packet_binary_pw2 = mosq_test.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06")
+
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
     try:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
+        sock.close()
+
+        if plugin_ver == 5:
+            sock = mosq_test.do_client_connect(connect_packet_binary_pw1, connack_packet, port=port)
+            sock.close()
+            sock = mosq_test.do_client_connect(connect_packet_binary_pw2, connack_packet, port=port)
+            sock.close()
         rc = 0
 
-        sock.close()
     except mosq_test.TestError:
         pass
     finally:

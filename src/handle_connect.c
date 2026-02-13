@@ -776,11 +776,11 @@ static int set_username_from_packet(struct mosquitto *context, char **username, 
 }
 
 
-static int set_password_from_packet(struct mosquitto *context, char **password, const char *clientid)
+static int set_password_from_packet(struct mosquitto *context, char **password, uint16_t *password_len, const char *clientid)
 {
 	int rc;
 
-	rc = packet__read_binary(&context->in_packet, (uint8_t **)password, &(uint16_t){0});
+	rc = packet__read_binary(&context->in_packet, (uint8_t **)password, password_len);
 	if(rc == MOSQ_ERR_NOMEM){
 		return MOSQ_ERR_NOMEM;
 	}
@@ -801,7 +801,7 @@ static int set_password_from_packet(struct mosquitto *context, char **password, 
 
 static int read_and_verify_client_credentials_from_packet(struct mosquitto *context,
 		char **username, uint8_t username_flag,
-		char **password, uint8_t password_flag,
+		char **password, uint16_t *password_len, uint8_t password_flag,
 		const char *clientid)
 {
 	int rc;
@@ -821,7 +821,7 @@ static int read_and_verify_client_credentials_from_packet(struct mosquitto *cont
 		}
 	}
 	if(password_flag){
-		rc = set_password_from_packet(context, password, clientid);
+		rc = set_password_from_packet(context, password, password_len, clientid);
 		if(rc != MOSQ_ERR_SUCCESS){
 			return rc;
 		}
@@ -971,7 +971,7 @@ static int set_username_from_cert_subject_name(struct mosquitto *context)
 #endif
 
 
-static int handle_username_from_cert_options(struct mosquitto *context, char **username, char **password)
+static int handle_username_from_cert_options(struct mosquitto *context, char **username, char **password, uint16_t password_len)
 {
 	int rc;
 
@@ -1020,6 +1020,7 @@ static int handle_username_from_cert_options(struct mosquitto *context, char **u
 			* mosquitto_client_username() functions work, but is hacky */
 			context->username = *username;
 			context->password = *password;
+			context->password_len = password_len;
 			*username = NULL; /* Avoid free() in error: below. */
 			*password = NULL;
 		}
@@ -1059,6 +1060,7 @@ int handle__connect(struct mosquitto *context)
 	uint8_t will, will_retain, will_qos, clean_start;
 	uint8_t username_flag, password_flag;
 	char *username = NULL, *password = NULL;
+	uint16_t password_len = 0;
 	int rc;
 	mosquitto_property *properties = NULL;
 	void *auth_data = NULL;
@@ -1176,7 +1178,7 @@ int handle__connect(struct mosquitto *context)
 	// Client credentials
 	password_flag = connect_flags & 0x40;
 	username_flag = connect_flags & 0x80;
-	rc = read_and_verify_client_credentials_from_packet(context, &username, username_flag, &password, password_flag, clientid);
+	rc = read_and_verify_client_credentials_from_packet(context, &username, username_flag, &password, &password_len, password_flag, clientid);
 	if(rc != MOSQ_ERR_SUCCESS){
 		goto handle_connect_error;
 	}
@@ -1193,7 +1195,7 @@ int handle__connect(struct mosquitto *context)
 	clientid = NULL;
 
 	/* use_identity_as_username or use_subject_as_username */
-	rc = handle_username_from_cert_options(context, &username, &password);
+	rc = handle_username_from_cert_options(context, &username, &password, password_len);
 	if(rc != MOSQ_ERR_SUCCESS){
 		goto handle_connect_error;
 	}

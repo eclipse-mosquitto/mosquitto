@@ -4,6 +4,8 @@
 # Broker
 - Fix MOSQ_EVT_DISCONNECT being called before MOSQ_EVT_ACL_CHECK for the will
   of that client. Closes #3487.
+- Fix password length not being passed to MOSQ_EVT_BASIC_AUTH events.
+  Closes #3490.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
