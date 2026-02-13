@@ -41,7 +41,6 @@ int mosquitto_loop_start(struct mosquitto *mosq)
 #if defined(WITH_THREADING)
 	if(!mosq || mosq->threaded != mosq_ts_none) return MOSQ_ERR_INVAL;
 
-	mosq->threaded = mosq_ts_self;
 	if(!COMPAT_pthread_create(&mosq->thread_id, NULL, mosquitto__thread_main, mosq)){
 #if defined(__linux__)
 		pthread_setname_np(mosq->thread_id, "mosquitto loop");
@@ -50,6 +49,7 @@ int mosquitto_loop_start(struct mosquitto *mosq)
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 		pthread_set_name_np(mosq->thread_id, "mosquitto loop");
 #endif
+		mosq->threaded = mosq_ts_self;
 		return MOSQ_ERR_SUCCESS;
 	}else{
 		return MOSQ_ERR_ERRNO;
