@@ -17,13 +17,13 @@ subscribe_packet = mosq_test.gen_subscribe(mid, "test/topic", 2, proto_ver=5)
 suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=5)
 
 mid=1
-publish1_packet = mosq_test.gen_publish(topic="test/topic", mid=mid, qos=2, payload="12345678901234567890", proto_ver=5)
+publish1_packet = mosq_test.gen_publish(topic="test/topic", mid=mid, qos=2, payload="1234", proto_ver=5)
 pubrec1_packet = mosq_test.gen_pubrec(mid, proto_ver=5)
 pubrel1_packet = mosq_test.gen_pubrel(mid, proto_ver=5)
 pubcomp1_packet = mosq_test.gen_pubcomp(mid, proto_ver=5)
 
 mid=2
-publish2_packet = mosq_test.gen_publish(topic="test/topic", mid=mid, qos=2, payload="7890", proto_ver=5)
+publish2_packet = mosq_test.gen_publish(topic="test/topic", mid=mid, qos=2, payload="789", proto_ver=5)
 pubrec2_packet = mosq_test.gen_pubrec(mid, proto_ver=5)
 pubrel2_packet = mosq_test.gen_pubrel(mid, proto_ver=5)
 pubcomp2_packet = mosq_test.gen_pubcomp(mid, proto_ver=5)

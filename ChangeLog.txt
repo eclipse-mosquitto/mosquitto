@@ -14,6 +14,7 @@ Broker:
   mosquitto 1.5 or earlier is loaded. Closes #3439.
 - Limit auto_id_prefix to 50 characters. Closes #3440.
 - Fix max_connections not being honoured on websockets listeners. Closes #3455.
+- Fix outgoing maximum-packet-size limit check. Closes #3503.
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
