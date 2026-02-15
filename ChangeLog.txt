@@ -15,6 +15,8 @@ Broker:
 - Limit auto_id_prefix to 50 characters. Closes #3440.
 - Fix max_connections not being honoured on websockets listeners. Closes #3455.
 - Fix outgoing maximum-packet-size limit check. Closes #3503.
+- Fix creation of log and runtime directories in systemd unit files.
+ Closes #3344.
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
