@@ -238,7 +238,7 @@ int packet__check_oversize(struct mosquitto *mosq, uint32_t remaining_length)
 		return MOSQ_ERR_SUCCESS;
 	}
 
-	len = remaining_length + mosquitto_varint_bytes(remaining_length);
+	len = 1 + remaining_length + mosquitto_varint_bytes(remaining_length);
 	if(len > mosq->maximum_packet_size){
 		return MOSQ_ERR_OVERSIZE_PACKET;
 	}else{

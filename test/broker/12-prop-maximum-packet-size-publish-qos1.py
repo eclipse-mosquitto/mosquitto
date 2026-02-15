@@ -17,12 +17,17 @@ def do_test(start_broker):
     suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=5)
 
     mid=1
-    publish1_packet = mosq_test.gen_publish(topic="12/max/publish/qos1/test/topic", mid=mid, qos=1, payload="12345678901234567890", proto_ver=5)
+    publish1_packet = mosq_test.gen_publish(topic="12/max/publish/qos1/test/topic", mid=mid, qos=1, payload="1234", proto_ver=5)
     puback1_packet = mosq_test.gen_puback(mid, proto_ver=5)
 
     mid=2
-    publish2_packet = mosq_test.gen_publish(topic="12/max/publish/qos1/test/topic", mid=mid, qos=1, payload="7890", proto_ver=5)
+    props = mqtt5_props.gen_byte_prop(mqtt5_props.PAYLOAD_FORMAT_INDICATOR, 1)
+    publish2_packet = mosq_test.gen_publish(topic="12/max/publish/qos1/test/topic", mid=mid, qos=1, payload="56", proto_ver=5, properties=props)
     puback2_packet = mosq_test.gen_puback(mid, proto_ver=5)
+
+    mid=3
+    publish3_packet = mosq_test.gen_publish(topic="12/max/publish/qos1/test/topic", mid=mid, qos=1, payload="789", proto_ver=5)
+    puback3_packet = mosq_test.gen_puback(mid, proto_ver=5)
 
     port = mosq_test.get_port()
     if start_broker:
@@ -33,12 +38,15 @@ def do_test(start_broker):
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet)
 
         mosq_test.do_send_receive(sock, publish1_packet, puback1_packet, "puback 1")
-
         # We shouldn't receive the publish here because it is > MAXIMUM_PACKET_SIZE
         mosq_test.do_ping(sock)
 
-        sock.send(publish2_packet)
-        mosq_test.receive_unordered(sock, puback2_packet, publish2_packet, "puback 2/publish2")
+        mosq_test.do_send_receive(sock, publish2_packet, puback2_packet, "puback 2")
+        # We shouldn't receive the publish here because it is > MAXIMUM_PACKET_SIZE
+        mosq_test.do_ping(sock)
+
+        sock.send(publish3_packet)
+        mosq_test.receive_unordered(sock, puback3_packet, publish3_packet, "puback 3/publish3")
         rc = 0
     except mosq_test.TestError:
         pass

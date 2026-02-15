@@ -6,6 +6,7 @@
   of that client. Closes #3487.
 - Fix password length not being passed to MOSQ_EVT_BASIC_AUTH events.
   Closes #3490.
+- Fix incorrect maximum-packet-size restriction. Closes #3503.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id

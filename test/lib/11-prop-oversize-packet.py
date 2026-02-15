@@ -13,8 +13,8 @@ def do_test(conn, data):
     props += mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 20)
     connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props, property_helper=False)
 
-    bad_publish_packet = mosq_test.gen_publish("pub/test", qos=0, payload="0123456789012345678", proto_ver=5)
-    publish_packet = mosq_test.gen_publish("pub/test", qos=0, payload="012345678901234567", proto_ver=5)
+    bad_publish_packet = mosq_test.gen_publish("pub/test", qos=0, payload="123456789012345678", proto_ver=5)
+    publish_packet = mosq_test.gen_publish("pub/test", qos=0, payload="12345678901234567", proto_ver=5)
 
     disconnect_packet = mosq_test.gen_disconnect()
 
