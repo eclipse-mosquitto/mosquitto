@@ -185,7 +185,7 @@ void context__cleanup(struct mosquitto *context, bool force_free)
 void context__send_will(struct mosquitto *ctxt)
 {
 	if(ctxt->state != mosq_cs_disconnecting && ctxt->will){
-		if(ctxt->will_delay_interval > 0){
+		if(ctxt->session_expiry_interval > 0 && ctxt->will_delay_interval > 0){
 			will_delay__add(ctxt);
 			return;
 		}
@@ -218,10 +218,10 @@ void context__disconnect(struct mosquitto *context)
 	if(mosquitto__get_state(context) == mosq_cs_disconnected){
 		return;
 	}
+	context__send_will(context);
 
 	plugin__handle_disconnect(context, -1);
 
-	context__send_will(context);
 	net__socket_close(context);
 #ifdef WITH_BRIDGE
 	if(context->bridge == NULL)

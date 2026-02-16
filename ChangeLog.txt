@@ -17,6 +17,8 @@ Broker:
 - Fix outgoing maximum-packet-size limit check. Closes #3503.
 - Fix creation of log and runtime directories in systemd unit files.
  Closes #3344.
+- Fix will messages being incorrectly delayed if a client set
+  session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
