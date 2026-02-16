@@ -216,7 +216,7 @@ void context__cleanup(struct mosquitto *context, bool force_free)
 void context__send_will(struct mosquitto *ctxt)
 {
 	if(ctxt->state != mosq_cs_disconnecting && ctxt->will){
-		if(ctxt->will_delay_interval > 0){
+		if(ctxt->session_expiry_interval > 0 && ctxt->will_delay_interval > 0){
 			will_delay__add(ctxt);
 			return;
 		}

@@ -27,6 +27,8 @@ def do_test(start_broker, clean_session):
 
     connect2_packet_clear = mosq_test.gen_connect("will-delay-recovery-helper", proto_ver=5)
 
+    will_packet = mosq_test.gen_publish(topic="will/delay/recovery/test", payload="will delay", qos=0, proto_ver=5)
+
     port = mosq_test.get_port()
     if start_broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
@@ -43,8 +45,13 @@ def do_test(start_broker, clean_session):
         time.sleep(3)
 
         # The client2 has reconnected within the will delay interval, which has now
-        # passed. We should not have received the will at this point.
-        mosq_test.do_ping(sock1)
+        # passed.
+        if clean_session:
+            # The old session has ended, so we should receive the will
+            mosq_test.expect_packet(sock1, "will", will_packet)
+        else:
+            # We should not have received the will at this point.
+            mosq_test.do_ping(sock1)
         rc = 0
 
         sock1.close()

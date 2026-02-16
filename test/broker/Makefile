@@ -148,6 +148,7 @@ msg_sequence_test:
 	./07-will-delay-invalid-573191.py
 	./07-will-delay-reconnect.py
 	./07-will-delay-recover.py
+	./07-will-delay-session-expiry-0.py
 	./07-will-delay-session-expiry.py
 	./07-will-delay-session-expiry2.py
 	./07-will-delay.py
