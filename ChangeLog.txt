@@ -7,6 +7,8 @@
 - Fix password length not being passed to MOSQ_EVT_BASIC_AUTH events.
   Closes #3490.
 - Fix incorrect maximum-packet-size restriction. Closes #3503.
+- Fix will messages being incorrectly delayed if a client set
+  session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
