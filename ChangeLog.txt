@@ -23,6 +23,8 @@ Broker:
 Library:
 - Fix mosquitto_loop_start() leaving the mosq stuct in an invalid state if
   thread creation fails. Closes #3496.
+- Fix will messages being incorrectly delayed if a client set
+  session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
