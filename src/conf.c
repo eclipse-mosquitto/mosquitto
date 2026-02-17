@@ -46,6 +46,10 @@ Contributors:
 #include "tls_mosq.h"
 #include "util_mosq.h"
 #include "mosquitto/mqtt_protocol.h"
+#ifdef WITH_GRPC
+#include <cjson/cJSON.h>
+#include "mosquitto/libcommon_base64.h"
+#endif
 
 #include "utlist.h"
 
@@ -548,7 +552,8 @@ static void print_usage(void)
 	printf("mosquitto version %s\n\n", VERSION);
 	printf("mosquitto is an MQTT v5.0/v3.1.1/v3.1 broker.\n\n");
 	printf("Usage: mosquitto [-c config_file] [-d] [-h] [-p port] [-v]\n");
-	printf("                 [--tls-keylog file]\n\n");
+	printf("                 [--tls-keylog file]\n");
+	printf("\n");
 	printf(" -c : specify the broker config file.\n");
 	printf(" -d : put the broker into the background after starting.\n");
 	printf(" -h : display this help.\n");
@@ -632,7 +637,7 @@ int config__parse_args(struct mosquitto__config *config, int argc, char *argv[])
 			db.quiet = true;
 		}else if(!strcmp(argv[i], "-v") || !strcmp(argv[i], "--verbose")){
 			db.verbose = true;
-		}else if(!strcmp(argv[i], "--test-config")){
+	}else if(!strcmp(argv[i], "--test-config")){
 			config->test_configuration = true;
 		}else{
 			fprintf(stderr, "Error: Unknown option '%s'.\n", argv[i]);

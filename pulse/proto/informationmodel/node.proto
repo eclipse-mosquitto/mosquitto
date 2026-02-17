@@ -1,0 +1,107 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "google/protobuf/timestamp.proto";
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * A node inside the information model graph.
+ */
+message NodeProto {
+
+  /*
+   * Node metadata. This should contain information that is not necessary for computations but help with generating the
+   * information model and keeping information up-to-date as well as other helpful insights.
+   */
+  message Metadata {
+
+    /*
+     * The version of the actual information model node. This changes whenever an update on the node is triggered.
+     * This could be a general description change or a change of the dataPointOrigin in the case of an MQTT node.
+     * We might need hashes but a monotonic counting number seems fine for now.
+     *
+     * required
+     */
+    // uint64 version = 1;
+
+    /*
+     * The timestamp a node was first introduced into the information model.
+     *
+     * required
+     */
+    google.protobuf.Timestamp created_timestamp = 2;
+
+    /*
+     * The timestamp a node was last updated, e.g.. the description changed.
+     *
+     * required
+     */
+    google.protobuf.Timestamp updated_timestamp = 3;
+  }
+
+  /*
+   * The unique identifier of a node.
+   *
+   * required
+   */
+  UuidProto identifier = 1;
+
+  /*
+   * The specific type of a node. To be able to add types dynamically this is a string.
+   *
+   * required
+   */
+  string type_identifier = 2;
+
+  /*
+   * The name of a node. Names are the first indicator of what a node exactly is.
+   *
+   * required
+   */
+  string name = 3;
+
+  /*
+   * The description of a node. It describes the purpose of the node inside the information model.
+   *
+   * optional
+   */
+   string description = 4;
+
+  /*
+   * The node metadata.
+   *
+   * required
+   */
+  Metadata metadata = 5;
+
+  /*
+   * The properties of a specific node. It is -for now- a JSON object.
+   *
+   * optional
+   */
+
+   string properties = 6;
+
+  /*
+   * The flag if a node is computed for the RIM or created via user input
+   *
+   * required
+   */
+  bool computed = 7;
+
+  /*
+   * The topic level of a specific node. It defines the location of a node inside the namespace.
+   *
+   * optional
+   */
+   string topic_level = 8;
+}

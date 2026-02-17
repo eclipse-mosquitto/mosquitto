@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+import "heartbeat/heartbeat_request.proto";
+import "heartbeat/heartbeat_response.proto";
+
+service HeartbeatService {
+  rpc Heartbeat(HeartbeatRequestProto) returns (HeartbeatResponseOrErrorProto);
+}

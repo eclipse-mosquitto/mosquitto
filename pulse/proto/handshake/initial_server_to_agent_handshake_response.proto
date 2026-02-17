@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "metrics/metrics_config.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * The first answer of the server to the agent. It tells the agent what project exists and which information model is
+ * assigned.
+ */
+message InitialServerToAgentHandshakeResponseProto {
+
+  /*
+   * The server implementation version. This describes the basic feature set an agent has to offer without feature
+   * flags.
+   *
+   * required
+   */
+  string server_version = 1;
+
+  /**
+    * The status code of the handshake.
+    * required
+   */
+  StatusCode status_code = 2;
+
+  ServerInformationProto server_information = 3;
+
+  /**
+   * The latest released agent version. The agent can print an update log or similar based on this.
+   */
+  string latest_agent_version = 4;
+
+  optional string failed_message = 5;
+
+  enum StatusCode {
+    UNSPECIFIED = 0; // Default value, should not be used
+    SUCCESS = 1;
+    FAILED = 2;
+  }
+}
+
+message ServerInformationProto {
+  /*
+  * The heartbeat interval in seconds.
+  * This is the time the agent should wait before sending a heartbeat message to the server.
+  *
+  * required
+  */
+  int32 heartbeat_interval_seconds = 1;
+
+  /*
+  * Configuration for agent metrics reporting.
+  */
+  MetricsConfigProto metrics_config = 2;
+}

@@ -1,0 +1,33 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "informationmodel/node.proto";
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * A delta of a node. We want to send deltas if an agent already has an information model in place.
+ */
+message NodeDeltaProto {
+
+  /*
+   * The identifier of the node that is meant to be updated.
+   *
+   * required
+   */
+  UuidProto previous_identifier = 1;
+
+  /*
+   * The new node which replaces (updates) the previous node. For now, I decided to send the complete node
+   * and not deltas of all the changes. If a node is deleted the value should be null (absent).
+   */
+  NodeProto updated_node = 2;
+}

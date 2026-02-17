@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "uuid.proto";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * A batch of metrics reported by an agent.
+ */
+message MetricsReportProto {
+
+  /*
+   * The agent that is reporting the metrics.
+   *
+   * required
+   */
+  UuidProto agent_id = 1;
+
+  /*
+   * The project the agent belongs to.
+   *
+   * required
+   */
+  UuidProto project_id = 2;
+
+  /*
+   * The timestamp on the agent when the report was generated.
+   *
+   * required
+   */
+  google.protobuf.Timestamp agent_timestamp = 3;
+
+  /*
+   * Counter metrics (delta/increment since last report).
+   */
+  repeated CounterProto counters = 4;
+
+  /*
+   * Gauge metrics (point-in-time values).
+   */
+  repeated GaugeProto gauges = 5;
+
+  /*
+   * Histogram metrics (pre-aggregated distribution summaries).
+   */
+  repeated HistogramProto histograms = 6;
+}
+
+/*
+ * A counter metric reporting the increment since the previous report.
+ */
+message CounterProto {
+  string name = 1;
+  int64 value = 2;
+}
+
+/*
+ * A gauge metric with a point-in-time value.
+ */
+message GaugeProto {
+  string name = 1;
+  double value = 2;
+}
+
+/*
+ * A histogram metric with pre-aggregated distribution statistics.
+ */
+message HistogramProto {
+  string name = 1;
+  int64 count = 2;
+  double min = 3;
+  double max = 4;
+  double mean = 5;
+  double p50 = 6;
+  double p95 = 7;
+  double p99 = 8;
+}

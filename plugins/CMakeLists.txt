@@ -40,6 +40,7 @@ option(WITH_PLUGIN_EXAMPLES "Build example plugins?" ON)
 option(WITH_PLUGIN_PERSIST_SQLITE "Build persist-sqlite plugin?" ON)
 option(WITH_PLUGIN_PASSWORD_FILE "Build password-file plugin?" ON)
 option(WITH_PLUGIN_SPARKPLUG_AWARE "Build sparkplug-aware plugin?" ON)
+option(WITH_PLUGIN_PULSE "Build pulse plugin?" ON)
 
 if(WITH_PLUGIN_ACL_FILE)
 	add_subdirectory(acl-file)
@@ -64,4 +65,8 @@ endif()
 
 if(WITH_PLUGIN_SPARKPLUG_AWARE)
 	add_subdirectory(sparkplug-aware)
+endif()
+
+if(WITH_PLUGIN_PULSE AND WITH_GRPC)
+	add_subdirectory(pulse)
 endif()

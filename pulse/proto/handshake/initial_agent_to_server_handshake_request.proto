@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * The first contact point of the agent to the server after the TCP handshake.
+ */
+message InitialAgentToServerHandshakeRequestProto {
+
+  /*
+   * The agent implementation version. This describes the basic feature set an agent has to offer without feature
+   * flags.
+   *
+   * required
+   */
+  string agent_version = 1;
+
+  /*
+ * The agent implementation version. This describes the basic feature set an agent has to offer without feature
+ * flags.
+ *
+ * required
+ */
+  string application_version = 2;
+
+  /**
+   * A unique identifier of the agent.
+   *
+   * required
+   */
+  UuidProto agent_uuid = 3;
+
+  /*
+    * Identifier of the project this agent belongs to.
+    *
+    * required
+   */
+  UuidProto project_uuid = 4;
+}

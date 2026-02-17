@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+message InformationModelUpdatedNotificationProto {
+
+  /*
+ * The current (latest) available version of the information model at the server who sends the
+ * notification.
+ *
+ * required
+ */
+  uint64 information_model_current_version = 1;
+}

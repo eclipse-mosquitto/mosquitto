@@ -1,0 +1,50 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * An information model request to get or update an information model. This is usually sent from an agent to a pulse
+ * server and answered with an information model graph.
+ */
+message InformationModelRequestProto {
+
+  /*
+   * The identifier of an existing information model.
+   *
+   * required
+   */
+  UuidProto information_model_identifier = 1;
+
+  /*
+   * The identifier of the project.
+   *
+   * required
+   */
+  UuidProto project_id = 2;
+
+  /*
+   * The identifier of the agent
+   *
+   * required
+   */
+  UuidProto agent_id = 3;
+
+  /*
+   * The current (latest) loaded (or stored) available version of the information model at the agent who sends the
+   * request.
+   *
+   * required
+   */
+  uint64 information_model_current_version = 4;
+}

@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * Get history. This is triggered by an API request and can be requested any time.
+ */
+message GetHistoryRequestProto {
+
+  /*
+   * The request id.
+   *
+   * required
+   */
+  int64 request_id = 1;
+
+  /*
+   * The cursor. Used to reference a certain entry in the tag's history to be able to continue on another request.
+   *
+   * not required
+   */
+  optional string cursor = 2;
+
+  /*
+   * The tag id. Points to a tag or field from where the history is queried of.
+   *
+   * required
+   */
+  UuidProto tag_or_field_id = 3;
+
+  /*
+   * The max history size. The maximum amount of datapoints that should be returned inside a single response.
+   *
+   * required
+   */
+  int32 max_history_size = 4;
+
+  /*
+   * The max history size. The maximum amount of bytes that should be returned inside a single response.
+   *
+   * since 2.1.0 agent
+   */
+  optional int64 max_history_bytes = 5;
+
+}

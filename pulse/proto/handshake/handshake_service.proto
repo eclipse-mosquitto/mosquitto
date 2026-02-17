@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+import "handshake/initial_agent_to_server_handshake_request.proto";
+import "handshake/initial_server_to_agent_handshake_response.proto";
+
+service HandshakeService {
+  rpc Handshake(InitialAgentToServerHandshakeRequestProto) returns (InitialServerToAgentHandshakeResponseProto);
+}

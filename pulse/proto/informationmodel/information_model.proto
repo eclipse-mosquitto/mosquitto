@@ -1,0 +1,212 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "google/protobuf/timestamp.proto";
+import "informationmodel/node.proto";
+import "informationmodel/node_delta.proto";
+import "informationmodel/relation.proto";
+import "informationmodel/relation_delta.proto";
+import "informationmodel/ignored_deviation.proto";
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * The information model.
+ */
+message InformationModelProto {
+
+  /*
+   * Information model metadata.
+   */
+  message Metadata {
+
+    /*
+     * The version of the information model implementation.
+     *
+     * required
+     */
+    uint64 implementation_version = 1;
+
+    /*
+     * The timestamp of the information model is created.
+     *
+     * required
+     */
+    google.protobuf.Timestamp created_timestamp = 2;
+
+    /*
+     * The timestamp of the last information model update.
+     *
+     * required
+     */
+    google.protobuf.Timestamp updated_timestamp = 3;
+  }
+
+  /*
+   * The complete information model graph. This is necessary if an agent does not yet have any information model.
+   * It might not be necessary for an agent to have the entire model but it does not hurt to be able to send the
+   * complete model either.
+   */
+  message CompleteGraph {
+
+    /*
+     * The nodes of the complete graph.
+     *
+     * required
+     */
+    repeated NodeProto nodes = 1;
+
+    /*
+     * The relations between the nodes of the complete graph.
+     *
+     * required
+     */
+    repeated RelationProto relations = 2;
+
+    /*
+     * The relations between the nodes of the complete graph.
+     *
+     * required
+     */
+    repeated IgnoredDeviationProto ignored_deviations = 3;
+  }
+
+  /*
+   * A delta of the complete information model graph. This can be used to update a complete graph of an agent.
+   * A delta can always be send once the complete graph was received once.
+   */
+  message CompleteGraphDelta {
+
+    /*
+     * All node deltas for the complete graph. Those only contain updates for the nodes that actually changed.
+     *
+     * required
+     */
+    repeated NodeDeltaProto nodeDeltas = 1;
+
+    /*
+     * All relation deltas for the complete graph. Those only contain updates for the relations that actually changed.
+     *
+     * required
+     */
+    repeated RelationDeltaProto relationDeltas = 2;
+  }
+
+  /*
+   * A subgraph of the whole information model. This is probably the most desired way of delivering the information
+   * model graph to an agent as it does not require us to send the complete model over the wire.
+   */
+  message SubGraph {
+
+    /*
+     * A sensible origin identifier of a node that spans a subgraph which holds all necessary information for an agent
+     * to be able to operate.
+     *
+     * required
+     */
+    UuidProto originating_node_identifier = 1;
+
+    /*
+     * The nodes of the subgraph. It should be possible to calculate via relation directions what part of the
+     * complete graph is picked for the subgraph.
+     *
+     * required
+     */
+    repeated NodeProto nodes = 2;
+
+    /*
+     * The relations between the nodes of the subgraph.
+     *
+     * required
+     */
+    repeated RelationProto relations = 3;
+  }
+
+  /*
+   * A delta of the subgraph of the whole information model. This is used to update the partial graphs of the
+   * information model.
+   */
+  message SubGraphDelta {
+
+    /*
+     * A sensible origin identifier of a node that spans a subgraph which holds all necessary information for an agent
+     * to be able to operate. It could change inside a delta.
+     *
+     * required
+     */
+    UuidProto originating_node_identifier = 1;
+
+    /*
+     * The deltas of nodes of the subgraph. It should be possible to calculate via relation directions what part of the
+     * complete graph is picked for the subgraph.
+     *
+     * required
+     */
+    repeated NodeDeltaProto nodeDeltas = 2;
+
+    /*
+     * The deltas of relations between the nodes of the subgraph.
+     *
+     * required
+     */
+    repeated RelationDeltaProto relationDeltas = 3;
+  }
+
+  /*
+   * The identifier of the information model. For now we plan on using UUIDv7 or TSID.
+   * As UUIDs require 128bits of storage we need multiple bytes. TSID would fit into a single long.
+   * It is yet to be determined if TSIDs' entropy is enough.
+   *
+   * This should be globally unique as information models -in theory- could get shared.
+   *
+   * required
+   */
+  UuidProto identifier = 1;
+
+  /*
+   * The name of the information model. Might be only relevant for the frontend.
+   *
+   * required
+   */
+  string name = 2;
+
+  /*
+   * The description of the information model. Might be only relevant for the frontend.
+   */
+  optional string description = 3;
+
+  /*
+   * Additional metadata information about the information model.
+   * Currently not set.
+   */
+  optional Metadata metadata = 4;
+
+  /*
+   * The version of the actual information model graph.
+   * We might need hashes but a monotonic counting number seems fine for now.
+   *
+   * required
+   */
+  uint64 version = 5;
+
+  /*
+   * The actual information model graph. This is either a complete view on the graph or only a portion of it.
+   * Also, deltas are possible respectively.
+   *
+   * required
+   */
+  oneof graph {
+    CompleteGraph complete_graph = 6;
+    CompleteGraphDelta complete_graph_delta = 7;
+    SubGraph sub_graph = 8;
+    SubGraphDelta sub_graph_delta = 9;
+  }
+}

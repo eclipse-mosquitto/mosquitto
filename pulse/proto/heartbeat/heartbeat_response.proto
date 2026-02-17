@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "error_response.proto";
+import "metrics/metrics_config.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+message HeartbeatResponseOrErrorProto {
+  int64 request_id = 1;
+  oneof result {
+    ErrorResponseProto error = 2;
+    HeartbeatResponseProto response = 3;
+  }
+}
+
+message HeartbeatResponseProto {
+  uint64 information_model_version = 1;
+  MetricsConfigProto metrics_config = 2;
+}

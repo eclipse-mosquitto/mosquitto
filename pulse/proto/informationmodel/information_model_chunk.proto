@@ -1,0 +1,112 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "informationmodel/node.proto";
+import "informationmodel/relation.proto";
+import "informationmodel/ignored_deviation.proto";
+import "uuid.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * A chunk of an information model for streaming transmission.
+ * Large information models are split into multiple chunks to avoid message size limits.
+ */
+message InformationModelChunkProto {
+
+  /*
+   * Metadata about the chunk stream.
+   */
+  message ChunkMetadata {
+    /*
+     * The identifier of the information model.
+     *
+     * required
+     */
+    UuidProto information_model_identifier = 1;
+
+    /*
+     * The name of the information model.
+     *
+     * required
+     */
+    string information_model_name = 2;
+
+    /*
+     * The description of the information model.
+     */
+    optional string information_model_description = 3;
+
+    /*
+     * The version of the information model.
+     *
+     * required
+     */
+    uint64 information_model_version = 4;
+
+    /*
+     * The index of this chunk in the stream (0-based).
+     *
+     * required
+     */
+    uint32 chunk_index = 5;
+
+    /*
+     * Total number of chunks in the stream.
+     *
+     * required
+     */
+    uint32 total_chunks = 6;
+
+    /*
+     * Total number of nodes across all chunks.
+     *
+     * required
+     */
+    uint32 total_nodes = 7;
+
+    /*
+     * Total number of relations across all chunks.
+     *
+     * required
+     */
+    uint32 total_relations = 8;
+
+    /*
+     * Total number of ignored deviations across all chunks.
+     *
+     * required
+     */
+    uint32 total_ignored_deviations = 9;
+  }
+
+  /*
+   * Metadata about this chunk and the overall stream.
+   *
+   * required
+   */
+  ChunkMetadata metadata = 1;
+
+  /*
+   * Nodes included in this chunk.
+   */
+  repeated NodeProto nodes = 2;
+
+  /*
+   * Relations included in this chunk.
+   */
+  repeated RelationProto relations = 3;
+
+  /*
+   * Ignored deviations included in this chunk.
+   * Typically sent only in the last chunk.
+   */
+  repeated IgnoredDeviationProto ignored_deviations = 4;
+}

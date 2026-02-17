@@ -1,0 +1,289 @@
+name: Pulse Plugin - Multi-platform Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - develop
+      - fixes
+    paths:
+      - 'plugins/pulse/**'
+      - 'pulse/proto/**'
+      - '.github/workflows/pulse-plugin.yml'
+  pull_request:
+    branches:
+      - master
+      - develop
+      - fixes
+    paths:
+      - 'plugins/pulse/**'
+      - 'pulse/proto/**'
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # ============================================
+  # Linux x64
+  # ============================================
+  linux-x64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            libcjson-dev \
+            libssl-dev \
+            protobuf-compiler \
+            libprotobuf-dev \
+            libgrpc++-dev \
+            libgrpc-dev \
+            protobuf-compiler-grpc \
+            libabsl-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DWITH_GRPC=ON \
+            -DWITH_PLUGIN_PULSE=ON \
+            -DWITH_DOCS=OFF \
+            -DWITH_BROKER=OFF \
+            -DWITH_CLIENTS=OFF \
+            -DWITH_APPS=OFF \
+            -DWITH_TESTS=OFF
+
+      - name: Build pulse plugin
+        run: cmake --build build --target mosquitto_pulse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-linux-x64
+          path: build/plugins/pulse/mosquitto_pulse.so
+
+  # ============================================
+  # Linux arm64
+  # ============================================
+  linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            libcjson-dev \
+            libssl-dev \
+            protobuf-compiler \
+            libprotobuf-dev \
+            libgrpc++-dev \
+            libgrpc-dev \
+            protobuf-compiler-grpc \
+            libabsl-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DWITH_GRPC=ON \
+            -DWITH_PLUGIN_PULSE=ON \
+            -DWITH_DOCS=OFF \
+            -DWITH_BROKER=OFF \
+            -DWITH_CLIENTS=OFF \
+            -DWITH_APPS=OFF \
+            -DWITH_TESTS=OFF
+
+      - name: Build pulse plugin
+        run: cmake --build build --target mosquitto_pulse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-linux-arm64
+          path: build/plugins/pulse/mosquitto_pulse.so
+
+  # ============================================
+  # macOS ARM (Apple Silicon)
+  # ============================================
+  macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Install Homebrew dependencies
+        run: |
+          brew update
+          brew install \
+            cmake \
+            ninja \
+            cjson \
+            openssl@3 \
+            protobuf \
+            grpc \
+            abseil
+
+      - name: Configure CMake
+        run: |
+          HOMEBREW_PREFIX=$(brew --prefix)
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
+            -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3) \
+            -DWITH_GRPC=ON \
+            -DWITH_PLUGIN_PULSE=ON \
+            -DWITH_DOCS=OFF \
+            -DWITH_BROKER=OFF \
+            -DWITH_CLIENTS=OFF \
+            -DWITH_APPS=OFF \
+            -DWITH_TESTS=OFF
+
+      - name: Build pulse plugin
+        run: cmake --build build --target mosquitto_pulse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-macos-arm64
+          path: build/plugins/pulse/mosquitto_pulse.so
+
+  # ============================================
+  # macOS Intel
+  # ============================================
+  macos-intel:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Install Homebrew dependencies
+        run: |
+          brew update
+          brew install \
+            cmake \
+            ninja \
+            cjson \
+            openssl@3 \
+            protobuf \
+            grpc \
+            abseil
+
+      - name: Configure CMake
+        run: |
+          HOMEBREW_PREFIX=$(brew --prefix)
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
+            -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3) \
+            -DWITH_GRPC=ON \
+            -DWITH_PLUGIN_PULSE=ON \
+            -DWITH_DOCS=OFF \
+            -DWITH_BROKER=OFF \
+            -DWITH_CLIENTS=OFF \
+            -DWITH_APPS=OFF \
+            -DWITH_TESTS=OFF
+
+      - name: Build pulse plugin
+        run: cmake --build build --target mosquitto_pulse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-macos-x64
+          path: build/plugins/pulse/mosquitto_pulse.so
+
+  # ============================================
+  # Windows x64
+  # ============================================
+  windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: '962e5e39f8a25f42522f51fffc574e05a3efd26b'
+
+      - name: Install dependencies via vcpkg
+        run: |
+          vcpkg install --triplet x64-windows `
+            cjson `
+            openssl `
+            protobuf `
+            grpc `
+            abseil
+
+      - name: Configure CMake
+        run: |
+          cmake -B build `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DVCPKG_TARGET_TRIPLET=x64-windows `
+            -DWITH_GRPC=ON `
+            -DWITH_PLUGIN_PULSE=ON `
+            -DWITH_DOCS=OFF `
+            -DWITH_BROKER=OFF `
+            -DWITH_CLIENTS=OFF `
+            -DWITH_APPS=OFF `
+            -DWITH_TESTS=OFF
+
+      - name: Build pulse plugin
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --target mosquitto_pulse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-windows-x64
+          path: build/plugins/pulse/${{ env.BUILD_TYPE }}/mosquitto_pulse.dll
+
+  # ============================================
+  # Create Release Bundle
+  # ============================================
+  bundle:
+    needs: [linux-x64, linux-arm64, macos-arm, macos-intel, windows-x64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release structure
+        run: |
+          mkdir -p release/linux-x64 release/linux-arm64 release/macos-arm64 release/macos-x64 release/windows-x64
+          cp artifacts/mosquitto_pulse-linux-x64/* release/linux-x64/
+          cp artifacts/mosquitto_pulse-linux-arm64/* release/linux-arm64/
+          cp artifacts/mosquitto_pulse-macos-arm64/* release/macos-arm64/
+          cp artifacts/mosquitto_pulse-macos-x64/* release/macos-x64/
+          cp artifacts/mosquitto_pulse-windows-x64/* release/windows-x64/
+
+      - name: Upload combined artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosquitto_pulse-all-platforms
+          path: release/

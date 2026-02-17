@@ -1,0 +1,46 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+import "uuid.proto";
+import "deviations/deviation.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+/*
+ * A node inside the information model graph.
+ */
+message IgnoredDeviationProto {
+
+  /*
+  * The unique identifier of the ignored deviation.
+  *
+  * required
+  */
+  UuidProto identifier = 1;
+  /*
+ * The unique identifier of the tag for which the deviations are ignored
+ *
+ * required
+ */
+  UuidProto tagId = 2;
+  /*
+ * The selector in string representation for the field for which the deviations are ignored
+ *
+ * required
+ */
+  string selector = 3;
+  /*
+ * The ordinal of the deviation type for which the deviations will be ignored
+ *
+ * required
+ */
+  DeviationProto.Type type = 4;
+
+}

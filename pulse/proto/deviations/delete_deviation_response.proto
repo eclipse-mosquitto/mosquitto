@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "error_response.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+
+message DeleteDeviationResponseOrErrorProto {
+  int64 request_id = 1;
+  oneof result {
+    ErrorResponseProto error = 2;
+    DeleteDeviationResponseProto response = 3;
+  }
+}
+
+message DeleteDeviationResponseProto {
+  bool wasDeleted = 1;
+}

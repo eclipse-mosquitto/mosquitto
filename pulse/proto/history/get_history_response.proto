@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package hivemq.pulse.grpc;
+
+import "google/protobuf/timestamp.proto";
+import "error_response.proto";
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/*
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+message GetHistoryResponseOrErrorProto {
+  int64 request_id = 1;
+  oneof result {
+    ErrorResponseProto error = 2;
+    GetHistoryResponseProto response = 3;
+  }
+}
+
+message GetHistoryResponseProto {
+  /*
+   * Cursor to get information about the last query.
+   * Null, if read from latest
+   *
+   * optional
+   */
+  optional string cursor = 1;
+  repeated QueryDatapointProto results = 2;
+  /*
+   * since 2.1.0 agent
+   */
+  optional int32 totalAvailableDataPoints = 3;
+  /*
+   * since 2.1.0 agent
+   */
+  optional int32 totalBytesUsed = 4;
+  /*
+   * since 2.1.0 agent
+   */
+  optional google.protobuf.Timestamp earliestTimestamp = 5;
+  /*
+   * since 2.1.0 agent
+   */
+  optional google.protobuf.Timestamp latestTimestamp = 6;
+}
+
+
+message QueryDatapointProto {
+
+  google.protobuf.Timestamp timestamp = 1;
+
+  string payload = 2;
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package hivemq.pulse.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.hivemq.pulse.agent.server.communication.message.proto";
+
+/**
+ * Based on:
+ * https://protobuf.dev/programming-guides/style/
+ * https://protobuf.dev/best-practices/dos-donts
+ */
+
+
+message ErrorResponseProto {
+  optional string message = 1;
+}
