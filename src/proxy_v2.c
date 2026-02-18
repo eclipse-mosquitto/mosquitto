@@ -280,7 +280,7 @@ int proxy_v2__read(struct mosquitto *context)
 			union proxy_addr *addr = (union proxy_addr *)context->proxy.buf;
 			context->address = mosquitto_strndup((char *)addr->unix_addr.src_addr, sizeof(addr->unix_addr.src_addr));
 			context->remote_port = 0;
-			context->proxy.pos = (uint16_t)(strlen(context->address) + 1);
+			context->proxy.pos = (uint16_t)(sizeof(addr->unix_addr.src_addr) + 1);
 		}else{
 			/* Must be LOCAL */
 			/* Ignore address */
