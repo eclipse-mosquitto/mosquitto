@@ -35,7 +35,7 @@ Contributors:
 #include "util_mosq.h"
 
 
-int send__unsubscribe(struct mosquitto *mosq, int *mid, int topic_count, char *const *const topic, const mosquitto_property *properties)
+int send__unsubscribe(struct mosquitto *mosq, int *mid, int topic_count, const char* const *topic, const mosquitto_property *properties)
 {
 	struct mosquitto__packet *packet = NULL;
 	uint32_t packetlen;

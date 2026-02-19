@@ -546,12 +546,12 @@ int bridge__on_connect(struct mosquitto *context)
 					| MQTT_SUB_OPT_RETAIN_AS_PUBLISHED
 					| MQTT_SUB_OPT_SEND_RETAIN_ALWAYS;
 			}
-			if(send__subscribe(context, NULL, 1, &context->bridge->topics[i].remote_topic, sub_opts, NULL)){
+			if(send__subscribe(context, NULL, 1, (const char* const*)&context->bridge->topics[i].remote_topic, sub_opts, NULL)){
 				return 1;
 			}
 		}else{
 			if(context->bridge->attempt_unsubscribe){
-				if(send__unsubscribe(context, NULL, 1, &context->bridge->topics[i].remote_topic, NULL)){
+				if(send__unsubscribe(context, NULL, 1, (const char* const*)&context->bridge->topics[i].remote_topic, NULL)){
 					/* direction = inwards only. This means we should not be subscribed
 					* to the topic. It is possible that we used to be subscribed to
 					* this topic so unsubscribe. */

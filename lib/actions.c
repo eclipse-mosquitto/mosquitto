@@ -166,17 +166,17 @@ int mosquitto_publish_v5(struct mosquitto *mosq, int *mid, const char *topic, in
 
 int mosquitto_subscribe(struct mosquitto *mosq, int *mid, const char *sub, int qos)
 {
-	return mosquitto_subscribe_multiple(mosq, mid, 1, (char *const *const)&sub, qos, 0, NULL);
+	return mosquitto_subscribe_multiple(mosq, mid, 1, &sub, qos, 0, NULL);
 }
 
 
 int mosquitto_subscribe_v5(struct mosquitto *mosq, int *mid, const char *sub, int qos, int options, const mosquitto_property *properties)
 {
-	return mosquitto_subscribe_multiple(mosq, mid, 1, (char *const *const)&sub, qos, options, properties);
+	return mosquitto_subscribe_multiple(mosq, mid, 1, &sub, qos, options, properties);
 }
 
 
-int mosquitto_subscribe_multiple(struct mosquitto *mosq, int *mid, int sub_count, char *const *const sub, int qos, int options, const mosquitto_property *properties)
+int mosquitto_subscribe_multiple(struct mosquitto *mosq, int *mid, int sub_count, const char* const *sub, int qos, int options, const mosquitto_property *properties)
 {
 	const mosquitto_property *outgoing_properties = NULL;
 	mosquitto_property local_property;
@@ -227,15 +227,15 @@ int mosquitto_subscribe_multiple(struct mosquitto *mosq, int *mid, int sub_count
 
 int mosquitto_unsubscribe(struct mosquitto *mosq, int *mid, const char *sub)
 {
-	return mosquitto_unsubscribe_multiple(mosq, mid, 1, (char *const *const)&sub, NULL);
+	return mosquitto_unsubscribe_multiple(mosq, mid, 1, &sub, NULL);
 }
 
 int mosquitto_unsubscribe_v5(struct mosquitto *mosq, int *mid, const char *sub, const mosquitto_property *properties)
 {
-	return mosquitto_unsubscribe_multiple(mosq, mid, 1, (char *const *const)&sub, properties);
+	return mosquitto_unsubscribe_multiple(mosq, mid, 1, &sub, properties);
 }
 
-int mosquitto_unsubscribe_multiple(struct mosquitto *mosq, int *mid, int sub_count, char *const *const sub, const mosquitto_property *properties)
+int mosquitto_unsubscribe_multiple(struct mosquitto *mosq, int *mid, int sub_count, const char* const *sub, const mosquitto_property *properties)
 {
 	const mosquitto_property *outgoing_properties = NULL;
 	mosquitto_property local_property;

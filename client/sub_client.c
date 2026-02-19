@@ -122,7 +122,7 @@ static void my_connect_callback(struct mosquitto *mosq, void *obj, int result, i
 
 	connack_result = result;
 	if(!result){
-		mosquitto_subscribe_multiple(mosq, NULL, cfg.topic_count, cfg.topics, cfg.qos, cfg.sub_opts, cfg.subscribe_props);
+		mosquitto_subscribe_multiple(mosq, NULL, cfg.topic_count, (const char* const*)cfg.topics, cfg.qos, cfg.sub_opts, cfg.subscribe_props);
 
 		for(i=0; i<cfg.unsub_topic_count; i++){
 			mosquitto_unsubscribe_v5(mosq, NULL, cfg.unsub_topics[i], cfg.unsubscribe_props);
