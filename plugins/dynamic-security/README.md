@@ -338,10 +338,11 @@ Command:
 		{
 			"command": "createGroup",
 			"groupname": "new group",
+            "textname": "", # Optional
+			"textdescription": "", # Optional
 			"roles": [
 				{ "rolename": "role", "priority": 1 }
-			] # Optional, roles must exist
-
+			], # Optional
 		}
 	]
 }
