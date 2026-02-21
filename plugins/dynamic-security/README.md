@@ -342,7 +342,7 @@ Command:
 			"textdescription": "", # Optional
 			"roles": [
 				{ "rolename": "role", "priority": 1 }
-			], # Optional
+			], # Optional, roles must exist
 		}
 	]
 }
@@ -425,10 +425,10 @@ Command:
 			"textdescription": "", # Optional
 			"roles": [
 				{ "rolename": "role", "priority": 1 }
-			], # Optional
+			], # Optional, roles must exist
 			"clients": [
 				{ "username": "client", "priority": 1 }
-			] # Optional
+			] # Optional, client must exist
 
 		}
 	]
