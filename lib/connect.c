@@ -187,7 +187,7 @@ int mosquitto_reconnect(struct mosquitto *mosq)
 }
 
 
-int get_address(int sock, char *buf, size_t len, uint16_t *remote_port)
+int get_address(mosq_sock_t sock, char *buf, size_t len, uint16_t *remote_port)
 {
 	struct sockaddr_storage addr;
 	socklen_t addrlen;

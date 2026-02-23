@@ -938,7 +938,7 @@ static int net__socket_listen_tcp(struct mosquitto__listener *listener)
 static int net__socket_listen_unix(struct mosquitto__listener *listener)
 {
 	struct sockaddr_un addr;
-	int sock;
+	mosq_sock_t sock = INVALID_SOCKET;
 	int rc;
 #ifndef WIN32
 	mode_t old_mask;

@@ -30,6 +30,7 @@
 - Fix test when nbuilding with WITH_EDITLINE=no. Closes #3484.
 - Fix tests when building with WITH_WEBSOCKETS=no. Closes #3502.
 - Fix libmosquitto_static cmake build.
+- Enable WITH_UNIX_SOCKETS on Windows.
 
 
 2.1.2 - 2026-02-09
