@@ -10,7 +10,7 @@ set (VERSION 2.1.2)
 project(mosquitto
 	VERSION ${VERSION}
 	DESCRIPTION "Eclipse Mosquitto"
-	LANGUAGES C CXX
+	LANGUAGES C
 )
 
 set(CMAKE_C_STANDARD 99)
@@ -46,10 +46,16 @@ include(CMakePushCheckState)
 include(CheckSourceCompiles)
 
 option(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
+option(WITH_LIB_CPP "Build C++ library?" ON)
 option(WITH_TLS "Include SSL/TLS support?" ON)
 option(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
 option(WITH_TESTS "Enable tests" ON)
 option(INC_MEMTRACK "Include memory tracking support?" ON)
+
+if (WITH_LIB_CPP OR WITH_TESTS)
+	ENABLE_LANGUAGE(CXX)
+endif()
+
 if (WITH_TLS)
 	find_package(OpenSSL REQUIRED)
 	add_definitions("-DWITH_TLS")
