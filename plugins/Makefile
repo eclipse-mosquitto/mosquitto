@@ -1,3 +1,6 @@
+R=..
+include ${R}/config.mk
+
 DIRS= \
 		acl-file \
 		dynamic-security \
