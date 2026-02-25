@@ -102,8 +102,10 @@ msg_sequence_test:
 	./03-publish-qos2.py
 
 04 :
+ifeq ($(WITH_PERSISTENCE),yes)
 	./04-retain-check-source-persist-diff-port.py
 	./04-retain-check-source-persist.py
+endif
 	./04-retain-check-source.py
 	./04-retain-clear-multiple.py
 	./04-retain-qos0-clear.py
@@ -121,7 +123,9 @@ msg_sequence_test:
 06 :
 	./06-bridge-b2br-disconnect-qos1.py
 	./06-bridge-b2br-disconnect-qos2.py
+ifeq ($(WITH_PERSISTENCE),yes)
 	./06-bridge-b2br-late-connection-retain.py
+endif
 	./06-bridge-b2br-late-connection.py
 	./06-bridge-b2br-remapping.py
 	./06-bridge-br2b-disconnect-qos1.py
@@ -217,11 +221,15 @@ endif
 	./09-plugin-auth-v5-unpwd-success.py
 	./09-plugin-bad.py
 	./09-plugin-change-id.py
+ifneq ($(WITH_WEBSOCKETS),no)
 	./09-plugin-delayed-auth.py
+endif
 	./09-plugin-evt-client-offline.py
 	./09-plugin-evt-message-in.py
 	./09-plugin-evt-message-out.py
+ifeq ($(WITH_TLS_PSK),yes)
 	./09-plugin-evt-psk-key.py
+endif
 	./09-plugin-evt-reload.py
 	./09-plugin-evt-subscribe.py
 	./09-plugin-evt-tick.py
@@ -237,12 +245,14 @@ endif
 	./10-listener-mount-point.py
 
 11 :
+ifeq ($(WITH_PERSISTENCE),yes)
 	./11-message-expiry.py
 	./11-persistence-autosave-changes.py
 	./11-persistent-subscription-no-local.py
 	./11-persistent-subscription.py
 	./11-pub-props.py
 	./11-subscription-id.py
+endif
 
 12 :
 	./12-prop-assigned-client-identifier.py
@@ -367,7 +377,9 @@ endif
 22:
 ifeq ($(WITH_HTTP_API),yes)
 	./22-http-api-acl.py
+ifeq ($(WITH_WEBSOCKETS),yes)
 	./22-http-api-api.py
+endif
 	./22-http-api-auth.py
 	./22-http-api-file.py
 	./22-http-api-tls.py
