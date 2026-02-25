@@ -2,6 +2,7 @@ add_subdirectory(c)
 
 file(GLOB PY_TEST_FILES [0-9][0-9]-*.py)
 file(GLOB PY_PERSIST_TEST_FILES 15-*.py)
+file(GLOB PY_HTTP_API_TEST_FILES 22-*.py)
 
 list(APPEND PY_TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/msg_sequence_test.py")
 
@@ -17,6 +18,13 @@ set(EXCLUDE_LIST
     06-bridge-clean-session-core
     08-ssl-bridge-helper
 )
+
+if(NOT MICROHTTPD_LIBRARY)
+	foreach(PY_HTTP_API_TEST_FILE ${PY_HTTP_API_TEST_FILES})
+		get_filename_component(PY_HTTP_API_TEST_NAME ${PY_HTTP_API_TEST_FILE} NAME_WE)
+		list(APPEND EXCLUDE_LIST ${PY_HTTP_API_TEST_NAME})
+	endforeach()
+endif()
 
 foreach(PY_PERSIST_TEST_FILE ${PY_PERSIST_TEST_FILES})
     get_filename_component(PY_PERSIST_TEST_NAME ${PY_PERSIST_TEST_FILE} NAME_WE)

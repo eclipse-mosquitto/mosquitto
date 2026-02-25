@@ -119,6 +119,8 @@ if(WITH_HTTP_API)
 		if(HTTP_API_DIR)
 			target_compile_definitions(mosquitto PRIVATE "HTTP_API_DIR=\"${HTTP_API_DIR}\"")
 		endif()
+	else()
+		message(WARNING "microhttpd not found, disabling WITH_HTTP_API")
 	endif()
 endif()
 
