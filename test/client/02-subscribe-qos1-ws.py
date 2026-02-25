@@ -3,6 +3,10 @@
 #
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_WEBSOCKETS') != 'yes':
+    exit(77)
 
 def write_config(filename, port1, port2):
     with open(filename, 'w') as f:

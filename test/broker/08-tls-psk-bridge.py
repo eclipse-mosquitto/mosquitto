@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS_PSK') != 'yes':
+    exit(77)
 
 if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")

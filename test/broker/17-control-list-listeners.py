@@ -4,7 +4,11 @@
 
 from mosq_test_helper import *
 import json
+import os
 import shutil
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_WEBSOCKETS') != 'yes':
+    exit(77)
 
 def write_config(filename, ports):
     with open(filename, 'w') as f:

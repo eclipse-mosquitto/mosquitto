@@ -4,7 +4,11 @@
 from mosq_test_helper import *
 from dynsec_helper import *
 import json
+import os
 import shutil
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

@@ -11,6 +11,10 @@
 # message. If rc!=0, the client should exit with an error.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")

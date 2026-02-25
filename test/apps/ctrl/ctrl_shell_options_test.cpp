@@ -230,6 +230,9 @@ TEST_F(CtrlShellOptionsTest, ConnectUrlMissingHost)
 
 TEST_F(CtrlShellOptionsTest, ConnectTLS)
 {
+#ifndef WITH_TLS
+	GTEST_SKIP() << "TLS support not available.";
+#else
 	mosq_config config{};
 	mosquitto mosq{};
 	const char host[] = "localhost";
@@ -258,6 +261,7 @@ TEST_F(CtrlShellOptionsTest, ConnectTLS)
 	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
 
 	ctrl_shell__main(&config);
+#endif
 }
 
 
@@ -296,6 +300,9 @@ TEST_F(CtrlShellOptionsTest, ConnectWebsockets)
 
 TEST_F(CtrlShellOptionsTest, ConnectWebsocketsTLS)
 {
+#ifndef WITH_TLS
+	GTEST_SKIP() << "TLS support not available.";
+#else
 	mosq_config config{};
 	mosquitto mosq{};
 	const char host[] = "localhost";
@@ -325,6 +332,7 @@ TEST_F(CtrlShellOptionsTest, ConnectWebsocketsTLS)
 	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
 
 	ctrl_shell__main(&config);
+#endif
 }
 
 
@@ -441,6 +449,9 @@ TEST_F(CtrlShellOptionsTest, ConnectCertNotFound)
 
 TEST_F(CtrlShellOptionsTest, ConnectCertError)
 {
+#ifndef WITH_TLS
+	GTEST_SKIP() << "TLS support not available.";
+#else
 	mosq_config config{};
 	mosquitto mosq{};
 	const char host[] = "localhost";
@@ -485,4 +496,5 @@ TEST_F(CtrlShellOptionsTest, ConnectCertError)
 	free(config.capath);
 	free(config.certfile);
 	free(config.keyfile);
+#endif
 }

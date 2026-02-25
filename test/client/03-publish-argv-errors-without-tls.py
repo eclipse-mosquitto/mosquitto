@@ -3,6 +3,7 @@
 #
 
 from mosq_test_helper import *
+import os
 
 def do_test(args, stderr_expected, rc_expected):
     rc = 1
@@ -46,7 +47,8 @@ if __name__ == '__main__':
     do_test(['-o'], "Error: -o argument given but no options file specified.\n\n" + helps, 1)
     do_test(['-p'], "Error: -p argument given but no port specified.\n\n" + helps, 1)
     do_test(['-P'], "Error: -P argument given but no password specified.\n\n" + helps, 1)
-    do_test(['--proxy'], "Error: --proxy argument given but no proxy url specified.\n\n" + helps, 1)
+    if os.environ.get('WITH_SOCKS') != 'no':
+        do_test(['--proxy'], "Error: --proxy argument given but no proxy url specified.\n\n" + helps, 1)
     do_test(['-q'], "Error: -q argument given but no QoS specified.\n\n" + helps, 1)
     do_test(['--repeat'], "Error: --repeat argument given but no count specified.\n\n" + helps, 1)
     do_test(['--repeat-delay'], "Error: --repeat-delay argument given but no time specified.\n\n" + helps, 1)
