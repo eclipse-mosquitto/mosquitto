@@ -3,6 +3,10 @@
 #
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_TLS_PSK') != 'yes':
+    exit(77)
 
 def do_test(args, stderr_expected, rc_expected):
     rc = 1
@@ -37,4 +41,3 @@ if __name__ == '__main__':
     do_test(['--cafile', 'file', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.\n" + helps, 1)
     do_test(['--capath', 'dir', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.\n" + helps, 1)
     do_test(['--psk', 'key'], "Error: --psk-identity required if --psk used.\n" + helps, 1)
-    

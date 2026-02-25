@@ -3,7 +3,11 @@
 from mosq_test_helper import *
 import http.client
 import json
+import os
 import ssl
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_HTTP_API') != 'yes':
+    exit(77)
 
 def write_config(filename, mqtt_port, http_port):
     with open(filename, 'w') as f:

@@ -165,6 +165,14 @@ WITH_HTTP_API=yes
 # End of user configuration
 # =============================================================================
 
+# Export WITH_* variables so test scripts can check them via the environment.
+export WITH_HTTP_API
+export WITH_PERSISTENCE
+export WITH_SOCKS
+export WITH_TLS
+export WITH_TLS_PSK
+export WITH_WEBSOCKETS
+
 
 # Also bump lib/mosquitto.h, CMakeLists.txt,
 # installer/mosquitto.nsi, installer/mosquitto64.nsi

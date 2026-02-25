@@ -4,6 +4,10 @@
 # needs a username and password.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

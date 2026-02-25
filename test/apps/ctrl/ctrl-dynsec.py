@@ -5,6 +5,9 @@ import json
 import os
 import shutil
 
+if os.environ.get('WITH_TLS') != 'yes':
+     exit(77)
+
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")

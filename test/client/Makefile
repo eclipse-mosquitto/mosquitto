@@ -9,8 +9,10 @@ all :
 check : test
 test : 02 03 04
 	./test.sh
+ifeq ($(WITH_TLS),yes)
 ifeq ($(WITH_WEBSOCKETS),yes)
 	./test-ws.sh
+endif
 endif
 
 test-compile:
@@ -84,8 +86,10 @@ endif
 
 ptest :
 	./test.sh
+ifeq ($(WITH_TLS),yes)
 ifeq ($(WITH_WEBSOCKETS),yes)
 	./test-ws.sh
+endif
 endif
 	./test.py
 
