@@ -27,6 +27,9 @@ WITH_TLS:=yes
 # WITH_TLS=yes.
 # This must be disabled if using openssl < 1.0.
 WITH_TLS_PSK:=yes
+ifneq ($(WITH_TLS),yes)
+	override WITH_TLS_PSK:=no
+endif
 
 # Comment out to disable client threading support.
 WITH_THREADING:=yes
