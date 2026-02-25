@@ -150,7 +150,9 @@ endif
 endif
 
 test : test-mock
+ifeq ($(WITH_TLS_PSK),yes)
 	./ctrl-args.py
+endif
 	./ctrl-broker.py
 	./ctrl-dynsec.py
 

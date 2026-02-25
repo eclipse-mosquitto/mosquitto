@@ -12,13 +12,17 @@ test-compile:
 	$(MAKE) -C ctrl test-compile
 
 test :
+ifeq ($(WITH_PERSISTENCE),yes)
 	$(MAKE) -C db_dump test
+endif
 	$(MAKE) -C ctrl test
 	$(MAKE) -C passwd test
 	$(MAKE) -C signal test
 
 ptest :
+ifeq ($(WITH_PERSISTENCE),yes)
 	$(MAKE) -C db_dump ptest
+endif
 	$(MAKE) -C ctrl ptest
 	$(MAKE) -C passwd ptest
 	$(MAKE) -C signal ptest
