@@ -8,6 +8,7 @@ import time
 import sys
 
 COLOUR_PASS = 34
+COLOUR_SKIP = 242
 COLOUR_FAIL = 124
 
 class PTestCase():
@@ -37,6 +38,8 @@ class PTestCase():
         cmd = " ".join(self.run_args)
         if col == COLOUR_PASS:
             stat = "✓"
+        elif col == COLOUR_SKIP:
+            stat = "skip"
         elif col == COLOUR_FAIL:
             stat = "✗"
         else:
@@ -120,6 +123,7 @@ class PTest():
         passed = 0
         retried = 0
         failed = 0
+        skipped = 0
 
         failed_tests = []
         failed_tests_output = []
@@ -149,6 +153,11 @@ class PTest():
                     t.proc.terminate()
                     t.proc.wait()
 
+                    if t.proc.returncode == 77:
+                        skipped += 1
+                        t.print_result(0, COLOUR_SKIP)
+                        continue
+
                     if t.proc.returncode != 0 and t.attempts < 5:
                         t.print_result(t.attempts+1, 226-6*t.attempts)
                         retried += 1
@@ -174,7 +183,7 @@ class PTest():
                     t.proc.wait()
                     t.print_log()
 
-        print("Passed: %d\nRetried: %d\nFailed: %d\nTotal: %d\nTotal time: %0.2f" % (passed, retried, failed, passed+failed, time.time()-start_time))
+        print("Passed: %d\nRetried: %d\nFailed: %d\nSkipped: %d\nTotal: %d\nTotal time: %0.2f" % (passed, retried, failed, skipped, passed+failed+skipped, time.time()-start_time))
         if failed > 0:
             print("Failing tests:")
             failed_tests.sort()
