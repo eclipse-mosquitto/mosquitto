@@ -21,3 +21,7 @@ target_link_libraries(libcommon-test
 		libmosquitto_common
 )
 add_test(NAME unit-libcommon-test COMMAND libcommon-test)
+set_tests_properties(unit-libcommon-test
+    PROPERTIES
+        SKIP_RETURN_CODE 77
+)

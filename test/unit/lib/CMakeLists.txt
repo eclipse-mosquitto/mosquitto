@@ -16,3 +16,7 @@ add_executable(lib-test
 target_include_directories(lib-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(lib-test PRIVATE common-unit-test-header OpenSSL::SSL libmosquitto_common)
 add_test(NAME unit-lib-test COMMAND lib-test)
+set_tests_properties(unit-lib-test
+    PROPERTIES
+        SKIP_RETURN_CODE 77
+)

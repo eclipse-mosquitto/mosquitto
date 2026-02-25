@@ -14,6 +14,7 @@ add_executable(bridge-topic-test
 target_compile_definitions(bridge-topic-test PRIVATE WITH_BRIDGE WITH_BROKER)
 target_link_libraries(bridge-topic-test PRIVATE bridge-topic-obj common-unit-test-header libmosquitto_common OpenSSL::SSL)
 add_test(NAME unit-bridge-topic-test COMMAND bridge-topic-test)
+set_tests_properties(unit-bridge-topic-test PROPERTIES SKIP_RETURN_CODE 77)
 
 # keepalive-test
 add_executable(keepalive-test
@@ -23,6 +24,7 @@ add_executable(keepalive-test
 target_compile_definitions(keepalive-test PRIVATE WITH_BROKER)
 target_link_libraries(keepalive-test PRIVATE common-unit-test-header libmosquitto_common OpenSSL::SSL)
 add_test(NAME unit-keepalive-test COMMAND keepalive-test)
+set_tests_properties(unit-keepalive-test PROPERTIES SKIP_RETURN_CODE 77)
 
 # persist-read-test
 add_library(persistence-read-obj
@@ -48,6 +50,7 @@ target_compile_definitions(persist-read-test PRIVATE TEST_SOURCE_DIR="${CMAKE_CU
 target_include_directories(persist-read-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(persist-read-test PRIVATE persistence-read-obj libmosquitto_common)
 add_test(NAME unit-persist-read-test COMMAND persist-read-test)
+set_tests_properties(unit-persist-read-test PROPERTIES SKIP_RETURN_CODE 77)
 
 # persist-write-test
 add_library(persistence-write-obj
@@ -78,6 +81,7 @@ target_compile_definitions(persist-write-test PRIVATE TEST_SOURCE_DIR="${CMAKE_C
 target_include_directories(persist-write-test PRIVATE ${mosquitto_SOURCE_DIR}/libcommon)
 target_link_libraries(persist-write-test PRIVATE persistence-write-obj OpenSSL::SSL libmosquitto_common)
 add_test(NAME unit-persist-write-test COMMAND persist-write-test)
+set_tests_properties(unit-persist-write-test PROPERTIES SKIP_RETURN_CODE 77)
 
 # subs-test
 add_library(subs-obj
@@ -100,3 +104,4 @@ add_executable(subs-test
 target_compile_definitions(subs-test PRIVATE WITH_PERSISTENCE WITH_BROKER WITH_SYS_TREE)
 target_link_libraries(subs-test PRIVATE common-unit-test-header subs-obj libmosquitto_common OpenSSL::SSL)
 add_test(NAME unit-subs-test COMMAND subs-test)
+set_tests_properties(unit-subs-test PROPERTIES SKIP_RETURN_CODE 77)
