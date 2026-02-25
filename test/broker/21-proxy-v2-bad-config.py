@@ -3,8 +3,12 @@
 from mosq_test_helper import *
 from proxy_helper import *
 import json
+import os
 import shutil
 import socket
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def write_config(filename, port, extra_options):
     with open(filename, 'w') as f:

@@ -14,6 +14,7 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     )
     set_tests_properties(apps-${PY_TEST_NAME}
         PROPERTIES
-            ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
+            ENVIRONMENT "${TEST_ENVIRONMENT}"
+            SKIP_RETURN_CODE 77
     )
 endforeach()

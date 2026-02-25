@@ -3,6 +3,10 @@
 #
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 source_dir = Path(__file__).resolve().parent
 ssl_dir = source_dir.parent / "ssl"

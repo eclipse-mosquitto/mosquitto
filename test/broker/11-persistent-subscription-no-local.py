@@ -4,6 +4,10 @@
 # And whether the no-local option is persisted.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_PERSISTENCE') != 'yes':
+    exit(77)
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

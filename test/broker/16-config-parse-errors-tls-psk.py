@@ -3,6 +3,11 @@
 # Test whether config parse errors are handled
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_TLS_PSK') != 'yes':
+    exit(77)
+
 port = mosq_test.get_port()
 
 conf_file = os.path.basename(__file__).replace('.py', '.conf')

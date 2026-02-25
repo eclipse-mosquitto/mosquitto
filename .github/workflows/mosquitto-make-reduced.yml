@@ -1,0 +1,67 @@
+name: Mosquitto - Make (reduced features)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - fixes
+      - develop
+      - release/*
+    tags:
+      - 'v[0-9]+.*'
+  pull_request:
+    branches:
+      - master
+      - fixes
+      - develop
+      - release/*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install third party dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          docbook-xsl \
+          lcov \
+          libargon2-dev \
+          libcjson-dev \
+          libcjson1 \
+          libcunit1-dev \
+          libgmock-dev \
+          microsocks \
+          python3-all \
+          python3-paho-mqtt \
+          python3-psutil \
+          uthash-dev \
+          xsltproc
+    -
+      uses: actions/checkout@v6
+      with:
+        submodules: 'true'
+    -
+      name: make
+      run: |
+        make \
+          WITH_EDITLINE=no \
+          WITH_HTTP_API=no \
+          WITH_PERSISTENCE=no \
+          WITH_SRV=no \
+          WITH_TLS=no \
+          WITH_TLS_PSK=no \
+          WITH_WEBSOCKETS=no
+    -
+      name: make test
+      run: |
+        make ptest \
+          WITH_EDITLINE=no \
+          WITH_HTTP_API=no \
+          WITH_PERSISTENCE=no \
+          WITH_SRV=no \
+          WITH_TLS=no \
+          WITH_TLS_PSK=no \
+          WITH_WEBSOCKETS=no

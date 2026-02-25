@@ -27,6 +27,9 @@ WITH_TLS:=yes
 # WITH_TLS=yes.
 # This must be disabled if using openssl < 1.0.
 WITH_TLS_PSK:=yes
+ifneq ($(WITH_TLS),yes)
+	override WITH_TLS_PSK:=no
+endif
 
 # Comment out to disable client threading support.
 WITH_THREADING:=yes
@@ -82,6 +85,9 @@ WITH_SRV:=no
 # Set to lws to build with old libwebsockets code
 # Set to no to disable
 WITH_WEBSOCKETS:=yes
+ifneq ($(WITH_TLS),yes)
+	override WITH_WEBSOCKETS:=no
+endif
 
 # Build man page documentation by default.
 WITH_DOCS:=yes
@@ -158,6 +164,14 @@ WITH_HTTP_API=yes
 # =============================================================================
 # End of user configuration
 # =============================================================================
+
+# Export WITH_* variables so test scripts can check them via the environment.
+export WITH_HTTP_API
+export WITH_PERSISTENCE
+export WITH_SOCKS
+export WITH_TLS
+export WITH_TLS_PSK
+export WITH_WEBSOCKETS
 
 
 # Also bump lib/mosquitto.h, CMakeLists.txt,

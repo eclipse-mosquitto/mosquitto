@@ -4,6 +4,10 @@
 # incorrect password. The client has a will, but it should not be sent. Check that.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def write_config(filename, port, pw_file):
     with open(filename, 'w') as f:
