@@ -85,6 +85,9 @@ WITH_SRV:=no
 # Set to lws to build with old libwebsockets code
 # Set to no to disable
 WITH_WEBSOCKETS:=yes
+ifneq ($(WITH_TLS),yes)
+	override WITH_WEBSOCKETS:=no
+endif
 
 # Build man page documentation by default.
 WITH_DOCS:=yes
