@@ -7,8 +7,12 @@ file(GLOB PY_HTTP_API_TEST_FILES 22-*.py)
 list(APPEND PY_TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/msg_sequence_test.py")
 
 set(PERSIST_LIST
-    persist_sqlite
 )
+
+if(WITH_PERSIST_SQLITE)
+    list(APPEND PERSIST_LIST persist_sqlite)
+endif()
+
 set(EXCLUDE_LIST
     01-connect-uname-password-success-no-tls
     03-publish-qos1-queued-bytes
