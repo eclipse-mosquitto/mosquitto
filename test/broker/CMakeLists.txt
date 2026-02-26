@@ -20,7 +20,6 @@ set(EXCLUDE_LIST
     09-extended-auth-single2
     # Not a test
     06-bridge-clean-session-core
-    08-ssl-bridge-helper
 )
 
 if(NOT MICROHTTPD_LIBRARY)

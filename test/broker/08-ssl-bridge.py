@@ -5,6 +5,16 @@ from mosq_test_helper import *
 source_dir = Path(__file__).resolve().parent
 ssl_dir = source_dir.parent / "ssl"
 
+def pub_helper(port):
+    connect_packet = mosq_test.gen_connect("test-helper")
+    connack_packet = mosq_test.gen_connack(rc=0)
+    publish_packet = mosq_test.gen_publish("bridge/ssl/test", qos=0, payload="message")
+    disconnect_packet = mosq_test.gen_disconnect()
+    sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port, connack_error="helper connack")
+    sock.send(publish_packet)
+    sock.send(disconnect_packet)
+    sock.close()
+
 def write_config(filename, address, port1, port2):
     with open(filename, 'w') as f:
         f.write(f"listener {port2}\n")
@@ -57,15 +67,10 @@ def do_test(address):
         mosq_test.expect_packet(bridge, "subscribe", subscribe_packet)
         bridge.send(suback_packet)
 
-        pub = subprocess.Popen([f'{source_dir}/08-ssl-bridge-helper.py', str(port2)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        pub_terminated = 0
-        if mosq_test.wait_for_subprocess(pub):
-            print("pub not terminated")
-            pub_terminated = 1
-        (stdo, stde) = pub.communicate()
+        pub_helper(port2)
 
         mosq_test.expect_packet(bridge, "publish", publish_packet)
-        rc = pub_terminated
+        rc = 0
 
         bridge.close()
     except mosq_test.TestError:
