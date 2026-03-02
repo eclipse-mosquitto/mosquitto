@@ -200,7 +200,7 @@ int mosquitto_main_loop(struct mosquitto__listener_sock *listensock, int listens
 		queue_plugin_msgs();
 		context__free_disused();
 
-		db.next_event_ms = 86400000;
+		db.next_event_ms = 1000;
 #ifdef WITH_SYS_TREE
 		if(db.config->sys_interval > 0){
 			sys_tree__update(false);

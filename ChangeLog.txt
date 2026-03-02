@@ -12,6 +12,8 @@
   Closes #3515.
 - Fix will messages being incorrectly delayed if a client set
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
+- Reduce default event loop timeout from 86400 to 1 second to help plugins
+  using the tick event but that set neiter next_s nor next_ms. Closes #3530.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
