@@ -62,6 +62,7 @@ Contributors:
 #define SOCKS_REPLY_ADDRESS_TYPE_NOT_SUPPORTED 0x08U
 
 
+#ifdef WITH_SOCKS
 static inline int socks5__network_error(struct mosquitto *mosq)
 {
 	WINDOWS_SET_ERRNO_RW();
@@ -79,8 +80,10 @@ static inline int socks5__network_error(struct mosquitto *mosq)
 		}
 	}
 }
+#endif
 
 
+#ifdef WITH_SOCKS
 static inline int socks5__connection_error(struct mosquitto *mosq)
 {
 	uint8_t v = mosq->in_packet.payload[1];
@@ -105,6 +108,7 @@ static inline int socks5__connection_error(struct mosquitto *mosq)
 	}
 	return MOSQ_ERR_PROXY;
 }
+#endif
 
 
 int mosquitto_socks5_set(struct mosquitto *mosq, const char *host, int port, const char *username, const char *password)

@@ -73,25 +73,12 @@ struct mosquitto_pw {
 };
 
 
-static int pw__memcmp_const(const void *a, const void *b, size_t len)
-{
 #ifdef WITH_TLS
+static inline int pw__memcmp_const(const void *a, const void *b, size_t len)
+{
 	return CRYPTO_memcmp(a, b, len);
-#else
-	int rc = 0;
-	const volatile char *ac = a;
-	const volatile char *bc = b;
-
-	if(!a || !b){
-		return 1;
-	}
-
-	for(size_t i=0; i<len; i++){
-		rc |= ((char *)ac)[i] ^ ((char *)bc)[i];
-	}
-	return rc;
-#endif
 }
+#endif
 
 
 /* ==================================================
@@ -221,6 +208,8 @@ static int pw__create_sha512_pbkdf2(struct mosquitto_pw *pw, const char *passwor
 	pw->valid = (rc == MOSQ_ERR_SUCCESS);
 	return rc;
 #else
+	UNUSED(pw);
+	UNUSED(password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -246,6 +235,8 @@ static int pw__verify_sha512_pbkdf2(struct mosquitto_pw *pw, const char *passwor
 		return MOSQ_ERR_AUTH;
 	}
 #else
+	UNUSED(pw);
+	UNUSED(password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -282,6 +273,7 @@ static int pw__encode_sha512_pbkdf2(struct mosquitto_pw *pw)
 
 	return MOSQ_ERR_SUCCESS;
 #else
+	UNUSED(pw);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -348,6 +340,8 @@ static int pw__decode_sha512_pbkdf2(struct mosquitto_pw *pw, const char *salt_pa
 	pw->valid = true;
 	return MOSQ_ERR_SUCCESS;
 #else
+	UNUSED(pw);
+	UNUSED(salt_password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -408,6 +402,8 @@ static int pw__create_sha512(struct mosquitto_pw *pw, const char *password)
 	pw->valid = (rc == MOSQ_ERR_SUCCESS);
 	return rc;
 #else
+	UNUSED(pw);
+	UNUSED(password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -430,6 +426,8 @@ static int pw__verify_sha512(struct mosquitto_pw *pw, const char *password)
 		return MOSQ_ERR_AUTH;
 	}
 #else
+	UNUSED(pw);
+	UNUSED(password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -465,6 +463,7 @@ static int pw__encode_sha512(struct mosquitto_pw *pw)
 
 	return MOSQ_ERR_SUCCESS;
 #else
+	UNUSED(pw);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }
@@ -519,6 +518,8 @@ static int pw__decode_sha512(struct mosquitto_pw *pw, const char *salt_password)
 	pw->valid = true;
 	return MOSQ_ERR_SUCCESS;
 #else
+	UNUSED(pw);
+	UNUSED(salt_password);
 	return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 }

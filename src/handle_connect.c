@@ -463,6 +463,7 @@ inline static int send__connack_error_and_return(struct mosquitto *context, uint
 }
 
 
+#ifdef WITH_TLS
 inline static int send__connack_bad_username_or_password_error(struct mosquitto *context, int rc)
 {
 	uint8_t err_code  = context->protocol == mosq_p_mqtt5
@@ -470,6 +471,7 @@ inline static int send__connack_bad_username_or_password_error(struct mosquitto 
 									: (uint8_t)CONNACK_REFUSED_BAD_USERNAME_PASSWORD;
 	return send__connack_error_and_return(context, err_code, rc);
 }
+#endif
 
 
 static int read_protocol_name(struct mosquitto *context, char protocol_name[7])
@@ -973,9 +975,9 @@ static int set_username_from_cert_subject_name(struct mosquitto *context)
 
 static int handle_username_from_cert_options(struct mosquitto *context, char **username, char **password, uint16_t password_len)
 {
+#ifdef WITH_TLS
 	int rc;
 
-#ifdef WITH_TLS
 	if(context->listener->ssl_ctx && (context->listener->use_identity_as_username || context->listener->use_subject_as_username)){
 		/* Don't need the username or password if provided */
 		mosquitto_FREE(*username);
