@@ -295,7 +295,7 @@ int mosquitto_string_option(struct mosquitto *mosq, enum mosq_opt_t option, cons
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 				/* The "Dynamic" OpenSSL engine is not initialized by default but
 				   is required by ENGINE_by_id() to find dynamically loadable engines */
-				OPENSSL_init_crypto(OPENSSL_INIT_ENGINE_DYNAMIC, NULL);
+				OPENSSL_init_crypto(OPENSSL_INIT_LOAD_CONFIG | OPENSSL_INIT_ENGINE_DYNAMIC, NULL);
 #endif
 				eng = ENGINE_by_id(value);
 				if(!eng){
