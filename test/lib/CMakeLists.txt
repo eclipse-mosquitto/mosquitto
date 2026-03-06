@@ -20,6 +20,7 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     )
     set_tests_properties(lib-${PY_TEST_NAME}
         PROPERTIES
+            RESOURCE_GROUPS "ports:1"
             ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
     )
 endforeach()
