@@ -880,19 +880,31 @@ def pack_remaining_length(remaining_length):
 
 
 def get_port(count=1):
-    if count == 1:
-        if len(sys.argv) == 2:
-            return int(sys.argv[1])
+    ports_def = os.environ.get('CTEST_RESOURCE_GROUP_0_PORTS')
+    if ports_def is not None:
+        ports = ports_def.split(";")
+        p = ()
+        for port in ports:
+            (pid, slots) = port.split(",")
+            p = p + (int(pid.split(":")[1]),)
+        if len(p) == 1:
+            return p[0]
         else:
-            return 1888
-    else:
-        if len(sys.argv) >= 1+count:
-            p = ()
-            for i in range(0, count):
-                p = p + (int(sys.argv[1+i]),)
             return p
+    else:
+        if count == 1:
+            if len(sys.argv) == 2:
+                return int(sys.argv[1])
+            else:
+                return 1888
         else:
-            return tuple(range(1888, 1888+count))
+            if len(sys.argv) >= 1+count:
+                p = ()
+                for i in range(0, count):
+                    p = p + (int(sys.argv[1+i]),)
+                return p
+            else:
+                return tuple(range(1888, 1888+count))
 
 
 def do_ping(sock, error_string="pingresp"):

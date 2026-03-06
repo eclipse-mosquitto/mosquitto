@@ -12,7 +12,7 @@ import mqtt5_props
 
 persist_help = persist_module()
 
-port = mosq_test.get_port()
+port, _ = mosq_test.get_port(2)
 
 proto_ver = 5
 qos = 1

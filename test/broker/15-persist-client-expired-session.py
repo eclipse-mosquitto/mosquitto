@@ -8,7 +8,7 @@ from persist_module_helper import *
 
 persist_help = persist_module()
 
-port = mosq_test.get_port()
+port, _ = mosq_test.get_port(2)
 
 num_messages = 100
 proto_ver = 5

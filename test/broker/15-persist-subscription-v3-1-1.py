@@ -18,7 +18,7 @@ def helper(port, packets):
     mosq_test.do_send_receive(helper, packets["pubrel2"], packets["pubcomp2"], "pubcomp helper")
     helper.close()
 
-port = mosq_test.get_port()
+port, _ = mosq_test.get_port(2)
 conf_file = os.path.basename(__file__).replace('.py', '.conf')
 persist_help.write_config(conf_file, port)
 

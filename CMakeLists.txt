@@ -50,6 +50,7 @@ option(WITH_LIB_CPP "Build C++ library?" ON)
 option(WITH_TLS "Include SSL/TLS support?" ON)
 option(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
 option(WITH_TESTS "Enable tests" ON)
+option(WITH_PARALLEL_TESTS "Run tests in parallel?" ON)
 option(INC_MEMTRACK "Include memory tracking support?" ON)
 
 if (WITH_LIB_CPP OR WITH_TESTS)
@@ -260,5 +261,67 @@ if(WITH_TESTS)
 	find_package(GTest REQUIRED)
 	include(GoogleTest)
 	enable_testing()
+
+	function(get_test_files GLOB_LIST EXCLUDE_LIST PY_NAME_LIST)
+		set(LOCAL_LIST )
+		foreach(PY_TEST_FILE ${${GLOB_LIST}})
+			get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
+			if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST)
+				continue()
+			else()
+				list(APPEND LOCAL_LIST ${PY_TEST_NAME})
+			endif()
+		endforeach()
+		set(${PY_NAME_LIST} "${LOCAL_LIST}" PARENT_SCOPE)
+	endfunction()
+
+	function(mosq_set_test_props name)
+		set(fullname "${prefix}-${name}")
+		get_property(test_vars GLOBAL PROPERTY TEST_ENV_VARS)
+		set_tests_properties("${name}"
+			PROPERTIES
+				ENVIRONMENT "${test_vars}"
+				SKIP_RETURN_CODE 77
+		)
+	endfunction()
+
+	function(add_python_test PY_TEST_LIST PREFIX PORTS PY_TEST_FILE)
+		set(LOCAL_LIST ${${PY_TEST_LIST}})
+		get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
+		if(${PY_TEST_NAME} IN_LIST LOCAL_LIST)
+			list(REMOVE_ITEM LOCAL_LIST ${PY_TEST_NAME})
+			set(${PY_TEST_LIST} "${LOCAL_LIST}" PARENT_SCOPE)
+		else()
+			message(SEND_ERROR "Adding non-existent test: ${PY_TEST_FILE}")
+		endif()
+		add_test(NAME ${PREFIX}${PY_TEST_NAME} COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/${PY_TEST_FILE})
+		mosq_set_test_props(${PREFIX}${PY_TEST_NAME})
+		if(${PORTS} GREATER 0)
+			set(PORT_LIST )
+			foreach(X RANGE 1 ${PORTS})
+				list(APPEND PORT_LIST "ports:1")
+			endforeach()
+			list(JOIN PORT_LIST "," PORT_REQ)
+			set_tests_properties(${PREFIX}${PY_TEST_NAME}
+				PROPERTIES
+					RESOURCE_GROUPS "${PORT_REQ}"
+			)
+		endif()
+	endfunction()
+
+	function(check_for_missing_tests PY_TEST_LIST)
+		foreach(PY_TEST ${${PY_TEST_LIST}})
+			message(SEND_ERROR "Test needs adding: ${PY_TEST}")
+		endforeach()
+	endfunction()
+
+	if(WITH_PARALLEL_TESTS)
+		set(CMAKE_CTEST_ARGUMENTS
+			"-j20"
+			"--resource-spec-file ../test/resource.json"
+			"--output-on-failure"
+			"--repeat until-pass:5"
+		)
+	endif()
 	add_subdirectory(test)
 endif()
