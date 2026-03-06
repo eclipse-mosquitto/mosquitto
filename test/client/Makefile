@@ -9,7 +9,9 @@ all :
 check : test
 test : 02 03 04
 	./test.sh
+ifeq ($(WITH_WEBSOCKETS),yes)
 	./test-ws.sh
+endif
 
 test-compile:
 
@@ -82,7 +84,9 @@ endif
 
 ptest :
 	./test.sh
+ifeq ($(WITH_WEBSOCKETS),yes)
 	./test-ws.sh
+endif
 	./test.py
 
 clean:
