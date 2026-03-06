@@ -55,6 +55,14 @@ if (WITH_TLS)
 		PUBLIC
 			OpenSSL::SSL
 	)
+elseif(NOT WIN32)
+	include(CheckSymbolExists)
+	check_symbol_exists(getrandom "sys/random.h" GETRANDOM_FOUND)
+	if(GETRANDOM_FOUND)
+		add_definitions("-DHAVE_GETRANDOM")
+	else()
+		message(FATAL_ERROR "C library does not provide getrandom(); enable WITH_TLS instead")
+	endif()
 endif()
 
 if(INC_MEMTRACK)

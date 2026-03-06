@@ -6,9 +6,14 @@
   of that client. Closes #3487.
 - Fix password length not being passed to MOSQ_EVT_BASIC_AUTH events.
   Closes #3490.
-- Fix incorrect maximum-packet-size restriction. Closes #3503.
+- Fix incorrect maximum-packet-size restriction for outgoing packets.
+  Closes #3503.
+- Fix incorrect maximum-packet-size restriction for incoming packets.
+  Closes #3515.
 - Fix will messages being incorrectly delayed if a client set
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
+- Reduce default event loop timeout from 86400 to 1 second to help plugins
+  using the tick event but that set neiter next_s nor next_ms. Closes #3530.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
@@ -27,6 +32,7 @@
 - Fix test when nbuilding with WITH_EDITLINE=no. Closes #3484.
 - Fix tests when building with WITH_WEBSOCKETS=no. Closes #3502.
 - Fix libmosquitto_static cmake build.
+- Enable WITH_UNIX_SOCKETS on Windows.
 
 
 2.1.2 - 2026-02-09

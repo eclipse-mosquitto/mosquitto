@@ -36,11 +36,15 @@ import os
 import random
 import subprocess
 
+env = os.environ.copy()
+env['CC'] = "ccache gcc"
+env['CXX'] = "ccache g++"
+
 def run_test(msg, opts):
     subprocess.run(["make", "clean"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     print("%s: %s" % (msg, str(opts)))
     args = ["make", "test-compile", "-j%d" % (os.cpu_count())] + opts
-    proc = subprocess.run(args, stdout=subprocess.DEVNULL)
+    proc = subprocess.run(args, stdout=subprocess.DEVNULL, env=env)
     if proc.returncode != 0:
         raise RuntimeError("BUILD FAILED: %s" % (' '.join(args)))
 

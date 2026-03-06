@@ -3,7 +3,11 @@
 # Test whether non-CONNECT packets as an initial packet can cause excess memory use
 
 from mosq_test_helper import *
-import psutil
+try:
+    import psutil
+except ModuleNotFoundError:
+    print("WARNING: Test not running due to missing psutil module")
+    exit(0)
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

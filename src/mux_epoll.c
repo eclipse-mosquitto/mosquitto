@@ -161,10 +161,10 @@ int mux_epoll__handle(void)
 	int event_count;
 
 	memset(&ev, 0, sizeof(struct epoll_event));
-#if defined(WITH_WEBSOCKETS)
+#if defined(WITH_WEBSOCKETS) && WITH_WEBSOCKETS == WS_IS_LWS
 	event_count = epoll_wait(db.epollfd, ep_events, MAX_EVENTS, 100);
 #else
-	event_count = epoll_wait(db.epollfd, ep_events, MAX_EVENTS, db.next_event_ms);
+	event_count = epoll_wait(db.epollfd, ep_events, MAX_EVENTS, (int)db.next_event_ms);
 #endif
 
 	db.now_s = mosquitto_time();

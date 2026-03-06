@@ -119,6 +119,8 @@ if(WITH_HTTP_API)
 		if(HTTP_API_DIR)
 			target_compile_definitions(mosquitto PRIVATE "HTTP_API_DIR=\"${HTTP_API_DIR}\"")
 		endif()
+	else()
+		message(WARNING "microhttpd not found, disabling WITH_HTTP_API")
 	endif()
 endif()
 
@@ -184,6 +186,7 @@ endif()
 if(WITH_ADNS)
 	cmake_push_check_state()
 	set(ANL_CODE "
+		#define _GNU_SOURCE
 		#include <stdlib.h>
 		#include <netdb.h>
 		int main(){

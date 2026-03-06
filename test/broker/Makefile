@@ -306,12 +306,16 @@ PERSIST_TESTS = \
 	./15-persist-subscription-v3-1-1.py \
 	./15-persist-subscription-v5-0.py
 
-PERSIST_PLUGINS =  \
-	persist_sqlite
+PERSIST_PLUGINS =
+ifeq ($(WITH_SQLITE),yes)
+PERSIST_PLUGINS+=persist_sqlite
+endif
 
 15 :	$(PERSISTENCE_TESTS)
 	set -e; for  p in $(PERSIST_PLUGINS); do for t in $(PERSIST_TESTS); do echo $$t $$p; $$t $$p; done; done
+ifeq ($(WITH_SQLITE),yes)
 	./15-persist-migrate-db.py persist_sqlite
+endif
 
 16 :
 	./16-cmd-args.py
