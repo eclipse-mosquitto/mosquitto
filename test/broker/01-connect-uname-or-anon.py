@@ -3,6 +3,10 @@
 # Test whether an anonymous connection is correctly denied.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def write_config(filename, port, allow_anonymous, password_file):
     with open(filename, 'w') as f:

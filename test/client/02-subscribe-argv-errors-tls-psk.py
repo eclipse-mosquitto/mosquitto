@@ -3,6 +3,10 @@
 #
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_TLS_PSK') != 'yes':
+    exit(77)
 
 def do_test(args, stderr_expected, rc_expected):
     rc = 1

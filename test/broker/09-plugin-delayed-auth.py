@@ -3,6 +3,10 @@
 # Test whether message parameters are passed to the plugin acl check function.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_WEBSOCKETS') != 'yes':
+    exit(77)
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

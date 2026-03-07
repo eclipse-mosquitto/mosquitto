@@ -3,7 +3,11 @@
 # Test for CVE-2018-12546
 
 from mosq_test_helper import *
+import os
 import signal
+
+if os.environ.get('WITH_PERSISTENCE') != 'yes':
+    exit(77)
 
 def write_config(filename, port, per_listener):
     with open(filename, 'w') as f:

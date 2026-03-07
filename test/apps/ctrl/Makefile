@@ -5,7 +5,6 @@ include ${R}/config.mk
 
 LOCAL_CPPFLAGS+= \
 	-DWITH_THREADING \
-	-DWITH_TLS \
 	-I../ \
 	-I${R}/include \
 	-I${R} \
@@ -14,6 +13,11 @@ LOCAL_CPPFLAGS+= \
 	-I${R}/test/mock \
 	-I${R}/test/mock/apps/mosquitto_ctrl \
 	-I${R}/test/mock/lib
+
+ifeq ($(WITH_TLS),yes)
+LOCAL_CPPFLAGS+= \
+	-DWITH_TLS
+endif
 
 LOCAL_CXXFLAGS+=-std=c++20 -Wall -ggdb -D TEST_SOURCE_DIR='"$(realpath .)"'
 LOCAL_LDFLAGS+=
@@ -150,7 +154,9 @@ endif
 endif
 
 test : test-mock
+ifeq ($(WITH_TLS_PSK),yes)
 	./ctrl-args.py
+endif
 	./ctrl-broker.py
 	./ctrl-dynsec.py
 

@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 import json
+import os
 from mosq_test_helper import *
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def do_test(file, json_expected):
 

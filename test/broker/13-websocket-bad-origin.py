@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes' or os.environ.get('WITH_WEBSOCKETS') != 'yes':
+    exit(77)
 
 rc = 1
 

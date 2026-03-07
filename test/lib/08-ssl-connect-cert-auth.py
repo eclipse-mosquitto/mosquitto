@@ -11,6 +11,10 @@
 # message. If rc!=0, the client should exit with an error.
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 def do_test(client_cmd):
     port = mosq_test.get_port()

@@ -3,6 +3,10 @@
 # Does a bridge queue up retained messages correctly if the remote broker starts up late?
 
 from mosq_test_helper import *
+import os
+
+if os.environ.get('WITH_PERSISTENCE') != 'yes':
+    exit(77)
 
 def write_config1(filename, persistence_file, port1, port2):
     with open(filename, 'w') as f:

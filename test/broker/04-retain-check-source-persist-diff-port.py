@@ -3,8 +3,11 @@
 # Test for CVE-2018-12546, with the broker being stopped to write the persistence file, plus subscriber on different port.
 
 from mosq_test_helper import *
-import os.path
+import os
 import signal
+
+if os.environ.get('WITH_PERSISTENCE') != 'yes':
+    exit(77)
 
 def write_config(filename, port1, port2, per_listener):
     with open(filename, 'w') as f:

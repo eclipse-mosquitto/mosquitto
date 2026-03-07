@@ -6,7 +6,11 @@
 # https://github.com/eclipse/mosquitto/issues/1402
 
 from mosq_test_helper import *
+import os
 import signal
+
+if os.environ.get('WITH_TLS') != 'yes':
+    exit(77)
 
 if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")
