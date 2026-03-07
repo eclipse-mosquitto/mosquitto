@@ -58,4 +58,4 @@ jobs:
     - run: cmake --build build --parallel $(nproc)
 
     - working-directory: build/
-      run: ctest --output-on-failure --repeat until-pass:5
+      run: ctest -j20 --resource-spec-file ../test/resource.json --output-on-failure --repeat until-pass:5

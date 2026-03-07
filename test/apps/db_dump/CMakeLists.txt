@@ -4,6 +4,10 @@ set(EXCLUDE_LIST
     # none
 )
 
+set(PORT_REQ_1_LIST
+	db-dump-stats-current
+)
+
 foreach(PY_TEST_FILE ${PY_TEST_FILES})
     get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
     if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST)
@@ -16,4 +20,11 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
         PROPERTIES
             ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
     )
+	if(${PY_TEST_NAME} IN_LIST PORT_REQ_1_LIST)
+		set(PORTREQ "ports:1")
+		set_tests_properties(apps-${PY_TEST_NAME}
+			PROPERTIES
+				RESOURCE_GROUPS ${PORTREQ}
+		)
+	endif()
 endforeach()

@@ -49,6 +49,8 @@ def do_test(proto_ver):
 
         rc = 0
 
+    except Exception as e:
+        print(e)
     except mosq_test.TestError:
         pass
     finally:
