@@ -24,6 +24,70 @@ def write_config(filename, mqtt_port, ws_port, http_port):
             f.write(f"listener {ws_port}\n")
             f.write("protocol websockets\n")
 
+def check_sys_tree(http_conn):
+    http_conn.request("GET", "/api/v1/systree")
+    response = http_conn.getresponse()
+    if response.status != 200:
+        raise ValueError(f"/api/v1/systree {response.status}")
+    payload = json.loads(response.read().decode('utf-8'))
+
+    for topic in [
+            '$SYS/broker/clients/connected',
+            '$SYS/broker/clients/disconnected',
+            '$SYS/broker/clients/maximum',
+            '$SYS/broker/connections/socket/count',
+            '$SYS/broker/heap/current',
+            '$SYS/broker/heap/maximum',
+            '$SYS/broker/messages/stored',
+            '$SYS/broker/retained messages/count',
+            '$SYS/broker/store/messages/bytes',
+            '$SYS/broker/uptime']:
+
+        # Protect against values being slightly different by
+        # setting to a known value
+        # This read will fail if the key doesn't already exist
+        if payload[topic] >= 0:
+            payload[topic] = -1
+
+
+    expected_payload = {
+        '$SYS/broker/clients/total': 0,
+        '$SYS/broker/clients/maximum': -1,
+        '$SYS/broker/clients/disconnected': -1,
+        '$SYS/broker/clients/connected': -1,
+        '$SYS/broker/clients/expired': 0,
+        '$SYS/broker/messages/stored': -1,
+        '$SYS/broker/store/messages/bytes': -1,
+        '$SYS/broker/subscriptions/count': 0,
+        '$SYS/broker/shared_subscriptions/count': 0,
+        '$SYS/broker/retained messages/count': -1,
+        '$SYS/broker/heap/current': -1,
+        '$SYS/broker/heap/maximum': -1,
+        '$SYS/broker/messages/received': 0,
+        '$SYS/broker/messages/sent': 0,
+        '$SYS/broker/bytes/received': 0,
+        '$SYS/broker/bytes/sent': 0,
+        '$SYS/broker/publish/bytes/received': 0,
+        '$SYS/broker/publish/bytes/sent': 0,
+        '$SYS/broker/packet/out/count': 0,
+        '$SYS/broker/packet/out/bytes': 0,
+        '$SYS/broker/connections/socket/count': -1,
+        '$SYS/broker/publish/messages/dropped': 0,
+        '$SYS/broker/publish/messages/received': 0,
+        '$SYS/broker/publish/messages/sent': 0,
+        '$SYS/broker/uptime': -1
+    }
+    if payload != expected_payload:
+        raise ValueError(f"/api/v1/systree payload\n{payload}\n{expected_payload}")
+
+
+def check_sys_tree_missing(http_conn):
+    http_conn.request("GET", "/api/v1/systree")
+    response = http_conn.getresponse()
+    if response.status != 404:
+        raise ValueError(f"/api/v1/systree {response.status}")
+
+
 mqtt_port, ws_port, http_port = mosq_test.get_port(3)
 conf_file = os.path.basename(__file__).replace('.py', '.conf')
 write_config(conf_file, mqtt_port, ws_port, http_port)
@@ -90,61 +154,10 @@ try:
     if payload != expected_payload:
         raise ValueError(f"/api/v1/listeners payload\n{payload}\n{expected_payload}")
 
-    # systree API
-    http_conn.request("GET", "/api/v1/systree")
-    response = http_conn.getresponse()
-    if response.status != 200:
-        raise ValueError(f"/api/v1/systree {response.status}")
-    payload = json.loads(response.read().decode('utf-8'))
-
-    for topic in [
-            '$SYS/broker/clients/connected',
-            '$SYS/broker/clients/disconnected',
-            '$SYS/broker/clients/maximum',
-            '$SYS/broker/connections/socket/count',
-            '$SYS/broker/heap/current',
-            '$SYS/broker/heap/maximum',
-            '$SYS/broker/messages/stored',
-            '$SYS/broker/retained messages/count',
-            '$SYS/broker/store/messages/bytes',
-            '$SYS/broker/uptime']:
-
-        # Protect against values being slightly different by
-        # setting to a known value
-        # This read will fail if the key doesn't already exist
-        if payload[topic] >= 0:
-            payload[topic] = -1
-
-
-    expected_payload = {
-        '$SYS/broker/clients/total': 0,
-        '$SYS/broker/clients/maximum': -1,
-        '$SYS/broker/clients/disconnected': -1,
-        '$SYS/broker/clients/connected': -1,
-        '$SYS/broker/clients/expired': 0,
-        '$SYS/broker/messages/stored': -1,
-        '$SYS/broker/store/messages/bytes': -1,
-        '$SYS/broker/subscriptions/count': 0,
-        '$SYS/broker/shared_subscriptions/count': 0,
-        '$SYS/broker/retained messages/count': -1,
-        '$SYS/broker/heap/current': -1,
-        '$SYS/broker/heap/maximum': -1,
-        '$SYS/broker/messages/received': 0,
-        '$SYS/broker/messages/sent': 0,
-        '$SYS/broker/bytes/received': 0,
-        '$SYS/broker/bytes/sent': 0,
-        '$SYS/broker/publish/bytes/received': 0,
-        '$SYS/broker/publish/bytes/sent': 0,
-        '$SYS/broker/packet/out/count': 0,
-        '$SYS/broker/packet/out/bytes': 0,
-        '$SYS/broker/connections/socket/count': -1,
-        '$SYS/broker/publish/messages/dropped': 0,
-        '$SYS/broker/publish/messages/received': 0,
-        '$SYS/broker/publish/messages/sent': 0,
-        '$SYS/broker/uptime': -1
-    }
-    if payload != expected_payload:
-        raise ValueError(f"/api/v1/systree payload\n{payload}\n{expected_payload}")
+    if mosq_test.check_features(["WITH_SYS_TREE"]):
+        check_sys_tree(http_conn)
+    else:
+        check_sys_tree_missing(http_conn)
 
     # Version API
     http_conn.request("GET", "/api/v1/version")
