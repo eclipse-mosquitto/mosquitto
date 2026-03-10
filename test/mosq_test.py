@@ -1279,6 +1279,17 @@ class WebsocketWrapper(object):
         self._socket.setblocking(flag)
 
 
+def check_features(features):
+    for feature in features:
+        env = os.environ.get(feature)
+        if env is not None and env != "ON":
+            return False
+    return True
+
+def require_features(features):
+    if not check_features(features):
+        exit(77)
+
 @atexit.register
 def test_cleanup():
     global vg_logfiles

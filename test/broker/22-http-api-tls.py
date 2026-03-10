@@ -5,18 +5,22 @@ import http.client
 import json
 import ssl
 
+mosq_test.require_features(["WITH_HTTP_API", "WITH_TLS"])
+
 def write_config(filename, mqtt_port, http_port):
     with open(filename, 'w') as f:
         f.write("allow_anonymous true\n")
         f.write(f"listener {mqtt_port}\n")
-        f.write(f"listener 0 {mqtt_port}.sock\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
 
         f.write(f"listener {http_port}\n")
         f.write("protocol http_api\n")
         f.write(f"certfile {ssl_dir}/server.crt\n")
         f.write(f"keyfile {ssl_dir}/server.key\n")
+
+        if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+            f.write(f"listener 0 {mqtt_port}.sock\n")
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
 
 mqtt_port, http_port = mosq_test.get_port(2)
 conf_file = os.path.basename(__file__).replace('.py', '.conf')
@@ -58,19 +62,23 @@ try:
             "mtls": False,
             "allow_anonymous": True
         }, {
-            "path": f"{mqtt_port}.sock",
-            "protocol": "mqtt",
-            "tls": True,
-            "mtls": False,
-            "allow_anonymous": True
-        }, {
             "port": http_port,
             "protocol": "httpapi",
             "tls": True,
             "mtls": False,
             "allow_anonymous": True
-       }]
+        }]
     }
+
+    if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+        expected_payload["listeners"].append({
+            "path": f"{mqtt_port}.sock",
+            "protocol": "mqtt",
+            "tls": True,
+            "mtls": False,
+            "allow_anonymous": True
+       })
+
     if payload != expected_payload:
         raise ValueError(f"Error: /api/v1/listeners payload {payload}")
 

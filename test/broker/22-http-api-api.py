@@ -5,20 +5,24 @@ import http.client
 import json
 import re
 
+mosq_test.require_features(["WITH_HTTP_API"])
+
 def write_config(filename, mqtt_port, ws_port, http_port):
     with open(filename, 'w') as f:
         f.write(f"allow_anonymous true\n")
         f.write(f"listener {mqtt_port}\n")
 
-        f.write(f"listener 0 {mqtt_port}.sock\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
-
-        f.write(f"listener {ws_port}\n")
-        f.write("protocol websockets\n")
-
         f.write(f"listener {http_port}\n")
         f.write("protocol http_api\n")
+
+        if mosq_test.check_features(["WITH_TLS", "WITH_UNIX_SOCKETS"]):
+            f.write(f"listener 0 {mqtt_port}.sock\n")
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
+
+        if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+            f.write(f"listener {ws_port}\n")
+            f.write("protocol websockets\n")
 
 mqtt_port, ws_port, http_port = mosq_test.get_port(3)
 conf_file = os.path.basename(__file__).replace('.py', '.conf')
@@ -57,25 +61,32 @@ try:
             "mtls": False,
             "allow_anonymous": True
         }, {
-            "path": f"{mqtt_port}.sock",
-            "protocol": "mqtt",
-            "tls": True,
-            "mtls": False,
-            "allow_anonymous": True
-        }, {
-            "port": ws_port,
-            "protocol": "websockets",
-            "tls": False,
-            "mtls": False,
-            "allow_anonymous": True
-        }, {
             "port": http_port,
             "protocol": "httpapi",
             "tls": False,
             "mtls": False,
             "allow_anonymous": True
-       }]
+        }]
     }
+
+    if mosq_test.check_features(["WITH_TLS", "WITH_UNIX_SOCKETS"]):
+        expected_payload["listeners"].append({
+            "path": f"{mqtt_port}.sock",
+            "protocol": "mqtt",
+            "tls": True,
+            "mtls": False,
+            "allow_anonymous": True
+        })
+
+    if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+        expected_payload["listeners"].append({
+            "port": ws_port,
+            "protocol": "websockets",
+            "tls": False,
+            "mtls": False,
+            "allow_anonymous": True
+       })
+
     if payload != expected_payload:
         raise ValueError(f"/api/v1/listeners payload\n{payload}\n{expected_payload}")
 
@@ -151,12 +162,15 @@ except mosq_test.TestError:
 except Exception as e:
     print(e)
 finally:
-    os.remove(conf_file)
-    os.remove(f"{mqtt_port}.sock")
     broker.terminate()
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
+    os.remove(conf_file)
+    try:
+        os.remove(f"{mqtt_port}.sock")
+    except FileNotFoundError:
+        pass
     (stdo, stde) = broker.communicate()
     if rc != 0:
         print(stde.decode('utf-8'))

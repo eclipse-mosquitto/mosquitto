@@ -5,6 +5,7 @@
 from mosq_test_helper import *
 import signal
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
 def write_config(filename, port1, port2, subtopic, reload_immediate=False):
     with open(filename, 'w') as f:

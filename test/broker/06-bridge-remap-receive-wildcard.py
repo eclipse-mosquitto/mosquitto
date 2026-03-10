@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+
 def write_config(filename, port1, port2):
     with open(filename, 'w') as f:
         f.write(f"listener {port2}\n")

@@ -5,6 +5,8 @@ import http.client
 import json
 import re
 
+mosq_test.require_features(["WITH_HTTP_API", "WITH_PLUGINS", "WITH_PLUGIN_ACL_FILE"])
+
 def write_config(filename, mqtt_port, http_port):
     with open(filename, 'w') as f:
         f.write(f"allow_anonymous true\n")

@@ -5,6 +5,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+
 def do_test(start_broker, proto_ver_connect, proto_ver_msgs, sub_opts):
     rc = 1
     connect_packet = mosq_test.gen_connect("bridge-test", proto_ver=proto_ver_connect)

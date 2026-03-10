@@ -3,6 +3,8 @@ from pathlib import Path
 import sqlite3
 import mosq_test
 
+mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PERSIST_SQLITE"])
+
 dir_in = 0
 dir_out = 1
 
