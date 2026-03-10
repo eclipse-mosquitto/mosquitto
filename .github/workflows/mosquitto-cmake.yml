@@ -38,6 +38,7 @@ jobs:
           libmicrohttpd-dev \
           libssl-dev \
           libwrap0-dev \
+          ninja-build \
           microsocks \
           python3-all \
           python3-paho-mqtt \
@@ -51,6 +52,7 @@ jobs:
 
     - run: |
         cmake \
+          -G Ninja \
           -DCMAKE_BUILD_TYPE=Debug \
           -S . \
           -B build
