@@ -1,5 +1,7 @@
 add_subdirectory(c)
-add_subdirectory(cpp)
+if(WITH_LIB_CPP)
+	add_subdirectory(cpp)
+endif()
 
 
 file(GLOB PY_TEST_FILES [0-9][0-9]-*.py)

@@ -77,4 +77,5 @@ def do_test(testdir):
             exit(1)
 
 do_test("c")
-do_test("cpp")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp")
