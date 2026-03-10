@@ -39,6 +39,44 @@ function(option_env name description value)
 	set_property(GLOBAL PROPERTY TEST_ENV_VARS "${test_vars};${name}=${${name}}")
 endfunction()
 
+function(mosq_set_test_props prefix name port1 port2 port3 port4)
+	set(fullname "${prefix}-${name}")
+	get_property(test_vars GLOBAL PROPERTY TEST_ENV_VARS)
+	set_tests_properties("${prefix}-${name}"
+		PROPERTIES
+			ENVIRONMENT "${test_vars}"
+			SKIP_RETURN_CODE 77
+	)
+	# Check in descending order so that port1 can contain all tests as a
+	# fallback without having to specify them individually in e.g the broker case
+    if(${name} IN_LIST port4)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1,ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port3)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port2)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port1)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1"
+		)
+    endif()
+endfunction()
+
+function(generate_test_names output_var input_list)
+	set(result)
+	foreach(file IN LISTS ${input_list})
+		get_filename_component(name "${file}" NAME_WE)
+		list(APPEND result "${name}")
+	endforeach()
+	set(${output_var} "${result}" PARENT_SCOPE)
+endfunction()
+
 add_library(common-options INTERFACE)
 if(NOT WIN32)
 	target_compile_options(common-options INTERFACE -Wall -Wextra -Wconversion)

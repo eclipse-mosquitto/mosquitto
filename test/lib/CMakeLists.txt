@@ -10,6 +10,8 @@ set(EXCLUDE_LIST
     03-publish-c2b-qos2-timeout
 )
 
+generate_test_names(PY_TEST_NAMES PY_TEST_FILES)
+
 foreach(PY_TEST_FILE ${PY_TEST_FILES})
     get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
     if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST)
@@ -18,9 +20,5 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     add_test(NAME lib-${PY_TEST_NAME}
         COMMAND ${PY_TEST_FILE}
     )
-    set_tests_properties(lib-${PY_TEST_NAME}
-        PROPERTIES
-            RESOURCE_GROUPS "ports:1"
-            ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
-    )
+	mosq_set_test_props("lib" ${PY_TEST_NAME} "${PY_TEST_NAMES}" "" "" "")
 endforeach()

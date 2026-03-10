@@ -17,17 +17,7 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     add_test(NAME apps-${PY_TEST_NAME}
         COMMAND ${PY_TEST_FILE}
     )
-    set_tests_properties(apps-${PY_TEST_NAME}
-        PROPERTIES
-            ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
-    )
-	if(${PY_TEST_NAME} IN_LIST PORT_REQ_2_LIST)
-		set(PORTREQ "ports:1,ports:1")
-		set_tests_properties(apps-${PY_TEST_NAME}
-			PROPERTIES
-				RESOURCE_GROUPS ${PORTREQ}
-		)
-	endif()
+	mosq_set_test_props("apps" ${PY_TEST_NAME} "" ${PORT_REQ_2_LIST} "" "")
 endforeach()
 
 

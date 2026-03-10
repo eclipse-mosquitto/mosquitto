@@ -83,6 +83,7 @@ set(PORT_REQ_2_LIST
     22-http-api-tls
 )
 
+generate_test_names(PY_TEST_NAMES PY_TEST_FILES)
 
 if(NOT MICROHTTPD_LIBRARY)
 	foreach(PY_HTTP_API_TEST_FILE ${PY_HTTP_API_TEST_FILES})
@@ -101,23 +102,15 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST OR ${PY_TEST_NAME} IN_LIST SQLITE_LIST)
         continue()
     endif()
-    if(${PY_TEST_NAME} IN_LIST PORT_REQ_4_LIST)
-        set(PORTREQ "ports:1,ports:1,ports:1,ports:1")
-    elseif(${PY_TEST_NAME} IN_LIST PORT_REQ_3_LIST)
-        set(PORTREQ "ports:1,ports:1,ports:1")
-    elseif(${PY_TEST_NAME} IN_LIST PORT_REQ_2_LIST)
-        set(PORTREQ "ports:1,ports:1")
-    else()
-        set(PORTREQ "ports:1")
-    endif()
     add_test(NAME broker-${PY_TEST_NAME}
         COMMAND ${PY_TEST_FILE}
     )
-    set_tests_properties(broker-${PY_TEST_NAME}
-        PROPERTIES
-            RESOURCE_GROUPS ${PORTREQ}
-            ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
-    )
+	mosq_set_test_props("broker" ${PY_TEST_NAME}
+		"${PY_TEST_NAMES}"
+		"${PORT_REQ_2_LIST}"
+		"${PORT_REQ_3_LIST}"
+		"${PORT_REQ_4_LIST}"
+	)
 endforeach()
 
 foreach(PERSIST_TYPE ${PERSIST_LIST})
@@ -127,10 +120,8 @@ foreach(PERSIST_TYPE ${PERSIST_LIST})
             COMMAND ${PY_TEST_FILE} ${PERSIST_TYPE}
         )
         set(PORTREQ "ports:1")
-        set_tests_properties(broker-${PY_TEST_NAME}-${PERSIST_TYPE}
-            PROPERTIES
-                RESOURCE_GROUPS ${PORTREQ}
-                ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
-        )
+		mosq_set_test_props("broker" ${PY_TEST_NAME}-${PERSIST_TYPE}
+			"broker-${PY_TEST_NAME}-${PERSIST_TYPE}" "" "" ""
+		)
     endforeach()
 endforeach()
