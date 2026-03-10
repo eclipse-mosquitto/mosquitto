@@ -34,12 +34,12 @@ def do_test(proto_ver):
         sock.close()
 
         # Connect, disconnect, reconnect - try to trigger #3388
-        print(broker.returncode)
-        for i in range(0, 10):
+        for i in range(0, 50):
             try:
-                sock = mosq_test.client_connect_only()
+                sock = mosq_test.client_connect_only(port=port)
+                break
             except ConnectionRefusedError:
-                time.sleep(0.5)
+                time.sleep(0.1)
         sock.send(connect_packet)
         sock.close()
         # Give the tick time to trigger
