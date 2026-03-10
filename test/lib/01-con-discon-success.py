@@ -19,4 +19,5 @@ def do_test(conn, data):
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)
 
 mosq_test.client_test("c/01-con-discon-success.test", [], do_test, None)
-mosq_test.client_test("cpp/01-con-discon-success.test", [], do_test, None)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/01-con-discon-success.test", [], do_test, None)

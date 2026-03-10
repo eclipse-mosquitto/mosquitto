@@ -58,6 +58,7 @@ def do_test(client_cmd, host):
             exit(rc)
 
 do_test("c/08-ssl-connect-san.test", "localhost")
-do_test("cpp/08-ssl-connect-san.test", "localhost")
 do_test("c/08-ssl-connect-san.test", "127.0.0.1")
-do_test("cpp/08-ssl-connect-san.test", "127.0.0.1")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/08-ssl-connect-san.test", "localhost")
+    do_test("cpp/08-ssl-connect-san.test", "127.0.0.1")

@@ -26,19 +26,22 @@ data['mid'] = 1
 data['pubrec_packet'] = mosq_test.gen_pubrec(data['mid'])
 data['pubcomp_packet'] = mosq_test.gen_pubcomp(data['mid'])
 mosq_test.client_test("c/03-publish-c2b-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
 
 # Reason code, no properties
 data['pubrec_packet'] = mosq_test.gen_pubrec(data['mid'], proto_ver=5, reason_code=0x00)
 data['pubcomp_packet'] = mosq_test.gen_pubcomp(data['mid'], proto_ver=5, reason_code=0x00)
 mosq_test.client_test("c/03-publish-c2b-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
 
 # Reason code, empty properties
 data['pubrec_packet'] = mosq_test.gen_pubrec(data['mid'], proto_ver=5, reason_code=0x00, properties="")
 data['pubcomp_packet'] = mosq_test.gen_pubcomp(data['mid'], proto_ver=5, reason_code=0x00, properties="")
 mosq_test.client_test("c/03-publish-c2b-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
 
 # Reason code, one property
 props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
@@ -46,4 +49,5 @@ data['pubrec_packet'] = mosq_test.gen_pubrec(data['mid'], proto_ver=5, reason_co
 props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
 data['pubcomp_packet'] = mosq_test.gen_pubcomp(data['mid'], proto_ver=5, reason_code=0x00, properties=props)
 mosq_test.client_test("c/03-publish-c2b-qos2-len.test", [], do_test, data)
-mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/03-publish-c2b-qos2-len.test", [], do_test, data)

@@ -20,4 +20,5 @@ def do_test(client):
         exit(rc)
 
 do_test("c/09-util-topic-tokenise.test")
-do_test("cpp/09-util-topic-tokenise.test")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/09-util-topic-tokenise.test")

@@ -27,4 +27,5 @@ def do_test(conn, data):
 
 
 mosq_test.client_test("c/01-keepalive-pingreq.test", [], do_test, None)
-mosq_test.client_test("cpp/01-keepalive-pingreq.test", [], do_test, None)
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    mosq_test.client_test("cpp/01-keepalive-pingreq.test", [], do_test, None)

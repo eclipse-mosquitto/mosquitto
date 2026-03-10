@@ -26,4 +26,5 @@ def do_test(conn, data):
 
 
 mosq_test.client_test("c/02-unsubscribe-multiple-v5.test", [], do_test, None)
-# FIXME - missing func in lib mosq_test.client_test("cpp/02-unsubscribe-multiple-v5.test", [], do_test, None)
+#if mosq_test.check_features(["WITH_LIB_CPP"]):
+    # FIXME - missing func in lib mosq_test.client_test("cpp/02-unsubscribe-multiple-v5.test", [], do_test, None)

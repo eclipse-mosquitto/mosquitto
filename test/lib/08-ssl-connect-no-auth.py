@@ -56,4 +56,5 @@ def do_test(client_cmd):
             exit(rc)
 
 do_test("c/08-ssl-connect-no-auth.test")
-do_test("cpp/08-ssl-connect-no-auth.test")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/08-ssl-connect-no-auth.test")
