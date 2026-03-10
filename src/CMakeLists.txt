@@ -96,14 +96,14 @@ if(HAVE_SYS_EPOLL_H)
 	target_compile_definitions(mosquitto PRIVATE "WITH_EPOLL")
 endif()
 
-option(INC_BRIDGE_SUPPORT
+option_env(INC_BRIDGE_SUPPORT
 	"Include bridge support for connecting to other brokers?" ON)
 if(INC_BRIDGE_SUPPORT)
 	target_sources(mosquitto PRIVATE bridge.c)
 	target_compile_definitions(mosquitto PRIVATE "WITH_BRIDGE")
 endif()
 
-option(WITH_HTTP_API
+option_env(WITH_HTTP_API
 	"Include http_api support for listeners?" ON)
 set(HTTP_API_DIR "Default http_api directory" CACHE STRING "")
 if(WITH_HTTP_API)
@@ -125,38 +125,38 @@ if(WITH_HTTP_API)
 endif()
 
 
-option(USE_LIBWRAP "Include tcp-wrappers support?" OFF)
+option_env(USE_LIBWRAP "Include tcp-wrappers support?" OFF)
 
 if(USE_LIBWRAP)
 	target_link_libraries(mosquitto PRIVATE wrap)
 	target_compile_definitions(mosquitto PRIVATE "WITH_WRAP")
 endif()
 
-option(INC_DB_UPGRADE "Include database upgrade support? (recommended)" ON)
+option_env(INC_DB_UPGRADE "Include database upgrade support? (recommended)" ON)
 
 if(INC_MEMTRACK)
 	target_compile_definitions(mosquitto PUBLIC "WITH_MEMORY_TRACKING")
 endif()
 
-option(WITH_PERSISTENCE "Include persistence support?" ON)
+option_env(WITH_PERSISTENCE "Include persistence support?" ON)
 if(WITH_PERSISTENCE)
 	target_compile_definitions(mosquitto PRIVATE "WITH_PERSISTENCE")
 endif()
 
-option(WITH_SYS_TREE "Include $SYS tree support?" ON)
+option_env(WITH_SYS_TREE "Include $SYS tree support?" ON)
 if(WITH_SYS_TREE)
 	target_compile_definitions(mosquitto PRIVATE "WITH_SYS_TREE")
 endif()
 
-option(WITH_OLD_KEEPALIVE "Use legacy keepalive check mechanism?" OFF)
+option_env(WITH_OLD_KEEPALIVE "Use legacy keepalive check mechanism?" OFF)
 if (WITH_OLD_KEEPALIVE)
 	add_definitions("-DWITH_OLD_KEEPALIVE")
 endif (WITH_OLD_KEEPALIVE)
 
-option(WITH_ADNS "Include ADNS support?" OFF)
+option_env(WITH_ADNS "Include ADNS support?" OFF)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-	option(WITH_SYSTEMD "Include systemd support?" OFF)
+	option_env(WITH_SYSTEMD "Include systemd support?" OFF)
 	if(WITH_SYSTEMD)
 		target_compile_definitions(mosquitto PRIVATE "WITH_SYSTEMD")
 		find_library(SYSTEMD_LIBRARY systemd)
@@ -164,9 +164,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux)
 	endif()
 endif()
 
-option(STATIC_WEBSOCKETS "Use the static libwebsockets library?" OFF)
+option_env(STATIC_WEBSOCKETS "Use the static libwebsockets library?" OFF)
 
-option(WITH_CONTROL "Include $CONTROL topic support?" ON)
+option_env(WITH_CONTROL "Include $CONTROL topic support?" ON)
 if(WITH_CONTROL)
 	target_compile_definitions(mosquitto PRIVATE "WITH_CONTROL")
 endif()
