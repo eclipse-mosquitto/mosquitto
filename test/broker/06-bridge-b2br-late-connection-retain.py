@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT", "WITH_PERSISTENCE"])
+
 def write_config1(filename, persistence_file, port1, port2):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port2))

@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_BROKER", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"])
+
 def write_config(filename, port1, port2):
     with open(filename, 'w') as f:
         f.write("allow_anonymous true\n")

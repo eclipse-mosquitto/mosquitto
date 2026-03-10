@@ -6,26 +6,33 @@ from mosq_test_helper import *
 import json
 import shutil
 
+mosq_test.require_features(["WITH_CONTROL"])
+
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write("enable_control_api true\n")
         f.write("allow_anonymous true\n")
         f.write("listener %d\n" % (ports[0]))
         f.write("protocol mqtt\n")
-        f.write("listener %d\n" % (ports[1]))
-        f.write("protocol websockets\n")
-        f.write("listener %d\n" % (ports[2]))
-        f.write("protocol mqtt\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
-        f.write("listener %d\n" % (ports[3]))
-        f.write("protocol websockets\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
-        f.write("listener 0 17-list-listeners-mqtt.sock\n")
-        f.write("protocol mqtt\n")
-        f.write("listener 0 17-list-listeners-websockets.sock\n")
-        f.write("protocol websockets\n")
+        if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+            f.write("listener %d\n" % (ports[1]))
+            f.write("protocol websockets\n")
+        if mosq_test.check_features(["WITH_TLS"]):
+            f.write("listener %d\n" % (ports[2]))
+            f.write("protocol mqtt\n")
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
+        if mosq_test.check_features(["WITH_TLS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+            f.write("listener %d\n" % (ports[3]))
+            f.write("protocol websockets\n")
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
+        if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+            f.write("listener 0 17-list-listeners-mqtt.sock\n")
+            f.write("protocol mqtt\n")
+        if mosq_test.check_features(["WITH_UNIX_SOCKETS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+            f.write("listener 0 17-list-listeners-websockets.sock\n")
+            f.write("protocol websockets\n")
 
 def command_check(sock, command_payload, expected_response):
     command_packet = mosq_test.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))
@@ -54,36 +61,55 @@ write_config(conf_file, ports)
 
 cmd_success = {"commands":[{"command": "listListeners", "correlationData": "m3CtYVnySLCOwnHzITSeowvgla0InV4G"}]}
 
+listeners = [{
+    'port': ports[0],
+    'protocol': 'mqtt',
+    'tls': False
+}]
+
+if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+    listeners.append({
+        'port': ports[1],
+        'protocol': 'mqtt+websockets',
+        'tls': False
+    })
+
+
+if mosq_test.check_features(["WITH_TLS"]):
+    listeners.append({
+        'port': ports[2],
+        'protocol': 'mqtt',
+        'tls': True
+
+    })
+
+if mosq_test.check_features(["WITH_TLS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+    listeners.append({
+        'port': ports[3],
+        'protocol': 'mqtt+websockets',
+        'tls': True
+    })
+
+if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+    listeners.append({
+        'port': 0,
+        'protocol': 'mqtt',
+        'socket-path': '17-list-listeners-mqtt.sock',
+        'tls': False
+    })
+
+if mosq_test.check_features(["WITH_UNIX_SOCKETS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+    listeners.append({
+        'port': 0,
+        'protocol': 'mqtt+websockets',
+        'socket-path': '17-list-listeners-websockets.sock',
+        'tls': False
+    })
+
 response_success = {'responses': [{'command': 'listListeners', "correlationData": "m3CtYVnySLCOwnHzITSeowvgla0InV4G", 'data':{
-    'listeners':[
-        {
-            'port': ports[0],
-            'protocol': 'mqtt',
-            'tls': False
-        },{
-            'port': ports[1],
-            'protocol': 'mqtt+websockets',
-            'tls': False
-        },{
-            'port': ports[2],
-            'protocol': 'mqtt',
-            'tls': True
-        },{
-            'port': ports[3],
-            'protocol': 'mqtt+websockets',
-            'tls': True
-        },{
-            'port': 0,
-            'protocol': 'mqtt',
-            'socket-path': '17-list-listeners-mqtt.sock',
-            'tls': False
-        },{
-            'port': 0,
-            'protocol': 'mqtt+websockets',
-            'socket-path': '17-list-listeners-websockets.sock',
-            'tls': False
-        }
-    ]}}]}
+    'listeners':listeners
+    }
+}]}
 
 rc = 1
 connect_packet = mosq_test.gen_connect("17-list-listeners")

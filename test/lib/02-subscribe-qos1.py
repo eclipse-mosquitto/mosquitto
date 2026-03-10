@@ -30,8 +30,10 @@ def do_test(conn, data):
 
 
 mosq_test.client_test("c/02-subscribe-qos1.test", [], do_test, None)
-mosq_test.client_test("c/02-subscribe-qos1-async1.test", [], do_test, None)
-mosq_test.client_test("c/02-subscribe-qos1-async2.test", [], do_test, None)
+if mosq_test.check_features(["WITH_THREADING"]):
+    mosq_test.client_test("c/02-subscribe-qos1-async1.test", [], do_test, None)
+    mosq_test.client_test("c/02-subscribe-qos1-async2.test", [], do_test, None)
 mosq_test.client_test("cpp/02-subscribe-qos1.test", [], do_test, None)
-mosq_test.client_test("cpp/02-subscribe-qos1-async1.test", [], do_test, None)
-# FIXME - CI fails here, connection refused mosq_test.client_test("cpp/02-subscribe-qos1-async2.test", [], do_test, None)
+if mosq_test.check_features(["WITH_THREADING"]):
+    mosq_test.client_test("cpp/02-subscribe-qos1-async1.test", [], do_test, None)
+    # FIXME - CI fails here, connection refused mosq_test.client_test("cpp/02-subscribe-qos1-async2.test", [], do_test, None)

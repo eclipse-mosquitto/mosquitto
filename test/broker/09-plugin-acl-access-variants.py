@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_ACL_FILE"])
+
 def write_config(filename, port, per_listener):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener))

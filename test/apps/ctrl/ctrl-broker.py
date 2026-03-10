@@ -6,6 +6,8 @@ from mosq_test_helper import *
 import json
 import shutil
 
+mosq_test.require_features(["WITH_CONTROL", "WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY"])
+
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write("enable_control_api true\n")
@@ -14,8 +16,9 @@ def write_config(filename, ports):
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        if mosq_test.check_features(["WITH_TLS"]):
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
 
 def ctrl_cmd(cmd, args, ports, response=None):
     opts = ["-u", "admin",
@@ -67,7 +70,12 @@ try:
     ctrl_cmd("dynsec", ["addRoleACL", "admin", "publishClientReceive", "$CONTROL/#", "allow"], ports)
     ctrl_cmd("dynsec", ["addRoleACL", "admin", "subscribePattern", "$CONTROL/#", "allow"], ports)
 
-    ctrl_cmd("broker", ["listListeners"], ports, response=f"Listener 1:\n  Port:              {ports[0]}\n  Protocol:          mqtt\n  TLS:               false\n\nListener 2:\n  Port:              {ports[1]}\n  Protocol:          mqtt\n  TLS:               true\n\n")
+    if mosq_test.check_features(["WITH_TLS"]):
+        tls = "true"
+    else:
+        tls = "false"
+
+    ctrl_cmd("broker", ["listListeners"], ports, response=f"Listener 1:\n  Port:              {ports[0]}\n  Protocol:          mqtt\n  TLS:               false\n\nListener 2:\n  Port:              {ports[1]}\n  Protocol:          mqtt\n  TLS:               {tls}\n\n")
 
     ctrl_cmd("broker", ["listPlugins"], ports, response="Plugin:            dynamic-security\nControl endpoints: $CONTROL/dynamic-security/v1\n")
 

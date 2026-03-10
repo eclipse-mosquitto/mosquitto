@@ -6,6 +6,8 @@ from mosq_test_helper import *
 import os.path
 import signal
 
+mosq_test.require_features(["WITH_PERSISTENCE"])
+
 def write_config(filename, port1, port2, per_listener):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener))

@@ -6,6 +6,8 @@ if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")
     exit(0)
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+
 def write_config1(filename, port1, port2):
     with open(filename, 'w') as f:
         f.write("allow_anonymous true\n")

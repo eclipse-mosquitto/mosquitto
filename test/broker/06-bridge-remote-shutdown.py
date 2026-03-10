@@ -5,6 +5,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+
 def write_config(filename, port1, port2, protocol_version):
     with open(filename, 'w') as f:
         f.write("log_type all\n")

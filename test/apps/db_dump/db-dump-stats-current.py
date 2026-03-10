@@ -5,6 +5,8 @@
 from mosq_test_helper import *
 import shutil
 
+mosq_test.require_features(["WITH_CLIENTS", "WITH_PERSISTENCE"])
+
 def write_config(conf_file, port):
     with open(conf_file, 'w') as f:
         f.write(f"listener {port}\n")
@@ -85,7 +87,6 @@ def do_test(counts):
         print(e)
     finally:
         os.remove(conf_file)
-        os.remove(f"{port}/mosquitto.db")
         shutil.rmtree(str(port))
         if broker is not None:
             broker.terminate()
