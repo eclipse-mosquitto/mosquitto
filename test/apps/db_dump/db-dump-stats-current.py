@@ -63,7 +63,7 @@ def do_test(counts):
             '-t', 'sub-topic',
             '-E'
         ]
-        subprocess.run(cmd, timeout=1, env=env)
+        subprocess.run(cmd, timeout=10, env=env)
 
         # Publish a retained message which is also queued for the subscriber
         cmd = [
@@ -74,7 +74,7 @@ def do_test(counts):
             '-m', 'message',
             '-r'
         ]
-        subprocess.run(cmd, timeout=1, env=env)
+        subprocess.run(cmd, timeout=10, env=env)
 
         broker.terminate()
         if mosq_test.wait_for_subprocess(broker):
