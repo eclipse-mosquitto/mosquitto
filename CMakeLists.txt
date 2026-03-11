@@ -185,7 +185,7 @@ if(WITH_APPS)
 	add_subdirectory(apps)
 endif()
 
-if(WITH_PLUGINS)
+if(WITH_BROKER AND WITH_PLUGINS)
 	add_subdirectory(plugins)
 endif()
 

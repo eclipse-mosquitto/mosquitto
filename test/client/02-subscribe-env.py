@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_BROKER"])
+
 def do_test(proto_ver, env):
     rc = 1
 

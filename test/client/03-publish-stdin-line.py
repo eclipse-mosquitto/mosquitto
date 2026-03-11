@@ -4,7 +4,7 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["WITH_THREADING"])
+mosq_test.require_features(["WITH_BROKER", "WITH_THREADING"])
 
 def do_test(proto_ver):
     rc = 1

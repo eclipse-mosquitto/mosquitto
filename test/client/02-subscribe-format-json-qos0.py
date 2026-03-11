@@ -5,6 +5,8 @@
 from mosq_test_helper import *
 import json
 
+mosq_test.require_features(["WITH_BROKER"])
+
 def do_test(proto_ver):
     rc = 1
 

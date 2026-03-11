@@ -5,6 +5,8 @@
 from mosq_test_helper import *
 import platform
 
+mosq_test.require_features(["WITH_BROKER"])
+
 def do_test(format_str, expected_output, proto_ver=4, payload="message"):
     rc = 1
 
