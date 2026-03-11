@@ -12,6 +12,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def do_test(client_cmd):
     port = mosq_test.get_port()
 

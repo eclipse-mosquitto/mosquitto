@@ -37,7 +37,6 @@ do_test_broker_failure(conf_file, ["plugin c/auth_plugin.so","plugin_opt_test"],
 if mosq_test.check_features(["INC_BRIDGE_SUPPORT"]):
     do_test_broker_failure(conf_file, ["bridge_attempt_unsubscribe true"], port, 3, "Error: The 'bridge_attempt_unsubscribe' option requires a bridge to be defined first.") # Missing bridge config
     do_test_broker_failure(conf_file, ["bridge_bind_address string"], port, 3, "Error: The 'bridge_bind_address' option requires a bridge to be defined first.") # Missing bridge config
-    do_test_broker_failure(conf_file, ["bridge_insecure true"], port, 3, "Error: The 'bridge_insecure' option requires a bridge to be defined first.") # Missing bridge config
     #do_test_broker_failure(conf_file, ["bridge_require_oscp true"], port, 3, "Error: The 'bridge_require_oscp' option requires a bridge to be defined first.") # Missing bridge config
     do_test_broker_failure(conf_file, ["bridge_max_packet_size 1000"], port, 3, "Error: The 'bridge_max_packet_size' option requires a bridge to be defined first.") # Missing bridge config
     do_test_broker_failure(conf_file, ["bridge_max_topic_alias 1000"], port, 3, "Error: The 'bridge_max_topic_alias' option requires a bridge to be defined first.") # Missing bridge config

@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def do_test(args, stderr_expected, rc_expected):
     rc = 1
 
@@ -41,3 +43,5 @@ if __name__ == '__main__':
     do_test(['--tls-engine-kpass-sha1'], "Error: --tls-engine-kpass-sha1 argument given but no kpass sha1 specified.\n\n" + helps, 1)
     do_test(['--tls-version'], "Error: --tls-version argument given but no version specified.\n\n" + helps, 1)
     do_test(['--tls-keylog'], "Error: --tls-keylog argument given but no file specified.\n\n" + helps, 1)
+    do_test(['-L', 'mqtts://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)
+    do_test(['-L', 'wss://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)

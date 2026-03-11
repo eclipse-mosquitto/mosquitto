@@ -6,7 +6,7 @@ import http.client
 import json
 import re
 
-mosq_test.require_features(["WITH_HTTP_API", "WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE"])
+mosq_test.require_features(["WITH_HTTP_API", "WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE", "WITH_TLS"])
 
 def write_config(filename, mqtt_port, http_port):
     with open(filename, 'w') as f:

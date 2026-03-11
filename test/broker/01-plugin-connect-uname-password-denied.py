@@ -5,7 +5,7 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE"])
+mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE", "WITH_TLS"])
 
 def write_config(filename, port):
     with open(filename, 'w') as f:

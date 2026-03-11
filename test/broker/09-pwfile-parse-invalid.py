@@ -5,6 +5,8 @@
 from mosq_test_helper import *
 import signal
 
+mosq_test.require_features(["WITH_TLS"])
+
 def write_config(filename, port, per_listener):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener))

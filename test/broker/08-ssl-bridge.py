@@ -2,7 +2,7 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+mosq_test.require_features(["INC_BRIDGE_SUPPORT", "WITH_TLS"])
 
 source_dir = Path(__file__).resolve().parent
 ssl_dir = source_dir.parent / "ssl"

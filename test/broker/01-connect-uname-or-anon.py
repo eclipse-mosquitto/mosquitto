@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def write_config(filename, port, allow_anonymous, password_file):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))

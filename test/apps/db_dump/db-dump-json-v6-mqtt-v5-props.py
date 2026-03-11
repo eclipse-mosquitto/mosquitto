@@ -3,6 +3,8 @@
 import json
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def do_test(file, json_expected):
 
     cmd = [
