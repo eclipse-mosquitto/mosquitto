@@ -59,4 +59,5 @@ def do_test(client_cmd):
             exit(1)
 
 do_test("c/03-publish-c2b-qos1-disconnect.test")
-do_test("cpp/03-publish-c2b-qos1-disconnect.test")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/03-publish-c2b-qos1-disconnect.test")

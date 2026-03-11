@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def do_test(args, rc_expected, response=None):
     proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
                     + args,
@@ -48,19 +50,26 @@ do_test(["-p"], 1, response="Error: -p argument given but no port specified.\n\n
 do_test(["-p", "-1"], 1, response="Error: Invalid port given: -1\n")
 do_test(["-p", "65536"], 1, response="Error: Invalid port given: 65536\n")
 do_test(["-P"], 1, response="Error: -P argument given but no password specified.\n\n")
-do_test(["--proxy"], 1, response="Error: --proxy argument given but no proxy url specified.\n\n")
-do_test(["--proxy", "mqtt://localhost"], 1, response="Error: Unsupported proxy protocol: mqtt://localhost\n")
-do_test(["--proxy", "socks5h://"], 1, response="Error: Invalid proxy.\n")
-do_test(["--proxy", "socks5h://localhost:0"], 1, response="Error: Invalid proxy port 0\n")
-do_test(["--proxy", "socks5h://localhost:65536"], 1, response="Error: Invalid proxy port 65536\n")
-do_test(["--proxy", "socks5h://username%@localhost"], 1, response="Error: Invalid URL encoding in username.\n")
-do_test(["--proxy", "socks5h://username%41@localhost"], 1, response="Error: Invalid URL encoding in username.\n")
-do_test(["--proxy", "socks5h://username:password%@localhost"], 1, response="Error: Invalid URL encoding in password.\n")
-do_test(["--proxy", "socks5h://username:password%41@localhost"], 1, response="Error: Invalid URL encoding in password.\n")
-do_test(["--psk"], 1, response="Error: --psk argument given but no key specified.\n\n")
-do_test(["--psk", "missing.psk"], 1, response="Error: --psk-identity required if --psk used.\n")
-do_test(["--psk-identity"], 1, response="Error: --psk-identity argument given but no identity specified.\n\n")
-do_test(["--cafile", ssl_dir / "all-ca.crt", "--psk", "missing.psk", "--psk-identity", "identity"], 1, response="Error: Only one of --psk or --cafile/--capath may be used at once.\n")
+
+if mosq_test.check_features(["WITH_SOCKS"]):
+    do_test(["--proxy"], 1, response="Error: --proxy argument given but no proxy url specified.\n\n")
+    do_test(["--proxy", "mqtt://localhost"], 1, response="Error: Unsupported proxy protocol: mqtt://localhost\n")
+    do_test(["--proxy", "socks5h://"], 1, response="Error: Invalid proxy.\n")
+    do_test(["--proxy", "socks5h://localhost:0"], 1, response="Error: Invalid proxy port 0\n")
+    do_test(["--proxy", "socks5h://localhost:65536"], 1, response="Error: Invalid proxy port 65536\n")
+    do_test(["--proxy", "socks5h://username%@localhost"], 1, response="Error: Invalid URL encoding in username.\n")
+    do_test(["--proxy", "socks5h://username%41@localhost"], 1, response="Error: Invalid URL encoding in username.\n")
+    do_test(["--proxy", "socks5h://username:password%@localhost"], 1, response="Error: Invalid URL encoding in password.\n")
+    do_test(["--proxy", "socks5h://username:password%41@localhost"], 1, response="Error: Invalid URL encoding in password.\n")
+else:
+    do_test(["--proxy", "socks5h://username:password%41@localhost"], 1, response="Error: Unknown option '--proxy'.\n")
+
+if mosq_test.check_features(["WITH_TLS_PSK"]):
+    do_test(["--psk"], 1, response="Error: --psk argument given but no key specified.\n\n")
+    do_test(["--psk", "missing.psk"], 1, response="Error: --psk-identity required if --psk used.\n")
+    do_test(["--psk-identity"], 1, response="Error: --psk-identity argument given but no identity specified.\n\n")
+    do_test(["--cafile", ssl_dir / "all-ca.crt", "--psk", "missing.psk", "--psk-identity", "identity"], 1, response="Error: Only one of --psk or --cafile/--capath may be used at once.\n")
+
 do_test(["-q"], 1, response="Error: -q argument given but no QoS specified.\n\n")
 do_test(["-q", "-1"], 1, response="Error: Invalid QoS given: -1\n")
 do_test(["-q", "3"], 1, response="Error: Invalid QoS given: 3\n")
@@ -126,12 +135,13 @@ do_test(["--version"], 1) # Gives generic help
 # Broker
 do_test(["broker", "unknown"], 13, response="Command 'unknown' not recognised.\n")
 
-# Dynsec
-do_test(["dynsec", "unknown"], 13, response="Command 'unknown' not recognised.\n")
-do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-i"], 3, response="Error: -i argument given, but no iterations provided.\nError: Invalid input.\n")
-do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-c"], 3, response="Error: Unknown argument: -c\nError: Invalid input.\n")
-do_test(["dynsec", "createClient", "client", "-i"], 3, response="Error: -i argument given, but no clientid provided.\nError: Invalid input.\n")
-do_test(["dynsec", "createClient", "client", "-p"], 3, response="Error: -p argument given, but no password provided.\nError: Invalid input.\n")
+if mosq_test.check_features(["WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY"]):
+    # Dynsec
+    do_test(["dynsec", "unknown"], 13, response="Command 'unknown' not recognised.\n")
+    do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-i"], 3, response="Error: -i argument given, but no iterations provided.\nError: Invalid input.\n")
+    do_test(["-f", "file", "dynsec", "setClientPassword", "admin", "admin", "-c"], 3, response="Error: Unknown argument: -c\nError: Invalid input.\n")
+    do_test(["dynsec", "createClient", "client", "-i"], 3, response="Error: -i argument given, but no clientid provided.\nError: Invalid input.\n")
+    do_test(["dynsec", "createClient", "client", "-p"], 3, response="Error: -p argument given, but no password provided.\nError: Invalid input.\n")
 
 # Env modification
 

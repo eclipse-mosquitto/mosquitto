@@ -13,6 +13,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 if sys.version < '2.7':
     print("WARNING: SSL not supported on Python 2.6")
     exit(0)
@@ -58,6 +60,7 @@ def do_test(client_cmd, host):
             exit(rc)
 
 do_test("c/08-ssl-connect-san.test", "localhost")
-do_test("cpp/08-ssl-connect-san.test", "localhost")
 do_test("c/08-ssl-connect-san.test", "127.0.0.1")
-do_test("cpp/08-ssl-connect-san.test", "127.0.0.1")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/08-ssl-connect-san.test", "localhost")
+    do_test("cpp/08-ssl-connect-san.test", "127.0.0.1")

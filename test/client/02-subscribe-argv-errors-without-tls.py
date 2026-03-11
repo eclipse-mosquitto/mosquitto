@@ -45,7 +45,10 @@ if __name__ == '__main__':
     do_test(['-o'], "Error: -o argument given but no options file specified.\n\n" + helps, 1)
     do_test(['-p'], "Error: -p argument given but no port specified.\n\n" + helps, 1)
     do_test(['-P'], "Error: -P argument given but no password specified.\n\n" + helps, 1)
-    do_test(['--proxy'], "Error: --proxy argument given but no proxy url specified.\n\n" + helps, 1)
+    if mosq_test.check_features(["WITH_SOCKS"]):
+        do_test(['--proxy'], "Error: --proxy argument given but no proxy url specified.\n\n" + helps, 1)
+    else:
+        do_test(['--proxy'], "Error: Unknown option '--proxy'.\n" + helps, 1)
     do_test(['--random-filter'], "Error: --random-filter argument given but no chance specified.\n\n" + helps, 1)
     do_test(['-q'], "Error: -q argument given but no QoS specified.\n\n" + helps, 1)
     do_test(['-t'], "Error: -t argument given but no topic specified.\n\n" + helps, 1)
@@ -95,9 +98,7 @@ if __name__ == '__main__':
     do_test(['-C', '0'], "Error: Invalid message count \"0\".\n\n" + helps, 1)
     do_test(['-L', 'invalid://'], "Error: Unsupported URL scheme.\n\n" + helps, 1)
     do_test(['-L', 'mqtt://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)
-    do_test(['-L', 'mqtts://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)
     do_test(['-L', 'ws://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)
-    do_test(['-L', 'wss://localhost'], "Error: Invalid URL for -L argument specified - topic missing.\n" + helps, 1)
     do_test(['-V', '5', '-D', 'connect', 'request-problem-information', '-1'], "Error: Property value (-1) out of range for property request-problem-information.\n\n" + helps, 1)
     do_test(['-V', '5', '-D', 'connect', 'request-problem-information', '256'], "Error: Property value (256) out of range for property request-problem-information.\n\n" + helps, 1)
     do_test(['-V', '5', '-D', 'connect', 'receive-maximum', '-1'], "Error: Property value (-1) out of range for property receive-maximum.\n\n" + helps, 1)

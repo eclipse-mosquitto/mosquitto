@@ -304,7 +304,7 @@ tests = [
     (2, './22-http-api-file.py'),
     (2, './22-http-api-tls.py'),
 
-    (2, './23-security-acl-file-reload.py'),
+    (1, './23-security-acl-file-reload.py'),
 ]
 
 if __name__ == "__main__":

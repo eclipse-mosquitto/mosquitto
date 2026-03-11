@@ -4,6 +4,11 @@ set(EXCLUDE_LIST
     # none
 )
 
+set(PORT_REQ_2_LIST
+	ctrl-broker
+	ctrl-dynsec
+)
+
 foreach(PY_TEST_FILE ${PY_TEST_FILES})
     get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
     if(${PY_TEST_NAME} IN_LIST EXCLUDE_LIST)
@@ -12,10 +17,7 @@ foreach(PY_TEST_FILE ${PY_TEST_FILES})
     add_test(NAME apps-${PY_TEST_NAME}
         COMMAND ${PY_TEST_FILE}
     )
-    set_tests_properties(apps-${PY_TEST_NAME}
-        PROPERTIES
-            ENVIRONMENT "BUILD_ROOT=${CMAKE_BINARY_DIR}"
-    )
+	mosq_set_test_props("apps" ${PY_TEST_NAME} "" ${PORT_REQ_2_LIST} "" "")
 endforeach()
 
 
@@ -88,10 +90,12 @@ function(add_ctrl_shell_test_real_editline TEST_NAME)
 	gtest_discover_tests(${TEST_NAME})
 endfunction()
 
-add_ctrl_shell_test(ctrl_shell_test)
-add_ctrl_shell_test(ctrl_shell_broker_test)
-add_ctrl_shell_test_real_editline(ctrl_shell_completion_test)
-add_ctrl_shell_test(ctrl_shell_dynsec_test)
-add_ctrl_shell_test(ctrl_shell_help_test)
-add_ctrl_shell_test(ctrl_shell_options_test)
-add_ctrl_shell_test(ctrl_shell_pre_connect_test)
+if(WITH_TLS)
+	add_ctrl_shell_test(ctrl_shell_test)
+	add_ctrl_shell_test(ctrl_shell_broker_test)
+	add_ctrl_shell_test_real_editline(ctrl_shell_completion_test)
+	add_ctrl_shell_test(ctrl_shell_dynsec_test)
+	add_ctrl_shell_test(ctrl_shell_help_test)
+	add_ctrl_shell_test(ctrl_shell_options_test)
+	add_ctrl_shell_test(ctrl_shell_pre_connect_test)
+endif()

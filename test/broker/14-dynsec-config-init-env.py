@@ -4,6 +4,8 @@ from mosq_test_helper import *
 import json
 import shutil
 
+mosq_test.require_features(["WITH_CONTROL", "WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY", "WITH_TLS"])
+
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))

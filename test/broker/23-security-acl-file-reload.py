@@ -3,6 +3,8 @@
 from mosq_test_helper import *
 import signal
 
+mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_ACL_FILE"])
+
 def write_config_default(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))

@@ -6,6 +6,8 @@ import json
 import shutil
 import socket
 
+mosq_test.require_features(["WITH_TLS"])
+
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("log_type all\n")

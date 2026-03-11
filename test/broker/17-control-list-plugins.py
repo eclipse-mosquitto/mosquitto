@@ -6,6 +6,8 @@ from mosq_test_helper import *
 import json
 import shutil
 
+mosq_test.require_features(["WITH_CONTROL"])
+
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("enable_control_api true\n")

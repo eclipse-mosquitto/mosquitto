@@ -12,6 +12,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 def do_test(client_cmd):
     port = mosq_test.get_port()
 
@@ -61,6 +63,7 @@ def do_test(client_cmd):
 do_test("c/08-ssl-connect-cert-auth.test")
 do_test("c/08-ssl-connect-cert-auth-custom-ssl-ctx.test")
 do_test("c/08-ssl-connect-cert-auth-custom-ssl-ctx-default.test")
-do_test("cpp/08-ssl-connect-cert-auth.test")
-do_test("cpp/08-ssl-connect-cert-auth-custom-ssl-ctx.test")
-do_test("cpp/08-ssl-connect-cert-auth-custom-ssl-ctx-default.test")
+if mosq_test.check_features(["WITH_LIB_CPP"]):
+    do_test("cpp/08-ssl-connect-cert-auth.test")
+    do_test("cpp/08-ssl-connect-cert-auth-custom-ssl-ctx.test")
+    do_test("cpp/08-ssl-connect-cert-auth-custom-ssl-ctx-default.test")

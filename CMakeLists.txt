@@ -32,6 +32,51 @@ if(APPLE)
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -undefined dynamic_lookup")
 endif()
 
+set_property(GLOBAL PROPERTY TEST_ENV_VARS "BUILD_ROOT=${CMAKE_BINARY_DIR}")
+function(option_env name description value)
+	option(${name} "${description}" ${value})
+	get_property(test_vars GLOBAL PROPERTY TEST_ENV_VARS)
+	set_property(GLOBAL PROPERTY TEST_ENV_VARS "${test_vars};${name}=${${name}}")
+endfunction()
+
+function(mosq_set_test_props prefix name port1 port2 port3 port4)
+	set(fullname "${prefix}-${name}")
+	get_property(test_vars GLOBAL PROPERTY TEST_ENV_VARS)
+	set_tests_properties("${prefix}-${name}"
+		PROPERTIES
+			ENVIRONMENT "${test_vars}"
+			SKIP_RETURN_CODE 77
+	)
+	# Check in descending order so that port1 can contain all tests as a
+	# fallback without having to specify them individually in e.g the broker case
+    if(${name} IN_LIST port4)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1,ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port3)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port2)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1,ports:1"
+		)
+    elseif(${name} IN_LIST port1)
+		set_tests_properties(${fullname}
+			PROPERTIES RESOURCE_GROUPS "ports:1"
+		)
+    endif()
+endfunction()
+
+function(generate_test_names output_var input_list)
+	set(result)
+	foreach(file IN LISTS ${input_list})
+		get_filename_component(name "${file}" NAME_WE)
+		list(APPEND result "${name}")
+	endforeach()
+	set(${output_var} "${result}" PARENT_SCOPE)
+endfunction()
+
 add_library(common-options INTERFACE)
 if(NOT WIN32)
 	target_compile_options(common-options INTERFACE -Wall -Wextra -Wconversion)
@@ -45,12 +90,12 @@ include(GNUInstallDirs)
 include(CMakePushCheckState)
 include(CheckSourceCompiles)
 
-option(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
-option(WITH_LIB_CPP "Build C++ library?" ON)
-option(WITH_TLS "Include SSL/TLS support?" ON)
-option(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
-option(WITH_TESTS "Enable tests" ON)
-option(INC_MEMTRACK "Include memory tracking support?" ON)
+option_env(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
+option_env(WITH_LIB_CPP "Build C++ library?" ON)
+option_env(WITH_TLS "Include SSL/TLS support?" ON)
+option_env(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
+option_env(WITH_TESTS "Enable tests" ON)
+option_env(INC_MEMTRACK "Include memory tracking support?" ON)
 
 if (WITH_LIB_CPP OR WITH_TESTS)
 	ENABLE_LANGUAGE(CXX)
@@ -73,27 +118,27 @@ else()
 	set (OPENSSL_INCLUDE_DIR "")
 endif()
 
-option(WITH_UNIX_SOCKETS "Include Unix Domain Socket support?" ON)
+option_env(WITH_UNIX_SOCKETS "Include Unix Domain Socket support?" ON)
 if(WITH_UNIX_SOCKETS)
 	add_definitions("-DWITH_UNIX_SOCKETS")
 endif()
 
-option(WITH_SOCKS "Include SOCKS5 support?" ON)
+option_env(WITH_SOCKS "Include SOCKS5 support?" ON)
 if(WITH_SOCKS)
 	add_definitions("-DWITH_SOCKS")
 endif()
 
-option(WITH_WEBSOCKETS "Include websockets support?" ON)
-option(WITH_WEBSOCKETS_BUILTIN "Websockets support uses builtin library? Set OFF to use libwebsockets" ON)
+option_env(WITH_WEBSOCKETS "Include websockets support?" ON)
+option_env(WITH_WEBSOCKETS_BUILTIN "Websockets support uses builtin library? Set OFF to use libwebsockets" ON)
 
 if(WITH_WEBSOCKETS AND NOT WITH_TLS)
 	message(FATAL_ERROR "WITH_WEBSOCKETS support requires WITH_TLS.")
 endif()
-option(WITH_SRV "Include SRV lookup support?" OFF)
-option(WITH_STATIC_LIBRARIES "Build static versions of the libmosquitto/pp libraries?" OFF)
-option(WITH_PIC "Build the static library with PIC (Position Independent Code) enabled archives?" OFF)
+option_env(WITH_SRV "Include SRV lookup support?" OFF)
+option_env(WITH_STATIC_LIBRARIES "Build static versions of the libmosquitto/pp libraries?" OFF)
+option_env(WITH_PIC "Build the static library with PIC (Position Independent Code) enabled archives?" OFF)
 
-option(WITH_THREADING "Include threading support?" ON)
+option_env(WITH_THREADING "Include threading support?" ON)
 if(WITH_THREADING)
 	add_definitions("-DWITH_THREADING")
 	if(WIN32)
@@ -101,7 +146,7 @@ if(WITH_THREADING)
 	endif()
 endif()
 
-option(WITH_DLT "Include DLT support?" OFF)
+option_env(WITH_DLT "Include DLT support?" OFF)
 message(STATUS "WITH_DLT = ${WITH_DLT}")
 if(WITH_DLT)
 	find_package(PkgConfig)
@@ -111,7 +156,7 @@ endif()
 find_package(cJSON REQUIRED)
 find_package(argon2)
 
-option(WITH_CTRL_SHELL "Include mosquitto_ctrl interactive shell support?" ON)
+option_env(WITH_CTRL_SHELL "Include mosquitto_ctrl interactive shell support?" ON)
 if(WITH_CTRL_SHELL)
 	find_package(LineEditing)
 endif()
@@ -120,7 +165,7 @@ if(ARGON2_FOUND)
 	#add_definitions("-DWITH_ARGON2")
 endif()
 
-option(WITH_LTO "Build with link time optimizations (IPO) / interprocedural optimization (IPO) enabled." ON)
+option_env(WITH_LTO "Build with link time optimizations (IPO) / interprocedural optimization (IPO) enabled." ON)
 if(WITH_LTO)
 	include(CheckIPOSupported)
 	check_ipo_supported(RESULT is_ipo_supported OUTPUT output)
@@ -135,11 +180,11 @@ endif()
 # Include projects
 # ========================================
 
-option(WITH_CLIENTS "Build clients?" ON)
-option(WITH_BROKER "Build broker?" ON)
-option(WITH_APPS "Build apps?" ON)
-option(WITH_PLUGINS "Build plugins?" ON)
-option(WITH_DOCS "Build documentation?" ON)
+option_env(WITH_CLIENTS "Build clients?" ON)
+option_env(WITH_BROKER "Build broker?" ON)
+option_env(WITH_APPS "Build apps?" ON)
+option_env(WITH_PLUGINS "Build plugins?" ON)
+option_env(WITH_DOCS "Build documentation?" ON)
 
 target_sources(common-options INTERFACE config.h)
 target_include_directories(common-options
@@ -177,7 +222,7 @@ if(WITH_APPS)
 	add_subdirectory(apps)
 endif()
 
-if(WITH_PLUGINS)
+if(WITH_BROKER AND WITH_PLUGINS)
 	add_subdirectory(plugins)
 endif()
 

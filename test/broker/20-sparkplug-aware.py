@@ -3,6 +3,8 @@
 from mosq_test_helper import *
 import uuid
 
+mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_SPARKPLUG_AWARE"])
+
 namespace = "spBv1.0"
 client_id = "test-client"
 username = None

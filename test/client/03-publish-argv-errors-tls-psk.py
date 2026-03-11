@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_CLIENTS", "WITH_TLS", "WITH_TLS_PSK"])
+
 def do_test(args, stderr_expected, rc_expected):
     rc = 1
 

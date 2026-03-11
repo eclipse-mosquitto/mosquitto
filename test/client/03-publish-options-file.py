@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_BROKER"])
+
 def write_config(filename, port, V):
     with open(filename, 'w') as f:
         f.write("-p %d\n" % (port))

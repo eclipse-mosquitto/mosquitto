@@ -5,6 +5,8 @@ import json
 import os
 import shutil
 
+mosq_test.require_features(["WITH_BROKER", "WITH_CONTROL", "WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY", "WITH_TLS"])
+
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
@@ -12,8 +14,9 @@ def write_config(filename, ports):
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        if mosq_test.check_features(["WITH_TLS"]):
+            f.write(f"certfile {ssl_dir}/server.crt\n")
+            f.write(f"keyfile {ssl_dir}/server.key\n")
 
 def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     opts = ["-u", "admin",
@@ -26,7 +29,8 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
                  ]
     else:
         opts += ["-p", str(ports[1])]
-        opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+        if mosq_test.check_features(["WITH_TLS"]):
+            opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
 
     proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
                     + opts + ["dynsec"] + args,

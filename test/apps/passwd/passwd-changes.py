@@ -5,6 +5,8 @@ import json
 import shutil
 import signal
 
+mosq_test.require_features(["WITH_BROKER", "WITH_TLS"])
+
 def write_config(filename, pw_file, port):
     with open(filename, 'w') as f:
         f.write(f"listener {port}\n")

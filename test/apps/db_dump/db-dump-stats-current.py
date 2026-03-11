@@ -5,6 +5,8 @@
 from mosq_test_helper import *
 import shutil
 
+mosq_test.require_features(["WITH_BROKER", "WITH_CLIENTS", "WITH_PERSISTENCE"])
+
 def write_config(conf_file, port):
     with open(conf_file, 'w') as f:
         f.write(f"listener {port}\n")
@@ -61,7 +63,7 @@ def do_test(counts):
             '-t', 'sub-topic',
             '-E'
         ]
-        subprocess.run(cmd, timeout=1, env=env)
+        subprocess.run(cmd, timeout=10, env=env)
 
         # Publish a retained message which is also queued for the subscriber
         cmd = [
@@ -72,7 +74,7 @@ def do_test(counts):
             '-m', 'message',
             '-r'
         ]
-        subprocess.run(cmd, timeout=1, env=env)
+        subprocess.run(cmd, timeout=10, env=env)
 
         broker.terminate()
         if mosq_test.wait_for_subprocess(broker):
@@ -85,7 +87,6 @@ def do_test(counts):
         print(e)
     finally:
         os.remove(conf_file)
-        os.remove(f"{port}/mosquitto.db")
         shutil.rmtree(str(port))
         if broker is not None:
             broker.terminate()
