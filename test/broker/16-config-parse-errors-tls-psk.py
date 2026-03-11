@@ -5,7 +5,7 @@
 from mosq_test_helper import *
 port = mosq_test.get_port()
 
-mosq_test.require_features(["INC_BRIDGE_SUPPORT", "WITH_TLS_PSK"])
+mosq_test.require_features(["INC_BRIDGE_SUPPORT", "WITH_TLS", "WITH_TLS_PSK"])
 
 conf_file = os.path.basename(__file__).replace('.py', '.conf')
 

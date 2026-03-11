@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_TLS"])
+
 source_dir = Path(__file__).resolve().parent
 ssl_dir = source_dir.parent / "ssl"
 
