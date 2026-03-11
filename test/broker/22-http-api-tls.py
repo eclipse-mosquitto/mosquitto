@@ -30,18 +30,24 @@ def check_sys_tree(http_conn):
         raise ValueError(f"Error: /api/v1/systree {response.status}")
     payload = json.loads(response.read().decode('utf-8'))
 
-    for topic in [
-            '$SYS/broker/clients/maximum',
-            '$SYS/broker/connections/socket/count',
+    topics = [
+        '$SYS/broker/clients/maximum',
+        '$SYS/broker/connections/socket/count',
+        '$SYS/broker/messages/received',
+        '$SYS/broker/bytes/received',
+        '$SYS/broker/messages/stored',
+        '$SYS/broker/retained messages/count',
+        '$SYS/broker/store/messages/bytes',
+        '$SYS/broker/uptime'
+    ]
+
+    if mosq_test.check_features(["INC_MEMTRACK"]):
+        topics.extend([
             '$SYS/broker/heap/current',
             '$SYS/broker/heap/maximum',
-            '$SYS/broker/messages/received',
-            '$SYS/broker/bytes/received',
-            '$SYS/broker/messages/stored',
-            '$SYS/broker/retained messages/count',
-            '$SYS/broker/store/messages/bytes',
-            '$SYS/broker/uptime']:
+        ])
 
+    for topic in topics:
         # Protect against values being slightly different by
         # setting to a known value
         # This read will fail if the key doesn't already exist
@@ -60,8 +66,6 @@ def check_sys_tree(http_conn):
         '$SYS/broker/subscriptions/count': 0,
         '$SYS/broker/shared_subscriptions/count': 0,
         '$SYS/broker/retained messages/count': -1,
-        '$SYS/broker/heap/current': -1,
-        '$SYS/broker/heap/maximum': -1,
         '$SYS/broker/messages/received': -1,
         '$SYS/broker/messages/sent': 0,
         '$SYS/broker/bytes/received': -1,
@@ -76,6 +80,11 @@ def check_sys_tree(http_conn):
         '$SYS/broker/publish/messages/sent': 0,
         '$SYS/broker/uptime': -1
     }
+
+    if mosq_test.check_features(["INC_MEMTRACK"]):
+        expected_payload['$SYS/broker/heap/current'] = -1
+        expected_payload['$SYS/broker/heap/maximum'] = -1
+
     if payload != expected_payload:
         raise ValueError(f"Error: /api/v1/systree payload\n{payload}\n{expected_payload}")
 
