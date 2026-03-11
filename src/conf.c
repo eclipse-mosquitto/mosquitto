@@ -1350,7 +1350,7 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Bridge and/or TLS support not available.");
 #endif
 				}else if(!strcmp(token, "bridge_bind_address")){
-#if defined(WITH_BRIDGE) && defined(WITH_TLS)
+#if defined(WITH_BRIDGE)
 					REQUIRE_BRIDGE(token);
 					if(conf__parse_string(&token, "bridge_bind_address", &cur_bridge->bind_address, &saveptr)){
 						return MOSQ_ERR_INVAL;
