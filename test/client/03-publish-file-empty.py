@@ -4,6 +4,8 @@
 
 from mosq_test_helper import *
 
+mosq_test.require_features(["WITH_BROKER"])
+
 def write_file(filename):
     with open(filename, 'w') as f:
         pass

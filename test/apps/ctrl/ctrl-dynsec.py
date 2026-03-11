@@ -5,7 +5,7 @@ import json
 import os
 import shutil
 
-mosq_test.require_features(["WITH_CONTROL", "WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY", "WITH_TLS"])
+mosq_test.require_features(["WITH_BROKER", "WITH_CONTROL", "WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY", "WITH_TLS"])
 
 def write_config(filename, ports):
     with open(filename, 'w') as f:

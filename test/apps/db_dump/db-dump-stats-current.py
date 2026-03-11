@@ -5,7 +5,7 @@
 from mosq_test_helper import *
 import shutil
 
-mosq_test.require_features(["WITH_CLIENTS", "WITH_PERSISTENCE"])
+mosq_test.require_features(["WITH_BROKER", "WITH_CLIENTS", "WITH_PERSISTENCE"])
 
 def write_config(conf_file, port):
     with open(conf_file, 'w') as f:

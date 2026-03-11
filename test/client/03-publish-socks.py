@@ -4,7 +4,7 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["WITH_SOCKS"])
+mosq_test.require_features(["WITH_BROKER", "WITH_SOCKS"])
 
 def do_test(proto_ver, host):
     rc = 1
