@@ -59,11 +59,6 @@ WITH_MEMORY_TRACKING:=yes
 # but freed with the tracking function will trigger an abort.
 #ALLOC_MISMATCH_ABORT:=yes
 
-# Compile with database upgrading support? If disabled, mosquitto won't
-# automatically upgrade old database versions.
-# Not currently supported.
-#WITH_DB_UPGRADE:=yes
-
 # Comment out to remove publishing of the $SYS topic hierarchy containing
 # information about the broker state.
 WITH_SYS_TREE:=yes

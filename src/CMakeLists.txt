@@ -132,8 +132,6 @@ if(USE_LIBWRAP)
 	target_compile_definitions(mosquitto PRIVATE "WITH_WRAP")
 endif()
 
-option_env(INC_DB_UPGRADE "Include database upgrade support? (recommended)" ON)
-
 if(INC_MEMTRACK)
 	target_compile_definitions(mosquitto PUBLIC "WITH_MEMORY_TRACKING")
 endif()
