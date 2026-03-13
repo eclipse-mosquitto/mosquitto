@@ -86,6 +86,11 @@ add_executable(mosquitto
 	../lib/will_mosq.c ../lib/will_mosq.h
 )
 
+option_env(WITH_PERSISTENCE "Include legacy persistence support?" ON)
+if(WITH_PERSISTENCE)
+	target_compile_definitions(mosquitto PRIVATE "WITH_PERSISTENCE")
+endif()
+
 CHECK_INCLUDE_FILES(sys/event.h HAVE_SYS_EVENT_H)
 if(HAVE_SYS_EVENT_H)
 	target_compile_definitions(mosquitto PRIVATE "WITH_KQUEUE")
