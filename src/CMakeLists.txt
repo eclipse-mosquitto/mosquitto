@@ -84,6 +84,7 @@ add_executable(mosquitto
 	websockets.c
 	will_delay.c
 	../lib/will_mosq.c ../lib/will_mosq.h
+	xtreport.c
 )
 
 option_env(INC_BRIDGE_SUPPORT "Include bridge support for connecting to other brokers?" ON)
@@ -96,6 +97,7 @@ option_env(WITH_OLD_KEEPALIVE "Use legacy keepalive check mechanism?" OFF)
 option_env(WITH_PERSISTENCE "Include legacy persistence support?" ON)
 option_env(WITH_PERSISTENCE "Include persistence support?" ON)
 option_env(WITH_SYS_TREE "Include $SYS tree support?" ON)
+option_env(WITH_XTREPORT "Include xtreport support (debugging only)?" OFF)
 
 set(HTTP_API_DIR "Default http_api directory" CACHE STRING "")
 
@@ -234,6 +236,10 @@ if(WITH_WEBSOCKETS)
 			target_link_libraries(mosquitto PRIVATE websockets_shared)
 		endif()
 	endif()
+endif()
+
+if(WITH_XTREPORT)
+	target_compile_definitions(mosquitto PRIVATE "WITH_XTREPORT")
 endif()
 
 if(WIN32 OR CYGWIN)
