@@ -25,6 +25,9 @@ set(C_SRC
 	"${mosquitto_SOURCE_DIR}/include/mosquitto/libcommon_utf8.h"
 )
 
+option_env(ALLOC_MISMATCH_INVALID_READ "Memory function mismatch detection." OFF)
+option_env(ALLOC_MISMATCH_ABORT "Memory function mismatch abort." OFF)
+
 if(WIN32)
 	add_library(libmosquitto_common SHARED
 		${C_SRC}
@@ -50,7 +53,19 @@ if(ARGON2_FOUND)
 	target_link_libraries(libmosquitto_common PRIVATE argon2)
 endif()
 
-if (WITH_TLS)
+if(ALLOC_MISMATCH_INVALID_READ)
+	target_compile_definitions(libmosquitto_common PRIVATE "ALLOC_MISMATCH_INVALID_READ")
+endif()
+
+if(ALLOC_MISMATCH_ABORT)
+	target_compile_definitions(libmosquitto_common PRIVATE "ALLOC_MISMATCH_ABORT")
+endif()
+
+if(INC_MEMTRACK)
+	target_compile_definitions(libmosquitto_common PUBLIC "WITH_MEMORY_TRACKING")
+endif()
+
+if(WITH_TLS)
 	target_link_libraries(libmosquitto_common
 		PUBLIC
 			OpenSSL::SSL
@@ -63,20 +78,6 @@ elseif(NOT WIN32)
 	else()
 		message(FATAL_ERROR "C library does not provide getrandom(); enable WITH_TLS instead")
 	endif()
-endif()
-
-if(INC_MEMTRACK)
-	target_compile_definitions(libmosquitto_common PUBLIC "WITH_MEMORY_TRACKING")
-endif()
-
-option_env(ALLOC_MISMATCH_INVALID_READ "Memory function mismatch detection." OFF)
-if(ALLOC_MISMATCH_INVALID_READ)
-	target_compile_definitions(libmosquitto_common PRIVATE "ALLOC_MISMATCH_INVALID_READ")
-endif()
-
-option_env(ALLOC_MISMATCH_ABORT "Memory function mismatch abort." OFF)
-if(ALLOC_MISMATCH_ABORT)
-	target_compile_definitions(libmosquitto_common PRIVATE "ALLOC_MISMATCH_ABORT")
 endif()
 
 set_target_properties(libmosquitto_common PROPERTIES
