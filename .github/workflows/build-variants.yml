@@ -23,6 +23,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          ccache \
+          cmake \
           docbook-xsl \
           libargon2-dev \
           libc-ares-dev \
