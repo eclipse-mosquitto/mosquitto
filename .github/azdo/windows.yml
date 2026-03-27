@@ -1,0 +1,144 @@
+name: windows-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - master
+      - fixes
+      - develop
+      - release/*
+  tags:
+    include:
+      - v[0-9]+.*
+
+pr:
+  branches:
+    include:
+      - master
+      - fixes
+      - develop
+      - release/*
+
+variables:
+  BUILD_TYPE: Release
+  VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
+  VCPKG_TRIPLET: x64-windows-release
+  VCPKG_BINARY_CACHE: $(Pipeline.Workspace)\vcpkg-binary-cache
+
+stages:
+- stage: build_windows
+  displayName: Build Windows
+  jobs:
+  - job: mosquitto
+    displayName: Build Mosquitto
+  
+    pool:
+      vmImage: windows-2022
+        
+    steps:
+    - checkout: self
+
+    - powershell: |
+        choco install cmake --version=3.31.6 -y --installargs 'ADD_CMAKE_TO_PATH=System'
+
+        $cmakeBin = 'C:\Program Files\CMake\bin'
+        if (-not (Test-Path -LiteralPath $cmakeBin)) {
+          throw "CMake installation not found at $cmakeBin"
+         }
+
+         Write-Host "##vso[task.prependpath]$cmakeBin"
+          & (Join-Path $cmakeBin 'cmake.exe') --version
+      displayName: pin cmake to 3.x series
+
+    - task: Cache@2
+      displayName: Cache vcpkg binary artifacts
+      inputs:
+        key: 'vcpkg | "$(Agent.OS)" | "$(VCPKG_TRIPLET)" | $(Build.SourcesDirectory)\vcpkg.json'
+        restoreKeys: |
+          vcpkg | "$(Agent.OS)" | "$(VCPKG_TRIPLET)"
+        path: $(VCPKG_BINARY_CACHE)
+
+    - powershell: |
+        git clone --depth 1 https://github.com/microsoft/vcpkg.git "$(VCPKG_ROOT)"
+          & "$(VCPKG_ROOT)\bootstrap-vcpkg.bat" -disableMetrics
+      displayName: set up vcpkg
+
+    - powershell: |
+        New-Item -ItemType Directory -Path '$(VCPKG_BINARY_CACHE)' -Force | Out-Null
+        $env:VCPKG_DEFAULT_BINARY_CACHE = '$(VCPKG_BINARY_CACHE)'
+        & "$(VCPKG_ROOT)\vcpkg.exe" install `
+          --triplet "$(VCPKG_TRIPLET)" `
+          --x-manifest-root "$(Build.SourcesDirectory)" `
+          --x-install-root "$(Build.SourcesDirectory)\build64\vcpkg_installed"
+      displayName: vcpkg build
+
+    - powershell: |
+        cmake -B "$(Build.SourcesDirectory)/build64" `
+          -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) `
+          -DWITH_WEBSOCKETS=ON `
+          -DWITH_TESTS=OFF `
+          -DCMAKE_GENERATOR_PLATFORM=x64 `
+          -DCMAKE_TOOLCHAIN_FILE="$(VCPKG_ROOT)/scripts/buildsystems/vcpkg.cmake" `
+          -DVCPKG_TARGET_TRIPLET=$(VCPKG_TRIPLET) `
+          -DVCPKG_MANIFEST_MODE=ON `
+          -DVCPKG_INSTALLED_DIR="$(Build.SourcesDirectory)/build64/vcpkg_installed" `
+          -DWITH_HTTP_API=ON `
+          -DHTTP_API_DIR="C:\Program Files\Mosquitto\dashboard"
+      displayName: Configure CMake
+
+    - powershell: |
+        cmake --build "$(Build.SourcesDirectory)/build64" --config $(BUILD_TYPE)
+      displayName: Build
+
+    - powershell: |
+        Invoke-WebRequest `
+          -Uri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' `
+          -OutFile "$(Build.SourcesDirectory)\installer\VC_redist.x64.exe"
+      displayName: Download VC redistributable
+
+    - powershell: |
+        $makensis = Get-Command makensis.exe -ErrorAction SilentlyContinue
+        if (-not $makensis) {
+          $fallback = 'C:\Program Files (x86)\NSIS\makensis.exe'
+          if (-not (Test-Path -LiteralPath $fallback)) {
+            throw 'makensis.exe not found on the hosted agent.'
+          }
+
+          $makensis = Get-Item -LiteralPath $fallback
+        }
+
+        & $makensis.Source /VERSION
+      displayName: Verify NSIS
+
+    - powershell: |
+        $makensis = Get-Command makensis.exe -ErrorAction SilentlyContinue
+        if (-not $makensis) {
+          $makensis = Get-Item -LiteralPath 'C:\Program Files (x86)\NSIS\makensis.exe'
+        }
+
+        & $makensis.Source "$(Build.SourcesDirectory)\installer\mosquitto64.nsi"
+      displayName: Build EXE installer
+
+    - powershell: |
+        & "$(Build.SourcesDirectory)\.github\scripts\pack-windows-binaries.ps1" `
+          -SourceRoot "$(Build.SourcesDirectory)" `
+          -StagingDir "$(Build.ArtifactStagingDirectory)\binaries-windows-x64"
+      displayName: Stage binaries
+
+    - powershell: |
+        $artifactDir = '$(Build.ArtifactStagingDirectory)\installer'
+        New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
+        Copy-Item -Path '$(Build.SourcesDirectory)\installer\mosquitto*.exe' -Destination $artifactDir -Force
+      displayName: Stage EXE installer artifact
+
+    - task: PublishPipelineArtifact@1
+      displayName: Upload installer
+      inputs:
+        targetPath: $(Build.ArtifactStagingDirectory)\installer
+        artifact: installer
+
+    - task: PublishPipelineArtifact@1
+      displayName: Upload binaries
+      inputs:
+        targetPath: $(Build.ArtifactStagingDirectory)\binaries-windows-x64
+        artifact: binaries-windows-x64
