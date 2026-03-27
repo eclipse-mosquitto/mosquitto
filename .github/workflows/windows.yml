@@ -58,8 +58,21 @@ jobs:
         with:
           script-file: ${{github.workspace}}/installer/mosquitto64.nsi
 
+      - name: Stage raw binaries artifact
+        shell: pwsh
+        run: |
+          & "$env:GITHUB_WORKSPACE/.github/scripts/pack-windows-binaries.ps1" `
+            -SourceRoot "$env:GITHUB_WORKSPACE" `
+            -StagingDir "$(Join-Path $env:GITHUB_WORKSPACE 'artifacts/mosquitto-windows-x64')"
+
       - name: Upload installer to artifacts
         uses: actions/upload-artifact@v6
         with:
           name: installer
           path: ${{ github.workspace }}/installer/mosquitto*.exe
+
+      - name: Upload raw binaries to artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: binaries-windows-x64
+          path: ${{ github.workspace }}/artifacts/mosquitto-windows-x64

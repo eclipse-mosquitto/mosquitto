@@ -174,3 +174,4 @@ obj-*/
 # Others
 tmp/
 failed-tests.json
+.vs/
