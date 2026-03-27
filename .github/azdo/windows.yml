@@ -1,4 +1,4 @@
-name: windows-$(Date:yyyyMMdd)$(Rev:.r)
+name: GitHub-mosquitto-windows-$(Date:yyyyMMdd)$(Rev:.r)
 
 trigger:
   branches:
@@ -24,6 +24,8 @@ variables:
   VCPKG_ROOT: $(Build.SourcesDirectory)\vcpkg
   VCPKG_TRIPLET: x64-windows-release
   VCPKG_BINARY_CACHE: $(Pipeline.Workspace)\vcpkg-binary-cache
+  BUILD_EXE_INSTALLER: true
+  BUILD_EXCLUDE_DEVELOPMENT_FILES: true
 
 stages:
 - stage: build_windows
@@ -95,20 +97,7 @@ stages:
           -Uri 'https://aka.ms/vs/17/release/vc_redist.x64.exe' `
           -OutFile "$(Build.SourcesDirectory)\installer\VC_redist.x64.exe"
       displayName: Download VC redistributable
-
-    - powershell: |
-        $makensis = Get-Command makensis.exe -ErrorAction SilentlyContinue
-        if (-not $makensis) {
-          $fallback = 'C:\Program Files (x86)\NSIS\makensis.exe'
-          if (-not (Test-Path -LiteralPath $fallback)) {
-            throw 'makensis.exe not found on the hosted agent.'
-          }
-
-          $makensis = Get-Item -LiteralPath $fallback
-        }
-
-        & $makensis.Source /VERSION
-      displayName: Verify NSIS
+      condition: eq(variables['BUILD_EXE_INSTALLER'], 'true')
 
     - powershell: |
         $makensis = Get-Command makensis.exe -ErrorAction SilentlyContinue
@@ -118,11 +107,21 @@ stages:
 
         & $makensis.Source "$(Build.SourcesDirectory)\installer\mosquitto64.nsi"
       displayName: Build EXE installer
+      condition: eq(variables['BUILD_EXE_INSTALLER'], 'true')
 
     - powershell: |
         & "$(Build.SourcesDirectory)\.github\scripts\pack-windows-binaries.ps1" `
           -SourceRoot "$(Build.SourcesDirectory)" `
+          -StagingDir "$(Build.ArtifactStagingDirectory)\binaries-windows-x64" `
+          -ExcludeDev
+      condition: eq(variables['BUILD_EXCLUDE_DEVELOPMENT_FILES'], 'true')
+      displayName: Stage binaries (exclude dev)
+      
+    - powershell: |
+        & "$(Build.SourcesDirectory)\.github\scripts\pack-windows-binaries.ps1" `
+          -SourceRoot "$(Build.SourcesDirectory)" `
           -StagingDir "$(Build.ArtifactStagingDirectory)\binaries-windows-x64"
+      condition: eq(variables['BUILD_EXCLUDE_DEVELOPMENT_FILES'], 'false')
       displayName: Stage binaries
 
     - powershell: |
@@ -130,6 +129,7 @@ stages:
         New-Item -ItemType Directory -Path $artifactDir -Force | Out-Null
         Copy-Item -Path '$(Build.SourcesDirectory)\installer\mosquitto*.exe' -Destination $artifactDir -Force
       displayName: Stage EXE installer artifact
+      condition: eq(variables['BUILD_EXE_INSTALLER'], 'true')
 
     - task: PublishPipelineArtifact@1
       displayName: Upload installer

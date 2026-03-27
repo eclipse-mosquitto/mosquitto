@@ -5,7 +5,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$StagingDir,
 
-    [switch]$ExcludeDevel
+    [switch]$ExcludeDev
 )
 
 function Copy-StagedFiles {
@@ -79,11 +79,10 @@ Copy-StagedFiles '.' @(
     'build64/vcpkg_installed/x64-windows-release/bin/libmicrohttpd-dll.dll',
     'build64/vcpkg_installed/x64-windows-release/bin/libssl-3-x64.dll',
     'build64/vcpkg_installed/x64-windows-release/bin/pthreadVC3.dll',
-    'build64/vcpkg_installed/x64-windows-release/bin/sqlite3.dll',
-    'installer/VC_redist.x64.exe'
+    'build64/vcpkg_installed/x64-windows-release/bin/sqlite3.dll'
 )
 
-if (-not $ExcludeDevel) {
+if (-not $ExcludeDev) {
     Copy-StagedFiles 'devel' @(
         'build64/lib/Release/mosquitto.lib',
         'build64/lib/cpp/Release/mosquittopp.lib',
