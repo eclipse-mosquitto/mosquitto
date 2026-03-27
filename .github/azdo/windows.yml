@@ -10,7 +10,6 @@ trigger:
   tags:
     include:
       - v[0-9]+.*
-
 pr:
   branches:
     include:
