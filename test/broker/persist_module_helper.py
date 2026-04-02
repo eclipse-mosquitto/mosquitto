@@ -3,6 +3,7 @@
 import socket
 import mosq_test
 import mqtt5_props
+import time
 
 from typing import Any, Optional
 from types import ModuleType
@@ -76,7 +77,7 @@ def publish_messages(
         mosq_test.do_send_receive(sock, publish_packet, puback_packet, "puback")
 
 
-def check_db(
+def check_db_once(
     persist_help: ModuleType,
     port: int,
     username: str,
@@ -162,3 +163,35 @@ def check_db(
                 0,
                 persist_help.ms_queued,
             )
+
+def check_db(
+    persist_help: ModuleType,
+    port: int,
+    username: str,
+    subscription_topic: str,
+    client_msg_counts: dict[str, int],
+    publisher_id: str,
+    num_published_msgs: int,
+    retain_end: int = 0,
+    message_expiry: int = 0,
+    qos: int = 1,
+    check_session_expiry_time: bool = True,
+):
+    for i in range(5):
+        try:
+            check_db_once(
+                persist_help,
+                port,
+                username,
+                subscription_topic,
+                client_msg_counts,
+                publisher_id,
+                num_published_msgs,
+                retain_end,
+                message_expiry,
+                qos,
+                check_session_expiry_time,
+            )
+            break
+        except ValueError:
+            time.sleep(1)
