@@ -62,7 +62,7 @@ jobs:
     - run: |
         lcov --capture --directory . --output-file coverage.info --no-external
 
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true

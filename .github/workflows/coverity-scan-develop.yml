@@ -37,7 +37,7 @@ jobs:
             uthash-dev \
             xsltproc
 
-    - uses: vapier/coverity-scan-action@v1
+    - uses: vapier/coverity-scan-action@2068473c7bdf8c2fb984a6a40ae76ee7facd7a85 # v1
       with:
         build_language: 'cxx'
         project: "eclipse/mosquitto"
