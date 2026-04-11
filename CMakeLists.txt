@@ -59,6 +59,7 @@ option_env(INC_MEMTRACK "Include memory tracking support?" ON)
 option_env(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
 option_env(WITH_CTRL_SHELL "Include mosquitto_ctrl interactive shell support?" ON)
 option_env(WITH_DLT "Include DLT support?" OFF)
+option_env(WITH_FUZZING "Build fuzzers instead of normal executables?" OFF)
 option_env(WITH_JEMALLOC "Build using the jemalloc memory allocator?" OFF)
 option_env(WITH_LIB_CPP "Build C++ library?" ON)
 option_env(WITH_LTO "Build with link time optimizations (IPO) / interprocedural optimization (IPO) enabled." ON)
@@ -74,6 +75,12 @@ option_env(WITH_TLS_PSK "Include TLS-PSK support (requires WITH_TLS)?" ON)
 option_env(WITH_UNIX_SOCKETS "Include Unix Domain Socket support?" ON)
 option_env(WITH_WEBSOCKETS "Include websockets support?" ON)
 option_env(WITH_WEBSOCKETS_BUILTIN "Websockets support uses builtin library? Set OFF to use libwebsockets" ON)
+
+if(WITH_FUZZING)
+	set(WITH_TESTS OFF)
+	set(WITH_SHARED_LIBRARIES OFF)
+	set(WITH_STATIC_LIBRARIES ON)
+endif()
 
 if(ARGON2_FOUND)
 	# Disable until separate password handling thread is implemented
@@ -198,6 +205,10 @@ endif()
 
 if(WITH_DOCS)
 	add_subdirectory(man)
+endif()
+
+if(WITH_FUZZING)
+	add_subdirectory(fuzzing)
 endif()
 
 # ========================================
