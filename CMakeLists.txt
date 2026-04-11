@@ -59,6 +59,7 @@ option_env(INC_MEMTRACK "Include memory tracking support?" ON)
 option_env(WITH_BUNDLED_DEPS "Build with bundled dependencies?" ON)
 option_env(WITH_CTRL_SHELL "Include mosquitto_ctrl interactive shell support?" ON)
 option_env(WITH_DLT "Include DLT support?" OFF)
+option_env(WITH_JEMALLOC "Build using the jemalloc memory allocator?" OFF)
 option_env(WITH_LIB_CPP "Build C++ library?" ON)
 option_env(WITH_LTO "Build with link time optimizations (IPO) / interprocedural optimization (IPO) enabled." ON)
 option_env(WITH_PARALLEL_TESTS "Run tests in parallel?" ON)
@@ -170,6 +171,12 @@ if(WITH_BUNDLED_DEPS)
 	)
 endif()
 
+if(WITH_JEMALLOC)
+	target_link_libraries(common-options
+		INTERFACE
+			jemalloc
+	)
+endif()
 
 add_subdirectory(libcommon)
 add_subdirectory(lib)
