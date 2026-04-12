@@ -39,8 +39,24 @@ jobs:
           python3-all \
           uthash-dev \
           xsltproc
+
+    - name: Configure ccache
+      run: |
+        mkdir "$GITHUB_WORKSPACE/ccache"
+        echo "CCACHE_DIR=$GITHUB_WORKSPACE/ccache" >> $GITHUB_ENV
+
+    - name: Restore ccache
+      uses: actions/cache@v5
+      with:
+        path: ccache
+        key: ${{ runner.os }}-build-variants-ccache
+
     - uses: actions/checkout@v6
       with:
         submodules: 'true'
+
     - name: build
       run: ./buildtest.py
+
+    - name: Report ccache stats
+      run: ccache -s
