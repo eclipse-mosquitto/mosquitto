@@ -143,7 +143,7 @@ class MsgSequence(object):
     def _recv_message(self, msg):
         data = self.sock.recv(len(msg.message))
         if data != msg.message:
-            raise ValueError("Receive message %s | %s | %s" % (msg.comment, data, msg.message))
+            raise ValueError("Receive message %s | rec:%s | exp:%s" % (msg.comment, data.hex(), msg.message.hex()))
 
 
     def _puback_check(self):

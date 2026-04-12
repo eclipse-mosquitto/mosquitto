@@ -89,7 +89,7 @@ class MsgSequence(object):
     def _recv_message(self, sock, msg):
         data = sock.recv(len(msg.message))
         if data != msg.message:
-            raise ValueError("Receive message %s | rec:%s | exp:%s" % (msg.comment, data, msg.message))
+            raise ValueError("Receive message %s | rec:%s | exp:%s" % (msg.comment, data.hex(), msg.message.hex()))
 
 
     def _disconnected_check(self, sock):
