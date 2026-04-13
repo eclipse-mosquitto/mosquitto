@@ -65,10 +65,11 @@ jobs:
             -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
             -DWITH_DOCS=OFF \
             -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
       - name: Build
         run: |
           cmake --build ${{github.workspace}}/build64 \
-            --config ${{env.BUILD_TYPE}}
+            --config ${{env.BUILD_TYPE}} --parallel $(sysctl -n hw.logicalcpu)
 
       - name: Test
         working-directory: build64/
@@ -77,4 +78,4 @@ jobs:
           source venv/bin/activate
           python3 -m pip install --upgrade pip
           python3 -m pip install psutil
-          ctest --output-on-failure --repeat until-pass:5
+          ctest -j20 --resource-spec-file ../test/resource.json --output-on-failure --repeat until-pass:5
