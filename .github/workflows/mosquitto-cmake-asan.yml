@@ -67,6 +67,7 @@ jobs:
         cmake \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Debug \
+          -DWITH_SHARED_LIBCOMMON=ON \
           -S . \
           -B build
       env:

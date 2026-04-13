@@ -29,6 +29,13 @@ option_env(ALLOC_MISMATCH_INVALID_READ "Memory function mismatch detection." OFF
 option_env(ALLOC_MISMATCH_ABORT "Memory function mismatch abort." OFF)
 
 if(WIN32)
+	set(WITH_SHARED_LIBCOMMON_DEF ON)
+else()
+	set(WITH_SHARED_LIBCOMMON_DEF OFF)
+endif()
+option_env(WITH_SHARED_LIBCOMMON "Build libmosquitto_common as a shared library?" ${WITH_SHARED_LIBCOMMON_DEF})
+
+if(WITH_SHARED_LIBCOMMON)
 	add_library(libmosquitto_common SHARED
 		${C_SRC}
 	)
