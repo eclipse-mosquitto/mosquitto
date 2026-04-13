@@ -122,6 +122,11 @@ if(WITH_THREADING)
 	endif()
 endif()
 
+if(WITH_WEBSOCKETS AND WITH_WEBSOCKETS_BUILTIN AND NOT WITH_TLS)
+	set(WITH_TLS ON)
+	message(WARNING "Re-enabling TLS support because builtin WebSockets is requested. Set WITH_WEBSOCKETS_BUILTIN=OFF to allow WITH_TLS=OFF.")
+endif()
+
 if(WITH_TLS)
 	find_package(OpenSSL REQUIRED)
 	add_definitions("-DWITH_TLS")
@@ -141,10 +146,6 @@ endif()
 
 if(WITH_UNIX_SOCKETS)
 	add_definitions("-DWITH_UNIX_SOCKETS")
-endif()
-
-if(WITH_WEBSOCKETS AND NOT WITH_TLS)
-	message(FATAL_ERROR "WITH_WEBSOCKETS support requires WITH_TLS.")
 endif()
 
 # ========================================
