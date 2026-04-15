@@ -34,7 +34,7 @@ jobs:
           cmake-version: '3.31.6'
 
       - name: vcpkg build
-        uses: johnwason/vcpkg-action@v7
+        uses: johnwason/vcpkg-action@ff71808de10afc0e3160fd079353c69ba0d7dd60 # v7
         id: vcpkg
         with:
           manifest-dir: ${{ github.workspace }}
@@ -46,7 +46,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build64 --config ${{env.BUILD_TYPE}}
 
-      - uses: suisei-cn/actions-download-file@v1.6.1
+      - uses: suisei-cn/actions-download-file@9f75b8c2dad5ccced7509c44a3b881c5613abde2 # v1.6.1
         id: vcredist
         name: Download VC redistributable
         with:
@@ -54,7 +54,7 @@ jobs:
           target: ${{github.workspace}}/installer/
 
       - name: Installer
-        uses: joncloud/makensis-action@v5.0
+        uses: joncloud/makensis-action@971ef20f43e4f9f3af2c7f276cb7348d033da1cd # v5.0
         with:
           script-file: ${{github.workspace}}/installer/mosquitto64.nsi
 
