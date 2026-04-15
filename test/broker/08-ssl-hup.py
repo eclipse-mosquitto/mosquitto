@@ -14,6 +14,12 @@
 #   capath must leave the previous context in use, while a dangling symlink in
 #   capath, e.g. left behind after removing a CA without rehashing, must not
 #   stop it from being loaded.
+#
+# crl
+#   The listener points at a private copy of a CRL that alternates between
+#   revoking client-revoked.crt and revoking nothing. Reloading has to replace
+#   the CRL set rather than extend it, so removing and reinstating the
+#   revocation must both take effect, while a valid client keeps working.
 
 from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig
@@ -123,9 +129,59 @@ def test_capath():
     run_rotation_test("capath", ["test-root-ca.crt", "test-signing-ca.crt"], ["test-fake-root-ca.crt"])
 
 
+# --- crl -------------------------------------------------------------------
+
+def test_crl():
+    crlfile = basename + ".crl.pem"
+    replace_file(ssl_dir / "crl.pem", crlfile)
+
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners=[
+            ListenerConfig(
+                port=port,
+                cafile=ssl_dir / "all-ca.crt",
+                certfile=ssl_dir / "server.crt",
+                keyfile=ssl_dir / "server.key",
+                require_certificate=True,
+                crlfile=crlfile,
+            ),
+        ],
+        allow_anonymous=True,
+    )
+
+    with MosquittoBroker(config=broker_config) as broker:
+        broker.add_extra_file(crlfile)
+
+        expect_tls_accepted(port, "hup-valid-0", "before any reload")
+        expect_tls_refused(port, "hup-revoked-0", "before any reload, while it is still revoked",
+                           cert="client-revoked")
+
+        # Alternate between revoking and un-revoking, so that each reload has
+        # to both add and drop a revocation, and repeated reloads are
+        # exercised.
+        for i in range(2):
+            replace_file(ssl_dir / "crl-empty.pem", crlfile)
+            broker.reload_and_wait()
+            expect_tls_accepted(port, f"hup-valid-empty-{i}",
+                                f"after crlfile was emptied (round {i})")
+            expect_tls_accepted(port, f"hup-revoked-empty-{i}",
+                                f"after its revocation was removed from crlfile (round {i})",
+                                cert="client-revoked")
+
+            replace_file(ssl_dir / "crl.pem", crlfile)
+            broker.reload_and_wait()
+            expect_tls_accepted(port, f"hup-valid-crl-{i}",
+                                f"after crlfile was reinstated (round {i})")
+            expect_tls_refused(port, f"hup-revoked-crl-{i}",
+                               f"after its revocation was reinstated in crlfile (round {i})",
+                               cert="client-revoked")
+
+
 SCENARIOS = {
     "cafile": test_cafile,
     "capath": test_capath,
+    "crl": test_crl,
 }
 
 if len(sys.argv) < 2 or sys.argv[1] not in SCENARIOS:
