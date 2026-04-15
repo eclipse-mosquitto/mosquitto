@@ -353,24 +353,31 @@ if(WITH_TESTS)
 		mosq_test_set_windows_path(${name})
 	endfunction()
 
+	# Any further arguments are passed to the test, and appended to its name.
+	# A test file may be added several times with different arguments.
 	function(add_python_test PY_TEST_LIST PREFIX PORTS PY_TEST_FILE)
 		set(LOCAL_LIST ${${PY_TEST_LIST}})
 		get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
 		if(${PY_TEST_NAME} IN_LIST LOCAL_LIST)
 			list(REMOVE_ITEM LOCAL_LIST ${PY_TEST_NAME})
 			set(${PY_TEST_LIST} "${LOCAL_LIST}" PARENT_SCOPE)
-		else()
+		elseif(NOT ARGN OR NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${PY_TEST_FILE}")
 			message(SEND_ERROR "Adding non-existent test: ${PY_TEST_FILE}")
 		endif()
-		add_test(NAME ${PREFIX}${PY_TEST_NAME} COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/${PY_TEST_FILE})
-		mosq_set_test_props(${PREFIX}${PY_TEST_NAME})
+		set(TEST_NAME ${PREFIX}${PY_TEST_NAME})
+		if(ARGN)
+			list(JOIN ARGN "-" TEST_ARGS_NAME)
+			string(APPEND TEST_NAME "-${TEST_ARGS_NAME}")
+		endif()
+		add_test(NAME ${TEST_NAME} COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/${PY_TEST_FILE} ${ARGN})
+		mosq_set_test_props(${TEST_NAME})
 		if(${PORTS} GREATER 0)
 			set(PORT_LIST )
 			foreach(X RANGE 1 ${PORTS})
 				list(APPEND PORT_LIST "ports:1")
 			endforeach()
 			list(JOIN PORT_LIST "," PORT_REQ)
-			set_tests_properties(${PREFIX}${PY_TEST_NAME}
+			set_tests_properties(${TEST_NAME}
 				PROPERTIES
 					RESOURCE_GROUPS "${PORT_REQ}"
 			)
