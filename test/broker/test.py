@@ -137,6 +137,8 @@ tests = [
     (1, './08-ssl-connect-no-auth-wrong-ca.py'),
     (1, './08-ssl-connect-no-auth.py'),
     (1, './08-ssl-connect-no-identity.py'),
+    (1, './08-ssl-hup.py', 'cafile'),
+    (1, './08-ssl-hup.py', 'capath'),
     (1, './08-ssl-hup-disconnect.py'),
     (2, './08-tls-psk-pub.py'),
     (3, './08-tls-psk-bridge.py'),
