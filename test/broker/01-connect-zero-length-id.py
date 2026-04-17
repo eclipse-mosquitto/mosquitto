@@ -55,10 +55,9 @@ def do_test(per_listener, proto_ver, clean_start, allow_zero, client_port, expec
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1
-        (stdo, stde) = broker.communicate()
         os.remove(conf_file)
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             print("per_listener:%s proto_ver:%d client_port:%d clean_start:%d allow_zero:%s" % (per_listener, proto_ver, client_port, clean_start, allow_zero))
             print("port1:%d port2:%d" % (port1, port2))
             exit(rc)

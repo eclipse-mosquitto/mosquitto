@@ -103,8 +103,7 @@ def do_test(per_listener_settings, plugver):
         broker.wait()
         if rc:
             print(f"per_listener_settings:{per_listener_settings} plugver:{plugver}")
-            (stdo, stde) = broker.communicate()
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 print("T1")

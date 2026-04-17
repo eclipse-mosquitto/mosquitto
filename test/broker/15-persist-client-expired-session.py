@@ -190,12 +190,11 @@ def do_test(
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1
-            (_, stde) = broker.communicate()
         os.remove(conf_file)
         rc += persist_help.cleanup(port)
 
         if rc:
-            print(stde.decode("utf-8"))
+            print(mosq_test.broker_log(broker))
         assert rc == 0, f"rc: {rc}"
 
 

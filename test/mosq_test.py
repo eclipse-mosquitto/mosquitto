@@ -8,6 +8,7 @@ import socket
 import subprocess
 import struct
 import sys
+import tempfile
 import time
 import uuid
 
@@ -74,6 +75,13 @@ def listen_sock(port):
     sock.listen(5)
     return sock
 
+def broker_log(broker):
+    try:
+        broker.mosq_log.seek(0)
+        return broker.mosq_log.read().decode('utf-8')
+    except AttributeError:
+        return None
+
 def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, expect_fail_log=None, nolog=False, checkhost="localhost", env=None, check_port=True, cmd_args=None, timeout=0.1):
     global vg_index
     global vg_logfiles
@@ -110,22 +118,18 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
     if cmd_args:
         cmd.extend(cmd_args)
 
-    #print(port)
-    #print(cmd)
-    if nolog:
-        stderr = subprocess.DEVNULL
-    else:
-        stderr = subprocess.PIPE
+    stderr = tempfile.TemporaryFile(prefix=str(port), suffix=".log")
 
     env = env_add_ld_library_path(env)
     broker = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr, env=env)
+    broker.mosq_log = stderr
 
     if expect_fail:
         try:
             broker.wait(timeout*10)
             if expect_fail_log is not None:
-                (_, stde) = broker.communicate()
-                if expect_fail_log not in stde.decode('utf-8'):
+                stde = broker_log(broker)
+                if expect_fail_log not in stde:
                     print(f"{expect_fail_log} not found in log.")
                     print(stde.decode('utf-8'))
                     raise ValueError()
@@ -154,8 +158,8 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
             return broker
 
     if expect_fail == False:
-        outs, errs = broker.communicate(timeout=timeout)
-        print(f"FAIL: unable to start broker: {errs.decode('utf-8')}")
+        stde = broker_log(broker)
+        print(f"FAIL: unable to start broker: {stde}")
         raise IOError
     else:
         return broker

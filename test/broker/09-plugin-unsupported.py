@@ -26,9 +26,8 @@ def do_test(plugver):
         pass
     finally:
         os.remove(conf_file)
-        (stdo, stde) = broker.communicate()
         if rc:
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test(1)

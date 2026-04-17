@@ -86,8 +86,7 @@ def do_test(per_listener_settings):
         broker.wait()
         if rc:
             print(f"per_listener_settings:{per_listener_settings}")
-            (stdo, stde) = broker.communicate()
-            print(stde.decode('utf-8'))
+            print(mosq_test.broker_log(broker))
             exit(rc)
 
 do_test("false")

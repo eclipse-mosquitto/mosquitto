@@ -193,9 +193,8 @@ finally:
         os.remove(f"{mqtt_port}.sock")
     except FileNotFoundError:
         pass
-    (stdo, stde) = broker.communicate()
     if rc != 0:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
         rc = 1
 
 

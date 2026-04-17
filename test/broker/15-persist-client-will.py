@@ -175,7 +175,7 @@ def do_test(
 
         # Kill the broker
         broker.kill()
-        (_, stde) = broker.communicate()
+        stde = mosq_test.broker_log(broker)
         broker = None
 
         if will_sent and will_qos > 0:
@@ -225,7 +225,7 @@ def do_test(
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1
-            (_, stde3) = broker.communicate()
+            stde3 = mosq_test.broker_log(broker)
             if not stde:
                 stde = stde3
             else:
@@ -235,10 +235,10 @@ def do_test(
 
         if rc:
             if stde:
-                print(stde.decode("utf-8"))
+                print(stde)
             if stde2:
                 print("Broker after restart")
-                print(stde2.decode("utf-8"))
+                print(stde2)
         # assert rc == 0, f"rc: {rc}"
 
 

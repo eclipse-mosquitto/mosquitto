@@ -84,7 +84,7 @@ ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin", "-i", "10000"], 
 ctrl_dynsec_file_cmd(["setClientPassword", "admin", "newadmin"], ports)
 
 # Then start broker
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0], nolog=True)
+broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0])
 
 try:
     rc = 1
@@ -239,5 +239,7 @@ finally:
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
+    if rc:
+        print(mosq_test.broker_log(broker))
 
 exit(rc)

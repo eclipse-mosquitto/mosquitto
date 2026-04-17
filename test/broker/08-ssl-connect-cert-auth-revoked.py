@@ -72,12 +72,11 @@ finally:
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
-    (stdo, stde) = broker.communicate()
     if ssl_eof:
         if "certificate verify failed" in stde.decode('utf-8'):
             rc = 0
     if rc:
-        print(stde.decode('utf-8'))
+        print(mosq_test.broker_log(broker))
 
 exit(rc)
 

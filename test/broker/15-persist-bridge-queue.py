@@ -232,13 +232,13 @@ def do_test(test_case_name: str, bridging_add_config: dict, target_add_config: d
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1
-            (_, stde) = broker.communicate()
+            stde = mosq_test.broker_log(broker)
         if bridge_target_broker is not None:
             bridge_target_broker.terminate()
             if mosq_test.wait_for_subprocess(bridge_target_broker):
                 if rc == 0:
                     rc = 1
-            (_, stde2) = bridge_target_broker.communicate()
+            stde2 = mosq_test.broker_log(bridge_target_broker)
         os.remove(conf_file_bridge_target)
         os.remove(conf_file)
         rc += persist_help.cleanup(bridge_target_port)
@@ -248,13 +248,13 @@ def do_test(test_case_name: str, bridging_add_config: dict, target_add_config: d
         if rc:
             if stde2 is not None:
                 print("Bridge target brocker log:")
-                print(stde2.decode("utf-8"))
+                print(stde2)
             if stde3 is not None:
                 print("Bridging brocker log (first run):")
-                print(stde3.decode("utf-8"))
+                print(stde3)
             if stde is not None:
                 print("Bridging brocker log:")
-                print(stde.decode("utf-8"))
+                print(stde)
         assert rc == 0, f"rc: {rc}"
 
 
