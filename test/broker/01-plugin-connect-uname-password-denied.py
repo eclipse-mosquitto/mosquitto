@@ -10,7 +10,7 @@ mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE", "WITH_T
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/password-file/mosquitto_password_file.so\n")
+        f.write(f"plugin {mosq_paths.plugin_password_file}\n")
         f.write("plugin_opt_password_file %s/%s\n" % (Path(__file__).resolve().parent, filename.replace('.conf', '.pwfile')))
         f.write("allow_anonymous false\n")
 

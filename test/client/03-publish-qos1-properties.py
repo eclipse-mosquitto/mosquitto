@@ -22,7 +22,7 @@ def do_test(proto_ver):
     else:
         V = 'mqttv31'
 
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    cmd = [mosq_paths.mosquitto_pub,
             '-p', str(port),
             '-q', '1',
             '-t', '03/pub/qos1/test/properties',

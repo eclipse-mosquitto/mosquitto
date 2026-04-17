@@ -11,8 +11,8 @@ mosq_test.require_features(["WITH_BROKER", "WITH_CONTROL", "WITH_PLUGINS", "WITH
 def write_config(filename, ports):
     with open(filename, 'w') as f:
         f.write("enable_control_api true\n")
-        f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write(f"plugin_opt_config_file {ports[0]}/dynamic-security.json\n")
+        f.write(f"global_plugin {mosq_paths.plugin_dynamic_security}\n")
+        f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
@@ -33,10 +33,10 @@ def ctrl_cmd(cmd, args, ports, response=None):
         capture_output = False
     else:
         opts += ["-p", str(ports[1])]
-        opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+        opts += ["--cafile", Path(ssl_dir, "all-ca.crt")]
         capture_output = True
 
-    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_ctrl', mosq_test.get_build_type(), 'mosquitto_ctrl')]
+    proc = subprocess.run([mosq_paths.mosquitto_ctrl]
                     + opts + [cmd] + args,
                     env=env, capture_output=True, encoding='utf-8')
 

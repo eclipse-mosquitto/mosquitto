@@ -48,7 +48,7 @@ suback_packet = mosq_test.gen_suback(mid, 0)
 
 publish_packet = mosq_test.gen_publish(topic="psk/test", payload="message", qos=0)
 
-bridge_cmd = [mosq_test.get_build_root() + '/src/mosquitto', '-c', '08-tls-psk-bridge.conf2']
+bridge_cmd = [mosq_paths.mosquitto, '-c', '08-tls-psk-bridge.conf2']
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port1)
 bridge = mosq_test.start_broker(filename=os.path.basename(__file__)+'_bridge', cmd=bridge_cmd, port=port3)
 
@@ -58,7 +58,7 @@ try:
 
     mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
-    pub = subprocess.run(['./c/08-tls-psk-bridge.test', str(port3)], env=env, capture_output=True, encoding='utf-8')
+    pub = subprocess.run([Path('c', mosq_test.get_build_type(), '08-tls-psk-bridge.exe'), str(port3)], env=env, capture_output=True, encoding='utf-8')
     if pub.returncode != 0:
         print("d")
         print(pub.returncode)

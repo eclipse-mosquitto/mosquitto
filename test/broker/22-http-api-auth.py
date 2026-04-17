@@ -14,7 +14,7 @@ def write_config(filename, mqtt_port, http_port):
 
         f.write(f"listener {http_port}\n")
         f.write("protocol http_api\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/password-file/mosquitto_password_file.so\n")
+        f.write(f"plugin {mosq_paths.plugin_password_file}\n")
         f.write("plugin_opt_password_file %s/%s\n" % (Path(__file__).resolve().parent, filename.replace('.conf', '.pwfile')))
 
 mqtt_port, http_port = mosq_test.get_port(2)

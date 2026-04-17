@@ -7,7 +7,7 @@ from mosq_test_helper import *
 mosq_test.require_features(["WITH_TLS"])
 
 def do_test(args, rc_expected, response=None):
-    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_ctrl', mosq_test.get_build_type(), 'mosquitto_ctrl')]
+    proc = subprocess.run([mosq_paths.mosquitto_ctrl]
                     + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2)
 
@@ -152,7 +152,7 @@ do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile an
 # Invalid file
 env["XDG_CONFIG_HOME"] = "."
 with open("mosquitto_ctrl", "w") as f:
-    f.write(f"--cert {ssl_dir}/client.crt\n")
+    f.write(f"--cert {ssl_dir / 'client.crt'}\n")
     f.write(f"--key\n")
 do_test(["broker"], 1, response="Error: --key argument given but no file specified.\n\n")
 

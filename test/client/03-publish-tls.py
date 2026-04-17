@@ -20,7 +20,7 @@ def do_test(address, insecure_option, expect_ssl_fail):
         'SSLKEYLOGFILE':'/home/roger/keylog'
     }
     env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_pub',
+    cmd = [mosq_paths.mosquitto_pub,
             '--cafile', f"{ssl_dir}/all-ca.crt",
             '-d',
             '-h', address,

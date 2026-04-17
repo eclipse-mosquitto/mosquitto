@@ -6,7 +6,7 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write("auth_plugin c/auth_plugin_extended_multiple.so\n")
+        f.write(f"auth_plugin {mosq_paths.test_plugin('auth_plugin_extended_multiple')}\n")
 
 port = mosq_test.get_port()
 conf_file = os.path.basename(__file__).replace('.py', '.conf')

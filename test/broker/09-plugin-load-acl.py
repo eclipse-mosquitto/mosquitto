@@ -8,7 +8,7 @@ import signal
 def write_config(filename, ports, per_listener_settings):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load acl c/plugin_load_acl.so\n")
+        f.write(f"plugin_load acl {mosq_paths.test_plugin('plugin_load_acl')}\n")
 
         f.write("listener %d\n" % (ports[0]))
         f.write("listener_allow_anonymous true\n")

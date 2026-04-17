@@ -8,7 +8,7 @@ mosq_test.require_features(["WITH_TLS"])
 def do_test(file, json_expected):
 
     cmd = [
-        Path(mosq_test.get_build_root(), 'apps', 'db_dump', mosq_test.get_build_type(), 'mosquitto_db_dump'),
+        mosq_paths.mosquitto_db_dump,
         '--json',
         Path(test_dir, "apps", "db_dump", "data", file)
     ]

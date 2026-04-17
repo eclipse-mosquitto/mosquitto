@@ -43,7 +43,7 @@ try:
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port2)
     mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
-    pub = subprocess.Popen(['./c/08-tls-psk-pub.test', str(port1)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pub = subprocess.Popen([Path('c', mosq_test.get_build_type(), '08-tls-psk-pub.exe'), str(port1)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     pub_terminate_rc = 0
     if mosq_test.wait_for_subprocess(pub):
         print("pub not terminated")

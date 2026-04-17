@@ -8,7 +8,7 @@ import signal
 def write_config(filename, ports, per_listener_settings):
     with open(filename, 'w') as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
-        f.write("plugin_load auth c/plugin_load_extended_auth.so\n")
+        f.write(f"plugin_load auth {mosq_paths.test_plugin('plugin_load_extended_auth')}\n")
 
         f.write("listener %d\n" % (ports[0]))
         f.write("plugin_use auth\n")

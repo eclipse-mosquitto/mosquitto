@@ -10,7 +10,7 @@ def write_config(filename, port, per_listener_settings="false"):
     with open(filename, "w") as f:
         f.write("per_listener_settings %s\n" % (per_listener_settings))
         f.write("listener %d\n" % (port))
-        f.write("plugin c/plugin_evt_psk_key.so\n")
+        f.write(f"plugin {mosq_paths.test_plugin('plugin_evt_psk_key')}\n")
         f.write("psk_hint myhint\n")
         f.write("allow_anonymous true\n")
 
@@ -30,7 +30,7 @@ def do_test(per_listener_settings):
 
     try:
         pub_client_args = [
-            mosq_test.get_build_root() + "/client/mosquitto_pub",
+            mosq_paths.mosquitto_pub,
             "-t",
             "plugin/psk/test",
             "-m",
@@ -49,7 +49,7 @@ def do_test(per_listener_settings):
         pub_client.wait()
 
         bad_client_args = [
-            mosq_test.get_build_root() + "/client/mosquitto_pub",
+            mosq_paths.mosquitto_pub,
             "-t",
             "plugin/psk/test",
             "-m",
@@ -70,7 +70,7 @@ def do_test(per_listener_settings):
             raise ValueError("bad client should have failed")
 
         sub_client_args = [
-            mosq_test.get_build_root() + "/client/mosquitto_sub",
+            mosq_paths.mosquitto_sub,
             "-t",
             "plugin/psk/test",
             "-C",

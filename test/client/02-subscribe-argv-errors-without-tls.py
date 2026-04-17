@@ -13,7 +13,7 @@ def do_test(args, stderr_expected, rc_expected):
         'XDG_CONFIG_HOME':'/tmp/missing'
     }
     env = mosq_test.env_add_ld_library_path(env)
-    cmd = [f'{mosq_test.get_build_root()}/client/mosquitto_sub'] + args
+    cmd = [mosq_paths.mosquitto_sub] + args
 
     sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     if mosq_test.wait_for_subprocess(sub):

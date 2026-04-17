@@ -13,8 +13,8 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write("plugin_opt_config_file %d/dynamic-security.json\n" % (port))
+        f.write(f"plugin {mosq_paths.plugin_dynamic_security}\n")
+        f.write(f"plugin_opt_config_file {Path(str(port), 'dynamic-security.json')}\n")
 
 
 port = mosq_test.get_port()
@@ -348,7 +348,7 @@ suback_packet = mosq_test.gen_suback(mid, 1)
 
 try:
     os.mkdir(str(port))
-    shutil.copyfile(str(Path(__file__).resolve().parent / "dynamic-security-init.json"), "%d/dynamic-security.json" % (port))
+    shutil.copyfile(str(Path(__file__).resolve().parent / "dynamic-security-init.json"), Path(str(port), "dynamic-security.json"))
 except FileExistsError:
     pass
 

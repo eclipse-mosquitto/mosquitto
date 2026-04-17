@@ -10,7 +10,7 @@ def do_test(file, counts):
         f"  {counts[4]}\n"
 
     cmd = [
-        Path(mosq_test.get_build_root(), 'apps', 'db_dump', mosq_test.get_build_type(), 'mosquitto_db_dump'),
+        mosq_paths.mosquitto_db_dump,
         '--client-stats',
         Path(test_dir, "apps", "db_dump", "data", file)
     ]

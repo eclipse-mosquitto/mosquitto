@@ -14,7 +14,7 @@ def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/sparkplug-aware/mosquitto_sparkplug_aware.so\n")
+        f.write(f"plugin {mosq_paths.plugin_sparkplug_aware}\n")
 
 def proc(port, proto_ver):
     group_id = str(uuid.uuid4())

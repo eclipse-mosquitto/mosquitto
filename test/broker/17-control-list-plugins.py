@@ -13,7 +13,7 @@ def write_config(filename, port):
         f.write("enable_control_api true\n")
         f.write("allow_anonymous true\n")
         f.write("listener %d\n" % (port))
-        f.write("plugin c/auth_plugin_v5_control.so\n")
+        f.write(f"plugin {mosq_paths.test_plugin('auth_plugin_v5_control')}\n")
 
 def command_check(sock, command_payload, expected_response):
     command_packet = mosq_test.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))

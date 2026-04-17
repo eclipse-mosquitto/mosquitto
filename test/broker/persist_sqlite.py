@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import sqlite3
+import mosq_paths
 import mosq_test
 
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PERSIST_SQLITE"])
@@ -27,9 +28,9 @@ def write_config(filename, port, additional_config_entries: dict = {}):
         f.write("listener %d\n" % (port))
         f.write("allow_anonymous true\n")
         f.write(
-            f"plugin {mosq_test.get_build_root()}/plugins/persist-sqlite/mosquitto_persist_sqlite.so\n"
+            f"plugin {mosq_paths.plugin_persist_sqlite}\n"
         )
-        f.write("plugin_opt_db_file %d/mosquitto.sqlite3\n" % (port))
+        f.write(f"plugin_opt_db_file {Path(str(port), 'mosquitto.sqlite3')}\n")
         for entry, value in additional_config_entries.items():
             f.write(f"{entry} {value}\n")
 
@@ -40,15 +41,16 @@ def write_config(filename, port, additional_config_entries: dict = {}):
 # 0.9.0: DB from Mosquitto without version info table
 # 1.0.0: DB created with latest version of plugin
 def init(port, create_db_of_version: list[int] = None):
+    dbfile = Path(str(port), 'mosquitto.sqlite3')
     try:
         os.mkdir(str(port))
     except FileExistsError:
         try:
-            os.remove(f"{port}/mosquitto.sqlite3")
+            os.remove(dbfile)
         except FileNotFoundError:
             pass
     if create_db_of_version is not None:
-        con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+        con = sqlite3.connect(dbfile)
         cursor = con.cursor()
         for statement in [
             "PRAGMA page_size=4096;",
@@ -83,13 +85,13 @@ def init(port, create_db_of_version: list[int] = None):
         con.commit()
         con.close()
         # We need to set write permission to everybody as broker will start with privilege drop
-        os.chmod(f"{port}/mosquitto.sqlite3", 0o666)
+        os.chmod(dbfile, 0o666)
 
 
 def cleanup(port):
     rc = 1
     try:
-        os.remove(f"{port}/mosquitto.sqlite3")
+        os.remove(Path(str(port), "mosquitto.sqlite3"))
     except FileNotFoundError:
         pass
     try:
@@ -115,7 +117,7 @@ def cleanup(port):
 
 
 def check_version_infos(port, database_schema_version):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
     cur.execute(
         "SELECT major,minor,patch FROM version_info WHERE component = 'database_schema';"
@@ -142,7 +144,7 @@ def check_counts(
     subscriptions=0,
     wills=None
 ):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
     cur.execute("SELECT COUNT(*) FROM clients")
     row = cur.fetchone()
@@ -207,7 +209,7 @@ def check_client(
     if session_expiry_interval == 4294967295:
         session_expiry_interval = -1
 
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
     cur.execute(
         "SELECT client_id, username, will_delay_time, session_expiry_time, "
@@ -268,7 +270,7 @@ def check_client(
 
 def modify_client(port: int, client_id: str, sub_expiry_time: int):
     num_modified_rows = 0
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     try:
         cur = con.cursor()
         cur.execute(
@@ -288,7 +290,7 @@ def modify_client(port: int, client_id: str, sub_expiry_time: int):
 def check_subscription(
     port, client_id, topic, subscription_options, subscription_identifier
 ):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
     cur.execute(
         "SELECT client_id, topic, subscription_options, subscription_identifier "
@@ -322,7 +324,7 @@ def check_subscription(
 def check_client_msg(
     port, client_id, cmsg_id, store_id, dup, direction, mid, qos, retain, state
 ):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     try:
         cur = con.cursor()
         cur.execute(
@@ -400,7 +402,7 @@ def check_base_msg(
     retain,
     idx=0,
 ):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     try:
         cur = con.cursor()
         cur.execute(
@@ -461,7 +463,7 @@ def modify_base_msgs(
     sub_expiry_time: int,
 ):
     num_modified_rows = 0
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     try:
         cur = con.cursor()
         cur.execute(
@@ -475,7 +477,7 @@ def modify_base_msgs(
 
 
 def check_retain(port, topic, store_id):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
     cur.execute("SELECT store_id FROM retains WHERE topic=?", (topic,))
     row = cur.fetchone()
@@ -495,7 +497,7 @@ def check_will(
     properties: str,
     idx=0,
 ):
-    con = sqlite3.connect(f"{port}/mosquitto.sqlite3")
+    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     try:
         cur = con.cursor()
         cur.execute(

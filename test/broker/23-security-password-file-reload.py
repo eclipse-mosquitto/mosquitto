@@ -15,7 +15,7 @@ def write_config_default(filename, port):
 def write_config_plugin(filename, port):
     with open(filename, 'w') as f:
         f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_test.get_build_root()}/plugins/password-file/mosquitto_password_file.so\n")
+        f.write(f"plugin {mosq_paths.plugin_password_file}\n")
         f.write(f"plugin_opt_password_file {port}.password\n")
         f.write("allow_anonymous true\n")
 

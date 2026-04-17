@@ -21,7 +21,7 @@ def client_check(port, username, password, rc):
 
 
 def passwd_cmd(args, response=None, input=None, expected_rc=0):
-    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_passwd', mosq_test.get_build_type(), 'mosquitto_passwd')]
+    proc = subprocess.run([mosq_paths.mosquitto_passwd]
                     + args,
                     capture_output=True, encoding='utf-8', timeout=2, input=input)
 

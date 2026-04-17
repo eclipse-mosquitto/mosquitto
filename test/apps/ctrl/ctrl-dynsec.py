@@ -9,14 +9,14 @@ mosq_test.require_features(["WITH_BROKER", "WITH_CONTROL", "WITH_PLUGINS", "WITH
 
 def write_config(filename, ports):
     with open(filename, 'w') as f:
-        f.write(f"global_plugin {mosq_test.get_build_root()}/plugins/dynamic-security/mosquitto_dynamic_security.so\n")
-        f.write(f"plugin_opt_config_file {ports[0]}/dynamic-security.json\n")
+        f.write(f"global_plugin {mosq_paths.plugin_dynamic_security}\n")
+        f.write(f"plugin_opt_config_file {Path(str(ports[0]), 'dynamic-security.json')}\n")
         f.write("allow_anonymous false\n")
         f.write(f"listener {ports[0]}\n")
         f.write(f"listener {ports[1]}\n")
         if mosq_test.check_features(["WITH_TLS"]):
-            f.write(f"certfile {ssl_dir}/server.crt\n")
-            f.write(f"keyfile {ssl_dir}/server.key\n")
+            f.write(f"certfile {Path(ssl_dir, 'server.crt')}\n")
+            f.write(f"keyfile {Path(ssl_dir, 'server.key')}\n")
 
 def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     opts = ["-u", "admin",
@@ -30,9 +30,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     else:
         opts += ["-p", str(ports[1])]
         if mosq_test.check_features(["WITH_TLS"]):
-            opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
+            opts += ["--cafile", Path(ssl_dir, 'all-ca.crt')]
 
-    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_ctrl', mosq_test.get_build_type(), 'mosquitto_ctrl')]
+    proc = subprocess.run([mosq_paths.mosquitto_ctrl]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2, input=input)
 
@@ -46,9 +46,9 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
         raise ValueError(args)
 
 def ctrl_dynsec_file_cmd(args, ports, response=None):
-    opts = ["-f", f"{ports[0]}/dynamic-security.json"]
+    opts = ["-f", Path(str(ports[0]), "dynamic-security.json")]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([mosq_paths.mosquitto_ctrl]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8')
 
@@ -71,11 +71,11 @@ if not os.path.exists(str(ports[0])):
     os.mkdir(str(ports[0]))
 
 # Generate initial dynsec file
-ctrl_dynsec_cmd(["init", f"{ports[0]}/dynamic-security.json", "admin", "admin"], ports)
+ctrl_dynsec_cmd(["init", Path(str(ports[0]), "dynamic-security.json"), "admin", "admin"], ports)
 try:
     # If we're root, set file ownership to "nobody", because that is the user
     # the broker will change to.
-    os.chown(f"{ports[0]}/dynamic-security.json", 65534, 65534)
+    os.chown(Path(str(ports[0]), "dynamic-security.json"), 65534, 65534)
 except (AttributeError, PermissionError):
     pass
 

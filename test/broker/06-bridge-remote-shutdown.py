@@ -11,7 +11,7 @@ def write_config(filename, port1, port2, protocol_version):
     with open(filename, 'w') as f:
         f.write("log_type all\n")
         f.write("listener %d\n" % (port2))
-        f.write("plugin c/plugin_evt_persist_client_update.so\n")
+        f.write(f"plugin {mosq_paths.test_plugin('plugin_evt_persist_client_update')}\n")
         f.write("allow_anonymous true\n")
         f.write("persistent_client_expiration 1d\n")
         f.write("\n")
@@ -44,7 +44,7 @@ def do_test(proto_ver):
     
     remote_broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port1, use_conf=False)
 
-    local_cmd = [mosq_test.get_build_root() + '/src/mosquitto', '-c', conf_file]
+    local_cmd = [mosq_paths.mosquitto, '-c', conf_file]
     local_broker = mosq_test.start_broker(cmd=local_cmd, filename=os.path.basename(__file__)+'_local1', use_conf=False, port=port2)    
 
     rc1 = None
