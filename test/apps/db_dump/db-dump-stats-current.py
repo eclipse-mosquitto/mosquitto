@@ -76,7 +76,7 @@ def do_test(counts):
         ]
         subprocess.run(cmd, timeout=10, env=env)
 
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             raise mosq_test.TestError
@@ -89,7 +89,7 @@ def do_test(counts):
         os.remove(conf_file)
         shutil.rmtree(str(port))
         if broker is not None:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
 
     exit(rc)
 

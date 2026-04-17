@@ -331,7 +331,7 @@ def main(protocol):
     try:
         rc = do_test(hostname=hostname, port=port, protocol=protocol)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")

@@ -52,7 +52,7 @@ def do_test(write_config_func):
     finally:
         os.remove(conf_file)
         os.remove(f"{port}.password")
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if rc:
             print(mosq_test.broker_log(broker))
             exit(rc)

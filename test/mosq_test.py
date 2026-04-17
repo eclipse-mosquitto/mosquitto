@@ -16,6 +16,9 @@ import traceback
 
 import mqtt5_props
 
+if platform.system() == "Windows":
+    import win32event
+
 import __main__
 
 from pathlib import Path
@@ -194,8 +197,19 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
 
 
 def terminate_broker(broker):
-    broker.terminate()
-    (_, stde) = broker.communicate()
+    if platform.system() == 'Windows':
+        for i in range(5):
+            try:
+                evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_shutdown")
+                win32event.PulseEvent(evt)
+                break
+            except Exception:
+                time.sleep(0.5)
+                
+        broker.terminate()
+    else:
+        broker.terminate()
+    stde = broker_log(broker)
     if wait_for_subprocess(broker):
         print("broker not terminated")
         return (1, stde)

@@ -51,7 +51,7 @@ def do_test(per_listener, proto_ver, clean_start, allow_zero, client_port, expec
     except mosq_test.TestError:
         pass
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

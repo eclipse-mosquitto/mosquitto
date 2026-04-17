@@ -41,7 +41,7 @@ def do_test():
     except mosq_test.TestError:
         pass
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         os.remove(conf_file)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")

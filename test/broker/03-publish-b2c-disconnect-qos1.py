@@ -69,7 +69,7 @@ def do_test(start_broker, proto_ver):
         pass
     finally:
         if start_broker:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             if mosq_test.wait_for_subprocess(broker):
                 print("broker not terminated")
                 if rc == 0: rc=1

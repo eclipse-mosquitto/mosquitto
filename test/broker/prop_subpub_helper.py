@@ -41,7 +41,7 @@ def prop_subpub_helper(start_broker, test_name, props_out, props_in, expect_prot
         pass
     finally:
         if start_broker:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             if mosq_test.wait_for_subprocess(broker):
                 print("broker not terminated")
                 if rc == 0: rc=1

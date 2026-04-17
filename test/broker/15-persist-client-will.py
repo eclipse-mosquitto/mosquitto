@@ -221,7 +221,7 @@ def do_test(
         rc = broker_terminate_rc
     finally:
         if broker is not None:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             if mosq_test.wait_for_subprocess(broker):
                 if rc == 0:
                     rc = 1

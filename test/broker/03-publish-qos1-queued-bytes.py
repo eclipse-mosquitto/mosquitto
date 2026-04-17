@@ -154,7 +154,7 @@ finally:
     brokerMonitor.join()
     rq.join()
     cq.join()
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if rc:
         print(mosq_test.broker_log(broker))
 

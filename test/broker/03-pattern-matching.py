@@ -48,7 +48,7 @@ def pattern_test(sub_topic, pub_topic):
     except mosq_test.TestError:
         pass
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

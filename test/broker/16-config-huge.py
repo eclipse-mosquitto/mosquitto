@@ -201,7 +201,7 @@ def do_test(per_listener_settings):
     except Exception as err:
         print(err)
     finally:
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         os.remove(conf_file)
         os.remove(acl_file)

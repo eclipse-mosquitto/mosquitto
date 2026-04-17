@@ -52,7 +52,7 @@ def do_test(option):
         ssock.connect(("localhost", port))
         mosq_test.do_send_receive(ssock, connect_packet, connack_packet, "connack")
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         time.sleep(1)
 
         # This will fail if we've been disconnected
@@ -65,7 +65,7 @@ def do_test(option):
     finally:
         os.remove(conf_file)
         os.remove(pw_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         if mosq_test.wait_for_subprocess(broker):
             print("broker not terminated")
             if rc == 0: rc=1

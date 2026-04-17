@@ -45,8 +45,7 @@ finally:
     os.remove(conf_file)
     ssock.close()
 
-time.sleep(0.5)
-broker.terminate()
+terminate_broker(broker)
 if mosq_test.wait_for_subprocess(broker):
     print("broker not terminated")
     if rc == 0: rc=1

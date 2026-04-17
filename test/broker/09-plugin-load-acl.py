@@ -52,7 +52,7 @@ def do_test(per_listener_settings):
         print(err)
     finally:
         os.remove(conf_file)
-        broker.terminate()
+        mosq_test.terminate_broker(broker)
         broker.wait()
         if rc:
             print(f"per_listener_settings:{per_listener_settings}")

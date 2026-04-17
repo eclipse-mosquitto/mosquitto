@@ -50,7 +50,7 @@ try:
             elif err.errno == 8 and "EOF occurred" in err.strerror:
                 rc = 0
             else:
-                broker.terminate()
+                mosq_test.terminate_broker(broker)
                 print(err.strerror)
                 raise ValueError(err.errno) from err
     except ssl.SSLError as err:
@@ -59,7 +59,7 @@ try:
         elif err.errno == 8 and "EOF occurred" in err.strerror:
             rc = 0
         else:
-            broker.terminate()
+            mosq_test.terminate_broker(broker)
             print(err.strerror)
             raise ValueError(err.errno)
 
@@ -68,7 +68,7 @@ except mosq_test.TestError:
 finally:
     os.remove(conf_file)
     time.sleep(0.5)
-    broker.terminate()
+    mosq_test.terminate_broker(broker)
     if mosq_test.wait_for_subprocess(broker):
         print("broker not terminated")
         if rc == 0: rc=1
