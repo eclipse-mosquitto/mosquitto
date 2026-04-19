@@ -12,7 +12,7 @@ def write_config(filename, port1, port2, subtopic, reload_immediate=False):
         f.write("allow_anonymous true\n")
         f.write("\n")
         f.write("connection bridge_sample\n")
-        f.write("address 127.0.0.1:%d\n" % (port1))
+        f.write("address localhost:%d\n" % (port1))
         f.write("topic # in 0 local/topic/ remote/%s/\n" % (subtopic))
         f.write("notifications false\n")
         f.write("restart_timeout 1\n")
@@ -44,15 +44,6 @@ def accept_subscription(socket, topic, mid=1, qos=0):
     socket.send(suback_packet)
 
 
-def start_fake_broker(port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.settimeout(3)
-    sock.bind(('', port))
-    sock.listen(5)
-    return sock
-
-
 def expect_no_incoming_connection(sock):
     try:
         accept_new_connection(sock) # will timeout if nothing comes in
@@ -68,7 +59,7 @@ def do_test():
     conf_file = os.path.basename(__file__).replace('.py', '.conf')
 
     try:
-        ssock = start_fake_broker(port1)
+        ssock = mosq_test.listen_sock(port1)
 
         write_config(conf_file, port1, port2, "topic1", True)
 

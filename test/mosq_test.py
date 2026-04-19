@@ -72,9 +72,15 @@ def env_add_ld_library_path(env=None, extra_path=""):
 
     return newenv
 
-def listen_sock(port):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def listen_sock(port, cafile=None, certfile=None, keyfile=None):
+    sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+    if cafile is not None:
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=cafile)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+        sock = context.wrap_socket(sock, server_side=True)
     sock.settimeout(10)
     sock.bind(('', port))
     sock.listen(5)

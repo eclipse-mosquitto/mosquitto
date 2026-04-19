@@ -47,15 +47,7 @@ def do_test(address):
 
     publish_packet = mosq_test.gen_publish("bridge/ssl/test", qos=0, payload="message")
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=f"{ssl_dir}/all-ca.crt")
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.load_cert_chain(certfile=f"{ssl_dir}/server-san.crt", keyfile=f"{ssl_dir}/server-san.key")
-    ssock = context.wrap_socket(sock, server_side=True)
-    ssock.settimeout(20)
-    ssock.bind(('', port1))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port1, f"{ssl_dir}/all-ca.crt", f"{ssl_dir}/server-san.crt", f"{ssl_dir}/server-san.key")
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
 

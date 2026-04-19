@@ -20,7 +20,7 @@ def write_config2(filename, persistence_file, port1, port2, protocol_version):
         f.write("allow_anonymous true\n")
         f.write("\n")
         f.write("connection bridge_sample\n")
-        f.write("address 127.0.0.1:%d\n" % (port1))
+        f.write("address localhost:%d\n" % (port1))
         f.write("topic bridge/# out 1\n")
         f.write("notifications false\n")
         f.write("bridge_attempt_unsubscribe false\n")
@@ -57,11 +57,7 @@ def do_test(proto_ver):
     else:
         puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
 
-    ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    ssock.settimeout(40)
-    ssock.bind(('', port1))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port1)
 
     write_config1(conf_file, persistence_file, port1, port2)
 

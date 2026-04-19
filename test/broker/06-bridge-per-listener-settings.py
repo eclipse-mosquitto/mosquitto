@@ -13,7 +13,7 @@ def write_config(filename, port1, port2, protocol_version):
         f.write("allow_anonymous true\n")
         f.write("\n")
         f.write("connection bridge_sample\n")
-        f.write("address 127.0.0.1:%d\n" % (port1))
+        f.write("address localhost:%d\n" % (port1))
         f.write("bridge_attempt_unsubscribe false\n")
         f.write("topic # in 0 local/topic/ remote/topic/\n")
         f.write("topic prefix/# in 0 local2/topic/ remote2/topic/\n")
@@ -112,11 +112,7 @@ def do_test(proto_ver):
     client_connect_packet = mosq_test.gen_connect("pub-test", proto_ver=proto_ver)
     client_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
 
-    ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    ssock.settimeout(4)
-    ssock.bind(('', port1))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port1)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
 

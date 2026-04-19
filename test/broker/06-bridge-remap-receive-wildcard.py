@@ -11,7 +11,7 @@ def write_config(filename, port1, port2):
         f.write(f"listener {port2}\n")
         f.write("allow_anonymous true\n")
         f.write("connection bridge1\n")
-        f.write(f"address 127.0.0.1:{port1}\n")
+        f.write(f"address localhost:{port1}\n")
         f.write("topic room1/# both 2 sensor/ myhouse/\n")
         f.write("topic tst/ba both 2\n")
         f.write("topic # both 2\n")
@@ -50,11 +50,7 @@ def do_test(proto_ver):
     subscribe_packet3 = mosq_test.gen_subscribe(mid, "#", 2 | opts, proto_ver=proto_ver)
     suback_packet3 = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
 
-    ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    ssock.settimeout(40)
-    ssock.bind(('', port1))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port1)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
 

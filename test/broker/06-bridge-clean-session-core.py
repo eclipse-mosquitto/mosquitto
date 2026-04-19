@@ -39,7 +39,7 @@ def write_config_edge(filename, persistence_file, remote_port, listen_port, prot
         f.write("connection bridge_sample\n")
         f.write("local_clientid id_local\n")
         f.write("remote_clientid id_remote\n")
-        f.write("address 127.0.0.1:%d\n" % (remote_port))
+        f.write("address localhost:%d\n" % (remote_port))
         f.write("topic br_out/# out 1\n")
         f.write("topic br_in/# in 1\n")
         # We need to ensure connections break fast enough to keep test times sane

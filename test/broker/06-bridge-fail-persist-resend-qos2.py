@@ -12,7 +12,7 @@ def write_config(filename, port1, port2, protocol_version):
         f.write("\n")
         f.write("connection bridge-u-test\n")
         f.write("remote_clientid bridge-u-test\n")
-        f.write("address 127.0.0.1:%d\n" % (port1))
+        f.write("address localhost:%d\n" % (port1))
         f.write("topic bridge/# out\n")
         f.write("\n")
         f.write("cleansession true\n")
@@ -63,12 +63,7 @@ def do_test(proto_ver):
     else:
         sleep_time = 0.5
 
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.settimeout(10)
-    sock.bind(('', port1))
-    sock.listen(5)
+    sock = mosq_test.listen_sock(port1)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
     time.sleep(sleep_time)

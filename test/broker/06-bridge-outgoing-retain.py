@@ -13,7 +13,7 @@ def write_config(filename, port1, port2, protocol_version, outgoing_retain):
         f.write("allow_anonymous true\n")
         f.write("\n")
         f.write("connection bridge_sample\n")
-        f.write("address 127.0.0.1:%d\n" % (port1))
+        f.write("address localhost:%d\n" % (port1))
         f.write("topic \"bridge with space/#\" both 1\n")
         f.write("notifications false\n")
         f.write("restart_timeout 5\n")
@@ -57,12 +57,7 @@ def do_test(proto_ver, outgoing_retain):
     helper_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
     helper_publish_packet = mosq_test.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=proto_ver)
 
-
-    ssock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ssock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    ssock.settimeout(40)
-    ssock.bind(('', port1))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port1)
 
     try:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
