@@ -63,12 +63,14 @@ def env_add_ld_library_path(env=None, extra_path=""):
         os.getenv(pathvar, "")
     ])
 
-    if env is None:
-        env = os.environ.copy()
+    newenv = os.environ.copy()
+    if env is not None:
+        for key, value in env.items():
+            newenv[key] = value
 
-    env[pathvar] = p
+    newenv[pathvar] = p
 
-    return env
+    return newenv
 
 def listen_sock(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
