@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Cedalo GmbH
 #
@@ -16,7 +16,7 @@
 # Contributors:
 #    Roger Light - initial implementation and documentation.
 
-set -e
+set -eu
 
 # Note that sqlite3 is required as a build dep of a plugin which is not
 # currently part of fuzz testing. Once it is part of fuzz testing, sqlite will
