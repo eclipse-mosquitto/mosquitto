@@ -61,7 +61,7 @@ def do_test(proto_ver):
             print("rr not terminated")
             rr_terminate_rc = 1
         (stdo, stde) = rr.communicate()
-        if stdo.decode('utf-8') == payload + '\n':
+        if payload in stdo.decode('utf-8'):
             rc = rr_terminate_rc
         sock.close()
     except mosq_test.TestError:

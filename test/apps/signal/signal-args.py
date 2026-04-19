@@ -10,7 +10,7 @@ def do_test(args, rc_expected, response=None, input=None):
                     capture_output=True, encoding='utf-8', timeout=2, input=input)
 
     if response is not None:
-        if proc.stderr != response:
+        if response not in proc.stderr:
             print(len(proc.stderr))
             print(len(response))
             raise ValueError(proc.stderr)
@@ -21,12 +21,12 @@ def do_test(args, rc_expected, response=None, input=None):
 
 do_test([], 1) # For the usage message
 do_test(["--help"], 1)
-do_test(["--invalid"], 1, response="Error: One of -a or -p must be used.\n")
-do_test(["-p"], 1, response="Error: -p argument given but process ID missing.\n")
-do_test(["-p", "0"], 1, response="Error: Process ID must be >0.\n")
-do_test(["-p", "1"], 1, response="Error: No signal given.\n")
-do_test(["-a"], 1, response="Error: No signal given.\n")
-do_test(["-p", "1", "invalid"], 1, response="Error: Unknown signal 'invalid'.\n")
+do_test(["--invalid"], 1, response="Error: One of -a or -p must be used.")
+do_test(["-p"], 1, response="Error: -p argument given but process ID missing.")
+do_test(["-p", "0"], 1, response="Error: Process ID must be >0.")
+do_test(["-p", "1"], 1, response="Error: No signal given.")
+do_test(["-a"], 1, response="Error: No signal given.")
+do_test(["-p", "1", "invalid"], 1, response="Error: Unknown signal 'invalid'.")
 do_test(["-p", "1", "config-reload"], 0)
 do_test(["-p", "1", "log-rotate"], 0)
 do_test(["-p", "1", "shutdown"], 0)

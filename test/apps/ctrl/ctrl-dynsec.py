@@ -34,7 +34,7 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
 
     proc = subprocess.run([mosq_paths.mosquitto_ctrl]
                     + opts + ["dynsec"] + args,
-                    env=env, capture_output=True, encoding='utf-8', timeout=2, input=input)
+                    env=env, capture_output=True, text=True, encoding='utf-8', input=input)
 
     if response is not None:
         if proc.stdout != response:

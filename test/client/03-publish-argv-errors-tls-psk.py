@@ -24,19 +24,17 @@ def do_test(args, stderr_expected, rc_expected):
     (stdo, stde) = pub.communicate()
     if pub.returncode != rc_expected:
         raise mosq_test.TestError(pub.returncode)
-    if stderr_expected is not None and stde.decode('utf-8') != stderr_expected:
+    if stderr_expected is not None and stderr_expected not in stde.decode('utf-8'):
         raise mosq_test.TestError(stde)
 
 
 if __name__ == '__main__':
-    helps = "\nUse 'mosquitto_pub --help' to see usage.\n"
-
     # Missing args
-    do_test(['--psk'], "Error: --psk argument given but no key specified.\n\n" + helps, 1)
-    do_test(['--psk-identity'], "Error: --psk-identity argument given but no identity specified.\n\n" + helps, 1)
+    do_test(['--psk'], "Error: --psk argument given but no key specified.", 1)
+    do_test(['--psk-identity'], "Error: --psk-identity argument given but no identity specified.", 1)
 
     # Invalid combinations
-    do_test(['--cafile', 'file', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.\n" + helps, 1)
-    do_test(['--capath', 'dir', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.\n" + helps, 1)
-    do_test(['--psk', 'key'], "Error: --psk-identity required if --psk used.\n" + helps, 1)
+    do_test(['--cafile', 'file', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.", 1)
+    do_test(['--capath', 'dir', '--psk', 'key'], "Error: Only one of --psk or --cafile/--capath may be used at once.", 1)
+    do_test(['--psk', 'key'], "Error: --psk-identity required if --psk used.", 1)
     

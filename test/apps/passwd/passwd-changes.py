@@ -23,7 +23,7 @@ def client_check(port, username, password, rc):
 def passwd_cmd(args, response=None, input=None, expected_rc=0):
     proc = subprocess.run([mosq_paths.mosquitto_passwd]
                     + args,
-                    capture_output=True, encoding='utf-8', timeout=2, input=input)
+                    capture_output=True, encoding='utf-8', timeout=2, text=True, input=input)
 
     if response is not None:
         if proc.stdout != response and proc.stderr != response:
