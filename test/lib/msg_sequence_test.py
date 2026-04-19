@@ -158,7 +158,7 @@ class MsgSequence(object):
         try:
             if self._puback_check() and self.expect_disconnect:
                 raise ValueError("Still connected")
-        except ConnectionResetError:
+        except (ConnectionAbortedError, ConnectionResetError):
             if self.expect_disconnect:
                 pass
             else:

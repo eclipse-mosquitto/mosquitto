@@ -38,7 +38,7 @@ def do_test():
             mosq_test.do_client_connect(connect_packet_bad, connack_packet_bad, port=port)
             print("did not throw when trying to open 11th connection (first time)")
             return rc
-        except (ConnectionResetError, BrokenPipeError, OSError):
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError, OSError):
             # Expected behaviour
             pass
         finally:
@@ -61,7 +61,7 @@ def do_test():
             mosq_test.do_client_connect(connect_packet_bad, connack_packet_bad, port=port)
             print("did not throw when trying to open 11th connection (second time)")
             return rc
-        except (ConnectionResetError, BrokenPipeError, OSError):
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError, OSError):
             # Expected behaviour
             pass
         finally:
