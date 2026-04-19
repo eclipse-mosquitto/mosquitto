@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
-import signal
 
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_ACL_FILE"])
 
@@ -41,7 +40,7 @@ def do_test(write_config_func):
         with open(f"{port}.acl", "wt") as f:
             f.write("topic readwrite a#")
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         # Broker should terminate
         if mosq_test.wait_for_subprocess(broker) == 0 and broker.returncode == 3:
             rc = 0

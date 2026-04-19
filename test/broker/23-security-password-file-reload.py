@@ -41,7 +41,7 @@ def do_test(write_config_func):
         with open(f"{port}.password", "wt") as f:
             f.write("test:bad\n")
 
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
         # Broker should terminate
         if mosq_test.wait_for_subprocess(broker) == 0 and broker.returncode == 3:
             rc = 0

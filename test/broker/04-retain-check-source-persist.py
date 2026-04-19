@@ -3,7 +3,6 @@
 # Test for CVE-2018-12546, with the broker being stopped to write the persistence file.
 
 from mosq_test_helper import *
-import signal
 
 mosq_test.require_features(["WITH_PERSISTENCE"])
 

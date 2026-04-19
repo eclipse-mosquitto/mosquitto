@@ -3,7 +3,6 @@
 # tests that bridge configuration is reloaded on signal
 
 from mosq_test_helper import *
-import signal
 
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
@@ -80,13 +79,13 @@ def do_test():
         accept_subscription(bridge, "remote/topic1/#")
 
         write_config(conf_file, port1, port2, "topic2", True)
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
 
         bridge = accept_new_connection(ssock) # immediate reload forces a reconnection
         accept_subscription(bridge, "remote/topic2/#")
 
         write_config(conf_file, port1, port2, "topic3", False)
-        broker.send_signal(signal.SIGHUP)
+        mosq_test.reload_broker(broker)
 
         expect_no_incoming_connection(ssock) # as it was set to lazy reload
 

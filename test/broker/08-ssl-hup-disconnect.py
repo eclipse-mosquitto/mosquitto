@@ -6,7 +6,6 @@
 # https://github.com/eclipse/mosquitto/issues/1402
 
 from mosq_test_helper import *
-import signal
 
 mosq_test.require_features(["WITH_TLS"])
 

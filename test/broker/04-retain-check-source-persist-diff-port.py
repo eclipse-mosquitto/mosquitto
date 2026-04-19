@@ -4,7 +4,6 @@
 
 from mosq_test_helper import *
 import os.path
-import signal
 
 mosq_test.require_features(["WITH_PERSISTENCE"])
 

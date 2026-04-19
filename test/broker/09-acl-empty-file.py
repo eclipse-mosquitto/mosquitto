@@ -3,7 +3,6 @@
 # Test for CVE-2018-xxxxx
 
 from mosq_test_helper import *
-import signal
 
 def write_config(filename, port, per_listener):
     with open(filename, 'w') as f:

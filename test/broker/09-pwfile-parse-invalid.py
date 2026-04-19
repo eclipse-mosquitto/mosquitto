@@ -3,7 +3,6 @@
 # Test for CVE-2018-xxxxx.
 
 from mosq_test_helper import *
-import signal
 
 mosq_test.require_features(["WITH_TLS"])
 

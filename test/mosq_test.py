@@ -198,15 +198,17 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
 
 def terminate_broker(broker):
     if platform.system() == 'Windows':
+        evt_sent = False
         for i in range(5):
             try:
                 evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_shutdown")
                 win32event.PulseEvent(evt)
+                evt_sent = True
                 break
             except Exception:
                 time.sleep(0.5)
-                
-        broker.terminate()
+        if evt_sent == False:
+            broker.terminate()
     else:
         broker.terminate()
     stde = broker_log(broker)
@@ -216,6 +218,19 @@ def terminate_broker(broker):
     else:
         return (0, stde)
 
+def reload_broker(broker):
+    if platform.system() == 'Windows':
+        for i in range(10):
+            try:
+                evt = win32event.OpenEvent(win32event.EVENT_ALL_ACCESS, False, f"mosq{broker.pid}_reload")
+                win32event.SetEvent(evt)
+                return
+            except Exception as e:
+                time.sleep(0.5)
+                print(e)
+                pass
+    else:
+        broker.send_signal(signal.SIGHUP)
 
 def pub_helper(port, proto_ver=4):
     connect_packet = gen_connect("pub-helper", proto_ver=proto_ver)
