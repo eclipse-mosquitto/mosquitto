@@ -298,7 +298,7 @@ foreach(PERSIST_TYPE ${PERSIST_LIST})
         set(test_name "broker-${PY_TEST_NAME}-${PERSIST_TYPE}")
         get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
         add_test(NAME ${test_name}
-            COMMAND ${PY_TEST_FILE} ${PERSIST_TYPE}
+            COMMAND python3 ${PY_TEST_FILE} ${PERSIST_TYPE}
         )
         mosq_set_test_props(${test_name})
         set_tests_properties(${test_name}
