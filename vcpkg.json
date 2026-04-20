@@ -4,6 +4,12 @@
 	"dependencies": [
 		"argon2",
 		"cjson",
+		"cunit",
+		{
+			"name": "dlfcn-win32",
+			"platform": "windows"
+		},
+		"gtest",
 		"libmicrohttpd",
 		"openssl",
 		"pthreads",
