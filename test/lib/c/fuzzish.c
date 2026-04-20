@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <mosquitto.h>
 
 #define UNUSED(A) (void)(A)
@@ -370,12 +369,16 @@ static void on_log(struct mosquitto *mosq, void *obj, int level, const char *str
 
 static void setup_signal_handler(void)
 {
+#ifdef WIN32
+	signal(SIGTERM, signal_handler);
+#else
 	struct sigaction act = { 0 };
 
 	act.sa_handler = &signal_handler;
 	if(sigaction(SIGTERM, &act, NULL) < 0){
 		exit(1);
 	}
+#endif
 }
 
 
@@ -394,7 +397,7 @@ int main(int argc, char *argv[])
 
 	port = atoi(argv[1]);
 	proto_ver = atoi(argv[2]);
-	clean_start = strcasecmp(argv[3], "false");
+	clean_start = strcmp(argv[3], "false");
 	if(argc == 5){
 		command = argv[4];
 	}
