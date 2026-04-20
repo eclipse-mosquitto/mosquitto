@@ -306,6 +306,20 @@ if(WITH_TESTS)
 		set(${PY_NAME_LIST} "${LOCAL_LIST}" PARENT_SCOPE)
 	endfunction()
 
+    function(mosq_test_set_windows_path name)
+        if(WIN32)
+            set(PATHMOD
+                "PATH=path_list_prepend:$<TARGET_FILE_DIR:libmosquitto_common>"
+                "PATH=path_list_prepend:$<TARGET_FILE_DIR:libmosquitto>"
+                "PATH=path_list_prepend:${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/bin"
+            )
+            set_property(TEST ${name}
+				PROPERTY
+					ENVIRONMENT_MODIFICATION "${PATHMOD}"
+			)
+        endif()
+    endfunction()
+
 	function(mosq_set_test_props name)
 		set(fullname "${prefix}-${name}")
 		get_property(test_vars GLOBAL PROPERTY TEST_ENV_VARS)
@@ -314,6 +328,7 @@ if(WITH_TESTS)
 				ENVIRONMENT "${test_vars}"
 				SKIP_RETURN_CODE 77
 		)
+		mosq_test_set_windows_path(${name})
 	endfunction()
 
 	function(add_python_test PY_TEST_LIST PREFIX PORTS PY_TEST_FILE)
