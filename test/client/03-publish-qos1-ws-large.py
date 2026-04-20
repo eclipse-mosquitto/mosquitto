@@ -3,8 +3,12 @@
 #
 
 from mosq_test_helper import *
+import platform
 
 mosq_test.require_features(["WITH_BROKER", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"])
+if platform.system() == 'Windows':
+    # Long command line args not supported
+    exit(0)
 
 def write_config(filename, port1, port2):
     with open(filename, 'w') as f:

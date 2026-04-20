@@ -3,6 +3,7 @@
 # Test parsing of command line args and errors. Does not test arg functionality.
 
 from mosq_test_helper import *
+import platform
 
 mosq_test.require_features(["WITH_TLS"])
 
