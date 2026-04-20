@@ -128,6 +128,9 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         f.write("accept_protocol_versions 3,4,5\n")
         if platform.system() == "Darwin":
             f.write("bind_interface lo0\n")
+        elif platform.system() == "Windows":
+            # bind_interface not supported
+            pass
         else:
             f.write("bind_interface lo\n")
         f.write(f"cafile {ssl_dir / 'all-ca.crt'}\n")
