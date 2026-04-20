@@ -100,14 +100,7 @@ target_include_directories(libmosquitto
 )
 
 if(WITH_THREADING)
-	if(WIN32)
-		set (LIBRARIES ${LIBRARIES} PThreads4W::PThreads4W)
-	else()
-		set(THREADS_PREFER_PTHREAD_FLAG ON)
-		find_package(Threads REQUIRED)
-
-		set (LIBRARIES ${LIBRARIES} Threads::Threads)
-	endif()
+	set (LIBRARIES ${LIBRARIES} ${THREADLIB})
 endif()
 
 target_link_libraries(libmosquitto PUBLIC ${LIBRARIES})

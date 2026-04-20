@@ -19,10 +19,7 @@ target_link_libraries(mosquittopp
 )
 
 if (WITH_THREADING AND NOT WIN32)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-	find_package(Threads REQUIRED)
-
-	target_link_libraries(mosquittopp PRIVATE Threads::Threads)
+	target_link_libraries(mosquittopp PRIVATE  ${THREADLIB})
 endif()
 
 set_target_properties(mosquittopp PROPERTIES
