@@ -3,9 +3,14 @@
 from mosq_test_helper import *
 import http.client
 import json
+import platform
 import ssl
 
 mosq_test.require_features(["WITH_HTTP_API", "WITH_TLS"])
+
+if platform.system() == "Windows":
+    # gnutls not supported on Windows
+    exit(77)
 
 def write_config(filename, mqtt_port, http_port):
     with open(filename, 'w') as f:

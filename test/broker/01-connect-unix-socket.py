@@ -10,7 +10,7 @@ try:
     s = socket.AF_UNIX
 except AttributeError:
     # Not supported on Windows
-    exit(0)
+    exit(77)
     
 def write_config(filename, port):
     with open(filename, 'w') as f:
