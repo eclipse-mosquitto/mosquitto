@@ -6,6 +6,12 @@ from mosq_test_helper import *
 
 mosq_test.require_features(["WITH_UNIX_SOCKETS"])
 
+try:
+    s = socket.AF_UNIX
+except AttributeError:
+    # Not supported on Windows
+    exit(0)
+    
 def write_config(filename, port):
     with open(filename, 'w') as f:
         f.write("listener 0 %d.sock\n" % (port))
