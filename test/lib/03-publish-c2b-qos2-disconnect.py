@@ -20,11 +20,7 @@ def do_test(client_cmd):
     pubrel_packet = mosq_test.gen_pubrel(mid)
     pubcomp_packet = mosq_test.gen_pubcomp(mid)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.settimeout(10)
-    sock.bind(('', port))
-    sock.listen(5)
+    sock = mosq_test.listen_sock(port)
 
     client_args = [client_cmd, str(port)]
     env = mosq_test.env_add_ld_library_path()

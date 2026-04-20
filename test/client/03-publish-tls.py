@@ -35,15 +35,7 @@ def do_test(address, insecure_option, expect_ssl_fail):
     connack_packet = mosq_test.gen_connack(rc=0)
     publish_packet = mosq_test.gen_publish("03/pub/tls/test", qos=0, payload="message")
 
-    broker = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    broker.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=f"{ssl_dir}/all-ca.crt")
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.load_cert_chain(certfile=f"{ssl_dir}/server-san.crt", keyfile=f"{ssl_dir}/server-san.key")
-    sbroker = context.wrap_socket(broker, server_side=True)
-    sbroker.settimeout(20)
-    sbroker.bind(('', port))
-    sbroker.listen(5)
+    sbroker = mosq_test.listen_sock(port, f"{ssl_dir}/all-ca.crt", f"{ssl_dir}/server-san.crt", f"{ssl_dir}/server-san.key")
 
     try:
         pub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
@@ -77,7 +69,7 @@ def do_test(address, insecure_option, expect_ssl_fail):
     except Exception as e:
         print(e)
     finally:
-        broker.close()
+        sbroker.close()
         if rc:
             print(stde.decode('utf-8'))
             exit(rc)

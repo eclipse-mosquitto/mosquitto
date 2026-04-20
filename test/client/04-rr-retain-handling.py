@@ -22,11 +22,7 @@ def do_test():
             '-V', '5',
             ]
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.settimeout(5)
-    sock.bind(('', port))
-    sock.listen(5)
+    sock = mosq_test.listen_sock(port)
 
     props = mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 1)
     connect_packet = mosq_test.gen_connect("", proto_ver=5, properties=props)

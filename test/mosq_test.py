@@ -5,6 +5,7 @@ import hashlib
 import os
 import platform
 import socket
+import ssl
 import subprocess
 import struct
 import sys
@@ -72,7 +73,7 @@ def env_add_ld_library_path(env=None, extra_path=""):
 
     return newenv
 
-def listen_sock(port, cafile=None, certfile=None, keyfile=None):
+def listen_sock(port, cafile=None, certfile=None, keyfile=None, cert_required=False):
     sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
@@ -80,6 +81,8 @@ def listen_sock(port, cafile=None, certfile=None, keyfile=None):
         context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=cafile)
         context.minimum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+        if cert_required:
+            context.verify_mode = ssl.CERT_REQUIRED
         sock = context.wrap_socket(sock, server_side=True)
     sock.settimeout(10)
     sock.bind(('', port))

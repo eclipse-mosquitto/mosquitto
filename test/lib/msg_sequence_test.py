@@ -252,11 +252,7 @@ def do_test(hostname, port):
     succeeded = 0
     test = None
 
-    server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_sock.settimeout(10)
-    server_sock.bind(('', port))
-    server_sock.listen(5)
+    server_sock = mosq_test.listen_sock(port)
 
     for seq in sorted(sequences):
         if seq[-5:] != ".json":

@@ -25,14 +25,7 @@ def do_test(client_cmd):
     connack_packet = mosq_test.gen_connack(rc=0)
     disconnect_packet = mosq_test.gen_disconnect()
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH, cafile=f"{ssl_dir}/all-ca.crt")
-    context.load_cert_chain(certfile=f"{ssl_dir}/server.crt", keyfile=f"{ssl_dir}/server.key")
-    ssock = context.wrap_socket(sock, server_side=True)
-    ssock.settimeout(10)
-    ssock.bind(('', port))
-    ssock.listen(5)
+    ssock = mosq_test.listen_sock(port, f"{ssl_dir}/all-ca.crt", f"{ssl_dir}/server.crt", f"{ssl_dir}/server.key")
 
     client_args = [Path(mosq_test.get_build_root(), "test", "lib") / client_cmd, str(port)]
     client = mosq_test.start_client(filename=str(client_cmd).replace('/', '-'), cmd=client_args)
