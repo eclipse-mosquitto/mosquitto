@@ -23,9 +23,9 @@ def check_db(port, counts):
         f"DB_CHUNK_CLIENT:     {counts[5]}\n"
 
     cmd = [
-        mosq_test.get_build_root()+'/apps/db_dump/mosquitto_db_dump',
+        Path(mosq_test.get_build_root(), 'apps', 'db_dump', mosq_test.get_build_type(), 'mosquitto_db_dump'),
         '--stats',
-        f'{port}/mosquitto.db'
+        Path(test_dir, port, 'mosquitto.db')
     ]
     res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1, encoding='utf-8')
     if res.stdout != stdout:
@@ -55,7 +55,7 @@ def do_test(counts):
 
         # Set up persistent client session, including a subscription
         cmd = [
-            mosq_test.get_build_root()+'/client/mosquitto_sub',
+            Path(mosq_test.get_build_root(), 'client', mosq_test.get_build_type(), 'mosquitto_sub'),
             '-c',
             '-i', 'client-id',
             '-p', str(port),

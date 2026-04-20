@@ -18,6 +18,6 @@ def do_test(conn, data):
     conn.close()
 
 
-mosq_test.client_test("c/04-retain-qos0.test", [], do_test, None)
+mosq_test.client_test(Path("c", mosq_test.get_build_type(), "04-retain-qos0.exe"), [], do_test, None)
 if mosq_test.check_features(["WITH_LIB_CPP"]):
-    mosq_test.client_test("cpp/04-retain-qos0.test", [], do_test, None)
+    mosq_test.client_test(Path("cpp", mosq_test.get_build_type(), "04-retain-qos0.exe"), [], do_test, None)

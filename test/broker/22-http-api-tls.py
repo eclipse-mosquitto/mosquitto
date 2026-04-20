@@ -14,13 +14,13 @@ def write_config(filename, mqtt_port, http_port):
 
         f.write(f"listener {http_port}\n")
         f.write("protocol http_api\n")
-        f.write(f"certfile {ssl_dir}/server.crt\n")
-        f.write(f"keyfile {ssl_dir}/server.key\n")
+        f.write(f"certfile {ssl_dir / 'server.crt'}\n")
+        f.write(f"keyfile {ssl_dir / 'server.key'}\n")
 
         if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
             f.write(f"listener 0 {mqtt_port}.sock\n")
-            f.write(f"certfile {ssl_dir}/server.crt\n")
-            f.write(f"keyfile {ssl_dir}/server.key\n")
+            f.write(f"certfile {ssl_dir / 'server.crt'}\n")
+            f.write(f"keyfile {ssl_dir / 'server.key'}\n")
 
 def check_sys_tree(http_conn):
     # systree API
@@ -107,7 +107,7 @@ rc = 1
 try:
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.load_verify_locations(cafile=f"{ssl_dir}/all-ca.crt")
+    context.load_verify_locations(cafile=ssl_dir / "all-ca.crt")
     http_conn = http.client.HTTPSConnection(f"localhost:{http_port}", context=context)
 
     # Bad request type

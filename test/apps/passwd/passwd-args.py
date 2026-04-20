@@ -7,7 +7,7 @@ from mosq_test_helper import *
 mosq_test.require_features(["WITH_TLS"])
 
 def do_test(args, rc_expected, response=None, input=None):
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_passwd/mosquitto_passwd"]
+    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_passwd', mosq_test.get_build_type(), 'mosquitto_passwd')]
                     + args,
                     capture_output=True, encoding='utf-8', timeout=2, input=input)
 

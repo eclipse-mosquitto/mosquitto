@@ -90,7 +90,7 @@ class MsgSequence(object):
 
         env = mosq_test.env_add_ld_library_path()
         cmd = [
-                mosq_test.get_build_root() + '/test/lib/c/fuzzish.test',
+                Path(mosq_test.get_build_root(), 'test', 'lib', 'c', mosq_test.get_build_type(), 'fuzzish.exe'),
                 str(port), str(self.proto_ver), str(self.clean_start)
                 ]
         if os.environ.get('MOSQ_USE_VALGRIND') is not None:

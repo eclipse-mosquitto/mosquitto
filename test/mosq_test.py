@@ -3,6 +3,7 @@ import base64
 import errno
 import hashlib
 import os
+import platform
 import socket
 import subprocess
 import struct
@@ -30,26 +31,38 @@ def get_build_root():
         result = str(Path(__file__).resolve().parents[1])
     return result
 
-def env_add_ld_library_path(env=None):
-    p = ":".join([
-        get_build_root() + '/libcommon',
-        get_build_root() + '/lib',
-        get_build_root() + '/lib/cpp',
-        os.getenv("LD_LIBRARY_PATH", "")
+def get_build_type():
+    if platform.system() == 'Windows':
+        buildtype = os.environ.get('CMAKE_CONFIG_TYPE')
+        if buildtype is None:
+            buildtype = 'RelWithDebInfo'
+    else:
+        buildtype = ''
+    return buildtype
+
+def env_add_ld_library_path(env=None, extra_path=""):
+    if platform.system() == 'Windows':
+        pathsep = ';'
+        pathvar = 'PATH'
+    elif platform.system() == 'Darwin':
+        pathsep = ':'
+        pathvar = 'DYLIB_LIBRARY_PATH'
+    else:
+        pathsep = ':'
+        pathvar = 'LD_LIBRARY_PATH'
+
+    p = pathsep.join([
+        str(Path(get_build_root(), 'libcommon', get_build_type())),
+        str(Path(get_build_root(), 'lib', get_build_type())),
+        str(Path(get_build_root(), 'lib', 'cpp', get_build_type())),
+        extra_path,
+        os.getenv(pathvar, "")
     ])
 
     if env is None:
-        env = {
-            'LD_LIBRARY_PATH': p,
-            'DYLIB_LIBRARY_PATH': p,
-        }
-    else:
-        for v in ['LD_LIBRARY_PATH', 'DYLIB_LIBRARY_PATH']:
-            try:
-                val = env[v]
-                env[v] = ":".join([val, p])
-            except KeyError:
-                env[v] = p
+        env = os.environ.copy()
+
+    env[pathvar] = p
 
     return env
 
@@ -65,8 +78,10 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
     global vg_index
     global vg_logfiles
 
+    broker_path = Path(get_build_root(), 'src', get_build_type(), 'mosquitto')
+
     if use_conf == True:
-        cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+        cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
 
         if port == 0:
             port = 1888
@@ -74,9 +89,9 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
             cmd += ['-p', str(port)]
     else:
         if cmd is None and port != 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-p', str(port)]
+            cmd = [broker_path, '-v', '-p', str(port)]
         elif cmd is None and port == 0:
-            cmd = [get_build_root() + '/src/mosquitto', '-v', '-c', filename.replace('.py', '.conf')]
+            cmd = [broker_path, '-v', '-c', filename.replace('.py', '.conf')]
 
     if os.environ.get('MOSQ_USE_VALGRIND') is not None:
         logfile = filename+'.'+str(vg_index)+'.vglog'
@@ -102,6 +117,7 @@ def start_broker(filename, cmd=None, port=0, use_conf=False, expect_fail=False, 
     else:
         stderr = subprocess.PIPE
 
+    env = env_add_ld_library_path(env)
     broker = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr, env=env)
 
     if expect_fail:
@@ -917,11 +933,11 @@ def client_test(client_cmd, client_args, callback, cb_data):
 
     sock = listen_sock(port)
 
-    args = [get_build_root() + "/test/lib/" + client_cmd, str(port)]
+    args = [Path(get_build_root(), "test", "lib") / client_cmd, str(port)]
     if client_args is not None:
         args = args + client_args
 
-    client = start_client(filename=client_cmd.replace('/', '-'), cmd=args)
+    client = start_client(filename=str(client_cmd).replace('/', '-'), cmd=args)
 
     try:
         (conn, address) = sock.accept()

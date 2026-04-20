@@ -32,8 +32,8 @@ def do_test(conn, data):
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)
 
 
-mosq_test.client_test("c/02-subscribe-helper-simple-qos2.test", [], do_test, None)
-mosq_test.client_test("c/02-subscribe-helper-callback-qos2.test", [], do_test, None)
+mosq_test.client_test(Path("c", mosq_test.get_build_type(), "02-subscribe-helper-simple-qos2.exe"), [], do_test, None)
+mosq_test.client_test(Path("c", mosq_test.get_build_type(), "02-subscribe-helper-callback-qos2.exe"), [], do_test, None)
 if mosq_test.check_features(["WITH_LIB_CPP"]):
-    mosq_test.client_test("cpp/02-subscribe-helper-simple-qos2.test", [], do_test, None)
-    mosq_test.client_test("cpp/02-subscribe-helper-callback-qos2.test", [], do_test, None)
+    mosq_test.client_test(Path("cpp", mosq_test.get_build_type(), "02-subscribe-helper-simple-qos2.exe"), [], do_test, None)
+    mosq_test.client_test(Path("cpp", mosq_test.get_build_type(), "02-subscribe-helper-callback-qos2.exe"), [], do_test, None)

@@ -25,13 +25,13 @@ def do_test(testdir):
 
     sock = mosq_test.listen_sock(port);
 
-    client1 = mosq_test.start_client(filename=f"{testdir}-03-request-response-1.log", cmd=[f"{testdir}/03-request-response-1.test", str(port)])
+    client1 = mosq_test.start_client(filename=f"{testdir}-03-request-response-1.log", cmd=[testdir / mosq_test.get_build_type() / "03-request-response-1.exe", str(port)])
 
     try:
         (conn1, address) = sock.accept()
         conn1.settimeout(10)
 
-        client2 = mosq_test.start_client(filename=f"{testdir}-03-request-response-2.log", cmd=[f"{testdir}/03-request-response-2.test", str(port)])
+        client2 = mosq_test.start_client(filename=f"{testdir}-03-request-response-2.log", cmd=[testdir / mosq_test.get_build_type() / "03-request-response-2.exe", str(port)])
         (conn2, address) = sock.accept()
         conn2.settimeout(10)
 
@@ -67,6 +67,6 @@ def do_test(testdir):
             print(stde)
             exit(1)
 
-do_test("c")
+do_test(Path("c"))
 if mosq_test.check_features(["WITH_LIB_CPP"]):
-    do_test("cpp")
+    do_test(Path("cpp"))

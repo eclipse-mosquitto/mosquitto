@@ -32,7 +32,7 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
         if mosq_test.check_features(["WITH_TLS"]):
             opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
 
-    proc = subprocess.run([mosq_test.get_build_root()+"/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_ctrl', mosq_test.get_build_type(), 'mosquitto_ctrl')]
                     + opts + ["dynsec"] + args,
                     env=env, capture_output=True, encoding='utf-8', timeout=2, input=input)
 

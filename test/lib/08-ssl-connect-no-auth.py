@@ -34,8 +34,8 @@ def do_test(client_cmd):
     ssock.bind(('', port))
     ssock.listen(5)
 
-    client_args = [mosq_test.get_build_root() + "/test/lib/" + client_cmd, str(port)]
-    client = mosq_test.start_client(filename=client_cmd.replace('/', '-'), cmd=client_args)
+    client_args = [Path(mosq_test.get_build_root(), "test", "lib") / client_cmd, str(port)]
+    client = mosq_test.start_client(filename=str(client_cmd).replace('/', '-'), cmd=client_args)
 
     try:
         (conn, address) = ssock.accept()
@@ -57,6 +57,6 @@ def do_test(client_cmd):
         if rc:
             exit(rc)
 
-do_test("c/08-ssl-connect-no-auth.test")
+do_test(Path("c", mosq_test.get_build_type(), "08-ssl-connect-no-auth.exe"))
 if mosq_test.check_features(["WITH_LIB_CPP"]):
-    do_test("cpp/08-ssl-connect-no-auth.test")
+    do_test(Path("cpp", mosq_test.get_build_type(), "08-ssl-connect-no-auth.exe"))

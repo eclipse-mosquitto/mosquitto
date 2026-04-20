@@ -26,6 +26,6 @@ def do_test(conn, data):
     conn.close()
 
 
-mosq_test.client_test("c/11-prop-oversize-packet.test", [], do_test, None)
+mosq_test.client_test(Path("c", mosq_test.get_build_type(), "11-prop-oversize-packet.exe"), [], do_test, None)
 if mosq_test.check_features(["WITH_LIB_CPP"]):
-    mosq_test.client_test("cpp/11-prop-oversize-packet.test", [], do_test, None)
+    mosq_test.client_test(Path("cpp", mosq_test.get_build_type(), "11-prop-oversize-packet.exe"), [], do_test, None)

@@ -36,7 +36,7 @@ def ctrl_cmd(cmd, args, ports, response=None):
         opts += ["--cafile", f"{ssl_dir}/all-ca.crt"]
         capture_output = True
 
-    proc = subprocess.run([mosq_test.get_build_root() + "/apps/mosquitto_ctrl/mosquitto_ctrl"]
+    proc = subprocess.run([Path(mosq_test.get_build_root(), 'apps', 'mosquitto_ctrl', mosq_test.get_build_type(), 'mosquitto_ctrl')]
                     + opts + [cmd] + args,
                     env=env, capture_output=True, encoding='utf-8')
 

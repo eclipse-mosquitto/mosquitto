@@ -12,7 +12,7 @@ def write_config(filename, mqtt_port, http_port):
         f.write(f"listener {mqtt_port}\n")
         f.write(f"listener {http_port} 127.0.0.1\n")
         f.write("protocol http_api\n")
-        f.write(f"http_dir ./\n")
+        f.write(f"http_dir .\n")
 
 def write_index():
     with open("index.html", 'w') as f:
