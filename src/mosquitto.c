@@ -561,7 +561,6 @@ int main(int argc, char *argv[])
 		return rc;
 	}
 
-	signal__setup();
 
 #ifdef WITH_BRIDGE
 	bridge__start_all();
@@ -569,12 +568,14 @@ int main(int argc, char *argv[])
 
 	broker_control__init();
 
+	g_run = 1;
+	signal__setup();
+
 	log__printf(NULL, MOSQ_LOG_INFO, "mosquitto version %s running", VERSION);
 #ifdef WITH_SYSTEMD
 	sd_notify(0, "READY=1");
 #endif
 
-	g_run = 1;
 	rc = mosquitto_main_loop(g_listensock, g_listensock_count);
 
 	post_shutdown_cleanup();
