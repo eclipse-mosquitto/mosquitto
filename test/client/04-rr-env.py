@@ -3,10 +3,11 @@
 #
 
 from mosq_test_helper import *
+import platform
 
 mosq_test.require_features(["WITH_BROKER"])
 
-def do_test(proto_ver, env):
+def do_test(proto_ver, configenv):
     rc = 1
 
     port = mosq_test.get_port()
@@ -18,14 +19,18 @@ def do_test(proto_ver, env):
     else:
         V = 'mqttv31'
 
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    for e in ['XDG_CONFIG_HOME', 'HOME', 'USERPROFILE']:
+        try:
+            del env[e]
+        except KeyError:
+            pass
+    env.update(configenv)
 
-    payload = "message"
+    payload = "e126014f-fa4d-4c4c-8138-6cedb2d32aff"
     cmd = [mosq_paths.mosquitto_rr,
             '-p', str(port),
             '-q', '1',
-            '-t', '04/rr/qos1/test/request',
-            '-e', '04/rr/qos1/test/response',
             '-V', V,
             '-m', payload
             ]
@@ -45,7 +50,7 @@ def do_test(proto_ver, env):
     try:
         sock = mosq_test.sub_helper(port=port, topic="04/rr/qos1/test/request", qos=1, proto_ver=proto_ver)
 
-        rr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        rr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
 
         mosq_test.expect_packet(sock, "publish", publish_packet_req)
         sock.send(puback_packet_req)
@@ -59,7 +64,7 @@ def do_test(proto_ver, env):
             print("rr not terminated")
             rr_terminate_rc = 1
         (stdo, stde) = rr.communicate()
-        if stdo.decode('utf-8') == payload + '\n':
+        if payload in stdo:
             rc = rr_terminate_rc
         sock.close()
     except mosq_test.TestError:
@@ -72,17 +77,26 @@ def do_test(proto_ver, env):
             print("broker not terminated")
             if rc == 0: rc=1
         if rc:
+            (stdo, stde) = rr.communicate()
+            print(stdo)
+            print(stde)
             print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)
 
 
-env = {'HOME': str(source_dir / 'data')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+if platform.system() == 'Windows':
+    env = {'USERPROFILE': str(source_dir / 'data' / '.config')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)
+else:
+    env = {'HOME': str(source_dir / 'data')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)
 
-env = {'XDG_CONFIG_HOME': str(source_dir / 'data/.config')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+    env = {'XDG_CONFIG_HOME': str(source_dir / 'data' / '.config')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)

@@ -3,10 +3,11 @@
 #
 
 from mosq_test_helper import *
+import platform
 
 mosq_test.require_features(["WITH_BROKER"])
 
-def do_test(proto_ver, env):
+def do_test(proto_ver, configenv):
     rc = 1
 
     port = mosq_test.get_port()
@@ -18,7 +19,13 @@ def do_test(proto_ver, env):
     else:
         V = 'mqttv31'
 
-    env = mosq_test.env_add_ld_library_path(env)
+    env = mosq_test.env_add_ld_library_path()
+    for e in ['XDG_CONFIG_HOME', 'HOME', 'USERPROFILE']:
+        try:
+            del env[e]
+        except KeyError:
+            pass
+    env.update(configenv)
     cmd = [mosq_paths.mosquitto_pub,
             '-p', str(port),
             '-q', '1',
@@ -37,7 +44,7 @@ def do_test(proto_ver, env):
     try:
         sock = mosq_test.sub_helper(port=port, topic="#", qos=1, proto_ver=proto_ver)
 
-        pub = subprocess.run(cmd, capture_output=True, env=env)
+        pub = subprocess.run(cmd, capture_output=True, text=True, env=env)
 
         mosq_test.expect_packet(sock, "publish", publish_packet)
         rc = pub.returncode
@@ -57,12 +64,18 @@ def do_test(proto_ver, env):
             exit(rc)
 
 
-env = {'HOME': str(source_dir / 'data')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+if platform.system() == 'Windows':
+    env = {'USERPROFILE': str(source_dir / 'data' / '.config')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)
+else:
+    env = {'HOME': str(source_dir / 'data')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)
 
-env = {'XDG_CONFIG_HOME': str(source_dir / 'data/.config')}
-do_test(proto_ver=3, env=env)
-do_test(proto_ver=4, env=env)
-do_test(proto_ver=5, env=env)
+    env = {'XDG_CONFIG_HOME': str(source_dir / 'data' / '.config')}
+    do_test(proto_ver=3, configenv=env)
+    do_test(proto_ver=4, configenv=env)
+    do_test(proto_ver=5, configenv=env)
