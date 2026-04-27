@@ -152,7 +152,7 @@ static void bytes_read_helper(
 	int rc;
 	int i;
 
-	value = malloc(count);
+	value = malloc((size_t)count);
 	CU_ASSERT_PTR_NOT_NULL(value);
 	if(!value){
 		return;
