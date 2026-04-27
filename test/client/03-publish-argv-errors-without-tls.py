@@ -32,6 +32,7 @@ if __name__ == '__main__':
     do_test(['--version'], None, 1)
 
     # Missing args
+    do_test([], "Error: Both topic and message must be supplied.", 1)
     do_test(['-A'], "Error: -A argument given but no address specified.", 1)
     do_test(['-f'], "Error: -f argument given but no file specified.", 1)
     do_test(['-h'], "Error: -h argument given but no host specified.", 1)

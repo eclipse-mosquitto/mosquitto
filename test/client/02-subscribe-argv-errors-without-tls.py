@@ -32,6 +32,7 @@ if __name__ == '__main__':
     do_test(['--version'], None, 1)
 
     # Missing args
+    do_test([], "Error: You must specify a topic to subscribe to (-t) or unsubscribe from (-U).", 1)
     do_test(['-A'], "Error: -A argument given but no address specified.", 1)
     do_test(['-C'], "Error: -C argument given but no count specified.", 1)
     do_test(['-h'], "Error: -h argument given but no host specified.", 1)
