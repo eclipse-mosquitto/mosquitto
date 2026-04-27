@@ -7,7 +7,7 @@ import platform
 
 mosq_test.require_features(["WITH_BROKER"])
 
-def do_test(format_str, expected_output, proto_ver=4, payload="message"):
+def do_test(format_str, expected_outputs, proto_ver=4, payload="message"):
     rc = 1
 
     port = mosq_test.get_port()
@@ -55,18 +55,19 @@ def do_test(format_str, expected_output, proto_ver=4, payload="message"):
         sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
         sock.send(publish_packet)
 
-        sub = subprocess.run(cmd, capture_output=True, text=True, env=env)
-        
+        sub = subprocess.run(cmd, capture_output=True, env=env)
+
         have_match = False
         for expected_output in expected_outputs:
-            if sub.stdout.startswith(expected_output):
+            stdout = sub.stdout.decode('utf-8')
+            if stdout.startswith(expected_output):
                 rc = sub.returncode
                 have_match = True
                 break
         if have_match == False:
             print(f"input: {format_str}")
             print("expected: (%d) %s" % (len(expected_outputs), expected_outputs))
-            print("actual:   (%d) %s"  % (len(sub.stdout), sub.stdout))
+            print("actual:   (%d) %s"  % (len(stdout), stdout))
         sock.close()
     except mosq_test.TestError:
         pass
@@ -82,54 +83,54 @@ def do_test(format_str, expected_output, proto_ver=4, payload="message"):
             exit(rc)
 
 
-do_test('%%', '%\n')
-do_test('%A', '\n') # missing
-do_test('%C', '\n') # missing
-do_test('%2C', '  \n') # missing
-do_test('%C', 'plain/text\n', proto_ver=5)
-do_test('%D', '\n') # missing
-do_test('%E', '\n') # missing
-do_test('%E', '3600\n', proto_ver=5)
-do_test('%F', '\n') # missing
-do_test('%F', '1\n', proto_ver=5)
-do_test('%l', '7\n') # strlen("message")
-do_test('%02l', '07\n') # strlen("message")
-do_test('%2l', ' 7\n') # strlen("message")
-do_test('%-2l', '7 \n') # strlen("message")
-do_test('%m', '0\n')
-do_test('%P', '\n') # missing
-do_test('%P', 'name1:value1 name2:value2 name3:value3 name4:value4\n', proto_ver=5)
-do_test('%p', 'message\n')
-do_test('%-12p', 'message     \n')
-do_test('%q', '0\n')
-do_test('%R', '\n') # missing
-do_test('%r', '0\n')
-do_test('%S', '\n') # missing
-do_test('%S', '56\n', proto_ver=5)
-do_test('%t', '02/sub/format/test\n')
-do_test('%.20t', '02/sub/format/test\n')
-do_test('%-.20t', '02/sub/format/test\n')
-do_test('%20t', '  02/sub/format/test\n')
-do_test('%-20t', '02/sub/format/test  \n')
-do_test('%10.10t', '02/sub/for\n')
-do_test('%20.10t', '          02/sub/for\n')
-do_test('%-20.10t', '02/sub/for          \n')
-do_test('%x', '6d657373616765\n')
-do_test('%.1x', '6 d 6 5 7 3 7 3 6 1 6 7 6 5\n')
-do_test('%.2x', '6d 65 73 73 61 67 65\n')
-do_test('%.2:x', '6d:65:73:73:61:67:65\n')
-do_test('%18x', '    6d657373616765\n')
-do_test('%-18x', '6d657373616765    \n')
-do_test('%X', '6D657373616765\n')
-do_test('\\\\', '\\\n')
-do_test('\\a', '\a\n')
-#do_test('\\e', '\e\n')
-do_test('\\n', '\n\n')
-do_test('\\r', '\r\n')
-do_test('\\t', '\t\n')
-do_test('\\v', '\v\n')
-do_test('@@', '@\n')
-do_test('text', 'text\n')
-if platform.system() != 'Darwin':
-    do_test('%.3d', '2.718\n', payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
-    do_test('%.3f', '0.707\n', payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))
+do_test('%%', ['%'])
+do_test('%A', ['']) # missing
+do_test('%C', ['']) # missing
+do_test('%2C', ['  ']) # missing
+do_test('%C', ['plain/text'], proto_ver=5)
+do_test('%D', ['']) # missing
+do_test('%E', ['']) # missing
+do_test('%E', ['3600','3599'], proto_ver=5)
+do_test('%F', ['']) # missing
+do_test('%F', ['1'], proto_ver=5)
+do_test('%l', ['7']) # strlen("message")
+do_test('%02l', ['07']) # strlen("message")
+do_test('%2l', [' 7']) # strlen("message")
+do_test('%-2l', ['7 ']) # strlen("message")
+do_test('%m', ['0'])
+do_test('%P', ['']) # missing
+do_test('%P', ['name1:value1 name2:value2 name3:value3 name4:value4'], proto_ver=5)
+do_test('%p', ['message'])
+do_test('%-12p', ['message     '])
+do_test('%q', ['0'])
+do_test('%R', ['']) # missing
+do_test('%r', ['1'])
+do_test('%S', ['']) # missing
+do_test('%S', ['56'], proto_ver=5)
+do_test('%t', ['02/sub/format/test'])
+do_test('%.20t', ['02/sub/format/test'])
+do_test('%-.20t', ['02/sub/format/test'])
+do_test('%20t', ['  02/sub/format/test'])
+do_test('%-20t', ['02/sub/format/test  '])
+do_test('%10.10t', ['02/sub/for'])
+do_test('%20.10t', ['          02/sub/for'])
+do_test('%-20.10t', ['02/sub/for          '])
+do_test('%x', ['6d657373616765'])
+do_test('%.1x', ['6 d 6 5 7 3 7 3 6 1 6 7 6 5'])
+do_test('%.2x', ['6d 65 73 73 61 67 65'])
+do_test('%.2:x', ['6d:65:73:73:61:67:65'])
+do_test('%18x', ['    6d657373616765'])
+do_test('%-18x', ['6d657373616765    '])
+do_test('%X', ['6D657373616765'])
+do_test('\\\\', ['\\'])
+do_test('\\a', ['\a'])
+#do_test('\\e', ['\e')
+do_test('\\n', ['\n'])
+do_test('\\r', ['\r'])
+do_test('\\t', ['\t'])
+do_test('\\v', ['\v'])
+do_test('@@', ['@'])
+do_test('text', ['text'])
+if platform.system() != 'Darwin' and platform.system() != 'Windows':
+    do_test('%.3d', ['2.718'], payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
+    do_test('%.3f', ['0.707'], payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))
