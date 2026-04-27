@@ -457,7 +457,7 @@ int mosquitto_read_file(const char *file, bool restrict_read, char **buf, size_t
 	if(buflen){
 		*buflen = 0;
 	}
-	fptr = mosquitto_fopen(file, "rt", restrict_read);
+	fptr = mosquitto_fopen(file, "rb", restrict_read);
 	if(fptr == NULL){
 		return MOSQ_ERR_ERRNO;
 	}
