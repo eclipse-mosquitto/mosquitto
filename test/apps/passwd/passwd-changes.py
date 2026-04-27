@@ -3,7 +3,6 @@
 from mosq_test_helper import *
 import json
 import shutil
-import signal
 
 mosq_test.require_features(["WITH_BROKER", "WITH_TLS"])
 

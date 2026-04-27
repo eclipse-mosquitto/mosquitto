@@ -3,7 +3,6 @@
 # Test whether a plugin can subscribe to the tick event
 
 from mosq_test_helper import *
-import signal
 
 def write_config1(filename, ports, per_listener_settings, plugver):
     with open(filename, 'w') as f:

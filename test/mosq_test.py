@@ -4,6 +4,7 @@ import errno
 import hashlib
 import os
 import platform
+import signal
 import socket
 import ssl
 import subprocess
