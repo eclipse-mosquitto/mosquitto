@@ -7,9 +7,9 @@ from mosq_test_helper import *
 mosq_test.require_features(["WITH_BROKER"])
 
 def write_file(filename):
-    with open(filename, 'w') as f:
-        f.write("line1\n")
-        f.write("line2\n")
+    with open(filename, 'wb') as f:
+        f.write("line1\n".encode('utf-8'))
+        f.write("line2\n".encode('utf-8'))
 
 
 def do_test(proto_ver):
