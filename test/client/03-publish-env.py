@@ -29,7 +29,8 @@ def do_test(proto_ver, configenv):
     cmd = [mosq_paths.mosquitto_pub,
             '-p', str(port),
             '-q', '1',
-            '-V', V
+            '-V', V,
+            '-d',
             ]
 
     mid = 1
@@ -59,6 +60,8 @@ def do_test(proto_ver, configenv):
             print("broker not terminated")
             if rc == 0: rc=1
         if rc:
+            print(pub.stdout)
+            print(pub.stderr)
             print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)

@@ -32,7 +32,8 @@ def do_test(proto_ver, configenv):
             '-p', str(port),
             '-q', '1',
             '-V', V,
-            '-m', payload
+            '-m', payload,
+            '-d',
             ]
 
     if proto_ver == 5:

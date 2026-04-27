@@ -31,7 +31,8 @@ def do_test(proto_ver, configenv):
             '-p', str(port),
             '-q', '1',
             '-V', V,
-            '-C', '1'
+            '-C', '1',
+            '-d',
             ]
 
     payload = "783c9cc5-5ad8-433f-a4ee-7dcd978c90a8"
@@ -61,6 +62,8 @@ def do_test(proto_ver, configenv):
             print("broker not terminated")
             if rc == 0: rc=1
         if rc:
+            print(sub.stdout)
+            print(sub.stderr)
             print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
             exit(rc)
