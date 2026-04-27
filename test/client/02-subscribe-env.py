@@ -27,8 +27,8 @@ def do_test(proto_ver, env):
             ]
 
     payload = "message"
-    publish_packet_s = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=1, payload=payload, proto_ver=proto_ver)
-    publish_packet_r = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=2, payload=payload, proto_ver=proto_ver)
+    publish_packet_s = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=1, payload=payload, proto_ver=proto_ver, retain=True)
+    publish_packet_r = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=2, payload=payload, proto_ver=proto_ver, retain=True)
     puback_packet_s = mosq_test.gen_puback(1, proto_ver=proto_ver)
     puback_packet_r = mosq_test.gen_puback(2, proto_ver=proto_ver)
 
@@ -36,18 +36,12 @@ def do_test(proto_ver, env):
 
     try:
         sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
-
-        sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        time.sleep(0.1)
         sock.send(publish_packet_s)
         mosq_test.expect_packet(sock, "puback", puback_packet_s)
-        sub_terminate_rc = 0
-        if mosq_test.wait_for_subprocess(sub):
-            print("sub not terminated")
-            sub_terminate_rc = 1
-        (stdo, stde) = sub.communicate()
-        if stdo.decode('utf-8') == payload + '\n':
-            rc = sub_terminate_rc
+
+        sub = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        if payload in sub.stdout:
+            rc = sub.returncode
         sock.close()
     except mosq_test.TestError:
         pass

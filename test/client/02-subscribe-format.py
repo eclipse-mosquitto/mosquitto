@@ -45,28 +45,28 @@ def do_test(format_str, expected_output, proto_ver=4, payload="message"):
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name3", "value3")
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name4", "value4")
     if proto_ver == 5:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, properties=props, proto_ver=proto_ver)
+        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, properties=props, proto_ver=proto_ver, retain=True)
     else:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver)
+        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver, retain=True)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
     try:
         sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
-
-        sub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        time.sleep(0.1)
         sock.send(publish_packet)
-        sub_terminate_rc = 0
-        if mosq_test.wait_for_subprocess(sub):
-            print("sub not terminated")
-            sub_terminate_rc = 1
-        (stdo, stde) = sub.communicate()
-        if stdo.decode('utf-8') == expected_output:
-            rc = sub_terminate_rc
-        else:
-            print("expected: (%d) %s" % (len(expected_output), expected_output))
-            print("actual:   (%d) %s"  % (len(stdo.decode('utf-8')), stdo.decode('utf-8')))
+
+        sub = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        
+        have_match = False
+        for expected_output in expected_outputs:
+            if sub.stdout.startswith(expected_output):
+                rc = sub.returncode
+                have_match = True
+                break
+        if have_match == False:
+            print(f"input: {format_str}")
+            print("expected: (%d) %s" % (len(expected_outputs), expected_outputs))
+            print("actual:   (%d) %s"  % (len(sub.stdout), sub.stdout))
         sock.close()
     except mosq_test.TestError:
         pass

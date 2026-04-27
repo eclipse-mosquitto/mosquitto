@@ -37,15 +37,10 @@ def do_test(proto_ver, env):
     try:
         sock = mosq_test.sub_helper(port=port, topic="#", qos=1, proto_ver=proto_ver)
 
-        pub = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        pub_terminate_rc = 0
-        if mosq_test.wait_for_subprocess(pub):
-            print("pub not terminated")
-            pub_terminate_rc = 1
-        (stdo, stde) = pub.communicate()
+        pub = subprocess.run(cmd, capture_output=True, env=env)
 
         mosq_test.expect_packet(sock, "publish", publish_packet)
-        rc = pub_terminate_rc
+        rc = pub.returncode
         sock.close()
     except mosq_test.TestError:
         pass
