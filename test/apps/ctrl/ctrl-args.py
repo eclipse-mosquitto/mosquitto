@@ -3,6 +3,7 @@
 # Test parsing of command line args and errors. Does not test arg functionality.
 
 from mosq_test_helper import *
+import platform
 
 mosq_test.require_features(["WITH_TLS"])
 
@@ -145,22 +146,41 @@ if mosq_test.check_features(["WITH_PLUGINS", "WITH_PLUGIN_DYNAMIC_SECURITY"]):
 
 # Env modification
 
-# Missing file
-env["HOME"] = "/tmp"
-do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
+if platform.system() == 'Windows':
+    # Missing file
+    env["USERPROFILE"] = "/tmp"
+    do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
 
-# Invalid file
-env["XDG_CONFIG_HOME"] = "."
-with open("mosquitto_ctrl", "w") as f:
-    f.write(f"--cert {ssl_dir / 'client.crt'}")
-    f.write(f"--key")
-do_test(["broker"], 1, response="Error: --key argument given but no file specified.")
+    # Invalid file
+    env["USERPROFILE"] = "."
+    with open("mosquitto_ctrl.conf", "wt") as f:
+        f.write(f"--cert {ssl_dir / 'client.crt'}\n")
+        f.write(f"--key\n")
+    do_test(["broker"], 1, response="Error: --key argument given but no file specified.")
 
-# Empty file
-env["XDG_CONFIG_HOME"] = "."
-with open("mosquitto_ctrl", "w") as f:
-    pass
-do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
-os.remove("mosquitto_ctrl")
+    # Empty file
+    env["USERPROFILE"] = "."
+    with open("mosquitto_ctrl.conf", "w") as f:
+        pass
+    do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
+    os.remove("mosquitto_ctrl.conf")
+else:
+    # Missing file
+    env["HOME"] = "/tmp"
+    do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
+
+    # Invalid file
+    env["XDG_CONFIG_HOME"] = "."
+    with open("mosquitto_ctrl", "w") as f:
+        f.write(f"--cert {ssl_dir / 'client.crt'}\n")
+        f.write(f"--key\n")
+    do_test(["broker"], 1, response="Error: --key argument given but no file specified.")
+
+    # Empty file
+    env["XDG_CONFIG_HOME"] = "."
+    with open("mosquitto_ctrl", "w") as f:
+        pass
+    do_test(["--cert", ssl_dir / "client.crt"], 1, response="Error: Both certfile and keyfile must be provided if one of them is set.")
+    os.remove("mosquitto_ctrl")
 
 exit(0)
