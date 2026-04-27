@@ -115,7 +115,7 @@ def do_test():
         except NameError:
             pass
 
-        return rc
+    return rc
 
 
 exit_code = do_test()
