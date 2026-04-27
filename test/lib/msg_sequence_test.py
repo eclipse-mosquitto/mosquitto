@@ -10,6 +10,8 @@ import socket
 import json
 from collections import deque
 import mosq_test
+import platform
+import signal
 
 send = 1
 recv = 2
@@ -101,12 +103,19 @@ class MsgSequence(object):
 
         if self.command is not None:
             cmd.append(self.command)
-        self.client = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=env)
+        if platform.system() == 'Windows':
+            self.client = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=env, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+        else:
+            self.client = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=env)
+
         (self.sock, _) = server_sock.accept()
 
     def kill_client(self):
         self.sock.close()
-        self.client.terminate()
+        if platform.system() == 'Windows':
+            self.client.send_signal(signal.CTRL_C_EVENT)
+        else:
+            self.client.terminate()
         self.client.wait()
         if self.client.returncode != 0:
             raise RuntimeError
