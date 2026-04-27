@@ -21,6 +21,7 @@ import struct
 import subprocess
 import time
 import errno
+import traceback
 from pathlib import Path
 
 source_dir = Path(__file__).resolve().parent
