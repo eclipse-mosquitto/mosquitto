@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <mosquitto.h>
+#ifdef WIN32
+#  include <windows.h>
+#endif
 
 /* mosquitto_connect_async() test, with mosquitto_loop_start() called before mosquitto_connect_async(). */
 

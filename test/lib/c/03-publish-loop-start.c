@@ -4,6 +4,9 @@
 #include <string.h>
 #include <time.h>
 #include <mosquitto.h>
+#ifdef WIN32
+#  include <windows.h>
+#endif
 
 static int run = -1;
 
