@@ -133,6 +133,7 @@ msg_sequence_test:
 	./06-bridge-clean-session-csT-lcsF.py
 	./06-bridge-clean-session-csT-lcsN.py
 	./06-bridge-clean-session-csT-lcsT.py
+	./06-bridge-connack-retain-not-supported.py
 	./06-bridge-fail-persist-resend-qos1.py
 	./06-bridge-fail-persist-resend-qos2.py
 	./06-bridge-no-local.py
