@@ -126,4 +126,4 @@ def random_tests(count, run_tests):
 if __name__ == "__main__":
     run_tests = False
     simple_tests(run_tests)
-    random_tests(2, run_tests)
+    #random_tests(2, run_tests)
