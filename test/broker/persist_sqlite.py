@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from pathlib import Path
 import sqlite3
 import mosq_paths
@@ -22,6 +23,17 @@ ms_resend_pubcomp = 8
 ms_wait_for_pubcomp = 9
 ms_send_pubrec = 10
 ms_queued = 11
+
+@contextmanager
+def get_connection(port, connection=None):
+    if connection is not None:
+        yield connection
+    else:
+        con = sqlite3.connect(Path(str(port), 'mosquitto.sqlite3'))
+        try:
+            yield con
+        finally:
+            con.close()
 
 
 def write_config(filename, port, additional_config_entries: dict = {}):
@@ -119,21 +131,18 @@ def cleanup(port):
 
 @retry()
 def check_version_infos(port, database_schema_version):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    cur = con.cursor()
-    cur.execute(
-        "SELECT major,minor,patch FROM version_info WHERE component = 'database_schema';"
-    )
-    row = cur.fetchone()
+    with get_connection(port) as con:
+        row = con.execute(
+            "SELECT major,minor,patch FROM version_info WHERE component = 'database_schema';"
+        ).fetchone()
 
-    if len(row) != len(database_schema_version):
-        raise ValueError("Could not fetch db version info from DB")
-    for i in range(len(row)):
-        if row[i] != database_schema_version[i]:
-            raise ValueError(
-                f"DB version info {'.'.join([str(v) for v in row])} != expected {'.'.join([str(v) for v in database_schema_version])}"
-            )
-    con.close()
+        if len(row) != len(database_schema_version):
+            raise ValueError("Could not fetch db version info from DB")
+        for i in range(len(row)):
+            if row[i] != database_schema_version[i]:
+                raise ValueError(
+                    f"DB version info {'.'.join([str(v) for v in row])} != expected {'.'.join([str(v) for v in database_schema_version])}"
+                )
 
 
 @retry()
@@ -145,54 +154,44 @@ def check_counts(
     base_msgs=0,
     retain_msgs=0,
     subscriptions=0,
-    wills=None
+    wills=None,
+    connection = None,
 ):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    cur = con.cursor()
-    cur.execute("SELECT COUNT(*) FROM clients")
-    row = cur.fetchone()
-    if row[0] != clients:
-        raise ValueError("Found %d clients, expected %d" % (row[0], clients))
+    with get_connection(port, connection) as con:
+        row = con.execute("SELECT COUNT(*) FROM clients").fetchone()
+        if row[0] != clients:
+            raise ValueError("Found %d clients, expected %d" % (row[0], clients))
 
-    cur.execute("SELECT COUNT(*) FROM client_msgs WHERE direction=0")
-    row = cur.fetchone()
-    if row[0] != client_msgs_in:
-        raise ValueError(
-            "Found %d client_msgs_in, expected %d" % (row[0], client_msgs_in)
-        )
+        row = con.execute("SELECT COUNT(*) FROM client_msgs WHERE direction=0").fetchone()
+        if row[0] != client_msgs_in:
+            raise ValueError(
+                "Found %d client_msgs_in, expected %d" % (row[0], client_msgs_in)
+            )
 
-    cur.execute("SELECT COUNT(*) FROM client_msgs WHERE direction=1")
-    row = cur.fetchone()
-    if row[0] != client_msgs_out:
-        raise ValueError(
-            "Found %d client_msgs_out, expected %d" % (row[0], client_msgs_out)
-        )
+        row = con.execute("SELECT COUNT(*) FROM client_msgs WHERE direction=1").fetchone()
+        if row[0] != client_msgs_out:
+            raise ValueError(
+                "Found %d client_msgs_out, expected %d" % (row[0], client_msgs_out)
+            )
 
-    cur.execute("SELECT COUNT(*) FROM subscriptions")
-    row = cur.fetchone()
-    if row[0] != subscriptions:
-        raise ValueError(
-            "Found %d subscriptions, expected %d" % (row[0], subscriptions)
-        )
+        row = con.execute("SELECT COUNT(*) FROM subscriptions").fetchone()
+        if row[0] != subscriptions:
+            raise ValueError(
+                "Found %d subscriptions, expected %d" % (row[0], subscriptions)
+            )
 
-    cur.execute("SELECT COUNT(*) FROM base_msgs")
-    row = cur.fetchone()
-    if row[0] != base_msgs:
-        raise ValueError("Found %d base_msgs, expected %d" % (row[0], base_msgs))
+        row = con.execute("SELECT COUNT(*) FROM base_msgs").fetchone()
+        if row[0] != base_msgs:
+            raise ValueError("Found %d base_msgs, expected %d" % (row[0], base_msgs))
 
-    cur.execute("SELECT COUNT(*) FROM retains")
-    row = cur.fetchone()
-    if row[0] != retain_msgs:
-        raise ValueError("Found %d retain_msgs, expected %d" % (row[0], retain_msgs))
+        row = con.execute("SELECT COUNT(*) FROM retains").fetchone()
+        if row[0] != retain_msgs:
+            raise ValueError("Found %d retain_msgs, expected %d" % (row[0], retain_msgs))
 
-    if wills is not None:
-        cur.execute("SELECT COUNT(*) FROM wills")
-        row = cur.fetchone()
-        if row[0] != wills:
-            raise ValueError("Found %d wills, expected %d" % (row[0], wills))
-        
-    
-    con.close()
+        if wills is not None:
+            row = con.execute("SELECT COUNT(*) FROM wills").fetchone()
+            if row[0] != wills:
+                raise ValueError("Found %d wills, expected %d" % (row[0], wills))
 
 
 @retry()
@@ -208,76 +207,72 @@ def check_client(
     retain_available,
     session_expiry_interval,
     will_delay_interval,
+    connection=None,
 ):
     # "Fix" the infinite session expiry interval as mangled by an int32 conversion.
     if session_expiry_interval == 4294967295:
         session_expiry_interval = -1
 
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    cur = con.cursor()
-    cur.execute(
-        "SELECT client_id, username, will_delay_time, session_expiry_time, "
-        + "listener_port, max_packet_size, max_qos, retain_available, "
-        + "session_expiry_interval, will_delay_interval "
-        + "FROM clients "
-        + f"WHERE client_id = '{client_id}'"
-    )
-    row = cur.fetchone()
+    with get_connection(port, connection) as con:
+        row = con.execute(
+            "SELECT client_id, username, will_delay_time, session_expiry_time, "
+            + "listener_port, max_packet_size, max_qos, retain_available, "
+            + "session_expiry_interval, will_delay_interval "
+            + "FROM clients "
+            + f"WHERE client_id = '{client_id}'"
+        ).fetchone()
 
-    if row is None:
-        raise ValueError(f"Cannot find client {client_id} in db")
+        if row is None:
+            raise ValueError(f"Cannot find client {client_id} in db")
 
-    if row[0] != client_id:
-        raise ValueError("Invalid client_id %s / %s" % (row[0], client_id))
+        if row[0] != client_id:
+            raise ValueError("Invalid client_id %s / %s" % (row[0], client_id))
 
-    if username is not None and row[1] != username:
-        raise ValueError("Invalid username %s / %s" % (row[1], username))
+        if username is not None and row[1] != username:
+            raise ValueError("Invalid username %s / %s" % (row[1], username))
 
-    if (will_delay_time == 0 and row[2] != 0) or (will_delay_time != 0 and row[2] == 0):
-        raise ValueError("Invalid will_delay_time %d / %d" % (row[2], will_delay_time))
+        if (will_delay_time == 0 and row[2] != 0) or (will_delay_time != 0 and row[2] == 0):
+            raise ValueError("Invalid will_delay_time %d / %d" % (row[2], will_delay_time))
 
-    if session_expiry_time and (
-        (session_expiry_time == 0 and row[3] != 0)
-        or (session_expiry_time != 0 and row[3] == 0)
-    ):
-        raise ValueError(
-            "Invalid session_expiry_time %d / %d for client %s"
-            % (row[3], session_expiry_time, client_id)
-        )
+        if session_expiry_time and (
+            (session_expiry_time == 0 and row[3] != 0)
+            or (session_expiry_time != 0 and row[3] == 0)
+        ):
+            raise ValueError(
+                "Invalid session_expiry_time %d / %d for client %s"
+                % (row[3], session_expiry_time, client_id)
+            )
 
-    if listener_port is not None and row[4] != listener_port:
-        raise ValueError("Invalid listener_port %d / %d" % (row[4], listener_port))
+        if listener_port is not None and row[4] != listener_port:
+            raise ValueError("Invalid listener_port %d / %d" % (row[4], listener_port))
 
-    if row[5] != max_packet_size:
-        raise ValueError("Invalid max_packet_size %d / %d" % (row[5], max_packet_size))
+        if row[5] != max_packet_size:
+            raise ValueError("Invalid max_packet_size %d / %d" % (row[5], max_packet_size))
 
-    if row[6] != max_qos:
-        raise ValueError("Invalid max_qos %d / %d" % (row[6], max_qos))
+        if row[6] != max_qos:
+            raise ValueError("Invalid max_qos %d / %d" % (row[6], max_qos))
 
-    if row[7] != retain_available:
-        raise ValueError(
-            "Invalid retain_available %d / %d" % (row[7], retain_available)
-        )
+        if row[7] != retain_available:
+            raise ValueError(
+                "Invalid retain_available %d / %d" % (row[7], retain_available)
+            )
 
-    if row[8] != session_expiry_interval:
-        raise ValueError(
-            "Invalid session_expiry_interval %d / %d"
-            % (row[8], session_expiry_interval)
-        )
+        if row[8] != session_expiry_interval:
+            raise ValueError(
+                "Invalid session_expiry_interval %d / %d"
+                % (row[8], session_expiry_interval)
+            )
 
-    if row[9] != will_delay_interval:
-        raise ValueError(
-            "Invalid will_delay_interval %d / %d" % (row[9], will_delay_interval)
-        )
-    con.close()
+        if row[9] != will_delay_interval:
+            raise ValueError(
+                "Invalid will_delay_interval %d / %d" % (row[9], will_delay_interval)
+            )
 
 
-def modify_client(port: int, client_id: str, sub_expiry_time: int):
+def modify_client(port: int, client_id: str, sub_expiry_time: int, connection=None):
     num_modified_rows = 0
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    try:
-        cur = con.cursor()
-        cur.execute(
+    with get_connection(port, connection) as con:
+        cur = con.execute(
             "UPDATE clients"
             + f" SET session_expiry_time = session_expiry_time - {sub_expiry_time}"
             + f" WHERE client_id = ?",
@@ -285,60 +280,52 @@ def modify_client(port: int, client_id: str, sub_expiry_time: int):
         )
         num_modified_rows = cur.rowcount
         con.commit()
-    finally:
-        con.close()
 
     return num_modified_rows
 
 
 @retry()
 def check_subscription(
-    port, client_id, topic, subscription_options, subscription_identifier
+    port, client_id, topic, subscription_options, subscription_identifier, connection=None
 ):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    cur = con.cursor()
-    cur.execute(
-        "SELECT client_id, topic, subscription_options, subscription_identifier "
-        + "FROM subscriptions "
-        + f"WHERE client_id = '{client_id}'"
-    )
-    row = cur.fetchone()
+    with get_connection(port, connection) as con:
+        row = con.execute(
+            "SELECT client_id, topic, subscription_options, subscription_identifier "
+            + "FROM subscriptions "
+            + f"WHERE client_id = '{client_id}'"
+        ).fetchone()
 
-    if row is None:
-        raise ValueError(f"Cannot find client {client_id} in db")
+        if row is None:
+            raise ValueError(f"Cannot find client {client_id} in db")
 
-    if row[0] != client_id:
-        raise ValueError("Invalid client_id %s / %s" % (row[0], client_id))
+        if row[0] != client_id:
+            raise ValueError("Invalid client_id %s / %s" % (row[0], client_id))
 
-    if row[1] != topic:
-        raise ValueError("Invalid topic %s / %s" % (row[1], topic))
+        if row[1] != topic:
+            raise ValueError("Invalid topic %s / %s" % (row[1], topic))
 
-    if row[2] != subscription_options:
-        raise ValueError(
-            "Invalid subscription_options %d / %d" % (row[2], subscription_options)
-        )
+        if row[2] != subscription_options:
+            raise ValueError(
+                "Invalid subscription_options %d / %d" % (row[2], subscription_options)
+            )
 
-    if row[3] != subscription_identifier:
-        raise ValueError(
-            "Invalid subscription_identifier %d / %d"
-            % (row[3], subscription_identifier)
-        )
-    con.close()
+        if row[3] != subscription_identifier:
+            raise ValueError(
+                "Invalid subscription_identifier %d / %d"
+                % (row[3], subscription_identifier)
+            )
 
 
 @retry()
 def check_client_msg(
-    port, client_id, cmsg_id, store_id, dup, direction, mid, qos, retain, state
+    port, client_id, cmsg_id, store_id, dup, direction, mid, qos, retain, state, connection=None
 ):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    try:
-        cur = con.cursor()
-        cur.execute(
+    with get_connection(port, connection) as con:
+        row = con.execute(
             "SELECT client_id,cmsg_id,store_id,dup,direction,mid,qos,retain,state "
             + "FROM client_msgs "
             + f"WHERE client_id = '{client_id}' AND cmsg_id = {cmsg_id}"
-        )
-        row = cur.fetchone()
+        ).fetchone()
 
         msg_id = f"client_id={client_id},cmsg_id={cmsg_id}"
         if row is None:
@@ -390,8 +377,6 @@ def check_client_msg(
             raise ValueError(
                 "Invalid state %d / %d for message %s" % (row[8], state, msg_id)
             )
-    finally:
-        con.close()
 
 
 @retry()
@@ -408,11 +393,10 @@ def check_base_msg(
     qos,
     retain,
     idx=0,
+    connection=None,
 ):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    try:
-        cur = con.cursor()
-        cur.execute(
+    with get_connection(port, connection) as con:
+        cur = con.execute(
             "SELECT store_id,expiry_time,topic,payload,source_id,source_username, "
             + "payloadlen, source_mid, source_port, qos, retain "
             + "FROM base_msgs "
@@ -457,10 +441,6 @@ def check_base_msg(
 
         if row[10] != retain:
             raise ValueError("Invalid retain %d / %d" % (row[10], retain))
-    except ValueError as err:
-        raise ValueError(str(err) + f" at index {idx}") from err
-    finally:
-        con.close()
 
     return row[0]
 
@@ -468,31 +448,25 @@ def check_base_msg(
 def modify_base_msgs(
     port: int,
     sub_expiry_time: int,
+    connection=None,
 ):
     num_modified_rows = 0
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    try:
-        cur = con.cursor()
-        cur.execute(
+    with get_connection(port, connection) as con:
+        cur = con.execute(
             "UPDATE base_msgs" + f" SET expiry_time = expiry_time - {sub_expiry_time}"
         )
         num_modified_rows = cur.rowcount
         con.commit()
-    finally:
-        con.close()
     return num_modified_rows
 
 
 @retry()
 def check_retain(port, topic, store_id):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    cur = con.cursor()
-    cur.execute("SELECT store_id FROM retains WHERE topic=?", (topic,))
-    row = cur.fetchone()
+    with sqlite3.connect(Path(str(port), "mosquitto.sqlite3")) as con:
+        row = con.execute("SELECT store_id FROM retains WHERE topic=?", (topic,)).fetchone()
 
-    if row[0] != store_id:
-        raise ValueError("Invalid store_id %d / %d" % (row[0], store_id))
-    con.close()
+        if row[0] != store_id:
+            raise ValueError("Invalid store_id %d / %d" % (row[0], store_id))
 
 
 @retry()
@@ -505,9 +479,9 @@ def check_will(
     retain: int,
     properties: str,
     idx=0,
+    connection=None,
 ):
-    con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
-    try:
+    with get_connection(port, connection) as con:
         cur = con.cursor()
         cur.execute(
             "SELECT client_id,topic,payload,payloadlen,qos,retain,properties "
@@ -539,10 +513,5 @@ def check_will(
 
         if row[6] != properties:
             raise ValueError("Invalid properties %s / %s" % (row[6], properties))
-
-    except ValueError as err:
-        raise ValueError(str(err) + f" at index {idx}") from err
-    finally:
-        con.close()
 
     return row[0]

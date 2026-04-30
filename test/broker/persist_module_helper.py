@@ -110,76 +110,82 @@ def check_db(
     qos: int = 1,
     check_session_expiry_time: bool = True,
 ):
-    count_list = [v for v in client_msg_counts.values() if v is not None] + [0]
-    num_base_msgs = max(count_list)
-    num_subscriptions = sum(1 for c in client_msg_counts.values() if c is not None)
-    num_client_msgs_out = sum(count_list)
-    persist_help.check_counts(
-        port,
-        clients=len(client_msg_counts),
-        client_msgs_out=num_client_msgs_out,
-        base_msgs=num_base_msgs if num_base_msgs > 0 or retain_end == 0 else 1,
-        retain_msgs=1 if retain_end > 0 else 0,
-        subscriptions=num_subscriptions,
-    )
 
-    # Check client
-    for client_id, num_messages_for_client in client_msg_counts.items():
-        persist_help.check_client(
+    with persist_help.get_connection(port) as con:
+        count_list = [v for v in client_msg_counts.values() if v is not None] + [0]
+        num_base_msgs = max(count_list)
+        num_subscriptions = sum(1 for c in client_msg_counts.values() if c is not None)
+        num_client_msgs_out = sum(count_list)
+        persist_help.check_counts(
             port,
-            client_id,
-            username=username,
-            will_delay_time=0,
-            session_expiry_time=60 if check_session_expiry_time else None,
-            listener_port=None,  # persist-lmdb reset listener port to 0 on disconnect
-            max_packet_size=0,
-            max_qos=2,
-            retain_available=1,
-            session_expiry_interval=60,
-            will_delay_interval=0,
+            clients=len(client_msg_counts),
+            client_msgs_out=num_client_msgs_out,
+            base_msgs=num_base_msgs if num_base_msgs > 0 or retain_end == 0 else 1,
+            retain_msgs=1 if retain_end > 0 else 0,
+            subscriptions=num_subscriptions,
+            connection=con,
         )
-        # Check subscription
-        if num_messages_for_client is not None:
-            persist_help.check_subscription(port, client_id, subscription_topic, qos, 0)
 
-    # Check stored message
-    for i in range(num_base_msgs):
-        msg_id = num_published_msgs - num_base_msgs + i
-        payload = f"queued message {msg_id:3}"
-        payload_b = payload.encode("UTF-8")
-        mid = 10 + msg_id
-        store_id = persist_help.check_base_msg(
-            port,
-            message_expiry,
-            subscription_topic,
-            payload_b,
-            publisher_id,
-            username,
-            len(payload_b),
-            mid,
-            port,
-            qos,
-            retain=1 if i < retain_end else 0,
-            idx=i,
-        )
-        # Check client msg
+        # Check client
         for client_id, num_messages_for_client in client_msg_counts.items():
-            if num_messages_for_client is None:
-                continue
-            client_msg_start = num_published_msgs - num_messages_for_client
-            if msg_id < client_msg_start:
-                continue
-            cmsg_id = 1 + msg_id - client_msg_start
-            subscriber_mid = cmsg_id
-            persist_help.check_client_msg(
+            persist_help.check_client(
                 port,
                 client_id,
-                cmsg_id,
-                store_id,
-                0,
-                persist_help.dir_out,
-                subscriber_mid,
-                qos,
-                0,
-                persist_help.ms_queued,
+                username=username,
+                will_delay_time=0,
+                session_expiry_time=60 if check_session_expiry_time else None,
+                listener_port=None,  # persist-lmdb reset listener port to 0 on disconnect
+                max_packet_size=0,
+                max_qos=2,
+                retain_available=1,
+                session_expiry_interval=60,
+                will_delay_interval=0,
+                connection=con,
             )
+            # Check subscription
+            if num_messages_for_client is not None:
+                persist_help.check_subscription(port, client_id, subscription_topic, qos, 0, connection=con)
+
+        # Check stored message
+        for i in range(num_base_msgs):
+            msg_id = num_published_msgs - num_base_msgs + i
+            payload = f"queued message {msg_id:3}"
+            payload_b = payload.encode("UTF-8")
+            mid = 10 + msg_id
+            store_id = persist_help.check_base_msg(
+                port,
+                message_expiry,
+                subscription_topic,
+                payload_b,
+                publisher_id,
+                username,
+                len(payload_b),
+                mid,
+                port,
+                qos,
+                retain=1 if i < retain_end else 0,
+                idx=i,
+                connection=con,
+            )
+            # Check client msg
+            for client_id, num_messages_for_client in client_msg_counts.items():
+                if num_messages_for_client is None:
+                    continue
+                client_msg_start = num_published_msgs - num_messages_for_client
+                if msg_id < client_msg_start:
+                    continue
+                cmsg_id = 1 + msg_id - client_msg_start
+                subscriber_mid = cmsg_id
+                persist_help.check_client_msg(
+                    port,
+                    client_id,
+                    cmsg_id,
+                    store_id,
+                    0,
+                    persist_help.dir_out,
+                    subscriber_mid,
+                    qos,
+                    0,
+                    persist_help.ms_queued,
+                    connection=con,
+                )
