@@ -296,8 +296,8 @@ check_for_missing_tests(PY_TEST_NAMES)
 
 foreach(PERSIST_TYPE ${PERSIST_LIST})
     foreach(PY_TEST_FILE ${PY_PERSIST_TEST_FILES})
-        set(test_name "broker-${PY_TEST_NAME}-${PERSIST_TYPE}")
         get_filename_component(PY_TEST_NAME ${PY_TEST_FILE} NAME_WE)
+        set(test_name "broker-${PY_TEST_NAME}-${PERSIST_TYPE}")
         add_test(NAME ${test_name}
             COMMAND python3 ${PY_TEST_FILE} ${PERSIST_TYPE}
         )
