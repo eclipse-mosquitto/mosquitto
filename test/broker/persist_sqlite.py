@@ -3,6 +3,7 @@ from pathlib import Path
 import sqlite3
 import mosq_paths
 import mosq_test
+from persist_module_helper import retry
 
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PERSIST_SQLITE"])
 
@@ -116,6 +117,7 @@ def cleanup(port):
     return rc
 
 
+@retry()
 def check_version_infos(port, database_schema_version):
     con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
@@ -134,6 +136,7 @@ def check_version_infos(port, database_schema_version):
     con.close()
 
 
+@retry()
 def check_counts(
     port,
     clients=0,
@@ -192,6 +195,7 @@ def check_counts(
     con.close()
 
 
+@retry()
 def check_client(
     port,
     client_id,
@@ -287,6 +291,7 @@ def modify_client(port: int, client_id: str, sub_expiry_time: int):
     return num_modified_rows
 
 
+@retry()
 def check_subscription(
     port, client_id, topic, subscription_options, subscription_identifier
 ):
@@ -321,6 +326,7 @@ def check_subscription(
     con.close()
 
 
+@retry()
 def check_client_msg(
     port, client_id, cmsg_id, store_id, dup, direction, mid, qos, retain, state
 ):
@@ -388,6 +394,7 @@ def check_client_msg(
         con.close()
 
 
+@retry()
 def check_base_msg(
     port,
     expiry_time,
@@ -476,6 +483,7 @@ def modify_base_msgs(
     return num_modified_rows
 
 
+@retry()
 def check_retain(port, topic, store_id):
     con = sqlite3.connect(Path(str(port), "mosquitto.sqlite3"))
     cur = con.cursor()
@@ -487,6 +495,7 @@ def check_retain(port, topic, store_id):
     con.close()
 
 
+@retry()
 def check_will(
     port,
     client_id: str,

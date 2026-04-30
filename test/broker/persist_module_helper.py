@@ -8,6 +8,26 @@ import time
 from typing import Any, Optional
 from types import ModuleType
 
+import time
+from functools import wraps
+
+def retry(retries=5, delay=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    print(f"Retrying {func.__name__} {attempt}/{retries}")
+                    last_exception = e
+                    if attempt < retries - 1:
+                        time.sleep(delay)
+            raise last_exception
+        return wrapper
+    return decorator
+
 
 def connect_client(
     port: int,
@@ -77,7 +97,7 @@ def publish_messages(
         mosq_test.do_send_receive(sock, publish_packet, puback_packet, "puback")
 
 
-def check_db_once(
+def check_db(
     persist_help: ModuleType,
     port: int,
     username: str,
@@ -163,35 +183,3 @@ def check_db_once(
                 0,
                 persist_help.ms_queued,
             )
-
-def check_db(
-    persist_help: ModuleType,
-    port: int,
-    username: str,
-    subscription_topic: str,
-    client_msg_counts: dict[str, int],
-    publisher_id: str,
-    num_published_msgs: int,
-    retain_end: int = 0,
-    message_expiry: int = 0,
-    qos: int = 1,
-    check_session_expiry_time: bool = True,
-):
-    for i in range(5):
-        try:
-            check_db_once(
-                persist_help,
-                port,
-                username,
-                subscription_topic,
-                client_msg_counts,
-                publisher_id,
-                num_published_msgs,
-                retain_end,
-                message_expiry,
-                qos,
-                check_session_expiry_time,
-            )
-            break
-        except ValueError:
-            time.sleep(1)
