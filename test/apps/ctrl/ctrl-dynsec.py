@@ -38,9 +38,7 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
 
     if response is not None:
         if proc.stdout != response:
-            print(len(proc.stdout))
-            print(len(response))
-            raise ValueError(proc.stdout)
+            raise ValueError(f"Command:\n{args}\nExpected:\n{response}\nReceived:\n{proc.stdout}")
 
     if proc.returncode != 0:
         raise ValueError(args)
