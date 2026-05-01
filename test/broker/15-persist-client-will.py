@@ -21,7 +21,6 @@ username = "test-will-msg"
 
 subscriber_id = "test-will-subscriber"
 publisher_id = "test-will-publisher"
-helper_id = "test-helper"
 
 will_properties = mqtt5_props.gen_properties(
     [
@@ -166,18 +165,8 @@ def do_test(
         else:
             will_sent = False
 
-        # Send an additional ping to make sure the commit to the DB has happened
-        helper_sock = connect_client(
-            port, helper_id, username, proto_ver, session_expiry=0
-        )
-        mosq_test.do_ping(helper_sock)
-        helper_sock.close()
-
-        # Kill the broker
-        broker.kill()
-        stde = mosq_test.broker_log(broker)
-        broker = None
-
+        # Do check whilst broker is still running, the retry on check_*() will
+        # ensure that the changes are committed to disk before the broker is killed
         if will_sent and will_qos > 0:
             num_client_msgs = 1
         else:
@@ -204,6 +193,11 @@ def do_test(
                 will_retain,
                 properties=will_properties_in_db,
             )
+
+        # Kill the broker
+        broker.kill()
+        stde = mosq_test.broker_log(broker)
+        broker = None
 
         # Restart broker
         broker = mosq_test.start_broker(filename=conf_file, use_conf=True, port=port)
