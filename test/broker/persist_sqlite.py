@@ -25,11 +25,13 @@ ms_send_pubrec = 10
 ms_queued = 11
 
 @contextmanager
-def get_connection(port, connection=None):
+def get_connection(port, connection=None, readonly=True):
     if connection is not None:
         yield connection
     else:
-        con = sqlite3.connect(Path(str(port), 'mosquitto.sqlite3'))
+        db_path = Path(str(port), 'mosquitto.sqlite3')
+        uri = db_path.resolve().as_uri() + ('?mode=ro' if readonly else '')
+        con = sqlite3.connect(uri, uri=True)
         try:
             yield con
         finally:
@@ -269,9 +271,9 @@ def check_client(
             )
 
 
-def modify_client(port: int, client_id: str, sub_expiry_time: int, connection=None):
+def modify_client(port: int, client_id: str, sub_expiry_time: int):
     num_modified_rows = 0
-    with get_connection(port, connection) as con:
+    with get_connection(port, readonly=False) as con:
         cur = con.execute(
             "UPDATE clients"
             + f" SET session_expiry_time = session_expiry_time - {sub_expiry_time}"
@@ -448,10 +450,9 @@ def check_base_msg(
 def modify_base_msgs(
     port: int,
     sub_expiry_time: int,
-    connection=None,
 ):
     num_modified_rows = 0
-    with get_connection(port, connection) as con:
+    with get_connection(port, readonly=False) as con:
         cur = con.execute(
             "UPDATE base_msgs" + f" SET expiry_time = expiry_time - {sub_expiry_time}"
         )
