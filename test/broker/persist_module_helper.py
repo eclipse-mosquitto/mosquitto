@@ -8,27 +8,6 @@ import time
 from typing import Any, Optional
 from types import ModuleType
 
-import time
-from functools import wraps
-
-def retry(retries=5, delay=1):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            last_exception = None
-            for attempt in range(retries):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    print(f"Retrying {func.__name__} {attempt}/{retries}")
-                    last_exception = e
-                    if attempt < retries - 1:
-                        time.sleep(delay)
-            raise last_exception
-        return wrapper
-    return decorator
-
-
 def connect_client(
     port: int,
     client_id: str,

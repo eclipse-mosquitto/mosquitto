@@ -4,7 +4,6 @@ from pathlib import Path
 import sqlite3
 import mosq_paths
 import mosq_test
-from persist_module_helper import retry
 
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PERSIST_SQLITE"])
 
@@ -131,7 +130,7 @@ def cleanup(port):
     return rc
 
 
-@retry()
+@mosq_test.retry()
 def check_version_infos(port, database_schema_version):
     with get_connection(port) as con:
         row = con.execute(
@@ -147,7 +146,7 @@ def check_version_infos(port, database_schema_version):
                 )
 
 
-@retry()
+@mosq_test.retry()
 def check_counts(
     port,
     clients=0,
@@ -196,7 +195,7 @@ def check_counts(
                 raise ValueError("Found %d wills, expected %d" % (row[0], wills))
 
 
-@retry()
+@mosq_test.retry()
 def check_client(
     port,
     client_id,
@@ -286,7 +285,7 @@ def modify_client(port: int, client_id: str, sub_expiry_time: int):
     return num_modified_rows
 
 
-@retry()
+@mosq_test.retry()
 def check_subscription(
     port, client_id, topic, subscription_options, subscription_identifier, connection=None
 ):
@@ -318,7 +317,7 @@ def check_subscription(
             )
 
 
-@retry()
+@mosq_test.retry()
 def check_client_msg(
     port, client_id, cmsg_id, store_id, dup, direction, mid, qos, retain, state, connection=None
 ):
@@ -381,7 +380,7 @@ def check_client_msg(
             )
 
 
-@retry()
+@mosq_test.retry()
 def check_base_msg(
     port,
     expiry_time,
@@ -461,7 +460,7 @@ def modify_base_msgs(
     return num_modified_rows
 
 
-@retry()
+@mosq_test.retry()
 def check_retain(port, topic, store_id):
     with sqlite3.connect(Path(str(port), "mosquitto.sqlite3")) as con:
         row = con.execute("SELECT store_id FROM retains WHERE topic=?", (topic,)).fetchone()
@@ -470,7 +469,7 @@ def check_retain(port, topic, store_id):
             raise ValueError("Invalid store_id %d / %d" % (row[0], store_id))
 
 
-@retry()
+@mosq_test.retry()
 def check_will(
     port,
     client_id: str,

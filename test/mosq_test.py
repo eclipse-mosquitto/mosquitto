@@ -13,8 +13,8 @@ import sys
 import tempfile
 import time
 import uuid
-
 import traceback
+from functools import wraps
 
 import mqtt5_props
 
@@ -30,6 +30,25 @@ vg_logfiles = []
 class TestError(Exception):
     def __init__(self, message="Mismatched packets"):
         self.message = message
+
+
+def retry(retries=5, delay=1):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    print(f"Retrying {func.__name__} {attempt+1}/{retries}")
+                    last_exception = e
+                    if attempt < retries - 1:
+                        time.sleep(delay)
+            raise last_exception
+        return wrapper
+    return decorator
+
 
 def get_build_root():
     result = os.getenv("BUILD_ROOT")

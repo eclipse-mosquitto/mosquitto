@@ -18,6 +18,8 @@ def write_config(filename, ports):
             f.write(f"certfile {Path(ssl_dir, 'server.crt')}\n")
             f.write(f"keyfile {Path(ssl_dir, 'server.key')}\n")
 
+
+@mosq_test.retry()
 def ctrl_dynsec_cmd(args, ports, response=None, input=None):
     opts = ["-u", "admin",
             "-P", "newadmin",]
@@ -42,6 +44,7 @@ def ctrl_dynsec_cmd(args, ports, response=None, input=None):
 
     if proc.returncode != 0:
         raise ValueError(args)
+
 
 def ctrl_dynsec_file_cmd(args, ports, response=None):
     opts = ["-f", Path(str(ports[0]), "dynamic-security.json")]
