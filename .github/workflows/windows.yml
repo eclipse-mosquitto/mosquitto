@@ -85,6 +85,7 @@ jobs:
       - name: Installer
         uses: joncloud/makensis-action@v5.0
         with:
+          arguments: "/V4"
           script-file: ${{github.workspace}}/installer/${{ matrix.nsis }}
 
       - name: Upload installer to artifacts
