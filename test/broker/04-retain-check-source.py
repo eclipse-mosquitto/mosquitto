@@ -30,13 +30,13 @@ def do_test(proto_ver, per_listener):
 
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("retain-check", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("retain-check", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("test/topic", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
-    subscribe_packet = mosq_test.gen_subscribe(mid, "test/topic", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("test/topic", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "test/topic", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

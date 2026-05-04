@@ -10,10 +10,10 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 19
-    connect_packet = mosq_test.gen_connect("03-pub-long-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-pub-long-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("/"*65535, qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("/"*65535, qos=1, mid=mid, payload="message", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     broker = None
@@ -28,7 +28,7 @@ def do_test(start_broker, proto_ver):
             except BrokenPipeError:
                 rc = 0
         else:
-            disconnect_packet = mosq_test.gen_disconnect(proto_ver=5, reason_code=mqtt5_rc.MALFORMED_PACKET)
+            disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code=mqtt5_rc.MALFORMED_PACKET)
             mosq_test.do_send_receive(sock, publish_packet, disconnect_packet, "puback")
             rc = 0
 

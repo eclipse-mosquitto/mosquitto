@@ -26,8 +26,8 @@ conf_file = os.path.basename(__file__).replace('.py', '.conf')
 write_config(conf_file, port1, port2)
 
 rc = 1
-connect_packet = mosq_test.gen_connect("connect-no-identity-test")
-connack_packet = mosq_test.gen_connack(rc=4)
+connect_packet = mqtt_packets.gen_connect("connect-no-identity-test")
+connack_packet = mqtt_packets.gen_connack(rc=4)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
 

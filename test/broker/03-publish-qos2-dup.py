@@ -4,14 +4,14 @@ from mosq_test_helper import *
 
 def do_test(proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("03-pub-qos2-dup-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-pub-qos2-dup-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("topic", qos=2, mid=mid, payload="message", proto_ver=proto_ver, dup=1)
-    pubrec_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("topic", qos=2, mid=mid, payload="message", proto_ver=proto_ver, dup=1)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
 
-    disconnect_packet = mosq_test.gen_disconnect(reason_code=130, proto_ver=proto_ver)
+    disconnect_packet = mqtt_packets.gen_disconnect(reason_code=130, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

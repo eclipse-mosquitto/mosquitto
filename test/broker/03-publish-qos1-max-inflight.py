@@ -13,15 +13,15 @@ def write_config(filename, port):
 
 def do_test(proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("pub-qos1-test", proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("pub-qos1-test", proto_ver=proto_ver)
     properties = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 10) \
         + mqtt5_props.gen_uint32_prop(mqtt5_props.MAXIMUM_PACKET_SIZE, 2000000) \
         + mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 1)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False)
 
     mid = 311
-    publish_packet = mosq_test.gen_publish("pub/qos1/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
-    puback_packet = mosq_test.gen_puback(mid, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("pub/qos1/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    puback_packet = mqtt_packets.gen_puback(mid, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

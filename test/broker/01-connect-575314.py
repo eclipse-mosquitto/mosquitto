@@ -13,9 +13,9 @@ def do_test():
     props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
     for i in range(0, num_props):
         props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
-    connect_packet_slow = mosq_test.gen_connect("connect-user-property", proto_ver=5, properties=props)
-    connect_packet_fast = mosq_test.gen_connect("a"*65000, proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet_slow = mqtt_packets.gen_connect("connect-user-property", proto_ver=5, properties=props)
+    connect_packet_fast = mqtt_packets.gen_connect("a"*65000, proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

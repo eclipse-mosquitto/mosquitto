@@ -11,9 +11,9 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("01-con-discon-success")
-    connack_packet = mosq_test.gen_connack(rc=0)
-    disconnect_packet = mosq_test.gen_disconnect()
+    connect_packet = mqtt_packets.gen_connect("01-con-discon-success")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
     mosq_test.expect_packet(conn, "disconnect", disconnect_packet)

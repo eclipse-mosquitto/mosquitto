@@ -39,14 +39,14 @@ write_config2(conf_file2, port2, port3)
 env = mosq_test.env_add_ld_library_path()
 
 rc = 1
-connect_packet = mosq_test.gen_connect("no-psk-test-client")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("no-psk-test-client")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 1
-subscribe_packet = mosq_test.gen_subscribe(mid, "psk/test", 0)
-suback_packet = mosq_test.gen_suback(mid, 0)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "psk/test", 0)
+suback_packet = mqtt_packets.gen_suback(mid, 0)
 
-publish_packet = mosq_test.gen_publish(topic="psk/test", payload="message", qos=0)
+publish_packet = mqtt_packets.gen_publish(topic="psk/test", payload="message", qos=0)
 
 bridge_cmd = [mosq_paths.mosquitto, '-c', '08-tls-psk-bridge.conf2']
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port1)

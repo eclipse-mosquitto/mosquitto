@@ -21,11 +21,11 @@ def do_test():
     write_config(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("persistent-test", clean_session=True)
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("persistent-test", clean_session=True)
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    publish_packet = mosq_test.gen_publish("subpub/qos1", qos=1, mid=1, payload="message", retain=True)
-    puback_packet = mosq_test.gen_puback(1)
+    publish_packet = mqtt_packets.gen_publish("subpub/qos1", qos=1, mid=1, payload="message", retain=True)
+    puback_packet = mqtt_packets.gen_puback(1)
 
     if os.path.exists('mosquitto-%d.db' % (port)):
         os.unlink('mosquitto-%d.db' % (port))

@@ -18,17 +18,17 @@ def do_test(proto_ver):
     write_config(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("pub-qos2-test", proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("pub-qos2-test", proto_ver=proto_ver)
     properties = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 10) \
         + mqtt5_props.gen_uint32_prop(mqtt5_props.MAXIMUM_PACKET_SIZE, 2000000) \
         + mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 1)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False)
 
     mid = 312
-    publish_packet = mosq_test.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message", proto_ver=proto_ver)
-    pubrec_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
-    pubrel_packet = mosq_test.gen_pubrel(mid, proto_ver=proto_ver)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message", proto_ver=proto_ver)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

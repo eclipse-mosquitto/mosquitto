@@ -17,12 +17,12 @@ def write_config(filename, ports, per_listener_settings):
         f.write("listener_allow_anonymous true\n")
 
 def client_check(topic, rc, port):
-    connect_packet = mosq_test.gen_connect(client_id="id", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect(client_id="id", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
 
-    publish_packet = mosq_test.gen_publish(topic=topic, qos=1, mid=1, payload="message", proto_ver=5)
-    puback_packet = mosq_test.gen_puback(mid=1, reason_code=rc, proto_ver=5)
+    publish_packet = mqtt_packets.gen_publish(topic=topic, qos=1, mid=1, payload="message", proto_ver=5)
+    puback_packet = mqtt_packets.gen_puback(mid=1, reason_code=rc, proto_ver=5)
 
     mosq_test.do_send_receive(sock, publish_packet, puback_packet, f"puback {topic}")
 

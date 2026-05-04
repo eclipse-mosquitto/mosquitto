@@ -40,8 +40,8 @@ def do_test(proto_ver):
             ]
 
     payload = "message"
-    publish_packet_s = mosq_test.gen_publish("02/sub/qos1/test", qos=1, mid=1, payload=payload, proto_ver=proto_ver)
-    puback_packet_s = mosq_test.gen_puback(1, proto_ver=proto_ver)
+    publish_packet_s = mqtt_packets.gen_publish("02/sub/qos1/test", qos=1, mid=1, payload=payload, proto_ver=proto_ver)
+    puback_packet_s = mqtt_packets.gen_puback(1, proto_ver=proto_ver)
 
     write_config(conf_file, ports[0], ports[1])
 

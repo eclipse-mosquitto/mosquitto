@@ -21,12 +21,12 @@ def do_test():
     try:
         for proto_ver in [4, 5]:
             rc = 1
-            connect_packet = mosq_test.gen_connect("connect-anon-test-%d" % (proto_ver), proto_ver=proto_ver)
+            connect_packet = mqtt_packets.gen_connect("connect-anon-test-%d" % (proto_ver), proto_ver=proto_ver)
 
             if proto_ver == 5:
-                connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+                connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
             else:
-                connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+                connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
             sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
             sock.close()

@@ -6,30 +6,30 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 3265
-    connect_packet = mosq_test.gen_connect("03-c2b-qos2-disco-test", clean_session=False, proto_ver=proto_ver, session_expiry=60)
-    connack1_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
-    connect_packet_clear = mosq_test.gen_connect("03-c2b-qos2-disco-test", proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-c2b-qos2-disco-test", clean_session=False, proto_ver=proto_ver, session_expiry=60)
+    connack1_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
+    connect_packet_clear = mqtt_packets.gen_connect("03-c2b-qos2-disco-test", proto_ver=proto_ver)
 
     if proto_ver == 3:
-        connack2_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
+        connack2_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
     else:
-        connack2_packet = mosq_test.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
+        connack2_packet = mqtt_packets.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
 
-    helper_connect_packet = mosq_test.gen_connect("03-c2b-qos2-disco-helper", clean_session=True, proto_ver=proto_ver)
-    helper_connack_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
-    subscribe_packet = mosq_test.gen_subscribe(mid, "03/c2b/qos2/disconnect/test", 2, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
+    helper_connect_packet = mqtt_packets.gen_connect("03-c2b-qos2-disco-helper", clean_session=True, proto_ver=proto_ver)
+    helper_connack_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "03/c2b/qos2/disconnect/test", 2, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("03/c2b/qos2/disconnect/test", qos=2, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
-    publish_dup_packet = mosq_test.gen_publish("03/c2b/qos2/disconnect/test", qos=2, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
-    pubrec_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
-    pubrel_packet = mosq_test.gen_pubrel(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/c2b/qos2/disconnect/test", qos=2, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
+    publish_dup_packet = mqtt_packets.gen_publish("03/c2b/qos2/disconnect/test", qos=2, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
     if proto_ver == 3:
-        pubrel_dup_packet = mosq_test.gen_pubrel(mid, dup=True, proto_ver=proto_ver)
+        pubrel_dup_packet = mqtt_packets.gen_pubrel(mid, dup=True, proto_ver=proto_ver)
     else:
-        pubrel_dup_packet = mosq_test.gen_pubrel(mid, dup=False, proto_ver=proto_ver)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid, proto_ver=proto_ver)
+        pubrel_dup_packet = mqtt_packets.gen_pubrel(mid, dup=False, proto_ver=proto_ver)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

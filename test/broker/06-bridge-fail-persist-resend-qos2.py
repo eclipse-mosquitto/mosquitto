@@ -36,26 +36,26 @@ def do_test(proto_ver):
     write_config(conf_file, port1, port2, bridge_protocol)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("bridge-u-test", proto_ver=proto_ver_connect)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("bridge-u-test", proto_ver=proto_ver_connect)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 180
     mid_unknown = 2000
 
-    publish_packet = mosq_test.gen_publish("bridge/unknown/qos2", qos=1, payload="bridge-message", mid=mid, proto_ver=proto_ver)
-    puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("bridge/unknown/qos2", qos=1, payload="bridge-message", mid=mid, proto_ver=proto_ver)
+    puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
-    pubrec_packet_unknown1 = mosq_test.gen_pubrec(mid_unknown+1, proto_ver=proto_ver)
-    pubrel_packet_unknown1 = mosq_test.gen_pubrel(mid_unknown+1, proto_ver=proto_ver)
+    pubrec_packet_unknown1 = mqtt_packets.gen_pubrec(mid_unknown+1, proto_ver=proto_ver)
+    pubrel_packet_unknown1 = mqtt_packets.gen_pubrel(mid_unknown+1, proto_ver=proto_ver)
 
-    pubrel_packet_unknown2 = mosq_test.gen_pubrel(mid_unknown+2, proto_ver=proto_ver)
-    pubcomp_packet_unknown2 = mosq_test.gen_pubcomp(mid_unknown+2, proto_ver=proto_ver)
+    pubrel_packet_unknown2 = mqtt_packets.gen_pubrel(mid_unknown+2, proto_ver=proto_ver)
+    pubcomp_packet_unknown2 = mqtt_packets.gen_pubcomp(mid_unknown+2, proto_ver=proto_ver)
 
-    pubcomp_packet_unknown3 = mosq_test.gen_pubcomp(mid_unknown+3, proto_ver=proto_ver)
+    pubcomp_packet_unknown3 = mqtt_packets.gen_pubcomp(mid_unknown+3, proto_ver=proto_ver)
 
 
-    unsubscribe_packet = mosq_test.gen_unsubscribe(1, "bridge/#", proto_ver=proto_ver)
-    unsuback_packet = mosq_test.gen_unsuback(1, proto_ver=proto_ver)
+    unsubscribe_packet = mqtt_packets.gen_unsubscribe(1, "bridge/#", proto_ver=proto_ver)
+    unsuback_packet = mqtt_packets.gen_unsuback(1, proto_ver=proto_ver)
 
 
     if os.environ.get('MOSQ_USE_VALGRIND') is not None:

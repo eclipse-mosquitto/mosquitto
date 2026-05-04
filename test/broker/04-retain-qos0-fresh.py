@@ -8,15 +8,15 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 16
-    connect_packet = mosq_test.gen_connect("retain-qos0-fresh", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("retain-qos0-fresh", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("retain/qos0/fresh", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
-    publish_fresh_packet = mosq_test.gen_publish("retain/qos0/fresh", qos=0, payload="retained message", proto_ver=proto_ver)
-    subscribe_packet = mosq_test.gen_subscribe(mid, "retain/qos0/fresh", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("retain/qos0/fresh", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
+    publish_fresh_packet = mqtt_packets.gen_publish("retain/qos0/fresh", qos=0, payload="retained message", proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "retain/qos0/fresh", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    publish_packet_clear = mosq_test.gen_publish("retain/qos0/fresh", qos=0, payload=None, retain=True, proto_ver=proto_ver)
+    publish_packet_clear = mqtt_packets.gen_publish("retain/qos0/fresh", qos=0, payload=None, retain=True, proto_ver=proto_ver)
     port = mosq_test.get_port()
     if start_broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

@@ -53,11 +53,11 @@ def do_test(proto_ver, host):
             ]
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("03/pub/proxy/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/pub/proxy/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
     if proto_ver == 5:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
     else:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, checkhost=host)
 

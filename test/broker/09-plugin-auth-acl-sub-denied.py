@@ -17,16 +17,16 @@ conf_file = os.path.basename(__file__).replace('.py', '.conf')
 write_config(conf_file, port)
 
 rc = 1
-connect_packet = mosq_test.gen_connect("sub-denied-test", username="denied")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("sub-denied-test", username="denied")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 53
-subscribe_packet = mosq_test.gen_subscribe(mid, "qos0/test", 0)
-suback_packet = mosq_test.gen_suback(mid, 128)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "qos0/test", 0)
+suback_packet = mqtt_packets.gen_suback(mid, 128)
 
 mid_pub = 54
-publish_packet = mosq_test.gen_publish("topic", qos=1, payload="test", mid=mid_pub)
-puback_packet = mosq_test.gen_puback(mid_pub)
+publish_packet = mqtt_packets.gen_publish("topic", qos=1, payload="test", mid=mid_pub)
+puback_packet = mqtt_packets.gen_puback(mid_pub)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

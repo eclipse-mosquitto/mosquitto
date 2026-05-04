@@ -27,20 +27,20 @@ def do_test(allow_anonymous, password_file, username, expect_success):
         for proto_ver in [3, 4, 5]:
             rc = 1
             if username:
-                connect_packet = mosq_test.gen_connect("connect-test-%d" % (proto_ver), proto_ver=proto_ver, username="user", password="password")
+                connect_packet = mqtt_packets.gen_connect("connect-test-%d" % (proto_ver), proto_ver=proto_ver, username="user", password="password")
             else:
-                connect_packet = mosq_test.gen_connect("connect-test-%d" % (proto_ver), proto_ver=proto_ver)
+                connect_packet = mqtt_packets.gen_connect("connect-test-%d" % (proto_ver), proto_ver=proto_ver)
 
             if proto_ver == 5:
                 if expect_success == True:
-                    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+                    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
                 else:
-                    connack_packet = mosq_test.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
+                    connack_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
             else:
                 if expect_success == True:
-                    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+                    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
                 else:
-                    connack_packet = mosq_test.gen_connack(rc=5, proto_ver=proto_ver)
+                    connack_packet = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
 
             sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)

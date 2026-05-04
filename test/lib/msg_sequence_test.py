@@ -54,10 +54,10 @@ class MsgSequence(object):
         self.sock = -1
         self.client = None
         if default_connect:
-            self.add_recv(mosq_test.gen_connect("fuzzish", proto_ver=proto_ver), "default connect")
+            self.add_recv(mqtt_packets.gen_connect("fuzzish", proto_ver=proto_ver), "default connect")
         if default_connack:
             properties = mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 20)
-            self.add_send(mosq_test.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False), "default connack")
+            self.add_send(mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver, properties=properties, property_helper=False), "default connack")
 
     def add_msg(self, message):
         try:
@@ -133,20 +133,20 @@ class MsgSequence(object):
 
     def _publish_message(self, msg):
         sock = mosq_test.client_connect_only(hostname="localhost", port=self.port, timeout=2)
-        sock.send(mosq_test.gen_connect("helper"))
-        mosq_test.expect_packet(sock, "connack", mosq_test.gen_connack(rc=0))
+        sock.send(mqtt_packets.gen_connect("helper"))
+        mosq_test.expect_packet(sock, "connack", mqtt_packets.gen_connack(rc=0))
 
         m = msg.message
         if m['qos'] == 0:
-            sock.send(mosq_test.gen_publish(topic=m['topic'], payload=m['payload']))
+            sock.send(mqtt_packets.gen_publish(topic=m['topic'], payload=m['payload']))
         elif m['qos'] == 1:
-            sock.send(mosq_test.gen_publish(mid=1, qos=1, topic=m['topic'], payload=m['payload']))
-            mosq_test.expect_packet(sock, "helper puback", mosq_test.gen_puback(mid=1))
+            sock.send(mqtt_packets.gen_publish(mid=1, qos=1, topic=m['topic'], payload=m['payload']))
+            mosq_test.expect_packet(sock, "helper puback", mqtt_packets.gen_puback(mid=1))
         elif m['qos'] == 2:
-            sock.send(mosq_test.gen_publish(mid=1, qos=2, topic=m['topic'], payload=m['payload']))
-            mosq_test.expect_packet(sock, "helper pubrec", mosq_test.gen_pubrec(mid=1))
-            sock.send(mosq_test.gen_pubrel(mid=1))
-            mosq_test.expect_packet(sock, "helper pubcomp", mosq_test.gen_pubcomp(mid=1))
+            sock.send(mqtt_packets.gen_publish(mid=1, qos=2, topic=m['topic'], payload=m['payload']))
+            mosq_test.expect_packet(sock, "helper pubrec", mqtt_packets.gen_pubrec(mid=1))
+            sock.send(mqtt_packets.gen_pubrel(mid=1))
+            mosq_test.expect_packet(sock, "helper pubcomp", mqtt_packets.gen_pubcomp(mid=1))
         sock.close()
 
     def _recv_message(self, msg):
@@ -156,8 +156,8 @@ class MsgSequence(object):
 
 
     def _puback_check(self):
-        publish_packet = mosq_test.gen_publish(mid=65535, qos=1, topic="alive check", payload="payload", proto_ver=self.proto_ver)
-        puback_packet = mosq_test.gen_puback(mid=65535, proto_ver=self.proto_ver)
+        publish_packet = mqtt_packets.gen_publish(mid=65535, qos=1, topic="alive check", payload="payload", proto_ver=self.proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid=65535, proto_ver=self.proto_ver)
         self.sock.send(publish_packet)
         packet = self.sock.recv(len(puback_packet))
         return packet == puback_packet

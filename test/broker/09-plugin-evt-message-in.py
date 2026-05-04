@@ -11,18 +11,18 @@ def write_config(filename, port):
 
 def do_test():
     rc = 1
-    connect_packet = mosq_test.gen_connect("plugin-evt-message-in", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("plugin-evt-message-in", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "fixed-topic", 2, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "fixed-topic", 2, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=5)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.RESPONSE_TOPIC, "response/topic")
-    publish_packet1 = mosq_test.gen_publish("subpub/qos2/receive/maximum1", qos=0, payload="message1", proto_ver=5, properties=props)
+    publish_packet1 = mqtt_packets.gen_publish("subpub/qos2/receive/maximum1", qos=0, payload="message1", proto_ver=5, properties=props)
 
     props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
-    publish_packet2 = mosq_test.gen_publish("fixed-topic", qos=0, payload="new-message", proto_ver=5, properties=props)
+    publish_packet2 = mqtt_packets.gen_publish("fixed-topic", qos=0, payload="new-message", proto_ver=5, properties=props)
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

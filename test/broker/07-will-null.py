@@ -5,21 +5,21 @@
 from mosq_test_helper import *
 
 def helper(port, proto_ver):
-    connect_packet = mosq_test.gen_connect("07-will-null-helper", will_topic="will/null/test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("07-will-null-helper", will_topic="will/null/test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     sock.close()
 
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 53
-    connect_packet = mosq_test.gen_connect("07-will-null-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("07-will-null-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "will/null/test", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "will/null/test", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("will/null/test", qos=0, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("will/null/test", qos=0, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

@@ -20,9 +20,9 @@ if sys.version < '2.7':
 
 def do_test(client_cmd):
     rc = 1
-    connect_packet = mosq_test.gen_connect("08-ssl-connect-crt-auth-enc")
-    connack_packet = mosq_test.gen_connack(rc=0)
-    disconnect_packet = mosq_test.gen_disconnect()
+    connect_packet = mqtt_packets.gen_connect("08-ssl-connect-crt-auth-enc")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
     port = mosq_test.get_port()
 

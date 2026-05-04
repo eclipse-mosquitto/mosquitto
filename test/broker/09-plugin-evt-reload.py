@@ -19,10 +19,10 @@ def do_test(per_listener_settings):
 
     rc = 1
     keepalive = 10
-    connect_packet = mosq_test.gen_connect("plugin-reload-test", keepalive=keepalive, username="readwrite", clean_session=False, proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("plugin-reload-test", keepalive=keepalive, username="readwrite", clean_session=False, proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    reload_packet = mosq_test.gen_publish("topic/reload", qos=0, payload="test-message", proto_ver=proto_ver)
+    reload_packet = mqtt_packets.gen_publish("topic/reload", qos=0, payload="test-message", proto_ver=proto_ver)
 
     print("1")
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)

@@ -33,10 +33,10 @@ def do_test(proto_ver):
 
     topic = "02/sub/null/test"
     payload = ""
-    publish_packet_s = mosq_test.gen_publish(topic, qos=1, mid=1, payload=payload, proto_ver=proto_ver)
-    publish_packet_r = mosq_test.gen_publish(topic, qos=1, mid=2, payload=payload, proto_ver=proto_ver)
-    puback_packet_s = mosq_test.gen_puback(1, proto_ver=proto_ver)
-    puback_packet_r = mosq_test.gen_puback(2, proto_ver=proto_ver)
+    publish_packet_s = mqtt_packets.gen_publish(topic, qos=1, mid=1, payload=payload, proto_ver=proto_ver)
+    publish_packet_r = mqtt_packets.gen_publish(topic, qos=1, mid=2, payload=payload, proto_ver=proto_ver)
+    puback_packet_s = mqtt_packets.gen_puback(1, proto_ver=proto_ver)
+    puback_packet_r = mqtt_packets.gen_puback(2, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

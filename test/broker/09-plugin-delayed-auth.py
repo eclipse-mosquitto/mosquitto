@@ -16,14 +16,14 @@ def do_test(proto_ver):
     write_config(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("delayed-auth-test", username="delayed-username", password="good", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("delayed-auth-test", username="delayed-username", password="good", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    connect_packet2 = mosq_test.gen_connect("delayed-auth-test", username="delayed-username", password="bad", proto_ver=proto_ver)
+    connect_packet2 = mqtt_packets.gen_connect("delayed-auth-test", username="delayed-username", password="bad", proto_ver=proto_ver)
     if proto_ver == 5:
-        connack_packet2 = mosq_test.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, property_helper=False)
+        connack_packet2 = mqtt_packets.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, property_helper=False)
     else:
-        connack_packet2 = mosq_test.gen_connack(rc=5, proto_ver=proto_ver)
+        connack_packet2 = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

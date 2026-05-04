@@ -11,11 +11,11 @@ from mosq_test_helper import *
 
 def do_test(conn, data):
     keepalive = 5
-    connect_packet = mosq_test.gen_connect("01-keepalive-pingreq", keepalive=keepalive)
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("01-keepalive-pingreq", keepalive=keepalive)
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    pingreq_packet = mosq_test.gen_pingreq()
-    pingresp_packet = mosq_test.gen_pingresp()
+    pingreq_packet = mqtt_packets.gen_pingreq()
+    pingresp_packet = mqtt_packets.gen_pingresp()
 
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
 

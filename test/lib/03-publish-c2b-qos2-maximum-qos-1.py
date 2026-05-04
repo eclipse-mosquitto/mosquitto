@@ -5,20 +5,20 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("publish-qos2-test", proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("publish-qos2-test", proto_ver=5)
 
     props = mqtt5_props.gen_byte_prop(mqtt5_props.MAXIMUM_QOS, 1)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
-    disconnect_packet = mosq_test.gen_disconnect(proto_ver=5)
+    disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5)
 
     mid = 1
-    publish_1_packet = mosq_test.gen_publish("maximum/qos/qos1", qos=1, mid=mid, payload="message", proto_ver=5)
-    puback_1_packet = mosq_test.gen_puback(mid, proto_ver=5)
+    publish_1_packet = mqtt_packets.gen_publish("maximum/qos/qos1", qos=1, mid=mid, payload="message", proto_ver=5)
+    puback_1_packet = mqtt_packets.gen_puback(mid, proto_ver=5)
 
-    publish_2_packet = mosq_test.gen_publish("maximum/qos/qos0", qos=0, payload="message", proto_ver=5)
+    publish_2_packet = mqtt_packets.gen_publish("maximum/qos/qos0", qos=0, payload="message", proto_ver=5)
 
-    disconnect_packet = mosq_test.gen_disconnect(proto_ver=5)
+    disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5)
 
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
     mosq_test.do_receive_send(conn, publish_1_packet, puback_1_packet, "publish 1")

@@ -40,7 +40,7 @@ def do_test(
     )
     persist_help.init(port)
 
-    connect2_packet = mosq_test.gen_connect(
+    connect2_packet = mqtt_packets.gen_connect(
         publisher_id, username=username, proto_ver=proto_ver
     )
 

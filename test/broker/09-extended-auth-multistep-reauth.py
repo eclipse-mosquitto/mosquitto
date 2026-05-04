@@ -18,49 +18,49 @@ rc = 1
 # ==========
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "step1")
-connect1_packet = mosq_test.gen_connect("client-params-test", proto_ver=5, properties=props)
+connect1_packet = mqtt_packets.gen_connect("client-params-test", proto_ver=5, properties=props)
 
 # Server to client
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "1pets")
-auth1_1_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+auth1_1_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
 # Client to server
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "supercalifragilisticexpialidocious")
-auth1_2_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+auth1_2_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
-connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
 # Second auth
 # ===========
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "step1")
-reauth2_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
+reauth2_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
 
 # Server to client
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "1pets")
-auth2_1_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+auth2_1_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
 # Client to server
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "supercalifragilisticexpialidocious")
-auth2_2_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+auth2_2_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
-auth2_3_packet = mosq_test.gen_auth(reason_code=0, properties=props)
+auth2_3_packet = mqtt_packets.gen_auth(reason_code=0, properties=props)
 
 
 # Third auth - bad due to different method
 # ========================================
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "badmethod")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "step1")
-reauth3_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
+reauth3_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
 
 # Server to client
-disconnect3_packet = mosq_test.gen_disconnect(reason_code=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
+disconnect3_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
 
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)

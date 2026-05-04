@@ -6,14 +6,14 @@ from mosq_test_helper import *
 
 def do_test(start_broker, proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("03-pub-qos2-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-pub-qos2-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 312
-    publish_packet = mosq_test.gen_publish("03/pub/qos2/test", qos=2, mid=mid, payload="message", proto_ver=proto_ver)
-    pubrec_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
-    pubrel_packet = mosq_test.gen_pubrel(mid, proto_ver=proto_ver)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/pub/qos2/test", qos=2, mid=mid, payload="message", proto_ver=proto_ver)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

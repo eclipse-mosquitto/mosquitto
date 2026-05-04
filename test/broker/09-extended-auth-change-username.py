@@ -27,29 +27,29 @@ def do_test(per_listener):
     rc = 1
 
     # Connect without a username - this means no access
-    connect1_packet = mosq_test.gen_connect("client-params-test1", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("client-params-test1", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "topic/one", 1, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "topic/one", 1, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=5)
 
     mid = 2
-    publish1_packet = mosq_test.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
-    puback1_packet = mosq_test.gen_puback(mid, proto_ver=5, reason_code=mqtt5_rc.NOT_AUTHORIZED)
+    publish1_packet = mqtt_packets.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
+    puback1_packet = mqtt_packets.gen_puback(mid, proto_ver=5, reason_code=mqtt5_rc.NOT_AUTHORIZED)
 
     # Connect without a username, but have the plugin change it
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "change")
-    connect2_packet = mosq_test.gen_connect("client-params-test2", proto_ver=5, properties=props)
+    connect2_packet = mqtt_packets.gen_connect("client-params-test2", proto_ver=5, properties=props)
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "change")
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
     mid = 2
-    publish2s_packet = mosq_test.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
-    puback2s_packet = mosq_test.gen_puback(mid, proto_ver=5)
+    publish2s_packet = mqtt_packets.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
+    puback2s_packet = mqtt_packets.gen_puback(mid, proto_ver=5)
 
     mid = 1
-    publish2r_packet = mosq_test.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
+    publish2r_packet = mqtt_packets.gen_publish("topic/one", qos=1, mid=mid, payload="message", proto_ver=5)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

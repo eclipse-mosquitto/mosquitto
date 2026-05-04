@@ -15,7 +15,7 @@ def write_config(filename, port):
         f.write(f"listener {port}\n")
 
 def command_check(sock, command_payload, expected_response):
-    command_packet = mosq_test.gen_publish(topic="$CONTROL/missing-endpoint/v1", qos=0, payload=json.dumps(command_payload))
+    command_packet = mqtt_packets.gen_publish(topic="$CONTROL/missing-endpoint/v1", qos=0, payload=json.dumps(command_payload))
     sock.send(command_packet)
     response = json.loads(mosq_test.read_publish(sock))
     if response != expected_response:
@@ -29,12 +29,12 @@ conf_file = os.path.basename(__file__).replace('.py', '.conf')
 write_config(conf_file, port)
 
 rc = 1
-connect_packet = mosq_test.gen_connect("17-missing-endpoint")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("17-missing-endpoint")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet = mosq_test.gen_subscribe(mid, "$CONTROL/missing-endpoint/#", 0)
-suback_packet = mosq_test.gen_suback(mid, 0)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/missing-endpoint/#", 0)
+suback_packet = mqtt_packets.gen_suback(mid, 0)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

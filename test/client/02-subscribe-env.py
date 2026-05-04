@@ -36,14 +36,13 @@ def do_test(proto_ver, configenv):
             ]
 
     payload = "783c9cc5-5ad8-433f-a4ee-7dcd978c90a8"
-    publish_packet_s = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=1, payload=payload, proto_ver=proto_ver, retain=True)
-    publish_packet_r = mosq_test.gen_publish("env/config/file/sub", qos=1, mid=2, payload=payload, proto_ver=proto_ver, retain=True)
-    puback_packet_s = mosq_test.gen_puback(1, proto_ver=proto_ver,  reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
-    puback_packet_r = mosq_test.gen_puback(2, proto_ver=proto_ver)
+    publish_packet_s = mqtt_packets.gen_publish("env/config/file/sub", qos=1, mid=1, payload=payload, proto_ver=proto_ver, retain=True)
+    publish_packet_r = mqtt_packets.gen_publish("env/config/file/sub", qos=1, mid=2, payload=payload, proto_ver=proto_ver, retain=True)
+    puback_packet_s = mqtt_packets.gen_puback(1, proto_ver=proto_ver,  reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
+    puback_packet_r = mqtt_packets.gen_puback(2, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
         sock.send(publish_packet_s)
         mosq_test.expect_packet(sock, "puback", puback_packet_s)
@@ -52,21 +51,12 @@ def do_test(proto_ver, configenv):
         if payload in sub.stdout:
             rc = sub.returncode
         sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
+
         if rc:
             print(sub.stdout)
             print(sub.stderr)
-            print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
-            exit(rc)
+            raise ValueError(rc)
 
 
 if platform.system() == 'Windows':

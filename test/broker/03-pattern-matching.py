@@ -3,10 +3,10 @@
 from mosq_test_helper import *
 
 def helper(port, pub_topic):
-    connect_packet = mosq_test.gen_connect("test-helper")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("test-helper")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    publish_packet = mosq_test.gen_publish(pub_topic, qos=0, retain=True, payload="message")
+    publish_packet = mqtt_packets.gen_publish(pub_topic, qos=0, retain=True, payload="message")
 
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, connack_error="helper connack", port=port)
     sock.send(publish_packet)
@@ -15,19 +15,19 @@ def helper(port, pub_topic):
 
 def pattern_test(sub_topic, pub_topic):
     rc = 1
-    connect_packet = mosq_test.gen_connect("pattern-sub-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("pattern-sub-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    publish_packet = mosq_test.gen_publish(pub_topic, qos=0, payload="message")
-    publish_retained_packet = mosq_test.gen_publish(pub_topic, qos=0, retain=True, payload="message")
+    publish_packet = mqtt_packets.gen_publish(pub_topic, qos=0, payload="message")
+    publish_retained_packet = mqtt_packets.gen_publish(pub_topic, qos=0, retain=True, payload="message")
 
     mid = 312
-    subscribe_packet = mosq_test.gen_subscribe(mid, sub_topic, 0)
-    suback_packet = mosq_test.gen_suback(mid, 0)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, sub_topic, 0)
+    suback_packet = mqtt_packets.gen_suback(mid, 0)
 
     mid = 234;
-    unsubscribe_packet = mosq_test.gen_unsubscribe(mid, sub_topic)
-    unsuback_packet = mosq_test.gen_unsuback(mid)
+    unsubscribe_packet = mqtt_packets.gen_unsubscribe(mid, sub_topic)
+    unsuback_packet = mqtt_packets.gen_unsuback(mid)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

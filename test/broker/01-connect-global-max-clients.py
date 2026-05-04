@@ -17,11 +17,11 @@ def do_test():
     connack_packets_ok = []
     connect_props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
     for i in range(0, 10):
-        connect_packets_ok.append(mosq_test.gen_connect("max-conn-%d"%i, proto_ver=5, properties=connect_props))
-        connack_packets_ok.append(mosq_test.gen_connack(rc=0, proto_ver=5))
+        connect_packets_ok.append(mqtt_packets.gen_connect("max-conn-%d"%i, proto_ver=5, properties=connect_props))
+        connack_packets_ok.append(mqtt_packets.gen_connack(rc=0, proto_ver=5))
 
-    connect_packet_bad = mosq_test.gen_connect("max-conn-bad", proto_ver=5)
-    connack_packet_bad = mosq_test.gen_connack(rc=mqtt5_rc.SERVER_BUSY, proto_ver=5, property_helper=False)
+    connect_packet_bad = mqtt_packets.gen_connect("max-conn-bad", proto_ver=5)
+    connack_packet_bad = mqtt_packets.gen_connack(rc=mqtt5_rc.SERVER_BUSY, proto_ver=5, property_helper=False)
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

@@ -10,6 +10,7 @@ import mosq_test
 import mqtt5_opts
 import mqtt5_props
 import mqtt5_rc
+import mqtt_packets
 
 import socket
 import ssl

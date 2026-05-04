@@ -203,7 +203,6 @@ def gen_pubrel(mid, dup=False, proto_ver=4, reason_code=-1, properties=None):
     cmd = 0x60 | 0x02
     if dup:
         cmd = cmd | 0x08
-    else:
     return _gen_command_with_mid(cmd, mid, proto_ver, reason_code, properties)
 
 

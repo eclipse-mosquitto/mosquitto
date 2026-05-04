@@ -9,14 +9,14 @@ mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
 def do_test(start_broker, proto_ver_connect, proto_ver_msgs, sub_opts):
     rc = 1
-    connect_packet = mosq_test.gen_connect("bridge-test", proto_ver=proto_ver_connect)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver_msgs)
+    connect_packet = mqtt_packets.gen_connect("bridge-test", proto_ver=proto_ver_connect)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver_msgs)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "loop/test", 0 | sub_opts, proto_ver=proto_ver_msgs)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver_msgs)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "loop/test", 0 | sub_opts, proto_ver=proto_ver_msgs)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver_msgs)
 
-    publish_packet = mosq_test.gen_publish("loop/test", qos=0, payload="message", proto_ver=proto_ver_msgs)
+    publish_packet = mqtt_packets.gen_publish("loop/test", qos=0, payload="message", proto_ver=proto_ver_msgs)
 
     port = mosq_test.get_port()
     if start_broker:

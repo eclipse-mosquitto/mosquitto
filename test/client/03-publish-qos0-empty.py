@@ -31,11 +31,11 @@ def do_test(proto_ver):
             ]
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("03/pub/qos0/test", qos=0, mid=mid, payload="", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/pub/qos0/test", qos=0, mid=mid, payload="", proto_ver=proto_ver)
     if proto_ver == 5:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
     else:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

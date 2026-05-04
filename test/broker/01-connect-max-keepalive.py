@@ -13,8 +13,8 @@ def write_config(filename, port):
 def do_test(proto_ver):
     rc = 1
 
-    connect_packet = mosq_test.gen_connect("max-keepalive", keepalive=101, proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=2, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("max-keepalive", keepalive=101, proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=2, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

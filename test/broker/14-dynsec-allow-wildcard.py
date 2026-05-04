@@ -54,23 +54,23 @@ modify_role_response = {"responses":[
     ]}
 
 rc = 1
-connect_packet_admin = mosq_test.gen_connect("ctrl-test", username="admin", password="admin")
-connack_packet_admin = mosq_test.gen_connack(rc=0)
+connect_packet_admin = mqtt_packets.gen_connect("ctrl-test", username="admin", password="admin")
+connack_packet_admin = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet_admin = mosq_test.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
-suback_packet_admin = mosq_test.gen_suback(mid, 1)
+subscribe_packet_admin = mqtt_packets.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
+suback_packet_admin = mqtt_packets.gen_suback(mid, 1)
 
 # Success
-connect_packet = mosq_test.gen_connect("cid", username="user_one", password="password", proto_ver=5)
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+connect_packet = mqtt_packets.gen_connect("cid", username="user_one", password="password", proto_ver=5)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
 mid = 4
-subscribe_packet = mosq_test.gen_subscribe(mid, "multilevel-wildcard/#", 0, proto_ver=5)
-suback_packet_success = mosq_test.gen_suback(mid, 0, proto_ver=5)
-suback_packet_fail = mosq_test.gen_suback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "multilevel-wildcard/#", 0, proto_ver=5)
+suback_packet_success = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
+suback_packet_fail = mqtt_packets.gen_suback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
 
-disconnect_kick_packet = mosq_test.gen_disconnect(reason_code=mqtt5_rc.ADMINISTRATIVE_ACTION, proto_ver=5)
+disconnect_kick_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.ADMINISTRATIVE_ACTION, proto_ver=5)
 
 try:
     os.mkdir(str(port))

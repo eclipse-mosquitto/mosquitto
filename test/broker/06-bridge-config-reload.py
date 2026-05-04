@@ -26,9 +26,9 @@ def accept_new_connection(sock):
     conn.settimeout(20)
 
     client_id = socket.gethostname()+".bridge_sample"
-    connect_packet = mosq_test.gen_connect(
+    connect_packet = mqtt_packets.gen_connect(
         client_id, clean_session=False, proto_ver=0x84)
-    connack_packet = mosq_test.gen_connack()
+    connack_packet = mqtt_packets.gen_connack()
 
     mosq_test.expect_packet(conn, "connect", connect_packet)
     conn.send(connack_packet)
@@ -37,8 +37,8 @@ def accept_new_connection(sock):
 
 
 def accept_subscription(socket, topic, mid=1, qos=0):
-    subscribe_packet = mosq_test.gen_subscribe(mid, topic, qos)
-    suback_packet = mosq_test.gen_suback(mid, qos)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, topic, qos)
+    suback_packet = mqtt_packets.gen_suback(mid, qos)
 
     mosq_test.expect_packet(socket, "subscribe", subscribe_packet)
     socket.send(suback_packet)

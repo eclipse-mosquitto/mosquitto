@@ -7,11 +7,11 @@ from mosq_test_helper import *
 def do_test(start_broker):
     rc = 1
     mid = 19
-    connect_packet = mosq_test.gen_connect("pub-dollar-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("pub-dollar-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    publish_packet = mosq_test.gen_publish("$test/test", qos=1, mid=mid, payload="message")
-    puback_packet = mosq_test.gen_puback(mid)
+    publish_packet = mqtt_packets.gen_publish("$test/test", qos=1, mid=mid, payload="message")
+    puback_packet = mqtt_packets.gen_puback(mid)
 
     port = mosq_test.get_port()
     if start_broker:

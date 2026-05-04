@@ -12,16 +12,16 @@ def do_test(start_broker, will_props, recvd_props):
     rc = 1
 
     mid = 1
-    connect1_packet = mosq_test.gen_connect("07-will-properties-helper", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("07-will-properties-helper", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    subscribe1_packet = mosq_test.gen_subscribe(mid, "07/will/properties/will/test", 0, proto_ver=5)
-    suback1_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe1_packet = mqtt_packets.gen_subscribe(mid, "07/will/properties/will/test", 0, proto_ver=5)
+    suback1_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    connect2_packet = mosq_test.gen_connect("07-will-properties", proto_ver=5, will_topic="07/will/properties/will/test", will_payload=b"will payload", will_properties=will_props)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect2_packet = mqtt_packets.gen_connect("07-will-properties", proto_ver=5, will_topic="07/will/properties/will/test", will_payload=b"will payload", will_properties=will_props)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    publish_packet = mosq_test.gen_publish("07/will/properties/will/test", qos=0, payload="will payload", proto_ver=5, properties=recvd_props)
+    publish_packet = mqtt_packets.gen_publish("07/will/properties/will/test", qos=0, payload="will payload", proto_ver=5, properties=recvd_props)
 
     port = mosq_test.get_port()
     if start_broker:

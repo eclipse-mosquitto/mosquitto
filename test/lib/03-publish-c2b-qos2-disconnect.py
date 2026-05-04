@@ -8,17 +8,17 @@ def do_test(client_cmd):
     port = mosq_test.get_port()
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("publish-qos2-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("publish-qos2-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    disconnect_packet = mosq_test.gen_disconnect()
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message")
-    publish_dup_packet = mosq_test.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message", dup=True)
-    pubrec_packet = mosq_test.gen_pubrec(mid)
-    pubrel_packet = mosq_test.gen_pubrel(mid)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid)
+    publish_packet = mqtt_packets.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message")
+    publish_dup_packet = mqtt_packets.gen_publish("pub/qos2/test", qos=2, mid=mid, payload="message", dup=True)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid)
 
     sock = mosq_test.listen_sock(port)
 

@@ -19,14 +19,14 @@ def do_test(proto_ver):
 
     rc = 1
     mid = 16
-    connect_packet = mosq_test.gen_connect("retain-qos0-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("retain-qos0-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("retain/qos0/test", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
-    subscribe_packet = mosq_test.gen_subscribe(mid, "retain/qos0/test", 1, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("retain/qos0/test", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "retain/qos0/test", 1, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
-    publish_packet2 = mosq_test.gen_publish("retain/qos0/test", mid=1, qos=1, payload="retained message", retain=True, proto_ver=proto_ver)
+    publish_packet2 = mqtt_packets.gen_publish("retain/qos0/test", mid=1, qos=1, payload="retained message", retain=True, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

@@ -9,8 +9,8 @@ def do_test():
     rc = 1
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.WILL_DELAY_INTERVAL, 3)
-    connect_packet = mosq_test.gen_connect("will-573191-test", proto_ver=5, will_topic="", will_properties=props)
-    connack_packet = mosq_test.gen_connack(rc=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("will-573191-test", proto_ver=5, will_topic="", will_properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

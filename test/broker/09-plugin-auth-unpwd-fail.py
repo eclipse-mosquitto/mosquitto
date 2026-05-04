@@ -17,11 +17,11 @@ def do_test(plugin_ver):
     write_config(conf_file, port, plugin_ver)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="test-username", password="wrong")
-    connack_packet = mosq_test.gen_connack(rc=5)
+    connect_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="test-username", password="wrong")
+    connack_packet = mqtt_packets.gen_connack(rc=5)
 
-    connect_packet_binary_pw1 = mosq_test.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06\x08")
-    connect_packet_binary_pw2 = mosq_test.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06")
+    connect_packet_binary_pw1 = mqtt_packets.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06\x08")
+    connect_packet_binary_pw2 = mqtt_packets.gen_connect("connect-uname-pwd-test", username="binary-password", password="\x00\x01\x02\x03\x04\x05\x06")
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

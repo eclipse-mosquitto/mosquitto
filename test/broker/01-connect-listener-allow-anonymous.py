@@ -85,14 +85,14 @@ def do_test(write_config, expect_success1, expect_success2):
     try:
         for proto_ver in [4, 5]:
             rc = 1
-            connect_packet = mosq_test.gen_connect(f"connect-anon-test-{proto_ver}-{expect_success1}-{expect_success2}", proto_ver=proto_ver)
+            connect_packet = mqtt_packets.gen_connect(f"connect-anon-test-{proto_ver}-{expect_success1}-{expect_success2}", proto_ver=proto_ver)
 
             if proto_ver == 5:
-                connack_packet_success = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-                connack_packet_rejected = mosq_test.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
+                connack_packet_success = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+                connack_packet_rejected = mqtt_packets.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
             else:
-                connack_packet_success = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-                connack_packet_rejected = mosq_test.gen_connack(rc=5, proto_ver=proto_ver)
+                connack_packet_success = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+                connack_packet_rejected = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
 
             if expect_success1:

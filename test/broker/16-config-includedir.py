@@ -24,8 +24,8 @@ def do_test():
 
     try:
         rc = 1
-        connect_packet = mosq_test.gen_connect("connect-include-dir")
-        connack_packet = mosq_test.gen_connack(rc=0)
+        connect_packet = mqtt_packets.gen_connect("connect-include-dir")
+        connack_packet = mqtt_packets.gen_connack(rc=0)
 
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         sock.close()

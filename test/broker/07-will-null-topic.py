@@ -6,10 +6,10 @@ from mosq_test_helper import *
 
 def do_test(start_broker, proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("will-null-topic", will_topic="", will_payload=struct.pack("!4sB7s", b"will", 0, b"message"), proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("will-null-topic", will_topic="", will_payload=struct.pack("!4sB7s", b"will", 0, b"message"), proto_ver=proto_ver)
 
     if proto_ver == 5:
-        connack_packet = mosq_test.gen_connack(rc=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
+        connack_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
     else:
         connack_packet = b""
 

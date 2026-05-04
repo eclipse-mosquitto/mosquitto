@@ -8,8 +8,8 @@ from mosq_test_helper import *
 def do_test(start_broker):
     rc = 1
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "basic")
-    connect_packet = mosq_test.gen_connect("connect-test", proto_ver=5, properties=props)
-    connack_packet = mosq_test.gen_connack(rc=mqtt5_rc.BAD_AUTHENTICATION_METHOD, proto_ver=5, properties=None)
+    connect_packet = mqtt_packets.gen_connect("connect-test", proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.BAD_AUTHENTICATION_METHOD, proto_ver=5, properties=None)
 
     port = mosq_test.get_port()
     if start_broker:

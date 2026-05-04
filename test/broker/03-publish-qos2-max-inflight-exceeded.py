@@ -8,8 +8,8 @@ def do_test(proto_ver):
     port = mosq_test.get_port()
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("pub-qos2-inflight-exceeded", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("pub-qos2-inflight-exceeded", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 
@@ -17,14 +17,14 @@ def do_test(proto_ver):
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port, timeout=10)
 
         for i in range(1, 21):
-            publish_packet = mosq_test.gen_publish("pub/qos2/max/inflight/exceeded", qos=2, mid=i, payload="message", proto_ver=proto_ver)
-            pubrec_packet = mosq_test.gen_pubrec(mid=i, proto_ver=proto_ver)
+            publish_packet = mqtt_packets.gen_publish("pub/qos2/max/inflight/exceeded", qos=2, mid=i, payload="message", proto_ver=proto_ver)
+            pubrec_packet = mqtt_packets.gen_pubrec(mid=i, proto_ver=proto_ver)
             mosq_test.do_send_receive(sock, publish_packet, pubrec_packet)
 
         i = 21
-        publish_packet = mosq_test.gen_publish("pub/qos2/max/inflight/exceeded", qos=2, mid=i, payload="message", proto_ver=proto_ver)
+        publish_packet = mqtt_packets.gen_publish("pub/qos2/max/inflight/exceeded", qos=2, mid=i, payload="message", proto_ver=proto_ver)
         if proto_ver == 5:
-            disconnect_packet = mosq_test.gen_disconnect(reason_code=mqtt5_rc.RECEIVE_MAXIMUM_EXCEEDED, proto_ver=proto_ver)
+            disconnect_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.RECEIVE_MAXIMUM_EXCEEDED, proto_ver=proto_ver)
         else:
             disconnect_packet = b""
         try:

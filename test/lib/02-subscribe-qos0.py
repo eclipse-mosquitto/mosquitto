@@ -15,14 +15,14 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("subscribe-qos0-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("subscribe-qos0-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    disconnect_packet = mosq_test.gen_disconnect()
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "qos0/test", 0)
-    suback_packet = mosq_test.gen_suback(mid, 0)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "qos0/test", 0)
+    suback_packet = mqtt_packets.gen_suback(mid, 0)
 
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
     mosq_test.do_receive_send(conn, subscribe_packet, suback_packet, "subscribe")

@@ -8,7 +8,7 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("01-no-clean-session", clean_session=False)
+    connect_packet = mqtt_packets.gen_connect("01-no-clean-session", clean_session=False)
 
     mosq_test.expect_packet(conn, "connect", connect_packet)
 

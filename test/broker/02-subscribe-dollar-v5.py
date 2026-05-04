@@ -6,16 +6,16 @@ from mosq_test_helper import *
 
 def do_test(start_broker, proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("subscribe-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("subscribe-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    subscribe1_packet = mosq_test.gen_subscribe(mid, "$SYS/broker/missing", 0, proto_ver=proto_ver)
-    suback1_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe1_packet = mqtt_packets.gen_subscribe(mid, "$SYS/broker/missing", 0, proto_ver=proto_ver)
+    suback1_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
     mid = 2
-    subscribe2_packet = mosq_test.gen_subscribe(mid, "$share/share/#", 0, proto_ver=proto_ver)
-    suback2_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe2_packet = mqtt_packets.gen_subscribe(mid, "$share/share/#", 0, proto_ver=proto_ver)
+    suback2_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

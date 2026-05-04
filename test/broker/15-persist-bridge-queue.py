@@ -49,28 +49,28 @@ def do_test(test_case_name: str, bridging_add_config: dict, target_add_config: d
 
     def gen_pub_packets(idx: int, mid_offset: int):
         payload = f"queued message {idx:3}"
-        publish_packet = mosq_test.gen_publish(
+        publish_packet = mqtt_packets.gen_publish(
             topic,
             mid=mid_offset + idx,
             qos=qos,
             payload=payload.encode("UTF-8"),
             proto_ver=proto_ver,
         )
-        puback_packet = mosq_test.gen_puback(mid=mid_offset + idx, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid=mid_offset + idx, proto_ver=proto_ver)
         return publish_packet, puback_packet
 
-    connect_packet = mosq_test.gen_connect(
+    connect_packet = mqtt_packets.gen_connect(
         client_id, proto_ver=proto_ver, clean_session=False
     )
-    connack_packet1 = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-    connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
+    connack_packet1 = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+    connack_packet2 = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, topic, qos, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, qos=qos, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, topic, qos, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, qos=qos, proto_ver=proto_ver)
 
-    connect2_packet = mosq_test.gen_connect(source_id, proto_ver=proto_ver)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect2_packet = mqtt_packets.gen_connect(source_id, proto_ver=proto_ver)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     num_messages = 100
 

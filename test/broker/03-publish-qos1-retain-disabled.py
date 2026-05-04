@@ -19,15 +19,15 @@ def do_test(proto_ver):
 
     rc = 1
     mid = 1
-    connect_packet = mosq_test.gen_connect("pub-qos1-test", proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("pub-qos1-test", proto_ver=5)
 
     props = mqtt5_props.gen_byte_prop(mqtt5_props.RETAIN_AVAILABLE, 0)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
-    publish_packet = mosq_test.gen_publish("pub/qos1/test", qos=1, mid=mid, payload="message", retain=True, proto_ver=5)
-    puback_packet = mosq_test.gen_puback(mid, proto_ver=5)
+    publish_packet = mqtt_packets.gen_publish("pub/qos1/test", qos=1, mid=mid, payload="message", retain=True, proto_ver=5)
+    puback_packet = mqtt_packets.gen_puback(mid, proto_ver=5)
 
-    disconnect_packet = mosq_test.gen_disconnect(reason_code=154, proto_ver=5)
+    disconnect_packet = mqtt_packets.gen_disconnect(reason_code=154, proto_ver=5)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

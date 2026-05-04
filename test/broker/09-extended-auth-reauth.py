@@ -16,16 +16,16 @@ rc = 1
 # First authentication succeeds
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "repeat")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "repeat")
-connect_packet = mosq_test.gen_connect("client-params-test", proto_ver=5, properties=props)
+connect_packet = mqtt_packets.gen_connect("client-params-test", proto_ver=5, properties=props)
 
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "repeat")
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
 # Reauthentication fails
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "repeat")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "repeat")
-auth_packet = mosq_test.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
-disconnect_packet = mosq_test.gen_disconnect(reason_code=mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
+auth_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, properties=props)
+disconnect_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

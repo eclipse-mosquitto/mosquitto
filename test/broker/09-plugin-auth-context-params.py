@@ -15,19 +15,19 @@ conf_file = os.path.basename(__file__).replace('.py', '.conf')
 write_config(conf_file, port)
 
 rc = 1
-connect_packet = mosq_test.gen_connect("client-params-test", keepalive=42, username="client-username")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("client-params-test", keepalive=42, username="client-username")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet = mosq_test.gen_subscribe(mid, "param/topic", 1)
-suback_packet = mosq_test.gen_suback(mid, 1)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "param/topic", 1)
+suback_packet = mqtt_packets.gen_suback(mid, 1)
 
 mid = 3
-publish_packet = mosq_test.gen_publish(topic="param/topic", qos=1, payload="payload contents", retain=1, mid=mid)
-puback_packet = mosq_test.gen_puback(mid)
+publish_packet = mqtt_packets.gen_publish(topic="param/topic", qos=1, payload="payload contents", retain=1, mid=mid)
+puback_packet = mqtt_packets.gen_puback(mid)
 
 mid = 1
-publish_packet_recv = mosq_test.gen_publish(topic="param/topic", qos=1, payload="payload contents", retain=0, mid=mid)
+publish_packet_recv = mqtt_packets.gen_publish(topic="param/topic", qos=1, payload="payload contents", retain=0, mid=mid)
 
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)

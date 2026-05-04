@@ -17,25 +17,25 @@ def do_test(plugin_ver):
     write_config(conf_file, port, plugin_ver)
 
     rc = 1
-    connect1_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="readwrite", clean_session=False)
-    connack1_packet = mosq_test.gen_connack(rc=0)
+    connect1_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="readwrite", clean_session=False)
+    connack1_packet = mqtt_packets.gen_connack(rc=0)
 
-    connect2_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="readwrite", clean_session=False)
-    connack2_packet = mosq_test.gen_connack(rc=0,flags=1)
+    connect2_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="readwrite", clean_session=False)
+    connack2_packet = mqtt_packets.gen_connack(rc=0,flags=1)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "readonly", 2)
-    suback_packet = mosq_test.gen_suback(mid, 2)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "readonly", 2)
+    suback_packet = mqtt_packets.gen_suback(mid, 2)
 
     mid = 2
-    publish1_packet = mosq_test.gen_publish("readonly", qos=2, mid=mid, payload="message")
-    pubrec1_packet = mosq_test.gen_pubrec(mid)
-    pubrel1_packet = mosq_test.gen_pubrel(mid)
-    pubcomp1_packet = mosq_test.gen_pubcomp(mid)
+    publish1_packet = mqtt_packets.gen_publish("readonly", qos=2, mid=mid, payload="message")
+    pubrec1_packet = mqtt_packets.gen_pubrec(mid)
+    pubrel1_packet = mqtt_packets.gen_pubrel(mid)
+    pubcomp1_packet = mqtt_packets.gen_pubcomp(mid)
 
     mid = 2
-    publish2_packet = mosq_test.gen_publish("writeable", qos=1, mid=mid, payload="message")
-    puback2_packet = mosq_test.gen_puback(mid)
+    publish2_packet = mqtt_packets.gen_publish("writeable", qos=1, mid=mid, payload="message")
+    puback2_packet = mqtt_packets.gen_puback(mid)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

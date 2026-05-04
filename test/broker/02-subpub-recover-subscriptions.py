@@ -5,10 +5,10 @@
 from mosq_test_helper import *
 
 def publish_helper(port):
-    connect_packet = mosq_test.gen_connect("subpub-sub-helper")
-    connack_packet = mosq_test.gen_connack(rc=0)
-    publish1_packet = mosq_test.gen_publish("not-shared/sub", qos=0, payload="message1")
-    publish2_packet = mosq_test.gen_publish("shared/sub", qos=0, payload="message2")
+    connect_packet = mqtt_packets.gen_connect("subpub-sub-helper")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
+    publish1_packet = mqtt_packets.gen_publish("not-shared/sub", qos=0, payload="message1")
+    publish2_packet = mqtt_packets.gen_publish("shared/sub", qos=0, payload="message2")
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
     sock.send(publish1_packet)
     sock.send(publish2_packet)
@@ -19,22 +19,22 @@ def do_test(proto_ver):
     rc = 1
     if proto_ver == 5:
         props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
-        connect_packet = mosq_test.gen_connect("subpub-sub-test", proto_ver=proto_ver, clean_session=False, properties=props)
+        connect_packet = mqtt_packets.gen_connect("subpub-sub-test", proto_ver=proto_ver, clean_session=False, properties=props)
     else:
-        connect_packet = mosq_test.gen_connect("subpub-sub-test", proto_ver=proto_ver, clean_session=False)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver, flags=1)
+        connect_packet = mqtt_packets.gen_connect("subpub-sub-test", proto_ver=proto_ver, clean_session=False)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver, flags=1)
 
     mid = 1
-    subscribe1_packet = mosq_test.gen_subscribe(mid, "not-shared/sub", 0, proto_ver=proto_ver)
-    suback1_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe1_packet = mqtt_packets.gen_subscribe(mid, "not-shared/sub", 0, proto_ver=proto_ver)
+    suback1_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
     mid = 2
-    subscribe2_packet = mosq_test.gen_subscribe(mid, "$share/name/shared/sub", 0, proto_ver=proto_ver)
-    suback2_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe2_packet = mqtt_packets.gen_subscribe(mid, "$share/name/shared/sub", 0, proto_ver=proto_ver)
+    suback2_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    publish1_packet = mosq_test.gen_publish("not-shared/sub", qos=0, payload="message1", proto_ver=proto_ver)
-    publish2_packet = mosq_test.gen_publish("shared/sub", qos=0, payload="message2", proto_ver=proto_ver)
+    publish1_packet = mqtt_packets.gen_publish("not-shared/sub", qos=0, payload="message1", proto_ver=proto_ver)
+    publish2_packet = mqtt_packets.gen_publish("shared/sub", qos=0, payload="message2", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

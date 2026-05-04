@@ -45,9 +45,9 @@ def do_test(format_str, expected_outputs, proto_ver=4, payload="message"):
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name3", "value3")
     props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "name4", "value4")
     if proto_ver == 5:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, properties=props, proto_ver=proto_ver, retain=True)
+        publish_packet = mqtt_packets.gen_publish("02/sub/format/test", qos=0, payload=payload, properties=props, proto_ver=proto_ver, retain=True)
     else:
-        publish_packet = mosq_test.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver, retain=True)
+        publish_packet = mqtt_packets.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver, retain=True)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

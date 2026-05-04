@@ -5,12 +5,12 @@
 from mosq_test_helper import *
 
 def helper(port):
-    connect_packet = mosq_test.gen_connect("05-clean-qos1-test-helper")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("05-clean-qos1-test-helper")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     mid = 128
-    publish_packet = mosq_test.gen_publish("qos1/05-clean_session/test", qos=1, mid=mid, payload="clean-session-message")
-    puback_packet = mosq_test.gen_puback(mid)
+    publish_packet = mqtt_packets.gen_publish("qos1/05-clean_session/test", qos=1, mid=mid, payload="clean-session-message")
+    puback_packet = mqtt_packets.gen_puback(mid)
 
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     mosq_test.do_send_receive(sock, publish_packet, puback_packet, "puback")
@@ -21,20 +21,20 @@ def helper(port):
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 109
-    connect_packet = mosq_test.gen_connect("05-clean-session", clean_session=False, proto_ver=proto_ver, session_expiry=60)
-    connack1_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
-    connack2_packet = mosq_test.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("05-clean-session", clean_session=False, proto_ver=proto_ver, session_expiry=60)
+    connack1_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
+    connack2_packet = mqtt_packets.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
 
-    disconnect_packet = mosq_test.gen_disconnect(proto_ver=proto_ver)
+    disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "qos1/05-clean_session/test", 1, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "qos1/05-clean_session/test", 1, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("qos1/05-clean_session/test", qos=1, mid=mid, payload="clean-session-message", proto_ver=proto_ver)
-    puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("qos1/05-clean_session/test", qos=1, mid=mid, payload="clean-session-message", proto_ver=proto_ver)
+    puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
-    connect_packet_clear = mosq_test.gen_connect("05-clean-session", clean_session=True, proto_ver=proto_ver, session_expiry=0)
+    connect_packet_clear = mqtt_packets.gen_connect("05-clean-session", clean_session=True, proto_ver=proto_ver, session_expiry=0)
 
     port = mosq_test.get_port()
     if start_broker:

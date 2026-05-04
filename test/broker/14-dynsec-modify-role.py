@@ -99,12 +99,12 @@ get_role_response2 = {'responses':[{'command': 'getRole', 'data': {'role': {'rol
     ]}}}]}
 
 rc = 1
-connect_packet = mosq_test.gen_connect("ctrl-test", username="admin", password="admin")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("ctrl-test", username="admin", password="admin")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet = mosq_test.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
-suback_packet = mosq_test.gen_suback(mid, 1)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
+suback_packet = mqtt_packets.gen_suback(mid, 1)
 
 try:
     os.mkdir(str(port))

@@ -27,8 +27,8 @@ except FileExistsError:
     pass
 
 rc = 1
-connect_packet = mosq_test.gen_connect("ctrl-test", username="admin", password="adminadminadmin")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("ctrl-test", username="admin", password="adminadminadmin")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port, timeout=3)
 
