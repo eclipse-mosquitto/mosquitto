@@ -33,8 +33,8 @@ def do_test(proto_ver):
     client_id = socket.gethostname()+".bridge_sample"
     properties = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 10)
     properties += mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 20)
-    connect_packet = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect, properties=properties)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect, properties=properties)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     if proto_ver == 5:
         opts = mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL | mqtt5_opts.MQTT_SUB_OPT_RETAIN_AS_PUBLISHED
@@ -42,23 +42,23 @@ def do_test(proto_ver):
         opts = 0
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=proto_ver)
 
     mid = 2
-    subscribe2_packet = mosq_test.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
-    suback2_packet = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
+    subscribe2_packet = mqtt_packets.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
+    suback2_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=proto_ver)
 
     mid = 3
-    subscribe3_packet = mosq_test.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
-    suback3_packet = mosq_test.gen_suback(mid, 2, proto_ver=proto_ver)
+    subscribe3_packet = mqtt_packets.gen_subscribe(mid, "bridge/#", 2 | opts, proto_ver=proto_ver)
+    suback3_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=proto_ver)
 
     mid = 5
-    publish_packet = mosq_test.gen_publish("bridge/disconnect/test", qos=2, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
-    publish_dup_packet = mosq_test.gen_publish("bridge/disconnect/test", qos=2, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
-    pubrec_packet = mosq_test.gen_pubrec(mid, proto_ver=proto_ver)
-    pubrel_packet = mosq_test.gen_pubrel(mid, proto_ver=proto_ver)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("bridge/disconnect/test", qos=2, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
+    publish_dup_packet = mqtt_packets.gen_publish("bridge/disconnect/test", qos=2, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
+    pubrec_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
     ssock = mosq_test.listen_sock(port1)
 

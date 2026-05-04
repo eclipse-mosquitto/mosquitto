@@ -8,14 +8,14 @@ from mosq_test_helper import *
 def do_test(start_broker):
     rc = 1
     props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 65535)
-    connect_packet = mosq_test.gen_connect("02-b2c-topic-alias", proto_ver=5, properties=props)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("02-b2c-topic-alias", proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    subscribe_packet = mosq_test.gen_subscribe(topic="02/b2c/topic/alias/#", qos=0, mid=1, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(qos=0, mid=1, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(topic="02/b2c/topic/alias/#", qos=0, mid=1, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(qos=0, mid=1, proto_ver=5)
 
-    connect_packet_helper = mosq_test.gen_connect("02-b2c-topic-alias-helper", proto_ver=5)
-    connack_packet_helper = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet_helper = mqtt_packets.gen_connect("02-b2c-topic-alias-helper", proto_ver=5)
+    connack_packet_helper = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     port = mosq_test.get_port()
     if start_broker:
@@ -42,10 +42,10 @@ def do_test(start_broker):
                 publish_packet_s = b""
                 publish_packet_r = b""
 
-            publish_packet_s += mosq_test.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5)
+            publish_packet_s += mqtt_packets.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5)
 
             props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS, i)
-            publish_packet_r += mosq_test.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5, properties=props)
+            publish_packet_r += mqtt_packets.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5, properties=props)
 
         if len(publish_packet_s) > 0:
             sock.send(publish_packet_s)
@@ -61,10 +61,10 @@ def do_test(start_broker):
                 publish_packet_s = b""
                 publish_packet_r = b""
 
-            publish_packet_s += mosq_test.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5)
+            publish_packet_s += mqtt_packets.gen_publish("02/b2c/topic/alias/%d"%(i), qos=0, payload="message", proto_ver=5)
 
             props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS, i)
-            publish_packet_r += mosq_test.gen_publish("", qos=0, payload="message", proto_ver=5, properties=props)
+            publish_packet_r += mqtt_packets.gen_publish("", qos=0, payload="message", proto_ver=5, properties=props)
 
         if len(publish_packet_s) > 0:
             sock.send(publish_packet_s)

@@ -48,12 +48,12 @@ def inner_test(bridge, sock, proto_ver):
     mid = 3
     for (local_topic, remote_topic) in cases:
         mid += 1
-        local_publish_packet = mosq_test.gen_publish(
+        local_publish_packet = mqtt_packets.gen_publish(
             local_topic, qos=0, mid=mid, payload='', proto_ver=proto_ver
         )
         sock.send(local_publish_packet)
         if remote_topic:
-            remote_publish_packet = mosq_test.gen_publish(
+            remote_publish_packet = mqtt_packets.gen_publish(
                 remote_topic, qos=0, mid=mid, payload='', proto_ver=proto_ver
             )
             match = mosq_test.expect_packet(bridge, "publish", remote_publish_packet)
@@ -87,11 +87,11 @@ def do_test(proto_ver):
 
     rc = 1
     client_id = socket.gethostname()+".bridge_sample"
-    connect_packet = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    client_connect_packet = mosq_test.gen_connect("pub-test", proto_ver=proto_ver)
-    client_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    client_connect_packet = mqtt_packets.gen_connect("pub-test", proto_ver=proto_ver)
+    client_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     ssock = mosq_test.listen_sock(port1)
 

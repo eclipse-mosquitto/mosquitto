@@ -76,7 +76,7 @@ def do_test(
             subscribe_topic=topic if do_subscribe else None,
         )
         if expect_will_publish:
-            will_publish = mosq_test.gen_publish(
+            will_publish = mqtt_packets.gen_publish(
                 topic,
                 will_qos,
                 will_payload,
@@ -86,7 +86,7 @@ def do_test(
                 properties=will_properties,
             )
             if will_qos > 0:
-                pub_ack = mosq_test.gen_puback(mid=1, proto_ver=proto_ver)
+                pub_ack = mqtt_packets.gen_puback(mid=1, proto_ver=proto_ver)
                 mosq_test.do_receive_send(subscriber_sock, will_publish, pub_ack)
             else:
                 mosq_test.expect_packet(subscriber_sock, "will message", will_publish)
@@ -157,7 +157,7 @@ def do_test(
             else:
                 mosq_test.do_send(
                     publisher_sock,
-                    mosq_test.gen_disconnect(
+                    mqtt_packets.gen_disconnect(
                         reason_code=disconnect_rc, proto_ver=proto_ver
                     ),
                 )

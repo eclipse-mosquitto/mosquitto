@@ -25,18 +25,18 @@ def do_test(per_listener, proto_ver, clean_start, allow_zero, client_port, expec
     write_config(conf_file, port1, port2, per_listener, allow_zero)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("", proto_ver=proto_ver, clean_session=clean_start)
+    connect_packet = mqtt_packets.gen_connect("", proto_ver=proto_ver, clean_session=clean_start)
     if proto_ver == 4:
         if expect_fail == True:
-            connack_packet = mosq_test.gen_connack(rc=2, proto_ver=proto_ver)
+            connack_packet = mqtt_packets.gen_connack(rc=2, proto_ver=proto_ver)
         else:
-            connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+            connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
     else:
         if expect_fail == True:
-            connack_packet = mosq_test.gen_connack(rc=128, proto_ver=proto_ver, properties=None)
+            connack_packet = mqtt_packets.gen_connack(rc=128, proto_ver=proto_ver, properties=None)
         else:
             props = mqtt5_props.gen_string_prop(mqtt5_props.ASSIGNED_CLIENT_IDENTIFIER, "auto-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
-            connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver, properties=props)
+            connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver, properties=props)
             # Remove the "xxxx" part - this means the front part of the packet
             # is correct (so remaining length etc. is correct), but we don't
             # need to match against the random id.

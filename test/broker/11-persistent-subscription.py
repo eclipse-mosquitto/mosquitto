@@ -20,21 +20,21 @@ def do_test(proto_ver):
 
     rc = 1
     mid = 530
-    connect_packet = mosq_test.gen_connect(
+    connect_packet = mqtt_packets.gen_connect(
         "persistent-subscription-test", clean_session=False, proto_ver=proto_ver, session_expiry=60
     )
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-    connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)  # session present
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+    connack_packet2 = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)  # session present
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "subpub/qos1", 1, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "subpub/qos1", 1, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
     mid = 300
-    publish_packet = mosq_test.gen_publish("subpub/qos1", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
-    puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("subpub/qos1", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet2 = mosq_test.gen_publish("subpub/qos1", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    publish_packet2 = mqtt_packets.gen_publish("subpub/qos1", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
 
     if os.path.exists('mosquitto-%d.db' % (port)):
         os.unlink('mosquitto-%d.db' % (port))

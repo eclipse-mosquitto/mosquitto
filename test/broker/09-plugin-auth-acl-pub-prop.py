@@ -17,17 +17,17 @@ def do_test():
     write_config(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="test-username", password="cnwTICONIURW", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="test-username", password="cnwTICONIURW", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     mid = 1
     props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "custom-name", "custom-value")
-    publish_allowed_packet = mosq_test.gen_publish("bad-topic", qos=1, mid=mid, payload="message", properties=props, proto_ver=5)
-    puback_allowed_packet = mosq_test.gen_puback(mid, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS, proto_ver=5)
+    publish_allowed_packet = mqtt_packets.gen_publish("bad-topic", qos=1, mid=mid, payload="message", properties=props, proto_ver=5)
+    puback_allowed_packet = mqtt_packets.gen_puback(mid, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS, proto_ver=5)
 
     mid = 2
-    publish_denied_packet = mosq_test.gen_publish("bad-topic", qos=1, mid=mid, payload="message", proto_ver=5)
-    puback_denied_packet = mosq_test.gen_puback(mid, reason_code=mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
+    publish_denied_packet = mqtt_packets.gen_publish("bad-topic", qos=1, mid=mid, payload="message", proto_ver=5)
+    puback_denied_packet = mqtt_packets.gen_puback(mid, reason_code=mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

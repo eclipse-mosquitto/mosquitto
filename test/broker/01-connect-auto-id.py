@@ -59,9 +59,9 @@ def do_test(config_func, client_port, auto_id):
     config_func(conf_file, port1, port2)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("", proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("", proto_ver=5)
     props = mqtt5_props.gen_string_prop(mqtt5_props.ASSIGNED_CLIENT_IDENTIFIER, f"{auto_id}xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx")
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
     # Remove the "xxxx" part - this means the front part of the packet
     # is correct (so remaining length etc. is correct), but we don't
     # need to match against the random id.

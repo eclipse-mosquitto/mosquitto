@@ -5,11 +5,11 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("retain-qos0-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("retain-qos0-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     mid = 16
-    publish_packet = mosq_test.gen_publish("retain/qos0/test", qos=0, payload="retained message", retain=True)
+    publish_packet = mqtt_packets.gen_publish("retain/qos0/test", qos=0, payload="retained message", retain=True)
 
     mosq_test.do_receive_send(conn, connect_packet, connack_packet, "connect")
 

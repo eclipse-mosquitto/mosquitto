@@ -3,6 +3,7 @@
 import socket
 import mosq_test
 import mqtt5_props
+import mqtt_packets
 import time
 
 from typing import Any, Optional
@@ -19,7 +20,7 @@ def connect_client(
     qos: int = 1,
     **connect_params: Any,
 ):
-    connect_packet = mosq_test.gen_connect(
+    connect_packet = mqtt_packets.gen_connect(
         client_id=client_id,
         username=username,
         proto_ver=proto_ver,
@@ -27,7 +28,7 @@ def connect_client(
         session_expiry=session_expiry,
         **connect_params,
     )
-    connack_packet = mosq_test.gen_connack(
+    connack_packet = mqtt_packets.gen_connack(
         rc=0, proto_ver=proto_ver, flags=1 if session_present else 0
     )
     sock = mosq_test.do_client_connect(
@@ -35,10 +36,10 @@ def connect_client(
     )
     if subscribe_topic is not None:
         mid = 1
-        subscribe_packet = mosq_test.gen_subscribe(
+        subscribe_packet = mqtt_packets.gen_subscribe(
             mid, subscribe_topic, qos, proto_ver=proto_ver
         )
-        suback_packet = mosq_test.gen_suback(mid, qos=qos, proto_ver=proto_ver)
+        suback_packet = mqtt_packets.gen_suback(mid, qos=qos, proto_ver=proto_ver)
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
     return sock
 
@@ -63,7 +64,7 @@ def publish_messages(
             if message_expiry > 0
             else b""
         )
-        publish_packet = mosq_test.gen_publish(
+        publish_packet = mqtt_packets.gen_publish(
             topic,
             mid=mid,
             qos=qos,
@@ -72,7 +73,7 @@ def publish_messages(
             proto_ver=proto_ver,
             properties=props,
         )
-        puback_packet = mosq_test.gen_puback(mid=mid, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid=mid, proto_ver=proto_ver)
         mosq_test.do_send_receive(sock, publish_packet, puback_packet, "puback")
 
 

@@ -40,10 +40,10 @@ def do_test():
     connect_packets_ok = []
     connack_packets_ok = []
     for i in range(0, 10):
-        connect_packets_ok.append(mosq_test.gen_connect("max-conn-%d"%i, proto_ver=5))
-        connack_packets_ok.append(mosq_test.gen_connack(rc=0, proto_ver=5))
+        connect_packets_ok.append(mqtt_packets.gen_connect("max-conn-%d"%i, proto_ver=5))
+        connack_packets_ok.append(mqtt_packets.gen_connack(rc=0, proto_ver=5))
 
-    connect_packet_bad = mosq_test.gen_connect("max-conn-bad", proto_ver=5)
+    connect_packet_bad = mqtt_packets.gen_connect("max-conn-bad", proto_ver=5)
     connack_packet_bad = b""
 
     port = mosq_test.get_port()

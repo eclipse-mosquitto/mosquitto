@@ -26,8 +26,8 @@ def write_config2(filename, ports, per_listener_settings, plugver):
         f.write("plugin_use auth\n")
 
 def client_check(username, password, rc, port):
-    connect_packet = mosq_test.gen_connect(client_id="id", username=username, password=password)
-    connack_packet = mosq_test.gen_connack(rc=rc)
+    connect_packet = mqtt_packets.gen_connect(client_id="id", username=username, password=password)
+    connack_packet = mqtt_packets.gen_connack(rc=rc)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     sock.close()
 

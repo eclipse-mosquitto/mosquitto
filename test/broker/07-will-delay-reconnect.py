@@ -11,19 +11,19 @@ def do_test(start_broker):
     rc = 1
 
     mid = 1
-    connect1_packet = mosq_test.gen_connect("will-delay-reconnect-test", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("will-delay-reconnect-test", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
     will_props = mqtt5_props.gen_uint32_prop(mqtt5_props.WILL_DELAY_INTERVAL, 3)
-    connect2a_packet = mosq_test.gen_connect("will-delay-reconnect-helper", proto_ver=5, will_topic="will/delay/reconnect/test", will_payload=b"will delay", will_properties=will_props, clean_session=False, properties=props)
-    connack2a_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect2a_packet = mqtt_packets.gen_connect("will-delay-reconnect-helper", proto_ver=5, will_topic="will/delay/reconnect/test", will_payload=b"will delay", will_properties=will_props, clean_session=False, properties=props)
+    connack2a_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect2b_packet = mosq_test.gen_connect("will-delay-reconnect-helper", proto_ver=5, clean_session=False)
-    connack2b_packet = mosq_test.gen_connack(rc=0, flags=1, proto_ver=5)
+    connect2b_packet = mqtt_packets.gen_connect("will-delay-reconnect-helper", proto_ver=5, clean_session=False)
+    connack2b_packet = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=5)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "will/delay/reconnect/test", 0, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "will/delay/reconnect/test", 0, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
     port = mosq_test.get_port()
     if start_broker:

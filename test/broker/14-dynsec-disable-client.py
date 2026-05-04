@@ -44,16 +44,16 @@ enable_client_command = { "commands": [{
 enable_client_response = {'responses':[{'command': 'enableClient'}]}
 
 rc = 1
-connect_packet = mosq_test.gen_connect("ctrl-test", username="admin", password="admin")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("ctrl-test", username="admin", password="admin")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
-client_connect_packet = mosq_test.gen_connect("cid", username="user_one", password="password")
-client_connack_packet1 = mosq_test.gen_connack(rc=5)
-client_connack_packet2 = mosq_test.gen_connack(rc=0)
+client_connect_packet = mqtt_packets.gen_connect("cid", username="user_one", password="password")
+client_connack_packet1 = mqtt_packets.gen_connack(rc=5)
+client_connack_packet2 = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet = mosq_test.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
-suback_packet = mosq_test.gen_suback(mid, 1)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
+suback_packet = mqtt_packets.gen_suback(mid, 1)
 
 try:
     os.mkdir(str(port))

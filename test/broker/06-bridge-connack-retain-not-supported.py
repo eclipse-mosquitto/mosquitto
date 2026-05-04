@@ -27,24 +27,24 @@ def do_test():
     rc = 1
     hostname = socket.gethostname()
     client_id = hostname+".bridge_sample"
-    connect_packet_retain = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
-    connect_packet_no_retain = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=False)
+    connect_packet_retain = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
+    connect_packet_no_retain = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=False)
 
     props = mqtt5_props.gen_byte_prop(mqtt5_props.RETAIN_AVAILABLE, 0)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
     mid = 1
     opts = mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL | mqtt5_opts.MQTT_SUB_OPT_RETAIN_AS_PUBLISHED
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "bridge with space/#", 1 | opts, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "bridge with space/#", 1 | opts, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=5)
 
-    publish_packet = mosq_test.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=5)
+    publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=5)
 
 
-    helper_connect_packet = mosq_test.gen_connect("helper", clean_session=True, proto_ver=5)
-    helper_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
-    helper_publish_packet = mosq_test.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=5)
+    helper_connect_packet = mqtt_packets.gen_connect("helper", clean_session=True, proto_ver=5)
+    helper_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
+    helper_publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=5)
 
     ssock = mosq_test.listen_sock(port1)
 

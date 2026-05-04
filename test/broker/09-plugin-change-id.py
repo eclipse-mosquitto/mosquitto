@@ -14,23 +14,23 @@ def do_test(plugin_ver):
     write_config(conf_file, port, plugin_ver)
 
     rc = 1
-    connect1_packet = mosq_test.gen_connect("already-exists")
-    connack1_packet = mosq_test.gen_connack(rc=0)
+    connect1_packet = mqtt_packets.gen_connect("already-exists")
+    connack1_packet = mqtt_packets.gen_connack(rc=0)
 
-    connect2_packet = mosq_test.gen_connect("id-change-test")
-    connack2_packet = mosq_test.gen_connack(rc=0)
+    connect2_packet = mqtt_packets.gen_connect("id-change-test")
+    connack2_packet = mqtt_packets.gen_connack(rc=0)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "#", 0)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "#", 0)
     # Only subs by client id == allowed is allowed
-    suback_packet_denied = mosq_test.gen_suback(mid, 128)
-    suback_packet_ok = mosq_test.gen_suback(mid, 0)
+    suback_packet_denied = mqtt_packets.gen_suback(mid, 128)
+    suback_packet_ok = mqtt_packets.gen_suback(mid, 0)
 
     mid = 2
-    publish1_packet = mosq_test.gen_publish("publish/topic", qos=2, mid=mid, payload="message")
-    pubrec1_packet = mosq_test.gen_pubrec(mid)
-    pubrel1_packet = mosq_test.gen_pubrel(mid)
-    pubcomp1_packet = mosq_test.gen_pubcomp(mid)
+    publish1_packet = mqtt_packets.gen_publish("publish/topic", qos=2, mid=mid, payload="message")
+    pubrec1_packet = mqtt_packets.gen_pubrec(mid)
+    pubrel1_packet = mqtt_packets.gen_pubrel(mid)
+    pubcomp1_packet = mqtt_packets.gen_pubcomp(mid)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

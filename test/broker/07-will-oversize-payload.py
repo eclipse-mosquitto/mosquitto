@@ -13,22 +13,22 @@ def write_config(filename, port):
 def do_test(proto_ver, clean_session):
     rc = 1
     mid = 53
-    connect_packet = mosq_test.gen_connect("will-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("will-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    connect_packet_ok = mosq_test.gen_connect("test-helper", will_topic="will/qos0/test", will_payload=b"A", clean_session=clean_session, proto_ver=proto_ver, session_expiry=60)
-    connack_packet_ok = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet_ok = mqtt_packets.gen_connect("test-helper", will_topic="will/qos0/test", will_payload=b"A", clean_session=clean_session, proto_ver=proto_ver, session_expiry=60)
+    connack_packet_ok = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    connect_packet_bad = mosq_test.gen_connect("test-helper", will_topic="will/qos0/test", will_payload=b"AB", clean_session=clean_session, proto_ver=proto_ver, session_expiry=60)
+    connect_packet_bad = mqtt_packets.gen_connect("test-helper", will_topic="will/qos0/test", will_payload=b"AB", clean_session=clean_session, proto_ver=proto_ver, session_expiry=60)
     if proto_ver == 5:
-        connack_packet_bad = mosq_test.gen_connack(rc=mqtt5_rc.PACKET_TOO_LARGE, proto_ver=proto_ver, property_helper=False)
+        connack_packet_bad = mqtt_packets.gen_connack(rc=mqtt5_rc.PACKET_TOO_LARGE, proto_ver=proto_ver, property_helper=False)
     else:
-        connack_packet_bad = mosq_test.gen_connack(rc=5, proto_ver=proto_ver)
+        connack_packet_bad = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "will/qos0/test", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "will/qos0/test", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("will/qos0/test", qos=0, payload="A", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("will/qos0/test", qos=0, payload="A", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

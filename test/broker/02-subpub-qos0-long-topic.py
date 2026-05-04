@@ -7,13 +7,13 @@ from mosq_test_helper import *
 def do_test(start_broker, topic, succeeds):
     rc = 1
     mid = 53
-    connect_packet = mosq_test.gen_connect("02-subpub-qos0-long-topic")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("02-subpub-qos0-long-topic")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, topic, 0)
-    suback_packet = mosq_test.gen_suback(mid, 0)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, topic, 0)
+    suback_packet = mqtt_packets.gen_suback(mid, 0)
 
-    publish_packet = mosq_test.gen_publish(topic, qos=0, payload="message")
+    publish_packet = mqtt_packets.gen_publish(topic, qos=0, payload="message")
 
     port = mosq_test.get_port()
     broker = None

@@ -21,8 +21,8 @@ def do_test():
 
     # Test the case of connect with session-expiry>0, kick, expiry for a crash
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 1)
-    connect_packet = mosq_test.gen_connect("05-session-expiry", clean_session=False, proto_ver=5, properties=props)
-    connack_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("05-session-expiry", clean_session=False, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=5)
 
     try:
         sock = mosq_test.client_connect_only(port=port)

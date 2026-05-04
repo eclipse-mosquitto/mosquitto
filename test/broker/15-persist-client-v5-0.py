@@ -19,11 +19,11 @@ proto_ver = 5
 
 connect_props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
 connect_props += mqtt5_props.gen_uint32_prop(mqtt5_props.MAXIMUM_PACKET_SIZE, 10000)
-connect_packet = mosq_test.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=False, properties=connect_props)
-connack_packet1 = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
+connect_packet = mqtt_packets.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=False, properties=connect_props)
+connack_packet1 = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+connack_packet2 = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
 
-connect_packet_clean = mosq_test.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=True)
+connect_packet_clean = mqtt_packets.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=True)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

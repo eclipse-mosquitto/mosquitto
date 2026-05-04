@@ -23,27 +23,27 @@ topic0 = "client-msg/0"
 topic1 = "client-msg/1"
 topic2 = "client-msg/2"
 
-connect_packet = mosq_test.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=False)
-connack_packet1 = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
+connect_packet = mqtt_packets.gen_connect(client_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=False)
+connack_packet1 = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+connack_packet2 = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
 mid = 1
-subscribe_packet0 = mosq_test.gen_subscribe(mid, topic0, qos=0, proto_ver=proto_ver)
-suback_packet0 = mosq_test.gen_suback(mid=mid, qos=0, proto_ver=proto_ver)
-subscribe_packet1 = mosq_test.gen_subscribe(mid, topic1, qos=1, proto_ver=proto_ver)
-suback_packet1 = mosq_test.gen_suback(mid=mid, qos=1, proto_ver=proto_ver)
-subscribe_packet2 = mosq_test.gen_subscribe(mid, topic2, qos=2, proto_ver=proto_ver)
-suback_packet2 = mosq_test.gen_suback(mid=mid, qos=2, proto_ver=proto_ver)
+subscribe_packet0 = mqtt_packets.gen_subscribe(mid, topic0, qos=0, proto_ver=proto_ver)
+suback_packet0 = mqtt_packets.gen_suback(mid=mid, qos=0, proto_ver=proto_ver)
+subscribe_packet1 = mqtt_packets.gen_subscribe(mid, topic1, qos=1, proto_ver=proto_ver)
+suback_packet1 = mqtt_packets.gen_suback(mid=mid, qos=1, proto_ver=proto_ver)
+subscribe_packet2 = mqtt_packets.gen_subscribe(mid, topic2, qos=2, proto_ver=proto_ver)
+suback_packet2 = mqtt_packets.gen_suback(mid=mid, qos=2, proto_ver=proto_ver)
 
-connect_packet_helper = mosq_test.gen_connect(helper_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=True)
-publish_packet0 = mosq_test.gen_publish(topic=topic0, qos=0, payload="message", proto_ver=proto_ver)
+connect_packet_helper = mqtt_packets.gen_connect(helper_id, keepalive=keepalive, proto_ver=proto_ver, clean_session=True)
+publish_packet0 = mqtt_packets.gen_publish(topic=topic0, qos=0, payload="message", proto_ver=proto_ver)
 mid = 1
-publish_packet1 = mosq_test.gen_publish(topic=topic1, qos=1, payload="message", mid=mid, proto_ver=proto_ver)
-puback_packet = mosq_test.gen_puback(mid=mid, proto_ver=proto_ver)
+publish_packet1 = mqtt_packets.gen_publish(topic=topic1, qos=1, payload="message", mid=mid, proto_ver=proto_ver)
+puback_packet = mqtt_packets.gen_puback(mid=mid, proto_ver=proto_ver)
 mid = 2
-publish_packet2 = mosq_test.gen_publish(topic=topic2, qos=2, payload="message", mid=mid, proto_ver=proto_ver)
-pubrec_packet = mosq_test.gen_pubrec(mid=mid, proto_ver=proto_ver)
-pubrel_packet = mosq_test.gen_pubrel(mid=mid, proto_ver=proto_ver)
-pubcomp_packet = mosq_test.gen_pubcomp(mid=mid, proto_ver=proto_ver)
+publish_packet2 = mqtt_packets.gen_publish(topic=topic2, qos=2, payload="message", mid=mid, proto_ver=proto_ver)
+pubrec_packet = mqtt_packets.gen_pubrec(mid=mid, proto_ver=proto_ver)
+pubrel_packet = mqtt_packets.gen_pubrel(mid=mid, proto_ver=proto_ver)
+pubcomp_packet = mqtt_packets.gen_pubcomp(mid=mid, proto_ver=proto_ver)
 
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)

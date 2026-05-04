@@ -13,8 +13,8 @@ def write_config(filename, pw_file, port):
         f.write(f"password_file {pw_file}\n")
 
 def client_check(port, username, password, rc):
-    connect_packet = mosq_test.gen_connect("pwd-test", username=username, password=password)
-    connack_packet = mosq_test.gen_connack(rc=rc)
+    connect_packet = mqtt_packets.gen_connect("pwd-test", username=username, password=password)
+    connack_packet = mqtt_packets.gen_connack(rc=rc)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     sock.close()
 

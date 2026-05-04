@@ -8,15 +8,15 @@ from mosq_test_helper import *
 
 def do_test(start_broker, clean_start):
     rc = 1
-    connect_packet = mosq_test.gen_connect(None, proto_ver=5, clean_session=clean_start)
+    connect_packet = mqtt_packets.gen_connect(None, proto_ver=5, clean_session=clean_start)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.ASSIGNED_CLIENT_IDENTIFIER, "auto-00000000-0000-0000-0000-000000000000")
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 1)
-    disconnect_client_packet = mosq_test.gen_disconnect(proto_ver=5, properties=props)
+    disconnect_client_packet = mqtt_packets.gen_disconnect(proto_ver=5, properties=props)
 
-    disconnect_server_packet = mosq_test.gen_disconnect(proto_ver=5, reason_code=130)
+    disconnect_server_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code=130)
 
     port = mosq_test.get_port()
     if start_broker:

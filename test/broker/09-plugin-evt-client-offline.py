@@ -11,10 +11,10 @@ def write_config(filename, port):
 
 def do_test():
     rc = 1
-    connect_packet = mosq_test.gen_connect("plugin-evt-subscribe", proto_ver=4, clean_session=False)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=4)
+    connect_packet = mqtt_packets.gen_connect("plugin-evt-subscribe", proto_ver=4, clean_session=False)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=4)
 
-    publish_packet = mosq_test.gen_publish("evt/client/offline", qos=0, payload="plugin-evt-subscribe")
+    publish_packet = mqtt_packets.gen_publish("evt/client/offline", qos=0, payload="plugin-evt-subscribe")
 
     port = mosq_test.get_port()
     conf_file = os.path.basename(__file__).replace('.py', '.conf')

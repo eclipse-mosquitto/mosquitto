@@ -7,10 +7,10 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 53
-    connect_packet = mosq_test.gen_connect("subscribe-invalid-utf8", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("subscribe-invalid-utf8", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "invalid/utf8", 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "invalid/utf8", 0, proto_ver=proto_ver)
     b = list(struct.unpack("B"*len(subscribe_packet), subscribe_packet))
     b[13] = 0 # Topic should never have a 0x0000
     subscribe_packet = struct.pack("B"*len(b), *b)
@@ -28,7 +28,7 @@ def do_test(start_broker, proto_ver):
             except BrokenPipeError:
                 rc = 0
         else:
-            disconnect_packet = mosq_test.gen_disconnect(proto_ver=5, reason_code = mqtt5_rc.MALFORMED_PACKET)
+            disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code = mqtt5_rc.MALFORMED_PACKET)
             mosq_test.do_send_receive(sock, subscribe_packet, disconnect_packet, "suback")
             rc = 0
 

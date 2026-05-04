@@ -9,8 +9,8 @@ def do_test(start_broker, proto_ver, clean_session1, clean_session2):
     rc = 1
 
     mid = 1
-    connect1_packet = mosq_test.gen_connect("will-takeover-helper", proto_ver=proto_ver)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect1_packet = mqtt_packets.gen_connect("will-takeover-helper", proto_ver=proto_ver)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     if proto_ver == 5:
         if clean_session1 == False:
@@ -26,22 +26,22 @@ def do_test(start_broker, proto_ver, clean_session1, clean_session2):
         connect_props1 = b""
         connect_props2 = b""
 
-    connect2_packet = mosq_test.gen_connect("will-takeover-test", proto_ver=proto_ver, will_topic="will/takeover/test", will_payload=b"LWT", clean_session=clean_session1, properties=connect_props1)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect2_packet = mqtt_packets.gen_connect("will-takeover-test", proto_ver=proto_ver, will_topic="will/takeover/test", will_payload=b"LWT", clean_session=clean_session1, properties=connect_props1)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    connect3_packet = mosq_test.gen_connect("will-takeover-test", proto_ver=proto_ver, clean_session=clean_session2, properties=connect_props2)
+    connect3_packet = mqtt_packets.gen_connect("will-takeover-test", proto_ver=proto_ver, clean_session=clean_session2, properties=connect_props2)
     if clean_session1 == False and clean_session2 == False:
-        connack3_packet = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
+        connack3_packet = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
     else:
-        connack3_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+        connack3_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "will/takeover/test", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "will/takeover/test", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish(topic="will/takeover/test", qos=0, payload="Client ready", proto_ver=proto_ver)
-    publish_lwt_packet = mosq_test.gen_publish(topic="will/takeover/test", qos=0, payload="LWT", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish(topic="will/takeover/test", qos=0, payload="Client ready", proto_ver=proto_ver)
+    publish_lwt_packet = mqtt_packets.gen_publish(topic="will/takeover/test", qos=0, payload="LWT", proto_ver=proto_ver)
 
-    connect2_packet_clear = mosq_test.gen_connect("will-takeover-test", proto_ver=proto_ver)
+    connect2_packet_clear = mqtt_packets.gen_connect("will-takeover-test", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

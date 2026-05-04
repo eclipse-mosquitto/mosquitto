@@ -13,16 +13,16 @@ def write_config(filename, port):
 
 def do_test(proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("subpub-qos0-bytes", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("subpub-qos0-bytes", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    connect_packet_helper = mosq_test.gen_connect("qos0-bytes-helper", proto_ver=proto_ver)
+    connect_packet_helper = mqtt_packets.gen_connect("qos0-bytes-helper", proto_ver=proto_ver)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "subpub/qos0/queued/bytes", 1, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "subpub/qos0/queued/bytes", 1, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
-    publish_packet0 = mosq_test.gen_publish("subpub/qos0/queued/bytes", qos=0, payload="message", proto_ver=proto_ver)
+    publish_packet0 = mqtt_packets.gen_publish("subpub/qos0/queued/bytes", qos=0, payload="message", proto_ver=proto_ver)
 
 
     port = mosq_test.get_port()

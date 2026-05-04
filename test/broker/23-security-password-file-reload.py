@@ -25,8 +25,8 @@ def do_test(write_config_func):
     write_config_func(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("password-change-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("password-change-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     with open(f"{port}.password", "wt") as f:
         f.write("test:$7$1000$97ozvObcN5zP4MGzYUw4uRp8+mPQbThrHOX69vdHHNVwV4iZf2K2X23FS7weilZMKeV+9oLHdilybmpXcFApYg==$WlM0jUhsiQNQJe4IDt5K1rmtAdaenWGdntswJmDkp74W9pdrt/+RdIK3YaJ09o3pD1xbtokXq933bQh+CrjA4Q==\n")

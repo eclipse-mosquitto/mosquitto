@@ -16,8 +16,8 @@ def do_test(plugin_ver):
     write_config(conf_file, port, plugin_ver)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="test-username@v2", password="doesNotMatter")
-    connack_packet = mosq_test.gen_connack(rc=5)
+    connect_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="test-username@v2", password="doesNotMatter")
+    connack_packet = mqtt_packets.gen_connack(rc=5)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

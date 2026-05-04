@@ -33,14 +33,14 @@ def do_test(proto_ver):
     write_config(conf_file, port1, port2, bridge_protocol)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("test-client", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("test-client", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
     mid = 180
-    subscribe_packet = mosq_test.gen_subscribe(mid, "#", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
-    publish_packet = mosq_test.gen_publish("echo_topic", qos=0, payload="sample-message", proto_ver=proto_ver)
-    bridge_up_packet = mosq_test.gen_publish("bridge_state", qos=0, payload="1", retain=1, proto_ver=proto_ver)
-    bridge_down_packet = mosq_test.gen_publish("bridge_state", qos=0, payload="0", retain=0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "#", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("echo_topic", qos=0, payload="sample-message", proto_ver=proto_ver)
+    bridge_up_packet = mqtt_packets.gen_publish("bridge_state", qos=0, payload="1", retain=1, proto_ver=proto_ver)
+    bridge_down_packet = mqtt_packets.gen_publish("bridge_state", qos=0, payload="0", retain=0, proto_ver=proto_ver)
     
     remote_broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port1, use_conf=False)
 

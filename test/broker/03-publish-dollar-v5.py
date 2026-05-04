@@ -8,14 +8,14 @@ mid = 1
 def helper(port, topic, reason_code):
     global mid
 
-    connect_packet = mosq_test.gen_connect("03-publish-dollar-v5", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
-    publish_packet = mosq_test.gen_publish(topic, qos=1, mid=mid, payload="message", proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("03-publish-dollar-v5", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
+    publish_packet = mqtt_packets.gen_publish(topic, qos=1, mid=mid, payload="message", proto_ver=5)
 
     if reason_code == 0:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=5)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=5)
     else:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=5, reason_code=reason_code)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=5, reason_code=reason_code)
 
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     mosq_test.do_send_receive(sock, publish_packet, puback_packet, "puback%d"%(mid))

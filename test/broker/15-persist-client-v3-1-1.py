@@ -16,11 +16,11 @@ persist_help.init(port)
 client_id = "persist-client-v3-1-1"
 proto_ver = 4
 
-connect_packet = mosq_test.gen_connect(client_id, proto_ver=proto_ver, clean_session=False)
-connack_packet1 = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
-connack_packet2 = mosq_test.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
+connect_packet = mqtt_packets.gen_connect(client_id, proto_ver=proto_ver, clean_session=False)
+connack_packet1 = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
+connack_packet2 = mqtt_packets.gen_connack(rc=0, flags=1, proto_ver=proto_ver)
 
-connect_packet_clean = mosq_test.gen_connect(client_id, proto_ver=proto_ver, clean_session=True)
+connect_packet_clean = mqtt_packets.gen_connect(client_id, proto_ver=proto_ver, clean_session=True)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

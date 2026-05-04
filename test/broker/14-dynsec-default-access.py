@@ -87,32 +87,32 @@ allow_unsubscribe_command = { "commands": [
 allow_unsubscribe_response = {'responses': [{'command': 'setDefaultACLAccess', 'correlationData': '7'}]}
 
 rc = 1
-connect_packet_admin = mosq_test.gen_connect("ctrl-test", username="admin", password="admin")
-connack_packet_admin = mosq_test.gen_connack(rc=0)
+connect_packet_admin = mqtt_packets.gen_connect("ctrl-test", username="admin", password="admin")
+connack_packet_admin = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet_admin = mosq_test.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
-suback_packet_admin = mosq_test.gen_suback(mid, 1)
+subscribe_packet_admin = mqtt_packets.gen_subscribe(mid, "$CONTROL/dynamic-security/#", 1)
+suback_packet_admin = mqtt_packets.gen_suback(mid, 1)
 
-connect_packet = mosq_test.gen_connect("cid", username="user_one", password="password", proto_ver=5)
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+connect_packet = mqtt_packets.gen_connect("cid", username="user_one", password="password", proto_ver=5)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
 mid = 3
-subscribe_packet = mosq_test.gen_subscribe(mid, "topic", 0, proto_ver=5)
-suback_packet_fail = mosq_test.gen_suback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
-suback_packet_success = mosq_test.gen_suback(mid, 0, proto_ver=5)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "topic", 0, proto_ver=5)
+suback_packet_fail = mqtt_packets.gen_suback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
+suback_packet_success = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
 mid = 4
-unsubscribe_packet = mosq_test.gen_unsubscribe(mid, "topic", proto_ver=5)
-unsuback_packet_fail = mosq_test.gen_unsuback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
-unsuback_packet_success = mosq_test.gen_unsuback(mid, proto_ver=5)
+unsubscribe_packet = mqtt_packets.gen_unsubscribe(mid, "topic", proto_ver=5)
+unsuback_packet_fail = mqtt_packets.gen_unsuback(mid, mqtt5_rc.NOT_AUTHORIZED, proto_ver=5)
+unsuback_packet_success = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
 mid = 5
-publish_packet = mosq_test.gen_publish(topic="topic", mid=mid, qos=1, payload="message", proto_ver=5)
-puback_packet_fail = mosq_test.gen_puback(mid, proto_ver=5, reason_code=mqtt5_rc.NOT_AUTHORIZED)
-puback_packet_success = mosq_test.gen_puback(mid, proto_ver=5)
+publish_packet = mqtt_packets.gen_publish(topic="topic", mid=mid, qos=1, payload="message", proto_ver=5)
+puback_packet_fail = mqtt_packets.gen_puback(mid, proto_ver=5, reason_code=mqtt5_rc.NOT_AUTHORIZED)
+puback_packet_success = mqtt_packets.gen_puback(mid, proto_ver=5)
 
-publish_packet_recv = mosq_test.gen_publish(topic="topic", qos=0, payload="message", proto_ver=5)
+publish_packet_recv = mqtt_packets.gen_publish(topic="topic", qos=0, payload="message", proto_ver=5)
 
 try:
     os.mkdir(str(port))

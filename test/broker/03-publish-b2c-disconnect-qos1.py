@@ -5,12 +5,12 @@
 from mosq_test_helper import *
 
 def helper(port):
-    connect_packet = mosq_test.gen_connect("03-b2c-disco-qos1-helper")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("03-b2c-disco-qos1-helper")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     mid = 128
-    publish_packet = mosq_test.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message")
-    puback_packet = mosq_test.gen_puback(mid)
+    publish_packet = mqtt_packets.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message")
+    puback_packet = mqtt_packets.gen_puback(mid)
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, connack_error="helper connack", port=port)
     mosq_test.do_send_receive(sock, publish_packet, puback_packet, "helper puback")
     sock.close()
@@ -21,22 +21,22 @@ def do_test(start_broker, proto_ver):
 
     rc = 1
     mid = 3265
-    connect_packet = mosq_test.gen_connect("03-b2c-disco-qos1", clean_session=False, proto_ver=proto_ver, session_expiry=60)
-    connack1_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
-    connack2_packet = mosq_test.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
-    connect_packet_clear = mosq_test.gen_connect("03-b2c-disco-qos1", proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-b2c-disco-qos1", clean_session=False, proto_ver=proto_ver, session_expiry=60)
+    connack1_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
+    connack2_packet = mqtt_packets.gen_connack(flags=1, rc=0, proto_ver=proto_ver)
+    connect_packet_clear = mqtt_packets.gen_connect("03-b2c-disco-qos1", proto_ver=proto_ver)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "03/b2c/qos1/disconnect/test", 1, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 1, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "03/b2c/qos1/disconnect/test", 1, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
-    publish_dup_packet = mosq_test.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
-    puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message", proto_ver=proto_ver)
+    publish_dup_packet = mqtt_packets.gen_publish("03/b2c/qos1/disconnect/test", qos=1, mid=mid, payload="disconnect-message", dup=True, proto_ver=proto_ver)
+    puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     mid = 3266
-    publish2_packet = mosq_test.gen_publish("03/b2c/qos1/outgoing", qos=1, mid=mid, payload="outgoing-message", proto_ver=proto_ver)
-    puback2_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+    publish2_packet = mqtt_packets.gen_publish("03/b2c/qos1/outgoing", qos=1, mid=mid, payload="outgoing-message", proto_ver=proto_ver)
+    puback2_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     if start_broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)

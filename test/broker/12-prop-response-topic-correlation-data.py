@@ -11,23 +11,23 @@ from mosq_test_helper import *
 def do_test(start_broker):
     rc = 1
 
-    connect_packet1 = mosq_test.gen_connect("client1", proto_ver=5)
-    connect_packet2 = mosq_test.gen_connect("client2", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet1 = mqtt_packets.gen_connect("client1", proto_ver=5)
+    connect_packet2 = mqtt_packets.gen_connect("client2", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    subscribe_packet1 = mosq_test.gen_subscribe(mid=1, topic="normal/topic", qos=0, proto_ver=5)
-    subscribe_packet2 = mosq_test.gen_subscribe(mid=1, topic="response/topic", qos=0, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid=1, qos=0, proto_ver=5)
+    subscribe_packet1 = mqtt_packets.gen_subscribe(mid=1, topic="normal/topic", qos=0, proto_ver=5)
+    subscribe_packet2 = mqtt_packets.gen_subscribe(mid=1, topic="response/topic", qos=0, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid=1, qos=0, proto_ver=5)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.RESPONSE_TOPIC, "response/topic")
     props = mqtt5_props.gen_string_prop(mqtt5_props.CORRELATION_DATA, "45vyvynq30q3vt4 nuy893b4v3")
-    publish_packet2 = mosq_test.gen_publish(topic="normal/topic", qos=0, payload="2", proto_ver=5, properties=props)
+    publish_packet2 = mqtt_packets.gen_publish(topic="normal/topic", qos=0, payload="2", proto_ver=5, properties=props)
 
-    publish_packet1 = mosq_test.gen_publish(topic="response/topic", qos=0, payload="22", proto_ver=5)
+    publish_packet1 = mqtt_packets.gen_publish(topic="response/topic", qos=0, payload="22", proto_ver=5)
 
-    disconnect_client_packet = mosq_test.gen_disconnect(proto_ver=5, properties=props)
+    disconnect_client_packet = mqtt_packets.gen_disconnect(proto_ver=5, properties=props)
 
-    disconnect_server_packet = mosq_test.gen_disconnect(proto_ver=5, reason_code=130)
+    disconnect_server_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code=130)
 
     port = mosq_test.get_port()
     if start_broker:

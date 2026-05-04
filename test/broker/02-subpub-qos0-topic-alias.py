@@ -7,22 +7,22 @@ from mosq_test_helper import *
 
 def do_test(start_broker):
     rc = 1
-    connect1_packet = mosq_test.gen_connect("02-subpub-qos0-topic-alias", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("02-subpub-qos0-topic-alias", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect2_packet = mosq_test.gen_connect("02-subpub-qos0-topic-alias-helper", proto_ver=5)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect2_packet = mqtt_packets.gen_connect("02-subpub-qos0-topic-alias-helper", proto_ver=5)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "02/subpub/topic-alias/alias", 0, proto_ver=5)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "02/subpub/topic-alias/alias", 0, proto_ver=5)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
     props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS, 3)
-    publish1_packet = mosq_test.gen_publish("02/subpub/topic-alias/alias", qos=0, payload="message", proto_ver=5, properties=props)
+    publish1_packet = mqtt_packets.gen_publish("02/subpub/topic-alias/alias", qos=0, payload="message", proto_ver=5, properties=props)
 
     props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS, 3)
-    publish2s_packet = mosq_test.gen_publish("", qos=0, payload="message", proto_ver=5, properties=props)
-    publish2r_packet = mosq_test.gen_publish("02/subpub/topic-alias/alias", qos=0, payload="message", proto_ver=5)
+    publish2s_packet = mqtt_packets.gen_publish("", qos=0, payload="message", proto_ver=5, properties=props)
+    publish2r_packet = mqtt_packets.gen_publish("02/subpub/topic-alias/alias", qos=0, payload="message", proto_ver=5)
 
 
     port = mosq_test.get_port()

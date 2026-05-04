@@ -7,14 +7,14 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 19
-    connect_packet = mosq_test.gen_connect("03-pub-qos1-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("03-pub-qos1-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("03/pub/qos1/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/pub/qos1/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
     if proto_ver == 5:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
     else:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

@@ -38,7 +38,7 @@ def do_test(proto_ver):
             '-V', V
             ]
 
-    publish_packet = mosq_test.gen_publish("03/pub/file/test", qos=0, payload="line1\nline2\n", proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("03/pub/file/test", qos=0, payload="line1\nline2\n", proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

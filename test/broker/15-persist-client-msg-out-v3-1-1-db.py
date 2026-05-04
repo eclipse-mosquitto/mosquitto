@@ -22,19 +22,19 @@ topic = "client-msg/test"
 source_id = "persist-cmsg-v3-1-1-helper"
 proto_ver = 4
 
-connect_packet = mosq_test.gen_connect(client_id, proto_ver=proto_ver, clean_session=False)
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+connect_packet = mqtt_packets.gen_connect(client_id, proto_ver=proto_ver, clean_session=False)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
 mid = 1
-subscribe_packet = mosq_test.gen_subscribe(mid, topic, qos, proto_ver=proto_ver)
-suback_packet = mosq_test.gen_suback(mid, qos=qos, proto_ver=proto_ver)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, topic, qos, proto_ver=proto_ver)
+suback_packet = mqtt_packets.gen_suback(mid, qos=qos, proto_ver=proto_ver)
 
-connect2_packet = mosq_test.gen_connect(source_id, proto_ver=proto_ver)
-connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+connect2_packet = mqtt_packets.gen_connect(source_id, proto_ver=proto_ver)
+connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
 mid = 18
-publish_packet = mosq_test.gen_publish(topic, mid=mid, qos=qos, payload=payload, proto_ver=proto_ver)
-puback_packet = mosq_test.gen_puback(mid=mid, proto_ver=proto_ver)
+publish_packet = mqtt_packets.gen_publish(topic, mid=mid, qos=qos, payload=payload, proto_ver=proto_ver)
+puback_packet = mqtt_packets.gen_puback(mid=mid, proto_ver=proto_ver)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

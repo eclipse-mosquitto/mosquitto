@@ -7,14 +7,14 @@ from mosq_test_helper import *
 
 def do_test(start_broker, proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("will-no-payload", will_topic="will/topic", will_qos=1, will_retain=True, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("will-no-payload", will_topic="will/topic", will_qos=1, will_retain=True, proto_ver=proto_ver)
     b = list(struct.unpack("B"*len(connect_packet), connect_packet))
 
     bmod = b[0:len(b)-2]
     bmod[1] = bmod[1] - 2 # Reduce remaining length by two to remove final two payload length values
 
     connect_packet = struct.pack("B"*len(bmod), *bmod)
-    connack_packet = mosq_test.gen_connack(mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
 
     port = mosq_test.get_port()
     broker = None

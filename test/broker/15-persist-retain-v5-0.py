@@ -21,20 +21,20 @@ qos = 0
 payload2 = "retained message 2"
 payload3 = "retained message 3"
 proto_ver = 5
-connect_packet = mosq_test.gen_connect(source_id, proto_ver=proto_ver, clean_session=True)
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+connect_packet = mqtt_packets.gen_connect(source_id, proto_ver=proto_ver, clean_session=True)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-publish1_packet = mosq_test.gen_publish(topic1, qos=qos, payload="retained message 1", retain=True, proto_ver=proto_ver)
-publish2_packet = mosq_test.gen_publish(topic2, qos=qos, payload=payload2, retain=False, proto_ver=proto_ver)
-publish3_packet = mosq_test.gen_publish(topic3, qos=qos, payload=payload3, retain=True, proto_ver=proto_ver)
+publish1_packet = mqtt_packets.gen_publish(topic1, qos=qos, payload="retained message 1", retain=True, proto_ver=proto_ver)
+publish2_packet = mqtt_packets.gen_publish(topic2, qos=qos, payload=payload2, retain=False, proto_ver=proto_ver)
+publish3_packet = mqtt_packets.gen_publish(topic3, qos=qos, payload=payload3, retain=True, proto_ver=proto_ver)
 
 mid = 1
-subscribe_packet = mosq_test.gen_subscribe(mid, "#", 0, proto_ver=proto_ver)
-suback_packet = mosq_test.gen_suback(mid, qos=0, proto_ver=proto_ver)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "#", 0, proto_ver=proto_ver)
+suback_packet = mqtt_packets.gen_suback(mid, qos=0, proto_ver=proto_ver)
 
 mid = 2
-unsubscribe_packet = mosq_test.gen_unsubscribe(mid, "#", proto_ver=proto_ver)
-unsuback_packet = mosq_test.gen_unsuback(mid, proto_ver=proto_ver)
+unsubscribe_packet = mqtt_packets.gen_unsubscribe(mid, "#", proto_ver=proto_ver)
+unsuback_packet = mqtt_packets.gen_unsuback(mid, proto_ver=proto_ver)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

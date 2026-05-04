@@ -16,7 +16,7 @@ def write_config(filename, port):
         f.write(f"plugin {mosq_paths.test_plugin('auth_plugin_v5_control')}\n")
 
 def command_check(sock, command_payload, expected_response):
-    command_packet = mosq_test.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))
+    command_packet = mqtt_packets.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))
     sock.send(command_packet)
     response = json.loads(mosq_test.read_publish(sock))
     if response != expected_response:
@@ -25,7 +25,7 @@ def command_check(sock, command_payload, expected_response):
         raise ValueError(response)
 
 def invalid_command_check(sock, command_payload, cmd_name, error_msg):
-    command_packet = mosq_test.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=command_payload)
+    command_packet = mqtt_packets.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=command_payload)
     sock.send(command_packet)
     response = json.loads(mosq_test.read_publish(sock))
     expected_response = {'responses': [{'command': cmd_name, 'error': error_msg}]}
@@ -51,12 +51,12 @@ response_success = {'responses': [{'command': 'listPlugins', "correlationData": 
     ]}}]}
 
 rc = 1
-connect_packet = mosq_test.gen_connect("17-list-listeners")
-connack_packet = mosq_test.gen_connack(rc=0)
+connect_packet = mqtt_packets.gen_connect("17-list-listeners")
+connack_packet = mqtt_packets.gen_connack(rc=0)
 
 mid = 2
-subscribe_packet = mosq_test.gen_subscribe(mid, "$CONTROL/broker/#", 0)
-suback_packet = mosq_test.gen_suback(mid, 0)
+subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/broker/#", 0)
+suback_packet = mqtt_packets.gen_suback(mid, 0)
 
 broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

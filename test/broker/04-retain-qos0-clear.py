@@ -8,18 +8,18 @@ from mosq_test_helper import *
 
 def do_test(start_broker, proto_ver):
     rc = 1
-    connect_packet = mosq_test.gen_connect("retain-qos0-clear-test", proto_ver=proto_ver)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("retain-qos0-clear-test", proto_ver=proto_ver)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    publish_packet = mosq_test.gen_publish("retain/qos0/clear/test", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
-    retain_clear_packet = mosq_test.gen_publish("retain/qos0/clear/test", qos=0, payload=None, retain=True, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("retain/qos0/clear/test", qos=0, payload="retained message", retain=True, proto_ver=proto_ver)
+    retain_clear_packet = mqtt_packets.gen_publish("retain/qos0/clear/test", qos=0, payload=None, retain=True, proto_ver=proto_ver)
     mid_sub = 592
-    subscribe_packet = mosq_test.gen_subscribe(mid_sub, "retain/qos0/clear/test", 0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid_sub, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid_sub, "retain/qos0/clear/test", 0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid_sub, 0, proto_ver=proto_ver)
 
     mid_unsub = 593
-    unsubscribe_packet = mosq_test.gen_unsubscribe(mid_unsub, "retain/qos0/clear/test", proto_ver=proto_ver)
-    unsuback_packet = mosq_test.gen_unsuback(mid_unsub, proto_ver=proto_ver)
+    unsubscribe_packet = mqtt_packets.gen_unsubscribe(mid_unsub, "retain/qos0/clear/test", proto_ver=proto_ver)
+    unsuback_packet = mqtt_packets.gen_unsuback(mid_unsub, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

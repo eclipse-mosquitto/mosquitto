@@ -7,25 +7,25 @@ from mosq_test_helper import *
 
 def do_test(start_broker):
     rc = 1
-    connect_packet = mosq_test.gen_connect("02-subpub-qos0-rap", proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("02-subpub-qos0-rap", proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     mid = 530
-    subscribe1_packet = mosq_test.gen_subscribe(mid, "02/subpub/rap/normal", 0, proto_ver=5)
-    suback1_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe1_packet = mqtt_packets.gen_subscribe(mid, "02/subpub/rap/normal", 0, proto_ver=5)
+    suback1_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
     mid = 531
-    subscribe2_packet = mosq_test.gen_subscribe(mid, "02/subpub/rap/rap", 0 | mqtt5_opts.MQTT_SUB_OPT_RETAIN_AS_PUBLISHED, proto_ver=5)
-    suback2_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe2_packet = mqtt_packets.gen_subscribe(mid, "02/subpub/rap/rap", 0 | mqtt5_opts.MQTT_SUB_OPT_RETAIN_AS_PUBLISHED, proto_ver=5)
+    suback2_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    publish1_packet = mosq_test.gen_publish("02/subpub/rap/normal", qos=0, retain=True, payload="message", proto_ver=5)
-    publish2_packet = mosq_test.gen_publish("02/subpub/rap/rap", qos=0, retain=True, payload="message", proto_ver=5)
+    publish1_packet = mqtt_packets.gen_publish("02/subpub/rap/normal", qos=0, retain=True, payload="message", proto_ver=5)
+    publish2_packet = mqtt_packets.gen_publish("02/subpub/rap/rap", qos=0, retain=True, payload="message", proto_ver=5)
 
-    publish1r_packet = mosq_test.gen_publish("02/subpub/rap/normal", qos=0, retain=False, payload="message", proto_ver=5)
-    publish2r_packet = mosq_test.gen_publish("02/subpub/rap/rap", qos=0, retain=True, payload="message", proto_ver=5)
+    publish1r_packet = mqtt_packets.gen_publish("02/subpub/rap/normal", qos=0, retain=False, payload="message", proto_ver=5)
+    publish2r_packet = mqtt_packets.gen_publish("02/subpub/rap/rap", qos=0, retain=True, payload="message", proto_ver=5)
 
     mid = 1
-    publish3_packet = mosq_test.gen_publish("02/subpub/rap/receive", qos=1, mid=mid, payload="success", proto_ver=5)
+    publish3_packet = mqtt_packets.gen_publish("02/subpub/rap/receive", qos=1, mid=mid, payload="success", proto_ver=5)
 
 
     port = mosq_test.get_port()

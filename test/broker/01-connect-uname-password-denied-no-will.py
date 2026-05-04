@@ -27,18 +27,18 @@ def do_test(proto_ver):
     write_pwfile(pw_file)
 
     rc = 1
-    connect1_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="user", password="password", will_topic="will/test", will_payload=b"will msg", proto_ver=proto_ver)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect1_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="user", password="password", will_topic="will/test", will_payload=b"will msg", proto_ver=proto_ver)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, topic="will/test", qos=0, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, topic="will/test", qos=0, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
 
-    connect2_packet = mosq_test.gen_connect("connect-uname-pwd-test", username="user", password="password9", proto_ver=proto_ver)
+    connect2_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="user", password="password9", proto_ver=proto_ver)
     if proto_ver == 5:
-        connack2_packet = mosq_test.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
+        connack2_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.NOT_AUTHORIZED, proto_ver=proto_ver, properties=None)
     else:
-        connack2_packet = mosq_test.gen_connack(rc=5, proto_ver=proto_ver)
+        connack2_packet = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

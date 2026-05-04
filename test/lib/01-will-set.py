@@ -10,7 +10,7 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("01-will-set", will_topic="topic/on/unexpected/disconnect", will_qos=1, will_retain=True, will_payload=b"will message")
+    connect_packet = mqtt_packets.gen_connect("01-will-set", will_topic="topic/on/unexpected/disconnect", will_qos=1, will_retain=True, will_payload=b"will message")
 
     mosq_test.expect_packet(conn, "connect", connect_packet)
 

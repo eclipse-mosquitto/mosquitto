@@ -31,7 +31,7 @@ def do_test(proto_ver):
             '-C', '1'
             ]
 
-    publish_packet = mosq_test.gen_publish("02/sub/format/json/retain/test", qos=0, payload="message", proto_ver=proto_ver, retain=True)
+    publish_packet = mqtt_packets.gen_publish("02/sub/format/json/retain/test", qos=0, payload="message", proto_ver=proto_ver, retain=True)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

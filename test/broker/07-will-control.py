@@ -8,7 +8,7 @@ from mosq_test_helper import *
 def do_test(start_broker, proto_ver):
     rc = 1
     mid = 1
-    connect_packet = mosq_test.gen_connect("will", will_topic="$CONTROL/dynamic-security/v1", will_payload=b"will-message", proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect("will", will_topic="$CONTROL/dynamic-security/v1", will_payload=b"will-message", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
     if start_broker:

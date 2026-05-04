@@ -17,8 +17,8 @@ def write_config(filename, ports, per_listener_settings):
 def client_check_start_denied(start_data, rc, port):
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "test")
     props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, start_data)
-    connect_packet = mosq_test.gen_connect(client_id="id", proto_ver=5, properties=props)
-    connack_packet = mosq_test.gen_connack(rc=rc, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect(client_id="id", proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=rc, proto_ver=5)
 
     try:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
@@ -34,18 +34,18 @@ def client_check_start_denied(start_data, rc, port):
 def client_check_start_allowed(start_data, cont_data, rc, port):
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "test")
     props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, start_data)
-    connect_packet = mosq_test.gen_connect(client_id="id", proto_ver=5, properties=props)
+    connect_packet = mqtt_packets.gen_connect(client_id="id", proto_ver=5, properties=props)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "test")
     props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "start-ok")
-    auth_packet_recv = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+    auth_packet_recv = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "test")
     props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, cont_data)
-    auth_packet_send = mosq_test.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
+    auth_packet_send = mqtt_packets.gen_auth(reason_code=mqtt5_rc.CONTINUE_AUTHENTICATION, properties=props)
 
     props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "test")
-    connack_packet = mosq_test.gen_connack(rc=rc, proto_ver=5, properties=props)
+    connack_packet = mqtt_packets.gen_connack(rc=rc, proto_ver=5, properties=props)
 
     sock = mosq_test.do_client_connect(connect_packet, auth_packet_recv, port=port)
     try:

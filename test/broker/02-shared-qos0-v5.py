@@ -19,61 +19,61 @@ def do_test(start_broker):
     rc = 1
     mid = 1
 
-    connect1_packet = mosq_test.gen_connect("02-shared-client1", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("02-shared-client1", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect2_packet = mosq_test.gen_connect("02-shared-client2", proto_ver=5)
-    connack2_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect2_packet = mqtt_packets.gen_connect("02-shared-client2", proto_ver=5)
+    connack2_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect3_packet = mosq_test.gen_connect("02-shared-client3", proto_ver=5)
-    connack3_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect3_packet = mqtt_packets.gen_connect("02-shared-client3", proto_ver=5)
+    connack3_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect4_packet = mosq_test.gen_connect("02-shared-client4", proto_ver=5)
-    connack4_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect4_packet = mqtt_packets.gen_connect("02-shared-client4", proto_ver=5)
+    connack4_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    connect5_packet = mosq_test.gen_connect("02-shared-client5", proto_ver=5)
-    connack5_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect5_packet = mqtt_packets.gen_connect("02-shared-client5", proto_ver=5)
+    connack5_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    subscribe1_packet = mosq_test.gen_subscribe(mid, "02A/#", 0, proto_ver=5)
-    suback1_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe1_packet = mqtt_packets.gen_subscribe(mid, "02A/#", 0, proto_ver=5)
+    suback1_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    subscribe2_packet = mosq_test.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
-    suback2_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe2_packet = mqtt_packets.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
+    suback2_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    subscribe3a_packet = mosq_test.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
-    suback3a_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe3a_packet = mqtt_packets.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
+    suback3a_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    subscribe3b_packet = mosq_test.gen_subscribe(mid, "$share/two/02A/share/test", 0, proto_ver=5)
-    suback3b_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe3b_packet = mqtt_packets.gen_subscribe(mid, "$share/two/02A/share/test", 0, proto_ver=5)
+    suback3b_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    subscribe4_packet = mosq_test.gen_subscribe(mid, "$share/two/02A/share/test", 0, proto_ver=5)
-    suback4_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe4_packet = mqtt_packets.gen_subscribe(mid, "$share/two/02A/share/test", 0, proto_ver=5)
+    suback4_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    subscribe5_packet = mosq_test.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
-    suback5_packet = mosq_test.gen_suback(mid, 0, proto_ver=5)
+    subscribe5_packet = mqtt_packets.gen_subscribe(mid, "$share/one/02A/share/test", 0, proto_ver=5)
+    suback5_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=5)
 
-    publish1_packet = mosq_test.gen_publish("02A/share/test", qos=0, payload="message1", proto_ver=5)
-    publish2_packet = mosq_test.gen_publish("02A/share/test", qos=0, payload="message2", proto_ver=5)
-    publish3_packet = mosq_test.gen_publish("02A/share/test", qos=0, payload="message3", proto_ver=5)
+    publish1_packet = mqtt_packets.gen_publish("02A/share/test", qos=0, payload="message1", proto_ver=5)
+    publish2_packet = mqtt_packets.gen_publish("02A/share/test", qos=0, payload="message2", proto_ver=5)
+    publish3_packet = mqtt_packets.gen_publish("02A/share/test", qos=0, payload="message3", proto_ver=5)
 
     mid = 2
-    unsubscribe1_packet = mosq_test.gen_unsubscribe(mid, "02A/#", proto_ver=5)
-    unsuback1_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe1_packet = mqtt_packets.gen_unsubscribe(mid, "02A/#", proto_ver=5)
+    unsuback1_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
-    unsubscribe2_packet = mosq_test.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
-    unsuback2_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe2_packet = mqtt_packets.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
+    unsuback2_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
-    unsubscribe3a_packet = mosq_test.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
-    unsuback3a_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe3a_packet = mqtt_packets.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
+    unsuback3a_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
-    unsubscribe3b_packet = mosq_test.gen_unsubscribe(mid, "$share/two/02A/share/test", proto_ver=5)
-    unsuback3b_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe3b_packet = mqtt_packets.gen_unsubscribe(mid, "$share/two/02A/share/test", proto_ver=5)
+    unsuback3b_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
-    unsubscribe4_packet = mosq_test.gen_unsubscribe(mid, "$share/two/02A/share/test", proto_ver=5)
-    unsuback4_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe4_packet = mqtt_packets.gen_unsubscribe(mid, "$share/two/02A/share/test", proto_ver=5)
+    unsuback4_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
-    unsubscribe5_packet = mosq_test.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
-    unsuback5_packet = mosq_test.gen_unsuback(mid, proto_ver=5)
+    unsubscribe5_packet = mqtt_packets.gen_unsubscribe(mid, "$share/one/02A/share/test", proto_ver=5)
+    unsuback5_packet = mqtt_packets.gen_unsuback(mid, proto_ver=5)
 
 
     port = mosq_test.get_port()

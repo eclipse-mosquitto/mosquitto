@@ -31,8 +31,8 @@ def do_test(proto_ver):
             '-C', '2'
             ]
 
-    publish_packet1 = mosq_test.gen_publish("02/sub/filter-out/recv", qos=0, payload="recv", proto_ver=proto_ver)
-    publish_packet2 = mosq_test.gen_publish("02/sub/filter-out/filtered", qos=0, payload="filtered", proto_ver=proto_ver)
+    publish_packet1 = mqtt_packets.gen_publish("02/sub/filter-out/recv", qos=0, payload="recv", proto_ver=proto_ver)
+    publish_packet2 = mqtt_packets.gen_publish("02/sub/filter-out/filtered", qos=0, payload="filtered", proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

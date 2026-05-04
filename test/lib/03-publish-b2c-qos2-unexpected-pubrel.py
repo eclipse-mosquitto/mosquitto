@@ -3,21 +3,21 @@
 from mosq_test_helper import *
 
 def do_test(conn, data):
-    connect_packet = mosq_test.gen_connect("publish-qos2-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("publish-qos2-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
-    disconnect_packet = mosq_test.gen_disconnect()
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
-    pubrel_unexpected = mosq_test.gen_pubrel(1000)
-    pubcomp_unexpected = mosq_test.gen_pubcomp(1000)
+    pubrel_unexpected = mqtt_packets.gen_pubrel(1000)
+    pubcomp_unexpected = mqtt_packets.gen_pubcomp(1000)
 
     mid = 13423
-    publish_packet = mosq_test.gen_publish("pub/qos2/receive", qos=2, mid=mid, payload="message")
-    pubrec_packet = mosq_test.gen_pubrec(mid)
-    pubrel_packet = mosq_test.gen_pubrel(mid)
-    pubcomp_packet = mosq_test.gen_pubcomp(mid)
+    publish_packet = mqtt_packets.gen_publish("pub/qos2/receive", qos=2, mid=mid, payload="message")
+    pubrec_packet = mqtt_packets.gen_pubrec(mid)
+    pubrel_packet = mqtt_packets.gen_pubrel(mid)
+    pubcomp_packet = mqtt_packets.gen_pubcomp(mid)
 
-    publish_quit_packet = mosq_test.gen_publish("quit", qos=0, payload="quit")
+    publish_quit_packet = mqtt_packets.gen_publish("quit", qos=0, payload="quit")
 
     mosq_test.expect_packet(conn, "connect", connect_packet)
     conn.send(connack_packet)

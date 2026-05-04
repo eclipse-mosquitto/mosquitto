@@ -21,9 +21,9 @@ def do_test(client_cmd):
     port = mosq_test.get_port()
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("08-ssl-connect-no-auth")
-    connack_packet = mosq_test.gen_connack(rc=0)
-    disconnect_packet = mosq_test.gen_disconnect()
+    connect_packet = mqtt_packets.gen_connect("08-ssl-connect-no-auth")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
+    disconnect_packet = mqtt_packets.gen_disconnect()
 
     ssock = mosq_test.listen_sock(port, f"{ssl_dir}/all-ca.crt", f"{ssl_dir}/server.crt", f"{ssl_dir}/server.key")
 

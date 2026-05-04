@@ -43,19 +43,19 @@ def do_test(proto_ver):
 
     rc = 1
     client_id = socket.gethostname()+".bridge_sample"
-    connect_packet = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    c_connect_packet = mosq_test.gen_connect("client", proto_ver=proto_ver)
-    c_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    c_connect_packet = mqtt_packets.gen_connect("client", proto_ver=proto_ver)
+    c_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("bridge/test", qos=1, mid=mid, payload="message", retain=True, proto_ver=proto_ver)
+    publish_packet = mqtt_packets.gen_publish("bridge/test", qos=1, mid=mid, payload="message", retain=True, proto_ver=proto_ver)
 
     if proto_ver == 5:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver, reason_code=16)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver, reason_code=16)
     else:
-        puback_packet = mosq_test.gen_puback(mid, proto_ver=proto_ver)
+        puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
     ssock = mosq_test.listen_sock(port1)
 

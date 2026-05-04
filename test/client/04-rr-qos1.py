@@ -36,11 +36,11 @@ def do_test(proto_ver):
         props = mqtt5_props.gen_string_prop(mqtt5_props.RESPONSE_TOPIC, "04/rr/qos1/test/response")
     else:
         props = None
-    publish_packet_req = mosq_test.gen_publish("04/rr/qos1/test/request", qos=1, mid=1, payload=payload, proto_ver=proto_ver, properties=props)
+    publish_packet_req = mqtt_packets.gen_publish("04/rr/qos1/test/request", qos=1, mid=1, payload=payload, proto_ver=proto_ver, properties=props)
     payload = "the response"
-    publish_packet_resp = mosq_test.gen_publish("04/rr/qos1/test/response", qos=1, mid=2, payload=payload, proto_ver=proto_ver)
-    puback_packet_req = mosq_test.gen_puback(1, proto_ver=proto_ver)
-    puback_packet_resp = mosq_test.gen_puback(2, proto_ver=proto_ver)
+    publish_packet_resp = mqtt_packets.gen_publish("04/rr/qos1/test/response", qos=1, mid=2, payload=payload, proto_ver=proto_ver)
+    puback_packet_req = mqtt_packets.gen_puback(1, proto_ver=proto_ver)
+    puback_packet_resp = mqtt_packets.gen_puback(2, proto_ver=proto_ver)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
 

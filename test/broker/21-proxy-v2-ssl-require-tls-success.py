@@ -23,8 +23,8 @@ def do_test(data):
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
-    connect_packet = mosq_test.gen_connect("proxy-test", keepalive=42, clean_session=False, proto_ver=5)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("proxy-test", keepalive=42, clean_session=False, proto_ver=5)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     rc = 1
 

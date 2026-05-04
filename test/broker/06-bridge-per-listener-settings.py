@@ -48,15 +48,15 @@ def inner_test(bridge, sock, proto_ver):
     ]
     for pattern in ("remote/topic/#", "remote2/topic/prefix/#", "remote3/topic/+/value"):
         mid += 1
-        subscribe_packet = mosq_test.gen_subscribe(mid, pattern, 0 | opts, proto_ver=proto_ver)
-        suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+        subscribe_packet = mqtt_packets.gen_subscribe(mid, pattern, 0 | opts, proto_ver=proto_ver)
+        suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
         if not mosq_test.expect_packet(bridge, "subscribe", subscribe_packet):
             return 1
         bridge.send(suback_packet)
 
     mid += 1
-    subscribe_packet = mosq_test.gen_subscribe(mid, "#", 0 | opts, proto_ver=proto_ver)
-    suback_packet = mosq_test.gen_suback(mid, 0, proto_ver=proto_ver)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "#", 0 | opts, proto_ver=proto_ver)
+    suback_packet = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
     sock.send(subscribe_packet)
     if not mosq_test.expect_packet(sock, "suback", suback_packet):
         return 1
@@ -75,9 +75,9 @@ def inner_test(bridge, sock, proto_ver):
 
     for (local_topic, remote_topic) in cases:
         mid += 1
-        remote_publish_packet = mosq_test.gen_publish(
+        remote_publish_packet = mqtt_packets.gen_publish(
             remote_topic, qos=0, mid=mid, payload='', proto_ver=proto_ver)
-        local_publish_packet = mosq_test.gen_publish(
+        local_publish_packet = mqtt_packets.gen_publish(
             local_topic, qos=0, mid=mid, payload='', proto_ver=proto_ver)
 
         bridge.send(remote_publish_packet)
@@ -106,11 +106,11 @@ def do_test(proto_ver):
 
     rc = 1
     client_id = socket.gethostname()+".bridge_sample"
-    connect_packet = mosq_test.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
-    connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
+    connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    client_connect_packet = mosq_test.gen_connect("pub-test", proto_ver=proto_ver)
-    client_connack_packet = mosq_test.gen_connack(rc=0, proto_ver=proto_ver)
+    client_connect_packet = mqtt_packets.gen_connect("pub-test", proto_ver=proto_ver)
+    client_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
     ssock = mosq_test.listen_sock(port1)
 

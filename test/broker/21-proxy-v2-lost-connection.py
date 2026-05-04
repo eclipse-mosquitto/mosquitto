@@ -15,8 +15,8 @@ def write_config(filename, port):
         f.write("allow_anonymous true\n")
         f.write("enable_proxy_protocol 2\n")
 
-connect_packet = mosq_test.gen_connect("proxy-test", keepalive=42, clean_session=False, proto_ver=5)
-connack_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+connect_packet = mqtt_packets.gen_connect("proxy-test", keepalive=42, clean_session=False, proto_ver=5)
+connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
 def do_test(header):
     port = mosq_test.get_port()

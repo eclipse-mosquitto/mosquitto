@@ -10,21 +10,21 @@ def do_test(start_broker):
     # This client exists to test possible fixed size int overflow and sorting of the session intervals
     # https://github.com/eclipse/mosquitto/issues/1525
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 4294967294)
-    connect0_packet = mosq_test.gen_connect("05-session-expiry-overflow", clean_session=False, proto_ver=5, properties=props)
-    connack0_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=5)
+    connect0_packet = mqtt_packets.gen_connect("05-session-expiry-overflow", clean_session=False, proto_ver=5, properties=props)
+    connack0_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=5)
 
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 1)
-    connect_packet = mosq_test.gen_connect("05-session-expiry", clean_session=False, proto_ver=5, properties=props)
-    connack1_packet = mosq_test.gen_connack(flags=0, rc=0, proto_ver=5)
+    connect_packet = mqtt_packets.gen_connect("05-session-expiry", clean_session=False, proto_ver=5, properties=props)
+    connack1_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=5)
 
-    connack2_packet = mosq_test.gen_connack(flags=1, rc=0, proto_ver=5)
+    connack2_packet = mqtt_packets.gen_connack(flags=1, rc=0, proto_ver=5)
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 3)
-    disconnect_packet = mosq_test.gen_disconnect(proto_ver=5, properties=props)
+    disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5, properties=props)
 
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 0)
-    disconnect2_packet = mosq_test.gen_disconnect(proto_ver=5, properties=props)
+    disconnect2_packet = mqtt_packets.gen_disconnect(proto_ver=5, properties=props)
 
     port = mosq_test.get_port()
     if start_broker:

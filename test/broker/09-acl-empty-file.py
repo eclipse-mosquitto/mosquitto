@@ -25,13 +25,13 @@ def do_test(port, per_listener):
     write_acl(acl_file)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("acl-check")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("acl-check")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     mid = 1
-    publish_packet = mosq_test.gen_publish("test/topic", qos=0, payload="message")
-    subscribe_packet = mosq_test.gen_subscribe(mid, "test/topic", 0)
-    suback_packet = mosq_test.gen_suback(mid, 0)
+    publish_packet = mqtt_packets.gen_publish("test/topic", qos=0, payload="message")
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "test/topic", 0)
+    suback_packet = mqtt_packets.gen_suback(mid, 0)
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 

@@ -25,8 +25,8 @@ def do_test(write_config_func):
     write_config_func(conf_file, port)
 
     rc = 1
-    connect_packet = mosq_test.gen_connect("acl-change-test")
-    connack_packet = mosq_test.gen_connack(rc=0)
+    connect_packet = mqtt_packets.gen_connect("acl-change-test")
+    connack_packet = mqtt_packets.gen_connack(rc=0)
 
     with open(f"{port}.acl", "wt") as f:
         f.write("topic readwrite a/#")

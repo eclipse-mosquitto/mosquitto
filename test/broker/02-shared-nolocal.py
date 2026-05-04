@@ -8,11 +8,11 @@ def do_test(start_broker):
     rc = 1
     mid = 1
 
-    connect1_packet = mosq_test.gen_connect("02-shared-nolocal-client1", proto_ver=5)
-    connack1_packet = mosq_test.gen_connack(rc=0, proto_ver=5)
+    connect1_packet = mqtt_packets.gen_connect("02-shared-nolocal-client1", proto_ver=5)
+    connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
-    subscribe_packet = mosq_test.gen_subscribe(mid, "$share/sharename/subpub/qos1", 1 | mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL, proto_ver=5)
-    disconnect_packet = mosq_test.gen_disconnect(reason_code=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
+    subscribe_packet = mqtt_packets.gen_subscribe(mid, "$share/sharename/subpub/qos1", 1 | mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL, proto_ver=5)
+    disconnect_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
 
     port = mosq_test.get_port()
     if start_broker:
