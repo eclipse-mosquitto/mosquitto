@@ -111,13 +111,12 @@ def do_test(start_broker, proto_ver):
             if rc:
                 print(mosq_test.broker_log(broker))
                 print("proto_ver=%d" % (proto_ver))
-                exit(rc)
-        else:
-            return rc
+        if rc:
+            exit(rc)
 
 
 def all_tests(start_broker=False):
-    return do_test(start_broker, proto_ver=5)
+    do_test(start_broker, proto_ver=5)
 
 if __name__ == '__main__':
     all_tests(True)

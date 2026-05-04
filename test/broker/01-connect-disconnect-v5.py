@@ -69,13 +69,12 @@ def do_test(start_broker):
                 if rc == 0: rc=1
             if rc:
                 print(mosq_test.broker_log(broker))
+        if rc:
             exit(rc)
-        else:
-            return rc
 
 
 def all_tests(start_broker=False):
-    return do_test(start_broker)
+    do_test(start_broker)
 
 if __name__ == '__main__':
     all_tests(True)
