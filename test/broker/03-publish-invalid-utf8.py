@@ -4,7 +4,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker, proto_ver):
+def do_test(proto_ver):
     rc = 1
     mid = 53
     connect_packet = mqtt_packets.gen_connect("03-publish-invalid-utf8", proto_ver=proto_ver)
@@ -16,11 +16,8 @@ def do_test(start_broker, proto_ver):
     publish_packet = struct.pack("B"*len(b), *b)
 
     port = mosq_test.get_port()
-    broker = None
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         if proto_ver == 4:
             try:
@@ -33,26 +30,9 @@ def do_test(start_broker, proto_ver):
             rc = 0
 
         sock.close()
-    finally:
-        if broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d" % (proto_ver))
-    return rc
+        assert rc == 0
 
-
-def all_tests(start_broker=False):
-    rc = do_test(start_broker, proto_ver=4)
-    if rc:
-        return rc
-    rc = do_test(start_broker, proto_ver=5)
-    if rc:
-        return rc
-    return 0
 
 if __name__ == '__main__':
-    sys.exit(all_tests(True))
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

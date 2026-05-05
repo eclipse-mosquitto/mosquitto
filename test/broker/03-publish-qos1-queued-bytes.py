@@ -32,7 +32,7 @@ def registerOfflineSubscriber():
     client.disconnect()
 
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+broker = MosquittoBroker(port=port)
 
 class BrokerMonitor(threading.Thread):
     def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, verbose=None):

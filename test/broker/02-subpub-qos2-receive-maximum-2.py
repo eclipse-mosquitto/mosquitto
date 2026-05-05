@@ -42,7 +42,7 @@ def helper(port):
     sock.close()
 
 
-def do_test(start_broker, proto_ver):
+def do_test(proto_ver):
     if proto_ver == 4:
         exit(0)
 
@@ -75,10 +75,9 @@ def do_test(start_broker, proto_ver):
 
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
 
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
@@ -96,27 +95,8 @@ def do_test(start_broker, proto_ver):
 
         mosq_test.do_send_receive(sock, pubrec_packet3, pubrel_packet3, "pubrel3")
         sock.send(pubcomp_packet3)
-
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d" % (proto_ver))
-        if rc:
-            exit(rc)
 
-
-def all_tests(start_broker=False):
-    do_test(start_broker, proto_ver=5)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(proto_ver=5)

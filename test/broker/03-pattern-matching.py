@@ -14,7 +14,6 @@ def helper(port, pub_topic):
 
 
 def pattern_test(sub_topic, pub_topic):
-    rc = 1
     connect_packet = mqtt_packets.gen_connect("pattern-sub-test")
     connack_packet = mqtt_packets.gen_connack(rc=0)
 
@@ -30,9 +29,9 @@ def pattern_test(sub_topic, pub_topic):
     unsuback_packet = mqtt_packets.gen_unsuback(mid)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -42,21 +41,8 @@ def pattern_test(sub_topic, pub_topic):
         mosq_test.do_send_receive(sock, unsubscribe_packet, unsuback_packet, "unsuback")
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
         mosq_test.expect_packet(sock, "publish retained", publish_retained_packet)
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            sys.exit(rc)
 
-    return rc
 
 pattern_test("#", "test/topic")
 pattern_test("#", "/test/topic")
@@ -82,6 +68,3 @@ pattern_test("foo/+/baz/#", "foo//baz/bar")
 pattern_test("foo//baz/#", "foo//baz/bar")
 pattern_test("foo/foo/baz/#", "foo/foo/baz/bar")
 pattern_test("/#", "////foo///bar")
-
-exit(0)
-

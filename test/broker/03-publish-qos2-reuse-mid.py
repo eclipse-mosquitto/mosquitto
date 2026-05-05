@@ -5,7 +5,6 @@
 from mosq_test_helper import *
 
 def do_test(proto_ver):
-    rc = 1
     connect_packet = mqtt_packets.gen_connect("pub-qos2-test", proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
@@ -27,9 +26,8 @@ def do_test(proto_ver):
     publish_packet_expected = mqtt_packets.gen_publish("pub/qos2/reuse", qos=2, mid=mid, payload="message", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         ssock = mosq_test.do_client_connect(sub_connect_packet, sub_connack_packet, port=port)
         mosq_test.do_send_receive(ssock, subscribe_packet, suback_packet, "suback")
 
@@ -39,23 +37,9 @@ def do_test(proto_ver):
         mosq_test.do_send_receive(sock, pubrel_packet, pubcomp_packet, "pubcomp")
 
         mosq_test.expect_packet(ssock, "publish", publish_packet_expected)
-
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
-do_test(proto_ver=4)
-do_test(proto_ver=5)
-exit(0)
+if __name__ == '__main__':
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

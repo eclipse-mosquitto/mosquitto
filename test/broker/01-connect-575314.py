@@ -9,7 +9,6 @@ def do_test():
     num_connects = 1000
     num_props = 5000
 
-    rc = 1
     props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
     for i in range(0, num_props):
         props += mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
@@ -18,10 +17,9 @@ def do_test():
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
-        broker_info = ProcessInfo(broker.pid)
+    broker = MosquittoBroker(port=port)
+    with broker:
+        broker_info = ProcessInfo(broker._process.pid)
         cpu_user_start = broker_info.cpu_times().user
 
         for i in range(num_connects):
@@ -40,19 +38,10 @@ def do_test():
         # 20 is chosen as a factor that works in plain mode and running under
         # valgrind. The slow performance manifests as a factor of >100. Fast is <10.
         if cpu_user_with_props / cpu_user_without_props < 20.0:
-            rc = 0
+            pass
         else:
-            print(f"CPU usage ratio with/without properties is {cpu_user_with_props / cpu_user_without_props}")
-    except Exception:
-        traceback.print_stack(file=sys.stdout)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            exit(rc)
+            raise ValueError(f"CPU usage ratio with/without properties is {cpu_user_with_props / cpu_user_without_props}")
 
 
-do_test()
-exit(0)
+if __name__ == '__main__':
+    do_test()

@@ -58,9 +58,8 @@ def tck_id_conformance_mqtt_retained(port, proto_ver):
 def do_tests():
     rc = 1
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         tck_id_conformance_mqtt_qos0(port, 4)
         tck_id_conformance_mqtt_qos0(port, 5)
 
@@ -73,17 +72,6 @@ def do_tests():
         tck_id_conformance_mqtt_retained(port, 4)
         tck_id_conformance_mqtt_retained(port, 5)
 
-        rc = 0
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 if __name__ == '__main__':
     do_tests()

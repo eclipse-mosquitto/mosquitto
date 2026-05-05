@@ -8,9 +8,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker):
-    rc = 1
-
+def do_test():
     connect_packet1 = mqtt_packets.gen_connect("12-response-topic-client1", proto_ver=5)
     connect_packet2 = mqtt_packets.gen_connect("12-response-topic-client2", proto_ver=5)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
@@ -29,10 +27,8 @@ def do_test(start_broker):
     disconnect_server_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code=130)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock1 = mosq_test.do_client_connect(connect_packet1, connack_packet, port=port)
         sock2 = mosq_test.do_client_connect(connect_packet2, connack_packet, port=port)
 
@@ -44,27 +40,9 @@ def do_test(start_broker):
         # FIXME - it would be better to extract the property and payload, even though we know them
         sock1.send(publish_packet1)
         mosq_test.expect_packet(sock2, "publish2", publish_packet1)
-        rc = 0
-
         sock1.close()
         sock2.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                exit(rc)
-        else:
-            return rc
 
-
-def all_tests(start_broker=False):
-    return do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()

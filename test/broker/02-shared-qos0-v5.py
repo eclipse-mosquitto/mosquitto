@@ -15,8 +15,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker):
-    rc = 1
+def do_test():
     mid = 1
 
     connect1_packet = mqtt_packets.gen_connect("02-shared-client1", proto_ver=5)
@@ -77,10 +76,9 @@ def do_test(start_broker):
 
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=20, port=port)
         sock2 = mosq_test.do_client_connect(connect2_packet, connack2_packet, timeout=20, port=port)
         sock3 = mosq_test.do_client_connect(connect3_packet, connack3_packet, timeout=20, port=port)
@@ -115,28 +113,12 @@ def do_test(start_broker):
         mosq_test.do_send_receive(sock4, unsubscribe4_packet, unsuback4_packet, "unsuback4")
         mosq_test.do_send_receive(sock5, unsubscribe5_packet, unsuback5_packet, "unsuback5")
 
-        rc = 0
-
         sock1.close()
         sock2.close()
         sock3.close()
         sock4.close()
         sock5.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-        if rc:
-            exit(rc)
 
-def all_tests(start_broker=False):
-    do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()

@@ -5,8 +5,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker):
-    rc = 1
+def do_test():
     connect_packet = mqtt_packets.gen_connect("03-pub-qos1-no-subs", proto_ver=5)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
@@ -39,10 +38,8 @@ def do_test(start_broker):
     puback3b_packet = mqtt_packets.gen_puback(mid, proto_ver=5, reason_code=mqtt5_rc.NO_MATCHING_SUBSCRIBERS)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
 
         # None of the pub/qos1/test topic tree exists here
@@ -57,25 +54,8 @@ def do_test(start_broker):
         mosq_test.do_send_receive(sock, publish1b_packet, puback1b_packet, "puback1b")
         mosq_test.do_send_receive(sock, publish2b_packet, puback2b_packet, "puback2b")
         mosq_test.do_send_receive(sock, publish3b_packet, puback3b_packet, "puback3b")
-
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                exit(rc)
 
-
-def all_tests(start_broker=False):
-    return do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()

@@ -5,9 +5,7 @@
 from mosq_test_helper import *
 
 
-def do_test(start_broker, proto_ver, clean_session1, clean_session2):
-    rc = 1
-
+def do_test(proto_ver, clean_session1, clean_session2):
     mid = 1
     connect1_packet = mqtt_packets.gen_connect("will-takeover-helper", proto_ver=proto_ver)
     connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -44,10 +42,8 @@ def do_test(start_broker, proto_ver, clean_session1, clean_session2):
     connect2_packet_clear = mqtt_packets.gen_connect("will-takeover-test", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         # Connect helper to look for will being published
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=5, port=port)
         mosq_test.do_send_receive(sock1, subscribe_packet, suback_packet, "suback")
@@ -73,7 +69,6 @@ def do_test(start_broker, proto_ver, clean_session1, clean_session2):
         mosq_test.expect_packet(sock1, "publish 2", publish_packet)
         # If the helper has received a will message, then the ping test will fail
         mosq_test.do_ping(sock1)
-        rc = 0
 
         sock1.close()
         sock2.close()
@@ -81,56 +76,14 @@ def do_test(start_broker, proto_ver, clean_session1, clean_session2):
 
         sock2 = mosq_test.do_client_connect(connect2_packet_clear, connack2_packet, timeout=5, port=port)
         sock2.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d clean_session1=%d clean_session2=%d" % (proto_ver, clean_session1, clean_session2))
-                exit(rc)
-        else:
-            return rc
 
-
-def all_tests(start_broker=False):
-    rc = do_test(start_broker, proto_ver=4, clean_session1=True, clean_session2=True)
-    if rc:
-        print("1")
-        return rc;
-    rc = do_test(start_broker, proto_ver=4, clean_session1=False, clean_session2=True)
-    if rc:
-        print("2")
-        return rc;
-    rc = do_test(start_broker, proto_ver=4, clean_session1=True, clean_session2=False)
-    if rc:
-        print("3")
-        return rc;
-    rc = do_test(start_broker, proto_ver=4, clean_session1=False, clean_session2=False)
-    if rc:
-        print("4")
-        return rc;
-    rc = do_test(start_broker, proto_ver=5, clean_session1=True, clean_session2=True)
-    if rc:
-        print("5")
-        return rc;
-    rc = do_test(start_broker, proto_ver=5, clean_session1=False, clean_session2=True)
-    if rc:
-        print("6")
-        return rc;
-    rc = do_test(start_broker, proto_ver=5, clean_session1=True, clean_session2=False)
-    if rc:
-        print("7")
-        return rc;
-    rc = do_test(start_broker, proto_ver=5, clean_session1=False, clean_session2=False)
-    if rc:
-        print("8")
-        return rc;
-    return 0
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(proto_ver=4, clean_session1=True, clean_session2=True)
+    do_test(proto_ver=4, clean_session1=False, clean_session2=True)
+    do_test(proto_ver=4, clean_session1=True, clean_session2=False)
+    do_test(proto_ver=4, clean_session1=False, clean_session2=False)
+    do_test(proto_ver=5, clean_session1=True, clean_session2=True)
+    do_test(proto_ver=5, clean_session1=False, clean_session2=True)
+    do_test(proto_ver=5, clean_session1=True, clean_session2=False)
+    do_test(proto_ver=5, clean_session1=False, clean_session2=False)

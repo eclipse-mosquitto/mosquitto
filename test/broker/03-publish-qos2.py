@@ -4,8 +4,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker, proto_ver):
-    rc = 1
+def do_test(port, proto_ver):
     connect_packet = mqtt_packets.gen_connect("03-pub-qos2-test", proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
@@ -15,36 +14,16 @@ def do_test(start_broker, proto_ver):
     pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
     pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
-    port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
+    mosq_test.do_send_receive(sock, publish_packet, pubrec_packet, "pubrec")
+    mosq_test.do_send_receive(sock, pubrel_packet, pubcomp_packet, "pubcomp")
+    sock.close()
 
-    try:
-        sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
-        mosq_test.do_send_receive(sock, publish_packet, pubrec_packet, "pubrec")
-        mosq_test.do_send_receive(sock, pubrel_packet, pubcomp_packet, "pubcomp")
-
-        rc = 0
-
-        sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d" % (proto_ver))
-        if rc:
-            exit(rc)
-
-
-def all_tests(start_broker=False):
-    do_test(start_broker, proto_ver=4)
-    do_test(start_broker, proto_ver=5)
 
 if __name__ == '__main__':
-    all_tests(True)
+    port = mosq_test.get_port()
+    broker = MosquittoBroker(port=port)
+
+    with broker:
+        do_test(port=port, proto_ver=4)
+        do_test(port=port, proto_ver=5)

@@ -16,7 +16,6 @@ def send_retain(port, topic, payload):
     sock.close()
 
 def do_test():
-    rc = 1
     connect_packet = mqtt_packets.gen_connect("retain-clear-test")
     connack_packet = mqtt_packets.gen_connack(rc=0)
 
@@ -28,9 +27,8 @@ def do_test():
     retain3_packet = mqtt_packets.gen_publish("1", qos=0, payload="retained message", retain=True)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         send_retain(port, "1/2/3/4/5/6/7", "retained message")
         send_retain(port, "1/2/3/4", "retained message")
         send_retain(port, "1", "retained message")
@@ -64,16 +62,6 @@ def do_test():
         mosq_test.do_ping(sock)
         sock.close()
 
-        rc = 0
-    except mosq_test.TestError:
-        pass
-    finally:
-        mosq_test.terminate_broker(broker)
-        broker.wait()
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
-do_test()
-exit(0)
-
+if __name__ == '__main__':
+    do_test()

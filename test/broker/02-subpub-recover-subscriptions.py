@@ -16,7 +16,6 @@ def publish_helper(port):
 
 
 def do_test(proto_ver):
-    rc = 1
     if proto_ver == 5:
         props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
         connect_packet = mqtt_packets.gen_connect("subpub-sub-test", proto_ver=proto_ver, clean_session=False, properties=props)
@@ -37,9 +36,9 @@ def do_test(proto_ver):
     publish2_packet = mqtt_packets.gen_publish("shared/sub", qos=0, payload="message2", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack1_packet, timeout=2, port=port, connack_error="connack 1")
 
         mosq_test.do_send_receive(sock, subscribe1_packet, suback1_packet, "suback1")
@@ -60,23 +59,6 @@ def do_test(proto_ver):
             mosq_test.expect_packet(sock, "publish2", publish2_packet)
         sock.close()
 
-        rc = 0
-
-        sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as err:
-        print(err)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
-
-
-do_test(proto_ver=4)
-do_test(proto_ver=5)
-exit(0)
+if __name__ == '__main__':
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

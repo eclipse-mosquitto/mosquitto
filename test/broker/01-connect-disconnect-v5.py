@@ -33,16 +33,13 @@ def disco_test(test, disconnect_packet):
 
     rc -= 1
 
-def do_test(start_broker):
+def do_test():
     global rc
 
     rc = 4
 
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         # No reason code, no properties, len=0
         disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5)
         disco_test("disco len=0", disconnect_packet)
@@ -59,22 +56,9 @@ def do_test(start_broker):
         props = mqtt5_props.gen_string_pair_prop(mqtt5_props.USER_PROPERTY, "key", "value")
         disconnect_packet = mqtt_packets.gen_disconnect(proto_ver=5, reason_code=0, properties=props)
         disco_test("disco len>2", disconnect_packet)
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-        if rc:
-            exit(rc)
 
+        assert rc == 0
 
-def all_tests(start_broker=False):
-    do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()

@@ -6,10 +6,8 @@ from mosq_test_helper import *
 
 mosq_test.require_features(["WITH_BROKER"])
 
-def do_test(proto_ver):
+def do_test(port, proto_ver):
     rc = 1
-
-    port = mosq_test.get_port()
 
     if proto_ver == 5:
         V = 'mqttv5'
@@ -42,43 +40,33 @@ def do_test(proto_ver):
     puback_packet_req = mqtt_packets.gen_puback(1, proto_ver=proto_ver)
     puback_packet_resp = mqtt_packets.gen_puback(2, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    sock = mosq_test.sub_helper(port=port, topic="04/rr/qos1/test/request", qos=1, proto_ver=proto_ver)
 
-    try:
-        sock = mosq_test.sub_helper(port=port, topic="04/rr/qos1/test/request", qos=1, proto_ver=proto_ver)
+    rr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
 
-        rr = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    mosq_test.expect_packet(sock, "publish", publish_packet_req)
+    sock.send(puback_packet_req)
 
-        mosq_test.expect_packet(sock, "publish", publish_packet_req)
-        sock.send(puback_packet_req)
+    sock.send(publish_packet_resp)
+    mosq_test.expect_packet(sock, "puback", puback_packet_resp)
 
-        sock.send(publish_packet_resp)
-        mosq_test.expect_packet(sock, "puback", puback_packet_resp)
-
-        time.sleep(0.1)
-        rr_terminate_rc = 0
-        if mosq_test.wait_for_subprocess(rr):
-            print("rr not terminated")
-            rr_terminate_rc = 1
-        (stdo, stde) = rr.communicate()
-        if payload in stdo.decode('utf-8'):
-            rc = rr_terminate_rc
-        sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
+    time.sleep(0.1)
+    rr_terminate_rc = 0
+    if mosq_test.wait_for_subprocess(rr):
+        print("rr not terminated")
+        rr_terminate_rc = 1
+    (stdo, stde) = rr.communicate()
+    if payload in stdo.decode('utf-8'):
+        rc = rr_terminate_rc
+    sock.close()
+    if rc:
+        raise ValueError(rc)
 
 
-do_test(proto_ver=3)
-do_test(proto_ver=4)
-do_test(proto_ver=5)
+if __name__ == '__main__':
+    port = mosq_test.get_port()
+    broker = MosquittoBroker(port=port)
+    with broker:
+        do_test(port, proto_ver=3)
+        do_test(port, proto_ver=4)
+        do_test(port, proto_ver=5)

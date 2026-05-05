@@ -24,8 +24,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker, proto_ver):
-    rc = 1
+def do_test(proto_ver):
     connect_packet_sub_persistent = mqtt_packets.gen_connect("flipflop-test", clean_session=False, proto_ver=proto_ver)
     connect_packet_sub_clean = mqtt_packets.gen_connect("flipflop-test", clean_session=True, proto_ver=proto_ver)
     connack_packet_sub = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -43,10 +42,9 @@ def do_test(start_broker, proto_ver):
 
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         # mosquitto_sub -i sub -t 'topic' -q 1 -d -c
         sub_sock = mosq_test.do_client_connect(connect_packet_sub_persistent, connack_packet_sub, port=port)
         mosq_test.do_send_receive(sub_sock, subscribe_packet, suback_packet, "subscribe persistent 1")
@@ -70,31 +68,12 @@ def do_test(start_broker, proto_ver):
         mosq_test.do_send_receive(pub_sock, publish_packet, puback_packet, "publish")
 
         mosq_test.expect_packet(sub_sock, "publish receive", publish_packet)
-        rc = 0
-
         sub_sock.close()
 
         sub_sock = mosq_test.do_client_connect(connect_packet_sub_clean, connack_packet_sub, port=port)
         sub_sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d" % (proto_ver))
-        if rc:
-            exit(rc)
 
-
-def all_tests(start_broker=False):
-    do_test(start_broker, proto_ver=4)
-    do_test(start_broker, proto_ver=5)
-    exit(0)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

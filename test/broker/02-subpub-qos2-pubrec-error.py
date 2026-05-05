@@ -31,7 +31,6 @@ def helper(port):
 
 
 def do_test(proto_ver):
-    rc = 1
     keepalive = 60
     connect_packet = mqtt_packets.gen_connect("pub-qo2-timeout-test", keepalive=keepalive, proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -51,9 +50,9 @@ def do_test(proto_ver):
     pubcomp_2_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -66,20 +65,7 @@ def do_test(proto_ver):
         mosq_test.expect_packet(sock, "publish 2", publish_2_packet)
         mosq_test.do_send_receive(sock, pubrec_2_packet, pubrel_2_packet, "pubrel 2")
         sock.send(pubcomp_2_packet)
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(proto_ver=5)
