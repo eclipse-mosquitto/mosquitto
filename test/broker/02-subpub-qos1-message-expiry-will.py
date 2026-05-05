@@ -12,7 +12,6 @@
 from mosq_test_helper import *
 
 def do_test(proto_ver):
-    rc = 1
     mid = 53
     keepalive = 60
     props = mqtt5_props.gen_uint32_prop(mqtt5_props.SESSION_EXPIRY_INTERVAL, 60)
@@ -35,9 +34,9 @@ def do_test(proto_ver):
 
 
     port = mosq_test.get_port()
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack1_packet, timeout=20, port=port)
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
         sock.close()
@@ -56,17 +55,7 @@ def do_test(proto_ver):
                 break
 
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
+        assert rc == 0
 
 
 do_test(proto_ver=5)

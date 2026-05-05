@@ -5,10 +5,8 @@
 from mosq_test_helper import *
 
 port = mosq_test.get_port()
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-try:
-    rc = 1
+broker = MosquittoBroker(port=port)
+with broker:
     connect_packet = mqtt_packets.gen_connect("take-over", proto_ver=5)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
     disconnect_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.SESSION_TAKEN_OVER, proto_ver=5)
@@ -20,16 +18,3 @@ try:
 
     sock2.close()
     sock1.close()
-    rc = 0
-except mosq_test.TestError:
-    pass
-except Exception as e:
-    print(e)
-finally:
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-        exit(rc)

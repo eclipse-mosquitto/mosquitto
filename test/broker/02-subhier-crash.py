@@ -25,41 +25,19 @@ def test(port):
     mosq_test.do_send_receive(sock, subscribe1_packet, suback1_packet, "suback 1")
     mosq_test.do_send_receive(sock, subscribe2_packet, suback2_packet, "suback 2")
     mosq_test.do_send_receive(sock, unsubscribe1_packet, unsuback1_packet, "unsuback")
-
     sock.send(disconnect_packet)
     sock.close()
 
 
-def do_test(start_broker=True):
-    rc = 1
-
+def do_test():
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         test(port)
         # Repeat test to check broker is still there
         test(port)
 
-        rc = 0
-
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-        if rc:
-            exit(rc)
-
-
-def all_tests(start_broker=False):
-    do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()

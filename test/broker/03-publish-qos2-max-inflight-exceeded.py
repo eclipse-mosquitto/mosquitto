@@ -7,13 +7,12 @@ from mosq_test_helper import *
 def do_test(proto_ver):
     port = mosq_test.get_port()
 
-    rc = 1
     connect_packet = mqtt_packets.gen_connect("pub-qos2-inflight-exceeded", proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port, timeout=10)
 
         for i in range(1, 21):
@@ -31,27 +30,9 @@ def do_test(proto_ver):
             mosq_test.do_send_receive(sock, publish_packet, disconnect_packet, "disconnect")
         except BrokenPipeError:
             pass
-
-        rc = 0
-
         sock.close()
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-    return rc
 
-
-def all_test():
-    rc = do_test(proto_ver=4)
-    if rc:
-        return rc
-    rc = do_test(proto_ver=5)
-    return rc
 
 if __name__ == "__main__":
-    sys.exit(all_test())
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

@@ -18,8 +18,7 @@ def helper(port):
     sock.close()
 
 
-def do_test(start_broker, proto_ver):
-    rc = 1
+def do_test(proto_ver):
     mid = 109
     connect_packet = mqtt_packets.gen_connect("05-clean-session", clean_session=False, proto_ver=proto_ver, session_expiry=60)
     connack1_packet = mqtt_packets.gen_connack(flags=0, rc=0, proto_ver=proto_ver)
@@ -37,10 +36,8 @@ def do_test(start_broker, proto_ver):
     connect_packet_clear = mqtt_packets.gen_connect("05-clean-session", clean_session=True, proto_ver=proto_ver, session_expiry=0)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack1_packet, port=port, connack_error="connack 1")
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -53,31 +50,13 @@ def do_test(start_broker, proto_ver):
         sock = mosq_test.do_client_connect(connect_packet, connack2_packet, timeout=30, port=port, connack_error="connack 2")
         mosq_test.expect_packet(sock, "publish", publish_packet)
         sock.send(puback_packet)
-        rc = 0
-
         sock.close()
 
         # Clear the session
         sock = mosq_test.do_client_connect(connect_packet_clear, connack1_packet, port=port, connack_error="connack clear")
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                print("proto_ver=%d" % (proto_ver))
-        if rc:
-            exit(rc)
 
-
-def all_tests(start_broker=False):
-    do_test(start_broker, proto_ver=4)
-    do_test(start_broker, proto_ver=5)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

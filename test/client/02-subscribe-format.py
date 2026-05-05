@@ -7,10 +7,8 @@ import platform
 
 mosq_test.require_features(["WITH_BROKER"])
 
-def do_test(format_str, expected_outputs, proto_ver=4, payload="message"):
+def do_test(port, format_str, expected_outputs, proto_ver=4, payload="message"):
     rc = 1
-
-    port = mosq_test.get_port()
 
     if proto_ver == 5:
         V = 'mqttv5'
@@ -49,88 +47,78 @@ def do_test(format_str, expected_outputs, proto_ver=4, payload="message"):
     else:
         publish_packet = mqtt_packets.gen_publish("02/sub/format/test", qos=0, payload=payload, proto_ver=proto_ver, retain=True)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
+    sock.send(publish_packet)
 
-    try:
-        sock = mosq_test.pub_helper(port=port, proto_ver=proto_ver)
-        sock.send(publish_packet)
+    sub = subprocess.run(cmd, capture_output=True, env=env)
 
-        sub = subprocess.run(cmd, capture_output=True, env=env)
-
-        have_match = False
-        for expected_output in expected_outputs:
-            stdout = sub.stdout.decode('utf-8')
-            if stdout.startswith(expected_output):
-                rc = sub.returncode
-                have_match = True
-                break
-        if have_match == False:
-            print(f"input: {format_str}")
-            print("expected: (%d) %s" % (len(expected_outputs), expected_outputs))
-            print("actual:   (%d) %s"  % (len(stdout), stdout))
-        sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
+    have_match = False
+    for expected_output in expected_outputs:
+        stdout = sub.stdout.decode('utf-8')
+        if stdout.startswith(expected_output):
+            rc = sub.returncode
+            have_match = True
+            break
+    sock.close()
+    if have_match == False:
+        print(f"input: {format_str}")
+        print("expected: (%d) %s" % (len(expected_outputs), expected_outputs))
+        print("actual:   (%d) %s"  % (len(stdout), stdout))
+        raise ValueError("no match")
 
 
-do_test('%%', ['%'])
-do_test('%A', ['']) # missing
-do_test('%C', ['']) # missing
-do_test('%2C', ['  ']) # missing
-do_test('%C', ['plain/text'], proto_ver=5)
-do_test('%D', ['']) # missing
-do_test('%E', ['']) # missing
-do_test('%E', ['3600','3599'], proto_ver=5)
-do_test('%F', ['']) # missing
-do_test('%F', ['1'], proto_ver=5)
-do_test('%l', ['7']) # strlen("message")
-do_test('%02l', ['07']) # strlen("message")
-do_test('%2l', [' 7']) # strlen("message")
-do_test('%-2l', ['7 ']) # strlen("message")
-do_test('%m', ['0'])
-do_test('%P', ['']) # missing
-do_test('%P', ['name1:value1 name2:value2 name3:value3 name4:value4'], proto_ver=5)
-do_test('%p', ['message'])
-do_test('%-12p', ['message     '])
-do_test('%q', ['0'])
-do_test('%R', ['']) # missing
-do_test('%r', ['1'])
-do_test('%S', ['']) # missing
-do_test('%S', ['56'], proto_ver=5)
-do_test('%t', ['02/sub/format/test'])
-do_test('%.20t', ['02/sub/format/test'])
-do_test('%-.20t', ['02/sub/format/test'])
-do_test('%20t', ['  02/sub/format/test'])
-do_test('%-20t', ['02/sub/format/test  '])
-do_test('%10.10t', ['02/sub/for'])
-do_test('%20.10t', ['          02/sub/for'])
-do_test('%-20.10t', ['02/sub/for          '])
-do_test('%x', ['6d657373616765'])
-do_test('%.1x', ['6 d 6 5 7 3 7 3 6 1 6 7 6 5'])
-do_test('%.2x', ['6d 65 73 73 61 67 65'])
-do_test('%.2:x', ['6d:65:73:73:61:67:65'])
-do_test('%18x', ['    6d657373616765'])
-do_test('%-18x', ['6d657373616765    '])
-do_test('%X', ['6D657373616765'])
-do_test('\\\\', ['\\'])
-do_test('\\a', ['\a'])
-#do_test('\\e', ['\e')
-do_test('\\n', ['\n'])
-do_test('\\r', ['\r'])
-do_test('\\t', ['\t'])
-do_test('\\v', ['\v'])
-do_test('@@', ['@'])
-do_test('text', ['text'])
-if platform.system() != 'Darwin' and platform.system() != 'Windows':
-    do_test('%.3d', ['2.718'], payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
-    do_test('%.3f', ['0.707'], payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))
+if __name__ == '__main__':
+    port = mosq_test.get_port()
+    broker = MosquittoBroker(port=port)
+    with broker:
+        do_test(port, '%%', ['%'])
+        do_test(port, '%A', ['']) # missing
+        do_test(port, '%C', ['']) # missing
+        do_test(port, '%2C', ['  ']) # missing
+        do_test(port, '%C', ['plain/text'], proto_ver=5)
+        do_test(port, '%D', ['']) # missing
+        do_test(port, '%E', ['']) # missing
+        do_test(port, '%E', ['3600','3599'], proto_ver=5)
+        do_test(port, '%F', ['']) # missing
+        do_test(port, '%F', ['1'], proto_ver=5)
+        do_test(port, '%l', ['7']) # strlen("message")
+        do_test(port, '%02l', ['07']) # strlen("message")
+        do_test(port, '%2l', [' 7']) # strlen("message")
+        do_test(port, '%-2l', ['7 ']) # strlen("message")
+        do_test(port, '%m', ['0'])
+        do_test(port, '%P', ['']) # missing
+        do_test(port, '%P', ['name1:value1 name2:value2 name3:value3 name4:value4'], proto_ver=5)
+        do_test(port, '%p', ['message'])
+        do_test(port, '%-12p', ['message     '])
+        do_test(port, '%q', ['0'])
+        do_test(port, '%R', ['']) # missing
+        do_test(port, '%r', ['1'])
+        do_test(port, '%S', ['']) # missing
+        do_test(port, '%S', ['56'], proto_ver=5)
+        do_test(port, '%t', ['02/sub/format/test'])
+        do_test(port, '%.20t', ['02/sub/format/test'])
+        do_test(port, '%-.20t', ['02/sub/format/test'])
+        do_test(port, '%20t', ['  02/sub/format/test'])
+        do_test(port, '%-20t', ['02/sub/format/test  '])
+        do_test(port, '%10.10t', ['02/sub/for'])
+        do_test(port, '%20.10t', ['          02/sub/for'])
+        do_test(port, '%-20.10t', ['02/sub/for          '])
+        do_test(port, '%x', ['6d657373616765'])
+        do_test(port, '%.1x', ['6 d 6 5 7 3 7 3 6 1 6 7 6 5'])
+        do_test(port, '%.2x', ['6d 65 73 73 61 67 65'])
+        do_test(port, '%.2:x', ['6d:65:73:73:61:67:65'])
+        do_test(port, '%18x', ['    6d657373616765'])
+        do_test(port, '%-18x', ['6d657373616765    '])
+        do_test(port, '%X', ['6D657373616765'])
+        do_test(port, '\\\\', ['\\'])
+        do_test(port, '\\a', ['\a'])
+        #do_test(port, '\\e', ['\e')
+        do_test(port, '\\n', ['\n'])
+        do_test(port, '\\r', ['\r'])
+        do_test(port, '\\t', ['\t'])
+        do_test(port, '\\v', ['\v'])
+        do_test(port, '@@', ['@'])
+        do_test(port, 'text', ['text'])
+        if platform.system() != 'Darwin' and platform.system() != 'Windows':
+            do_test(port, '%.3d', ['2.718'], payload=struct.pack('BBBBBBBB', 0x58, 0x39, 0xB4, 0xC8, 0x76, 0xBE, 0x05, 0x40))
+            do_test(port, '%.3f', ['0.707'], payload=struct.pack('BBBB', 0xF4, 0xFD, 0x34, 0x3F))

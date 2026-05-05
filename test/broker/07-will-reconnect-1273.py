@@ -7,9 +7,7 @@
 from mosq_test_helper import *
 
 
-def do_test(start_broker, proto_ver):
-    rc = 1
-
+def do_test(proto_ver):
     connect1_packet = mqtt_packets.gen_connect("will-reconnect-helper", proto_ver=proto_ver)
     connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
@@ -28,10 +26,8 @@ def do_test(start_broker, proto_ver):
     connect2_packet_clear = mqtt_packets.gen_connect("will-1273", proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         # Connect and subscribe will-sub
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=30, port=port, connack_error="connack1")
         mosq_test.do_send_receive(sock1, subscribe1_packet, suback1_packet, "suback")
@@ -55,37 +51,13 @@ def do_test(start_broker, proto_ver):
         mosq_test.expect_packet(sock1, "publish2", publish_packet)
         # Do a ping to make sure there are no other packets received.
         mosq_test.do_ping(sock1)
-        rc = 0
-
         sock1.close()
         sock2.close()
 
         sock2 = mosq_test.do_client_connect(connect2_packet_clear, connack1_packet, timeout=30, port=port, connack_error="connack clear")
         sock2.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                exit(rc)
-        else:
-            return rc
 
-
-
-def all_tests(start_broker=False):
-    rc = do_test(start_broker, proto_ver=4)
-    if rc:
-        return rc;
-    rc = do_test(start_broker, proto_ver=5)
-    if rc:
-        return rc;
-    return 0
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(proto_ver=4)
+    do_test(proto_ver=5)

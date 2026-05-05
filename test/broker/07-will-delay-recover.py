@@ -6,9 +6,7 @@
 from mosq_test_helper import *
 
 
-def do_test(start_broker, clean_session):
-    rc = 1
-
+def do_test(clean_session):
     mid = 1
     connect1_packet = mqtt_packets.gen_connect("will-delay-recovery", proto_ver=5)
     connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
@@ -30,10 +28,8 @@ def do_test(start_broker, clean_session):
     will_packet = mqtt_packets.gen_publish(topic="will/delay/recovery/test", payload="will delay", qos=0, proto_ver=5)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=30, port=port)
         mosq_test.do_send_receive(sock1, subscribe_packet, suback_packet, "suback")
 
@@ -52,36 +48,14 @@ def do_test(start_broker, clean_session):
         else:
             # We should not have received the will at this point.
             mosq_test.do_ping(sock1)
-        rc = 0
 
         sock1.close()
         sock2.close()
 
         sock2 = mosq_test.do_client_connect(connect2_packet_clear, connack1_packet, timeout=30, port=port)
         sock2.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                exit(rc)
-        else:
-            return rc
 
-
-def all_tests(start_broker=False):
-    rc = do_test(start_broker, clean_session=True)
-    if rc:
-        return rc
-    rc = do_test(start_broker, clean_session=False)
-    if rc:
-        return rc
-    return 0
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(clean_session=True)
+    do_test(clean_session=False)

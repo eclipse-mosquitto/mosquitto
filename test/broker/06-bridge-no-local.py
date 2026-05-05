@@ -7,8 +7,7 @@ from mosq_test_helper import *
 
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
-def do_test(start_broker, proto_ver_connect, proto_ver_msgs, sub_opts):
-    rc = 1
+def do_test(proto_ver_connect, proto_ver_msgs, sub_opts):
     connect_packet = mqtt_packets.gen_connect("bridge-test", proto_ver=proto_ver_connect)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver_msgs)
 
@@ -19,45 +18,16 @@ def do_test(start_broker, proto_ver_connect, proto_ver_msgs, sub_opts):
     publish_packet = mqtt_packets.gen_publish("loop/test", qos=0, payload="message", proto_ver=proto_ver_msgs)
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
-
-    try:
+    broker = MosquittoBroker(port=port)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
-
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
-
         sock.send(publish_packet)
         mosq_test.do_ping(sock)
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-                exit(rc)
-        else:
-            return rc
 
-
-def all_tests(start_broker=False):
-    rc = do_test(start_broker, 128+3, 3, 0)
-    if rc:
-        return rc;
-    rc = do_test(start_broker, 128+4, 4, 0)
-    if rc:
-        return rc;
-    rc = do_test(start_broker, 5, 5, mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL)
-    if rc:
-        return rc;
-    return 0
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test(128+3, 3, 0)
+    do_test(128+4, 4, 0)
+    do_test(5, 5, mqtt5_opts.MQTT_SUB_OPT_NO_LOCAL)

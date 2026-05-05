@@ -40,9 +40,9 @@ def do_test(proto_ver, configenv):
     else:
         puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.sub_helper(port=port, topic="#", qos=1, proto_ver=proto_ver)
 
         pub = subprocess.run(cmd, capture_output=True, text=True, env=env)
@@ -50,21 +50,11 @@ def do_test(proto_ver, configenv):
         mosq_test.expect_packet(sock, "publish", publish_packet)
         rc = pub.returncode
         sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
+
         if rc:
             print(pub.stdout)
             print(pub.stderr)
-            print(mosq_test.broker_log(broker))
             print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 if platform.system() == 'Windows':

@@ -5,8 +5,7 @@
 
 from mosq_test_helper import *
 
-def do_test(start_broker):
-    rc = 1
+def do_test():
     connect_packet = mqtt_packets.gen_connect("02-subpub-qos0-rap", proto_ver=5)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 
@@ -29,10 +28,9 @@ def do_test(start_broker):
 
 
     port = mosq_test.get_port()
-    if start_broker:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port)
+    broker = MosquittoBroker(port=port)
 
-    try:
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
 
         mosq_test.do_send_receive(sock, subscribe1_packet, suback1_packet, "suback1")
@@ -40,25 +38,9 @@ def do_test(start_broker):
 
         mosq_test.do_send_receive(sock, publish1_packet, publish1r_packet, "publish1")
         mosq_test.do_send_receive(sock, publish2_packet, publish2r_packet, "publish2")
-        rc = 0
 
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        if start_broker:
-            mosq_test.terminate_broker(broker)
-            if mosq_test.wait_for_subprocess(broker):
-                print("broker not terminated")
-                if rc == 0: rc=1
-            if rc:
-                print(mosq_test.broker_log(broker))
-        if rc:
-            exit(rc)
 
-
-def all_tests(start_broker=False):
-    do_test(start_broker)
 
 if __name__ == '__main__':
-    all_tests(True)
+    do_test()
