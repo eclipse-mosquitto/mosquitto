@@ -41,7 +41,7 @@ int handle__disconnect(struct mosquitto *context)
 		if((context->in_packet.command&0x0F) != 0x00){
 			log__printf(NULL, MOSQ_LOG_INFO, "Protocol error from %s: DISCONNECT packet with incorrect flags %02X.",
 					context->id, context->in_packet.command);
-			return MOSQ_ERR_PROTOCOL;
+			return MOSQ_ERR_MALFORMED_PACKET;
 		}
 	}
 
