@@ -69,7 +69,7 @@ int handle__disconnect(struct mosquitto *context)
 			log__printf(NULL, MOSQ_LOG_INFO, "Protocol error from %s: DISCONNECT packet with incorrect flags %02X.",
 					context->id, context->in_packet.command);
 			do_disconnect(context, MOSQ_ERR_PROTOCOL);
-			return MOSQ_ERR_PROTOCOL;
+			return MOSQ_ERR_MALFORMED_PACKET;
 		}
 	}
 	if(reason_code == MQTT_RC_DISCONNECT_WITH_WILL_MSG){
