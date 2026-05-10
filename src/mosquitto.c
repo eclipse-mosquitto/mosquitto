@@ -344,6 +344,7 @@ static void post_shutdown_cleanup(void)
 		context__send_will(ctxt);
 	}
 	will_delay__send_all();
+	session_expiry__add_on_shutdown();
 
 	/* Set to true only after persistence events have been processed */
 	db.shutdown = true;
