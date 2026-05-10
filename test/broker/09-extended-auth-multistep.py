@@ -2,16 +2,8 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"auth_plugin {mosq_paths.test_plugin('auth_plugin_extended_multiple')}\n")
-
-port = mosq_test.get_port()
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, port)
-
-rc = 1
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 props += mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_DATA, "step1")
@@ -31,26 +23,13 @@ props = mqtt5_props.gen_string_prop(mqtt5_props.AUTHENTICATION_METHOD, "mirror")
 connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5, properties=props)
 
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-try:
+port = mosq_test.get_port()
+broker_config = BrokerConfig(
+    listeners = [ ListenerConfig(port=port) ],
+    plugins = [ PluginConfig(path=mosq_paths.test_plugin('auth_plugin_extended_multiple')) ],
+)
+broker = MosquittoBroker(config=broker_config)
+with broker:
     sock = mosq_test.do_client_connect(connect_packet, auth1_packet, timeout=20, port=port, connack_error="auth1")
     mosq_test.do_send_receive(sock, auth2_packet, connack_packet)
-
-    rc = 0
-
     sock.close()
-except mosq_test.TestError:
-    pass
-finally:
-    os.remove(conf_file)
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-
-
-exit(rc)
-

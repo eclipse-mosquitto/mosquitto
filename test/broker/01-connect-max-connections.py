@@ -4,11 +4,9 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("max_connections 10\n")
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
+
 
 def test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_bad, connack_packet_bad):
     socks = []
@@ -35,8 +33,6 @@ def test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_
 
 
 def do_test():
-    rc = 1
-
     connect_packets_ok = []
     connack_packets_ok = []
     for i in range(0, 10):
@@ -47,11 +43,13 @@ def do_test():
     connack_packet_bad = b""
 
     port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        allow_anonymous=True,
+        max_connections=10,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_bad, connack_packet_bad)
 
         ## Now repeat - check it works as before
@@ -61,17 +59,4 @@ def do_test():
 
         test_iteration(port, connect_packets_ok, connack_packets_ok, connect_packet_bad, connack_packet_bad)
 
-        rc = 0
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-    return rc
-
-sys.exit(do_test())
+do_test()

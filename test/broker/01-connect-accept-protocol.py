@@ -4,21 +4,18 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port, accept):
-    with open(filename, 'w') as f:
-        f.write("listener %s\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("accept_protocol_versions %s\n" % (accept))
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 
 def do_test(accept, expect_success):
     port = mosq_test.get_port()
-
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port, accept)
-
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        accept_protocol_versions=accept,
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         for proto_ver in [3, 4, 5]:
             rc = 1
             connect_packet = mqtt_packets.gen_connect("accept-protocol-test-%d" % (proto_ver), proto_ver=proto_ver)
@@ -37,20 +34,6 @@ def do_test(accept, expect_success):
 
             sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
             sock.close()
-            rc = 0
-    except mosq_test.TestError:
-        pass
-    finally:
-        if write_config is not None:
-            os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(accept="3,4,5", expect_success=[3, 4, 5])

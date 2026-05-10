@@ -5,11 +5,8 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"auth_plugin {mosq_paths.test_plugin('auth_plugin_v5')}\n")
-        f.write("allow_anonymous false\n")
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 def do_test():
     port = mosq_test.get_port()
@@ -31,23 +28,18 @@ def do_test():
 
     broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
 
-    try:
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        plugins = [
+            PluginConfig(path=mosq_paths.test_plugin('auth_plugin_v5'))
+        ],
+        allow_anonymous=False,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
 
         mosq_test.do_send_receive(sock, publish_allowed_packet, puback_allowed_packet, "puback allowed")
         mosq_test.do_send_receive(sock, publish_denied_packet, puback_denied_packet, "puback denied")
         sock.close()
-        rc = 0
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
-
-do_test()

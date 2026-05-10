@@ -7,6 +7,9 @@
 
 from mosq_test_helper import *
 
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
+
 def helper(port):
     rc = 1
     connect_packet = mqtt_packets.gen_connect("subpub-qos2-recv-max1-helper", proto_ver=5)
@@ -44,15 +47,9 @@ def helper(port):
     sock.close()
 
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("max_inflight_bytes 16\n")
 
 
 def send_small(port):
-    rc = 1
     connect_packet = mqtt_packets.gen_connect("subpub-qos2-test-helper")
     connack_packet = mqtt_packets.gen_connack(rc=0)
 
@@ -73,7 +70,6 @@ def do_test(proto_ver):
     if proto_ver == 4:
         exit(0)
 
-    rc = 1
     props = mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 5)
     connect_packet = mqtt_packets.gen_connect("subpub-qos2-test", proto_ver=5, properties=props)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
@@ -83,11 +79,11 @@ def do_test(proto_ver):
     suback_packet = mqtt_packets.gen_suback(mid, 2, proto_ver=5)
 
     port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port, use_conf=True)
-
-    try:
+    broker_config = BrokerConfig(
+        max_inflight_bytes=16,
+    )
+    broker = MosquittoBroker(port=port, config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
 
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
@@ -172,31 +168,13 @@ def do_test(proto_ver):
         mosq_test.expect_packet(sock, "publish3s", publish_packet3)
         mosq_test.expect_packet(sock, "publish4s", publish_packet4)
         mosq_test.expect_packet(sock, "publish5s", publish_packet5)
-        
+
         mosq_test.do_send_receive(sock, pubrec_packet1, pubrel_packet1, "pubrel1s")
         mosq_test.do_send_receive(sock, pubrec_packet2, pubrel_packet2, "pubrel2s")
         mosq_test.do_send_receive(sock, pubrec_packet3, pubrel_packet3, "pubrel3s")
         mosq_test.do_send_receive(sock, pubrec_packet4, pubrel_packet4, "pubrel4s")
         mosq_test.do_send_receive(sock, pubrec_packet5, pubrel_packet5, "pubrel5s")
-
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(proto_ver=5)
-exit(0)

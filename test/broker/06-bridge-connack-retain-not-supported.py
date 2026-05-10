@@ -4,27 +4,12 @@
 
 from mosq_test_helper import *
 
+from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
+from mosquitto_broker import MosquittoBroker
+
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
-def write_config(filename, port1, port2):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port2))
-        f.write("allow_anonymous true\n")
-        f.write("retain_available false\n")
-        f.write("\n")
-        f.write("connection bridge_sample\n")
-        f.write("address localhost:%d\n" % (port1))
-        f.write("bridge_protocol_version mqttv50\n")
-        f.write("topic \"bridge with space/#\" both 1\n")
-        f.write("bridge_max_topic_alias 0\n")
-        f.write("restart_timeout 2\n")
-
 def do_test():
-    (port1, port2) = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port1, port2)
-
-    rc = 1
     hostname = socket.gethostname()
     client_id = hostname+".bridge_sample"
     connect_packet_retain = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
@@ -46,11 +31,27 @@ def do_test():
     helper_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
     helper_publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=5)
 
+    (port1, port2) = mosq_test.get_port(2)
+
     ssock = mosq_test.listen_sock(port1)
 
-    try:
-        broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
-
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port2) ],
+        bridges = [
+            MQTTBridgeConfig(
+                connection="bridge_sample",
+                address=f"localhost:{port1}",
+                bridge_protocol_version="mqttv50",
+                topics=["\"bridge with space/#\" both 1"],
+                bridge_max_topic_alias=0,
+                restart_timeout=2,
+            ),
+        ],
+        allow_anonymous=True,
+        retain_available=False,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         # Connect with a will with retain set, get refused
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
@@ -65,27 +66,4 @@ def do_test():
         bridge.send(connack_packet)
         bridge.close()
 
-        rc = 0
-
-        bridge.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        try:
-            bridge.close()
-        except NameError:
-            pass
-
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        ssock.close()
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
-
 do_test()
-
-exit(0)

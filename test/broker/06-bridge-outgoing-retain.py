@@ -5,21 +5,10 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
+from mosquitto_broker import MosquittoBroker
 
-def write_config(filename, port1, port2, protocol_version, outgoing_retain):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port2))
-        f.write("allow_anonymous true\n")
-        f.write("\n")
-        f.write("connection bridge_sample\n")
-        f.write("address localhost:%d\n" % (port1))
-        f.write("topic \"bridge with space/#\" both 1\n")
-        f.write("notifications false\n")
-        f.write("restart_timeout 5\n")
-        f.write("bridge_protocol_version %s\n" %(protocol_version))
-        f.write("bridge_outgoing_retain %s\n" %(outgoing_retain))
-        f.write("bridge_max_topic_alias 0\n")
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
 def do_test(proto_ver, outgoing_retain):
     if proto_ver == 4:
@@ -29,11 +18,6 @@ def do_test(proto_ver, outgoing_retain):
         bridge_protocol = "mqttv50"
         proto_ver_connect = 5
 
-    (port1, port2) = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port1, port2, bridge_protocol, outgoing_retain)
-
-    rc = 1
     client_id = socket.gethostname()+".bridge_sample"
     connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -47,7 +31,7 @@ def do_test(proto_ver, outgoing_retain):
     subscribe_packet = mqtt_packets.gen_subscribe(mid, "bridge with space/#", 1 | opts, proto_ver=proto_ver)
     suback_packet = mqtt_packets.gen_suback(mid, 1, proto_ver=proto_ver)
 
-    if outgoing_retain == "true":
+    if outgoing_retain == True:
         publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=proto_ver)
     else:
         publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=False, payload="message", proto_ver=proto_ver)
@@ -57,9 +41,28 @@ def do_test(proto_ver, outgoing_retain):
     helper_connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
     helper_publish_packet = mqtt_packets.gen_publish("bridge with space/retain/test", qos=0, retain=True, payload="message", proto_ver=proto_ver)
 
+    (port1, port2) = mosq_test.get_port(2)
+
     ssock = mosq_test.listen_sock(port1)
 
-    try:
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port2) ],
+        bridges = [
+            MQTTBridgeConfig(
+                connection="bridge_sample",
+                address=f"localhost:{port1}",
+                topics=["\"bridge with space/#\" both 1"],
+                notifications=False,
+                restart_timeout=5,
+                bridge_protocol_version=bridge_protocol,
+                bridge_outgoing_retain=outgoing_retain,
+                bridge_max_topic_alias=0,
+            ),
+        ],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
 
         (bridge, address) = ssock.accept()
@@ -79,30 +82,9 @@ def do_test(proto_ver, outgoing_retain):
         helper.close()
 
         mosq_test.expect_packet(bridge, "publish", publish_packet)
-        rc = 0
-
         bridge.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        try:
-            bridge.close()
-        except NameError:
-            pass
 
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        ssock.close()
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
-
-do_test(proto_ver=4, outgoing_retain="true")
-do_test(proto_ver=4, outgoing_retain="false")
-do_test(proto_ver=5, outgoing_retain="true")
-do_test(proto_ver=5, outgoing_retain="false")
-
-exit(0)
+do_test(proto_ver=4, outgoing_retain=True)
+do_test(proto_ver=4, outgoing_retain=False)
+do_test(proto_ver=5, outgoing_retain=True)
+do_test(proto_ver=5, outgoing_retain=False)

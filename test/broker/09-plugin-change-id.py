@@ -2,18 +2,10 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port, plugin_ver):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"auth_plugin {mosq_paths.test_plugin('auth_plugin_id_change')}\n")
-        f.write("allow_anonymous true\n")
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 def do_test(plugin_ver):
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port, plugin_ver)
-
-    rc = 1
     connect1_packet = mqtt_packets.gen_connect("already-exists")
     connack1_packet = mqtt_packets.gen_connack(rc=0)
 
@@ -32,9 +24,14 @@ def do_test(plugin_ver):
     pubrel1_packet = mqtt_packets.gen_pubrel(mid)
     pubcomp1_packet = mqtt_packets.gen_pubcomp(mid)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        plugins = [ PluginConfig(path=mosq_paths.test_plugin('auth_plugin_id_change')) ],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=20, port=port)
         sock2 = mosq_test.do_client_connect(connect2_packet, connack2_packet, timeout=20, port=port)
 
@@ -46,19 +43,5 @@ def do_test(plugin_ver):
         sock1.close()
         sock2.close()
 
-        rc = 0
-    except mosq_test.TestError:
-        pass
-    except Exception as err:
-        print(err)
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 do_test(4)

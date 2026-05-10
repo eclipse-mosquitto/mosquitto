@@ -4,21 +4,12 @@
 
 from mosq_test_helper import *
 
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
+
 mosq_test.require_features(["WITH_BROKER", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"])
 
-def write_config(filename, port1, port2):
-    with open(filename, 'w') as f:
-        f.write("allow_anonymous true\n")
-        f.write(f"listener {port1}\n")
-        f.write("protocol websockets\n")
-        f.write(f"listener {port2}\n")
-
 def do_test(proto_ver):
-    rc = 1
-
-    ports = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-
     if proto_ver == 5:
         V = 'mqttv5'
     elif proto_ver == 4:
@@ -31,6 +22,9 @@ def do_test(proto_ver):
     }
     env = mosq_test.env_add_ld_library_path(env)
     payload = "message"
+
+    ports = mosq_test.get_port(2)
+
     cmd = [mosq_paths.mosquitto_rr,
             '-p', str(ports[0]),
             '-q', '1',
@@ -51,9 +45,18 @@ def do_test(proto_ver):
     puback_packet_req = mqtt_packets.gen_puback(1, proto_ver=proto_ver)
     puback_packet_resp = mqtt_packets.gen_puback(2, proto_ver=proto_ver)
 
-    write_config(conf_file, ports[0], ports[1])
-
-    try:
+    broker_config = BrokerConfig(
+        listeners = [
+            ListenerConfig(
+                port=ports[0],
+                protocol="websockets",
+            ),
+            ListenerConfig(port=ports[1]),
+        ],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=ports[1], use_conf=True)
         sock = mosq_test.sub_helper(port=ports[1], topic="04/rr/qos1/test/request", qos=1, proto_ver=proto_ver)
 
@@ -65,29 +68,12 @@ def do_test(proto_ver):
         sock.send(publish_packet_resp)
         mosq_test.expect_packet(sock, "puback", puback_packet_resp)
 
-        time.sleep(0.1)
-        rr_terminate_rc = 0
         if mosq_test.wait_for_subprocess(rr):
-            print("rr not terminated")
-            rr_terminate_rc = 1
-        (stdo, stde) = rr.communicate()
-        if stdo.decode('utf-8') == payload + '\n':
-            rc = rr_terminate_rc
+            raise RuntimeError("rr not terminated")
         sock.close()
-    except mosq_test.TestError:
-        pass
-    except Exception as e:
-        print(e)
-    finally:
-        mosq_test.terminate_broker(broker)
-        os.remove(conf_file)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
+        (stdo, stde) = rr.communicate()
+        if stdo.decode('utf-8') != payload + '\n':
+            raise ValueError(stdo.decode('utf-8'))
 
 
 do_test(proto_ver=3)

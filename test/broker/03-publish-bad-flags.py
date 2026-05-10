@@ -4,21 +4,9 @@
 # MQTTv5
 
 from mosq_test_helper import *
-
-rc = 1
-
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("maximum_qos 1\n")
-        f.write("retain_available false\n")
+from broker_config import BrokerConfig, ListenerConfig
 
 def do_test(publish_packet, reason_code, error_string):
-    global rc
-
-    rc = 1
-
     connect_packet = mqtt_packets.gen_connect("13-malformed-publish-v5", proto_ver=5)
 
     connack_props = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 10)
@@ -34,15 +22,17 @@ def do_test(publish_packet, reason_code, error_string):
 
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     mosq_test.do_send_receive(sock, publish_packet, disconnect_packet, error_string=error_string)
-    rc = 0
 
 
 port = mosq_test.get_port()
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, port)
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-try:
+broker_config = BrokerConfig(
+    listeners=[ListenerConfig(port=port)],
+    allow_anonymous=True,
+    maximum_qos=1,
+    retain_available=False
+)
+broker = MosquittoBroker(port=port, config=broker_config)
+with broker:
     # qos > maximum qos
     publish_packet = mqtt_packets.gen_publish(topic="test/topic", qos=2, mid=1, proto_ver=5)
     do_test(publish_packet, mqtt5_rc.QOS_NOT_SUPPORTED, "qos > maximum qos")
@@ -50,14 +40,3 @@ try:
     # retain not supported
     publish_packet = mqtt_packets.gen_publish(topic="test/topic", qos=0, retain=True, proto_ver=5, payload="a")
     do_test(publish_packet, mqtt5_rc.RETAIN_NOT_SUPPORTED, "retain not supported")
-except mosq_test.TestError:
-    pass
-finally:
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    os.remove(conf_file)
-    if rc:
-        print(mosq_test.broker_log(broker))
-        exit(rc)

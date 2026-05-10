@@ -5,18 +5,10 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port, plugin_ver):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"auth_plugin {mosq_paths.test_plugin(f'auth_plugin_v{plugin_ver}')}\n")
-        f.write("allow_anonymous false\n")
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 def do_test(plugin_ver):
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port, plugin_ver)
-
-    rc = 1
     connect1_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="readwrite", clean_session=False)
     connack1_packet = mqtt_packets.gen_connack(rc=0)
 
@@ -37,9 +29,16 @@ def do_test(plugin_ver):
     publish2_packet = mqtt_packets.gen_publish("writeable", qos=1, mid=mid, payload="message")
     puback2_packet = mqtt_packets.gen_puback(mid)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        plugins = [
+            PluginConfig(path=mosq_paths.test_plugin(f'auth_plugin_v{plugin_ver}'))
+        ],
+        allow_anonymous=False,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=20, port=port)
 
         mosq_test.do_send_receive(sock, publish1_packet, pubrec1_packet, "pubrec1")
@@ -49,21 +48,7 @@ def do_test(plugin_ver):
         mosq_test.do_send_receive(sock, publish2_packet, puback2_packet, "puback2")
 
         mosq_test.do_ping(sock)
-
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 do_test(2)
 do_test(3)

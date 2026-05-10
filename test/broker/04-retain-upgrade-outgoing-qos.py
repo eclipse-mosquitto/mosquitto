@@ -4,20 +4,10 @@
 # when upgrade_outgoing_qos is true
 
 from mosq_test_helper import *
-
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("upgrade_outgoing_qos true\n")
+from broker_config import BrokerConfig
 
 
 def do_test(proto_ver):
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-
-    rc = 1
     mid = 16
     connect_packet = mqtt_packets.gen_connect("retain-qos0-test", proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -28,31 +18,17 @@ def do_test(proto_ver):
 
     publish_packet2 = mqtt_packets.gen_publish("retain/qos0/test", mid=1, qos=1, payload="retained message", retain=True, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(upgrade_outgoing_qos=True)
+    broker = MosquittoBroker(port=port, config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         sock.send(publish_packet)
 
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
         mosq_test.expect_packet(sock, "publish", publish_packet2)
-        rc = 0
-
         sock.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-exit(0)

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
+
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 import http.client
 import json
 import platform
@@ -11,21 +14,6 @@ mosq_test.require_features(["WITH_HTTP_API", "WITH_TLS"])
 if platform.system() == "Windows":
     # gnutls not supported on Windows
     exit(77)
-
-def write_config(filename, mqtt_port, http_port):
-    with open(filename, 'w') as f:
-        f.write("allow_anonymous true\n")
-        f.write(f"listener {mqtt_port}\n")
-
-        f.write(f"listener {http_port}\n")
-        f.write("protocol http_api\n")
-        f.write(f"certfile {ssl_dir / 'server.crt'}\n")
-        f.write(f"keyfile {ssl_dir / 'server.key'}\n")
-
-        if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
-            f.write(f"listener 0 {mqtt_port}.sock\n")
-            f.write(f"certfile {ssl_dir / 'server.crt'}\n")
-            f.write(f"keyfile {ssl_dir / 'server.key'}\n")
 
 def check_sys_tree(http_conn):
     # systree API
@@ -102,14 +90,31 @@ def check_sys_tree_missing(http_conn):
 
 
 mqtt_port, http_port = mosq_test.get_port(2)
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, mqtt_port, http_port)
+broker_config = BrokerConfig(
+    listeners = [
+        ListenerConfig(port=mqtt_port),
+        ListenerConfig(
+            port=http_port,
+            protocol="http_api",
+            certfile=f"{ssl_dir / 'server.crt'}",
+            keyfile=f"{ssl_dir / 'server.key'}",
+        )
+    ],
+    allow_anonymous=True,
+)
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=mqtt_port)
-
-rc = 1
-
-try:
+if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+    broker_config.listeners.append(
+        ListenerConfig(
+            port=0,
+            address=f"{mqtt_port}.sock",
+            certfile=f"{ssl_dir / 'server.crt'}",
+            keyfile=f"{ssl_dir / 'server.key'}",
+        )
+    )
+broker = MosquittoBroker(config=broker_config)
+broker.add_extra_file(f"{mqtt_port}.sock")
+with broker:
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.load_verify_locations(cafile=ssl_dir / "all-ca.crt")
@@ -165,25 +170,3 @@ try:
         check_sys_tree(http_conn)
     else:
         check_sys_tree_missing(http_conn)
-
-    rc = 0
-except mosq_test.TestError:
-    pass
-except Exception as e:
-    print(e)
-finally:
-    os.remove(conf_file)
-    try:
-        os.remove(f"{mqtt_port}.sock")
-    except FileNotFoundError:
-        pass
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc != 0:
-        print(mosq_test.broker_log(broker))
-        rc = 1
-
-
-exit(rc)

@@ -1,28 +1,14 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
+
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 import http.client
 import json
 import re
 
 mosq_test.require_features(["WITH_HTTP_API"])
-
-def write_config(filename, mqtt_port, ws_port, http_port):
-    with open(filename, 'w') as f:
-        f.write(f"allow_anonymous true\n")
-        f.write(f"listener {mqtt_port}\n")
-
-        f.write(f"listener {http_port}\n")
-        f.write("protocol http_api\n")
-
-        if mosq_test.check_features(["WITH_TLS", "WITH_UNIX_SOCKETS"]):
-            f.write(f"listener 0 {mqtt_port}.sock\n")
-            f.write(f"certfile {ssl_dir}/server.crt\n")
-            f.write(f"keyfile {ssl_dir}/server.key\n")
-
-        if mosq_test.check_features(["WITH_WEBSOCKETS"]):
-            f.write(f"listener {ws_port}\n")
-            f.write("protocol websockets\n")
 
 def check_sys_tree(http_conn):
     http_conn.request("GET", "/api/v1/systree")
@@ -98,14 +84,35 @@ def check_sys_tree_missing(http_conn):
 
 
 mqtt_port, ws_port, http_port = mosq_test.get_port(3)
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, mqtt_port, ws_port, http_port)
+broker_config = BrokerConfig(
+    allow_anonymous=True,
+    listeners = [
+        ListenerConfig(port=mqtt_port),
+        ListenerConfig(
+            port=http_port,
+            protocol="http_api",
+        ),
+    ]
+)
+if mosq_test.check_features(["WITH_TLS", "WITH_UNIX_SOCKETS"]):
+    broker_config.listeners.append(
+        ListenerConfig(
+            port=0,
+            address=f"{mqtt_port}.sock",
+            certfile=f"{ssl_dir}/server.crt",
+            keyfile=f"{ssl_dir}/server.key",
+        )
+    )
+if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+    broker_config.listeners.append(
+        ListenerConfig(
+            port=ws_port,
+            protocol="websockets"
+        )
+    )
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=mqtt_port)
-
-rc = 1
-
-try:
+broker = MosquittoBroker(config=broker_config)
+with broker:
     http_conn = http.client.HTTPConnection(f"localhost:{http_port}")
 
     # Bad request type
@@ -176,26 +183,3 @@ try:
     payload = response.read().decode('utf-8')
     if not re.match(r'^\d+\.\d+\.\d+.*$', payload):
         raise ValueError(f"Error: /api/v1/version\n{payload}")
-
-
-    rc = 0
-except mosq_test.TestError:
-    pass
-except Exception as e:
-    print(e)
-finally:
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    os.remove(conf_file)
-    try:
-        os.remove(f"{mqtt_port}.sock")
-    except FileNotFoundError:
-        pass
-    if rc != 0:
-        print(mosq_test.broker_log(broker))
-        rc = 1
-
-
-exit(rc)

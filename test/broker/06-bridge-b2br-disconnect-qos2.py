@@ -4,18 +4,10 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
+from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
+from mosquitto_broker import MosquittoBroker
 
-def write_config(filename, port1, port2, protocol_version):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port2))
-        f.write("\n")
-        f.write("connection bridge_sample\n")
-        f.write("address localhost:%d\n" % (port1))
-        f.write("topic bridge/# both 2\n")
-        f.write("notifications false\n")
-        f.write("restart_timeout 2\n")
-        f.write("bridge_protocol_version %s\n" % (protocol_version))
+mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
 def do_test(proto_ver):
     if proto_ver == 4:
@@ -25,11 +17,6 @@ def do_test(proto_ver):
         bridge_protocol = "mqttv50"
         proto_ver_connect = 5
 
-    (port1, port2) = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port1, port2, bridge_protocol)
-
-    rc = 1
     client_id = socket.gethostname()+".bridge_sample"
     properties = mqtt5_props.gen_uint16_prop(mqtt5_props.TOPIC_ALIAS_MAXIMUM, 10)
     properties += mqtt5_props.gen_uint16_prop(mqtt5_props.RECEIVE_MAXIMUM, 20)
@@ -60,9 +47,23 @@ def do_test(proto_ver):
     pubrel_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
     pubcomp_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
+    (port1, port2) = mosq_test.get_port(2)
+
     ssock = mosq_test.listen_sock(port1)
 
-    try:
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port2) ],
+        bridges = [MQTTBridgeConfig(
+            connection="bridge_sample",
+            address=f"localhost:{port1}",
+            topics=["bridge/# both 2"],
+            notifications=False,
+            restart_timeout=2,
+            bridge_protocol_version=bridge_protocol,
+        )],
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
@@ -105,30 +106,8 @@ def do_test(proto_ver):
         bridge.send(pubrel_packet)
 
         mosq_test.expect_packet(bridge, "pubcomp", pubcomp_packet)
-        rc = 0
-
         bridge.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        try:
-            bridge.close()
-        except NameError:
-            pass
-
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        ssock.close()
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-
-exit(0)
-

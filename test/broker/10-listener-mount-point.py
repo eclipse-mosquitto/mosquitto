@@ -2,17 +2,8 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port1, port2):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port1))
-        f.write("allow_anonymous true\n")
-        f.write("\n")
-        f.write("listener %d\n" % (port2))
-        f.write("allow_anonymous true\n")
-        f.write("mount_point mount/\n")
-        f.write("\n")
-        f.write("log_type debug\n")
-
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 
 def helper(port, proto_ver):
     connect_packet = mqtt_packets.gen_connect("10-listener-mount-helper", proto_ver=proto_ver)
@@ -26,11 +17,6 @@ def helper(port, proto_ver):
 
 
 def do_test(proto_ver):
-    (port1, port2) = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port1, port2)
-
-    rc = 1
     mid = 1
 
     # Subscriber for listener with mount point
@@ -47,9 +33,20 @@ def do_test(proto_ver):
     suback_packet2 = mqtt_packets.gen_suback(mid, 0, proto_ver=proto_ver)
     publish_packet2 = mqtt_packets.gen_publish("10/listener/mount/test", qos=0, payload="mount point", proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port1)
-
-    try:
+    (port1, port2) = mosq_test.get_port(2)
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [
+            ListenerConfig(port=port1),
+            ListenerConfig(
+                port=port2,
+                mount_point="mount/",
+            )
+        ],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         sock1 = mosq_test.do_client_connect(connect_packet1, connack_packet1, timeout=20, port=port1)
         mosq_test.do_send_receive(sock1, subscribe_packet1, suback_packet1, "suback1")
 
@@ -61,24 +58,9 @@ def do_test(proto_ver):
 
         mosq_test.expect_packet(sock1, "publish1", publish_packet1)
         mosq_test.expect_packet(sock2, "publish2", publish_packet2)
-        rc = 0
-
         sock1.close()
         sock2.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-exit(0)

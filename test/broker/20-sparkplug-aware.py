@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 from mosq_test_helper import *
+
+from broker_config import BrokerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 import uuid
 
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_SPARKPLUG_AWARE"])
@@ -10,11 +13,6 @@ client_id = "test-client"
 username = None
 password = None
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write(f"plugin {mosq_paths.plugin_sparkplug_aware}\n")
 
 def proc(port, proto_ver):
     group_id = str(uuid.uuid4())
@@ -228,28 +226,15 @@ def proc(port, proto_ver):
 
 
 def do_tests():
-    rc = 1
     port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker_config = BrokerConfig(
+        plugins=[PluginConfig(mosq_paths.plugin_sparkplug_aware)],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(port=port, config=broker_config)
+    with broker:
         proc(port, 4)
         proc(port, 5)
-
-        rc = 0
-    except Exception as e:
-        print(e)
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 if __name__ == '__main__':
     do_tests()

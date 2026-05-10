@@ -3,36 +3,13 @@
 # Test $CONTROL/broker/v1 listListeners
 
 from mosq_test_helper import *
+
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 import json
 import shutil
 
 mosq_test.require_features(["WITH_CONTROL"])
-
-def write_config(filename, ports):
-    with open(filename, 'w') as f:
-        f.write("enable_control_api true\n")
-        f.write("allow_anonymous true\n")
-        f.write("listener %d\n" % (ports[0]))
-        f.write("protocol mqtt\n")
-        if mosq_test.check_features(["WITH_WEBSOCKETS"]):
-            f.write("listener %d\n" % (ports[1]))
-            f.write("protocol websockets\n")
-        if mosq_test.check_features(["WITH_TLS"]):
-            f.write("listener %d\n" % (ports[2]))
-            f.write("protocol mqtt\n")
-            f.write(f"certfile {ssl_dir}/server.crt\n")
-            f.write(f"keyfile {ssl_dir}/server.key\n")
-        if mosq_test.check_features(["WITH_TLS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
-            f.write("listener %d\n" % (ports[3]))
-            f.write("protocol websockets\n")
-            f.write(f"certfile {ssl_dir}/server.crt\n")
-            f.write(f"keyfile {ssl_dir}/server.key\n")
-        if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
-            f.write("listener 0 17-list-listeners-mqtt.sock\n")
-            f.write("protocol mqtt\n")
-        if mosq_test.check_features(["WITH_UNIX_SOCKETS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
-            f.write("listener 0 17-list-listeners-websockets.sock\n")
-            f.write("protocol websockets\n")
 
 def command_check(sock, command_payload, expected_response):
     command_packet = mqtt_packets.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))
@@ -53,11 +30,47 @@ def invalid_command_check(sock, command_payload, cmd_name, error_msg):
         print(response)
         raise ValueError(response)
 
-
-
 ports = mosq_test.get_port(4)
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, ports)
+broker_config = BrokerConfig(
+    listeners = [
+        ListenerConfig(
+            port=ports[0],
+            protocol="mqtt"
+        )
+    ],
+    allow_anonymous=True,
+    enable_control_api=True
+)
+if mosq_test.check_features(["WITH_WEBSOCKETS"]):
+    broker_config.listeners.append(ListenerConfig(
+        port=ports[1],
+        protocol="websockets"
+    ))
+if mosq_test.check_features(["WITH_TLS"]):
+    broker_config.listeners.append(ListenerConfig(
+        port=ports[2],
+        protocol="mqtt",
+        certfile=ssl_dir/"server.crt",
+        keyfile=ssl_dir/"server.key",
+    ))
+if mosq_test.check_features(["WITH_TLS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+    broker_config.listeners.append(ListenerConfig(
+        port=ports[3],
+        protocol="websockets",
+        certfile=ssl_dir/"server.crt",
+        keyfile=ssl_dir/"server.key",
+    ))
+if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
+    broker_config.listeners.append(ListenerConfig(
+        port=0,
+        address="17-list-listeners-mqtt.sock",
+    ))
+if mosq_test.check_features(["WITH_UNIX_SOCKETS", "WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"]):
+    broker_config.listeners.append(ListenerConfig(
+        port=0,
+        address="17-list-listeners-websockets.sock",
+        protocol="websockets",
+    ))
 
 cmd_success = {"commands":[{"command": "listListeners", "correlationData": "m3CtYVnySLCOwnHzITSeowvgla0InV4G"}]}
 
@@ -119,9 +132,10 @@ mid = 2
 subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/broker/#", 0)
 suback_packet = mqtt_packets.gen_suback(mid, 0)
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=ports[0])
-
-try:
+broker = MosquittoBroker(config=broker_config)
+for f in ["17-list-listeners-mqtt.sock", "17-list-listeners-websockets.sock"]:
+    broker.add_extra_file(f)
+with broker:
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=ports[0])
     mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -142,25 +156,3 @@ try:
 
     command_check(sock, cmd_success, response_success)
     mosq_test.do_ping(sock)
-
-    rc = 0
-
-    sock.close()
-except mosq_test.TestError:
-    pass
-finally:
-    os.remove(conf_file)
-    for f in ["17-list-listeners-mqtt.sock", "17-list-listeners-websockets.sock"]:
-        try:
-            os.remove(f)
-        except FileNotFoundError:
-            pass
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-
-
-exit(rc)

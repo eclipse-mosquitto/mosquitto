@@ -2,18 +2,11 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"auth_plugin {mosq_paths.test_plugin(f'auth_plugin_publish')}\n")
-        f.write("allow_anonymous true\n")
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 proto_ver = 5
-port = mosq_test.get_port()
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, port)
 
-rc = 1
 connect1_packet = mqtt_packets.gen_connect("test-client", username="readwrite", clean_session=False, proto_ver=proto_ver)
 connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
@@ -45,9 +38,14 @@ pubrec2p_packet = mqtt_packets.gen_pubrec(mid, proto_ver=proto_ver)
 pubrel2p_packet = mqtt_packets.gen_pubrel(mid, proto_ver=proto_ver)
 pubcomp2p_packet = mqtt_packets.gen_pubcomp(mid, proto_ver=proto_ver)
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-try:
+port = mosq_test.get_port()
+broker_config = BrokerConfig(
+    listeners = [ ListenerConfig(port=port) ],
+    plugins = [ PluginConfig(path=mosq_paths.test_plugin('auth_plugin_publish')) ],
+    allow_anonymous=True,
+)
+broker = MosquittoBroker(config=broker_config)
+with broker:
     sock = mosq_test.do_client_connect(connect1_packet, connack1_packet, timeout=20, port=port)
 
     # Trigger the plugin to send us some messages
@@ -72,19 +70,4 @@ try:
     sock.send(pubcomp2p_packet)
 
     mosq_test.do_ping(sock)
-
-    rc = 0
     sock.close()
-except mosq_test.TestError:
-    pass
-finally:
-    os.remove(conf_file)
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-
-
-exit(rc)

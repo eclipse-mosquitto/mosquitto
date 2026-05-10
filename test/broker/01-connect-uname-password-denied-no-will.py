@@ -5,13 +5,10 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["WITH_TLS"])
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 
-def write_config(filename, port, pw_file):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("password_file %s\n" % (pw_file))
-        f.write("allow_anonymous false\n")
+mosq_test.require_features(["WITH_TLS"])
 
 def write_pwfile(filename):
     with open(filename, 'w') as f:
@@ -21,12 +18,7 @@ def write_pwfile(filename):
 
 def do_test(proto_ver):
     pw_file = os.path.basename(__file__).replace('.py', '.pwfile')
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port, pw_file)
     write_pwfile(pw_file)
-
-    rc = 1
     connect1_packet = mqtt_packets.gen_connect("connect-uname-pwd-test", username="user", password="password", will_topic="will/test", will_payload=b"will msg", proto_ver=proto_ver)
     connack1_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
 
@@ -40,9 +32,15 @@ def do_test(proto_ver):
     else:
         connack2_packet = mqtt_packets.gen_connack(rc=5, proto_ver=proto_ver)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        allow_anonymous=False,
+        password_file=os.path.basename(__file__).replace('.py', '.pwfile')
+    )
+    broker = MosquittoBroker(config=broker_config)
+    broker.add_extra_file(pw_file)
+    with broker:
         sock1 = mosq_test.do_client_connect(connect1_packet, connack1_packet, port=port)
         mosq_test.do_send_receive(sock1, subscribe_packet, suback_packet)
 
@@ -52,23 +50,7 @@ def do_test(proto_ver):
         # If we receive a will here, this is an error
         mosq_test.do_ping(sock1)
         sock1.close()
-        rc = 0
-
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        os.remove(pw_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-exit(0)

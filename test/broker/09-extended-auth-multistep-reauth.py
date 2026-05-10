@@ -2,17 +2,8 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write(f"auth_plugin {mosq_paths.test_plugin('auth_plugin_extended_multiple')}\n")
-
-port = mosq_test.get_port()
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, port)
-
-rc = 1
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 
 # First auth
 # ==========
@@ -63,9 +54,13 @@ reauth3_packet = mqtt_packets.gen_auth(reason_code=mqtt5_rc.REAUTHENTICATE, prop
 disconnect3_packet = mqtt_packets.gen_disconnect(reason_code=mqtt5_rc.PROTOCOL_ERROR, proto_ver=5)
 
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-try:
+port = mosq_test.get_port()
+broker_config = BrokerConfig(
+    listeners = [ ListenerConfig(port=port) ],
+    plugins = [ PluginConfig(path=mosq_paths.test_plugin('auth_plugin_extended_multiple')) ],
+)
+broker = MosquittoBroker(config=broker_config)
+with broker:
     sock = mosq_test.do_client_connect(connect1_packet, auth1_1_packet, timeout=20, port=port, connack_error="auth1")
     mosq_test.do_send_receive(sock, auth1_2_packet, connack1_packet, "connack1")
     mosq_test.do_ping(sock, "pingresp1")
@@ -75,21 +70,4 @@ try:
     mosq_test.do_ping(sock, "pingresp2")
 
     mosq_test.do_send_receive(sock, reauth3_packet, disconnect3_packet, "disconnect3")
-
-    rc = 0
-
     sock.close()
-except mosq_test.TestError:
-    pass
-finally:
-    os.remove(conf_file)
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-
-
-exit(rc)
-

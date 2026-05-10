@@ -3,17 +3,13 @@
 # Test $CONTROL/broker/v1 listListeners
 
 from mosq_test_helper import *
+
+from broker_config import BrokerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
 import json
 import shutil
 
 mosq_test.require_features(["WITH_CONTROL"])
-
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("enable_control_api true\n")
-        f.write("allow_anonymous true\n")
-        f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_paths.test_plugin('auth_plugin_v5_control')}\n")
 
 def command_check(sock, command_payload, expected_response):
     command_packet = mqtt_packets.gen_publish(topic="$CONTROL/broker/v1", qos=0, payload=json.dumps(command_payload))
@@ -36,10 +32,6 @@ def invalid_command_check(sock, command_payload, cmd_name, error_msg):
 
 
 
-port = mosq_test.get_port()
-conf_file = os.path.basename(__file__).replace('.py', '.conf')
-write_config(conf_file, port)
-
 cmd_success = {"commands":[{"command": "listPlugins", "correlationData": "m3CtYVnySLCOwnHzITSeowvgla0InV4G"}]}
 
 response_success = {'responses': [{'command': 'listPlugins', "correlationData": "m3CtYVnySLCOwnHzITSeowvgla0InV4G", 'data':{
@@ -58,9 +50,16 @@ mid = 2
 subscribe_packet = mqtt_packets.gen_subscribe(mid, "$CONTROL/broker/#", 0)
 suback_packet = mqtt_packets.gen_suback(mid, 0)
 
-broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-try:
+port = mosq_test.get_port()
+broker_config = BrokerConfig(
+    plugins=[PluginConfig(path=mosq_paths.test_plugin('auth_plugin_v5_control'))],
+    allow_anonymous=True,
+    enable_control_api=True,
+)
+broker = MosquittoBroker(port=port, config=broker_config)
+for f in ["17-list-listeners-mqtt.sock", "17-list-listeners-websockets.sock"]:
+    broker.add_extra_file(f)
+with broker:
     sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
     mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -81,25 +80,4 @@ try:
 
     command_check(sock, cmd_success, response_success)
     mosq_test.do_ping(sock)
-
-    rc = 0
-
     sock.close()
-except mosq_test.TestError:
-    pass
-finally:
-    os.remove(conf_file)
-    for f in ["17-list-listeners-mqtt.sock", "17-list-listeners-websockets.sock"]:
-        try:
-            os.remove(f)
-        except FileNotFoundError:
-            pass
-    mosq_test.terminate_broker(broker)
-    if mosq_test.wait_for_subprocess(broker):
-        print("broker not terminated")
-        if rc == 0: rc=1
-    if rc:
-        print(mosq_test.broker_log(broker))
-
-
-exit(rc)

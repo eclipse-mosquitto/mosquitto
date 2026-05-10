@@ -4,42 +4,26 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("max_keepalive 100\n")
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
+
 
 def do_test(proto_ver):
-    rc = 1
-
     connect_packet = mqtt_packets.gen_connect("max-keepalive", keepalive=101, proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=2, proto_ver=proto_ver)
 
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
     socks = []
-    try:
+
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        allow_anonymous=True,
+        max_keepalive=100,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         sock.close()
-        rc = 0
-    except mosq_test.TestError:
-        pass
-    except Exception as err:
-        print(err)
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 do_test(3)
 do_test(4)
-exit(0)

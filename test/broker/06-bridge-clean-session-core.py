@@ -179,7 +179,7 @@ def do_test(proto_ver, cs, lcs=None):
         if mosq_test.wait_for_subprocess(broker_b):
             print("broker_b not terminated")
             broker_termination_success = False
-        stde_b1 = broker_log(broker_b)
+        stde_b1 = mosq_test.broker_log(broker_b)
 
         # as we're _terminating_ the connections should close ~straight away
         tprint("terminated B", time.time())
@@ -254,8 +254,8 @@ def do_test(proto_ver, cs, lcs=None):
         if mosq_test.wait_for_subprocess(broker_b):
             print("broker_b not terminated")
             success = False
-        stde_a = broker_log(broker_a)
-        stde_b = broker_log(broker_b)
+        stde_a = mosq_test.broker_log(broker_a)
+        stde_b = mosq_test.broker_log(broker_b)
         # Must be after terminating!
         try:
             os.remove(persistence_file_a)
@@ -268,7 +268,7 @@ def do_test(proto_ver, cs, lcs=None):
         if not success:
             print("Test failed, dumping broker A logs: ")
             if stde_a1:
-                print(stde_a1))
+                print(stde_a1)
             print(stde_a)
             print("Test failed, dumping broker B logs: ")
             if stde_b1:

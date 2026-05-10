@@ -4,28 +4,23 @@
 
 from mosq_test_helper import *
 
-mosq_test.require_features(["WITH_TLS"])
+from broker_config import BrokerConfig, ListenerConfig
+from mosquitto_broker import MosquittoBroker
 
-def write_config(filename, port, allow_anonymous, password_file):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        if allow_anonymous:
-            f.write("allow_anonymous true\n")
-        else:
-            f.write("allow_anonymous false\n")
-        if password_file:
-            f.write("password_file %s/%s\n" % (Path(__file__).resolve().parent, filename.replace('.conf', '.pwfile')))
+mosq_test.require_features(["WITH_TLS"])
 
 def do_test(allow_anonymous, password_file, username, expect_success):
     port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port, allow_anonymous, password_file)
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port) ],
+        allow_anonymous=allow_anonymous,
+    )
+    if password_file:
+        broker_config.password_file = Path(__file__).resolve().parent / os.path.basename(__file__).replace('.py', '.pwfile')
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         for proto_ver in [3, 4, 5]:
-            rc = 1
             if username:
                 connect_packet = mqtt_packets.gen_connect("connect-test-%d" % (proto_ver), proto_ver=proto_ver, username="user", password="password")
             else:
@@ -45,19 +40,6 @@ def do_test(allow_anonymous, password_file, username, expect_success):
 
             sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
             sock.close()
-            rc = 0
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d, allow_anonymous=%d, password_file=%d, username=%d" % (proto_ver, allow_anonymous, password_file, username))
-            exit(rc)
 
 
 do_test(allow_anonymous=True,  password_file=True,  username=True,  expect_success=True)
@@ -68,5 +50,3 @@ do_test(allow_anonymous=False, password_file=True,  username=True,  expect_succe
 do_test(allow_anonymous=False, password_file=True,  username=False, expect_success=False)
 do_test(allow_anonymous=False, password_file=False, username=True,  expect_success=False)
 do_test(allow_anonymous=False, password_file=False, username=False, expect_success=False)
-
-exit(0)

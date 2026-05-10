@@ -4,20 +4,11 @@
 
 from mosq_test_helper import *
 
+from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
+from mosquitto_broker import MosquittoBroker
+
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
-def write_config(filename, port1, port2, protocol_version):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port2))
-        f.write("allow_anonymous true\n")
-        f.write("\n")
-        f.write("connection bridge_sample\n")
-        f.write("address localhost:%d\n" % (port1))
-        f.write("topic bridge/# out 1\n")
-        f.write("notifications false\n")
-        f.write("bridge_attempt_unsubscribe false\n")
-        f.write("bridge_max_topic_alias 0\n")
-        f.write("bridge_protocol_version %s\n" % (protocol_version))
 
 def do_test(proto_ver):
     if proto_ver == 4:
@@ -27,11 +18,6 @@ def do_test(proto_ver):
         bridge_protocol = "mqttv50"
         proto_ver_connect = 5
 
-    (port1, port2) = mosq_test.get_port(2)
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port1, port2, bridge_protocol)
-
-    rc = 1
     client_id = socket.gethostname()+".bridge_sample"
     connect_packet = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=proto_ver_connect)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -43,11 +29,25 @@ def do_test(proto_ver):
     publish_packet = mqtt_packets.gen_publish("bridge/test", qos=1, mid=mid, payload="message", proto_ver=proto_ver)
     puback_packet = mqtt_packets.gen_puback(mid, proto_ver=proto_ver)
 
+    (port1, port2) = mosq_test.get_port(2)
+
     ssock = mosq_test.listen_sock(port1)
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), port=port2, use_conf=True)
-
-    try:
+    broker_config = BrokerConfig(
+        listeners = [ ListenerConfig(port=port2) ],
+        bridges = [MQTTBridgeConfig(
+            connection="bridge_sample",
+            address=f"localhost:{port1}",
+            bridge_attempt_unsubscribe=False,
+            bridge_max_topic_alias=0,
+            bridge_protocol_version=bridge_protocol,
+            notifications=False,
+            topics=["bridge/# out 1"],
+        )],
+        allow_anonymous=True,
+    )
+    broker = MosquittoBroker(config=broker_config)
+    with broker:
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
 
@@ -60,29 +60,8 @@ def do_test(proto_ver):
         bridge.send(connack_packet)
 
         mosq_test.expect_packet(bridge, "publish", publish_packet)
-        rc = 0
-
         bridge.close()
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        try:
-            bridge.close()
-        except NameError:
-            pass
 
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        ssock.close()
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-
-exit(0)
-

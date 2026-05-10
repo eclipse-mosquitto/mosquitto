@@ -376,3 +376,4 @@ endif
 
 23:
 	./23-security-acl-file-reload.py
+	./23-security-password-file-reload.py

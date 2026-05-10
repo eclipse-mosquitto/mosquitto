@@ -2,59 +2,56 @@
 
 from mosq_test_helper import *
 
+from broker_config import BrokerConfig, ListenerConfig, PluginConfig
+from mosquitto_broker import MosquittoBroker
+
 mosq_test.require_features(["WITH_PLUGINS", "WITH_PLUGIN_PASSWORD_FILE", "WITH_TLS"])
 
-def write_config_default(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"password_file {port}.password\n")
-        f.write("allow_anonymous true\n")
+def broker_config_default(port):
+    return BrokerConfig(
+        listeners=[ListenerConfig(port=port)],
+        allow_anonymous=True,
+        password_file=f"{port}.password",
+    )
+
+def broker_config_plugin(port):
+    return BrokerConfig(
+        listeners=[ListenerConfig(port=port)],
+        plugins=[PluginConfig(
+            path=mosq_paths.plugin_password_file,
+            options={
+                "plugin_opt_password_file": f"{port}.password"
+            }
+        )],
+        allow_anonymous=True,
+        password_file=f"{port}.password",
+    )
 
 
-def write_config_plugin(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write(f"plugin {mosq_paths.plugin_password_file}\n")
-        f.write(f"plugin_opt_password_file {port}.password\n")
-        f.write("allow_anonymous true\n")
-
-
-def do_test(write_config_func):
-    port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config_func(conf_file, port)
-
-    rc = 1
+def do_test(broker_config_func):
     connect_packet = mqtt_packets.gen_connect("password-change-test")
     connack_packet = mqtt_packets.gen_connack(rc=0)
 
+    port = mosq_test.get_port()
     with open(f"{port}.password", "wt") as f:
         f.write("test:$7$1000$97ozvObcN5zP4MGzYUw4uRp8+mPQbThrHOX69vdHHNVwV4iZf2K2X23FS7weilZMKeV+9oLHdilybmpXcFApYg==$WlM0jUhsiQNQJe4IDt5K1rmtAdaenWGdntswJmDkp74W9pdrt/+RdIK3YaJ09o3pD1xbtokXq933bQh+CrjA4Q==\n")
 
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker_config = broker_config_func(port)
+    broker = MosquittoBroker(config=broker_config, expect_fail=True)
+    broker.add_extra_file(f"{port}.acl")
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, port=port)
         sock.close()
 
         with open(f"{port}.password", "wt") as f:
             f.write("test:bad\n")
 
-        mosq_test.reload_broker(broker)
+        broker.reload()
         # Broker should terminate
-        if mosq_test.wait_for_subprocess(broker) == 0 and broker.returncode == 3:
-            rc = 0
-    except mosq_test.TestError:
-        pass
-    except Exception as err:
-        print(err)
-    finally:
-        os.remove(conf_file)
-        os.remove(f"{port}.password")
-        mosq_test.terminate_broker(broker)
-        if rc:
-            print(mosq_test.broker_log(broker))
-            exit(rc)
+        if mosq_test.wait_for_subprocess(broker.process) == 0 and broker.process.returncode == 3:
+            pass
+        else:
+            raise RuntimeError("broker not terminated")
 
-do_test(write_config_default)
-do_test(write_config_plugin)
+do_test(broker_config_default)
+do_test(broker_config_plugin)

@@ -4,14 +4,10 @@
 
 from mosq_test_helper import *
 
-def write_config(filename, port):
-    with open(filename, 'w') as f:
-        f.write("listener %d\n" % (port))
-        f.write("allow_anonymous true\n")
-        f.write("message_size_limit 1\n")
+from broker_config import BrokerConfig
+from mosquitto_broker import MosquittoBroker
 
 def do_test(proto_ver):
-    rc = 1
     mid = 53
     connect_packet = mqtt_packets.gen_connect("subpub-qos1-oversize", proto_ver=proto_ver)
     connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=proto_ver)
@@ -34,12 +30,12 @@ def do_test(proto_ver):
         puback_packet_bad = mqtt_packets.gen_puback(mid=mid, proto_ver=proto_ver)
 
     port = mosq_test.get_port()
-    conf_file = os.path.basename(__file__).replace('.py', '.conf')
-    write_config(conf_file, port)
-
-    broker = mosq_test.start_broker(filename=os.path.basename(__file__), use_conf=True, port=port)
-
-    try:
+    broker_config = BrokerConfig(
+        allow_anonymous=True,
+        message_size_limit=1,
+    )
+    broker = MosquittoBroker(port=port, config=broker_config)
+    with broker:
         sock = mosq_test.do_client_connect(connect_packet, connack_packet, timeout=20, port=port)
         mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
 
@@ -55,27 +51,7 @@ def do_test(proto_ver):
 
         # The subscribing client shouldn't have received a PUBLISH
         mosq_test.do_ping(sock)
-        rc = 0
-
-        sock.close()
-    except SyntaxError:
-        raise
-    except TypeError:
-        raise
-    except mosq_test.TestError:
-        pass
-    finally:
-        os.remove(conf_file)
-        mosq_test.terminate_broker(broker)
-        if mosq_test.wait_for_subprocess(broker):
-            print("broker not terminated")
-            if rc == 0: rc=1
-        if rc:
-            print(mosq_test.broker_log(broker))
-            print("proto_ver=%d" % (proto_ver))
-            exit(rc)
 
 
 do_test(proto_ver=4)
 do_test(proto_ver=5)
-exit(0)
