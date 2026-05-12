@@ -24,6 +24,7 @@ class ListenerConfig:
     listener_auto_id_prefix: Optional[str] = None
     mount_point: Optional[str] = None
     protocol: Optional[str] = None
+    proxy_protocol_v2_require_tls: Optional[bool] = None
     psk_hint: Optional[str] = None
     require_certificate: Optional[bool] = None
     use_identity_as_username: Optional[bool] = None

@@ -103,6 +103,12 @@ class MosquittoBroker:
     def is_running(self):
         return self._process and self._process.poll() is None
 
+    def check_log(self, matcher):
+        if not matcher(self.get_log()):
+            raise AssertionError(f"{matcher.last_message}")
+        else:
+            logging.info(f"{self} Check log {matcher}")
+
     def get_log(self):
         return mosq_test.broker_log(self._process)
 

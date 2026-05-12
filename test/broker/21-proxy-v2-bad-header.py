@@ -17,7 +17,12 @@ connack_packet = mqtt_packets.gen_connack(rc=0, proto_ver=5)
 def do_test(headers):
     port = mosq_test.get_port()
     broker_config = BrokerConfig(
-        listeners=[ ListenerConfig(port=port, enable_proxy_protocol=2) ],
+        listeners=[
+            ListenerConfig(
+                port=port,
+                enable_proxy_protocol=2
+            )
+        ],
         allow_anonymous=True,
     )
     broker = MosquittoBroker(config=broker_config)
