@@ -10,7 +10,7 @@ try:
     import psutil
 except ModuleNotFoundError:
     print("WARNING: Test not running due to missing psutil module")
-    exit(0)
+    exit(77)
 
 
 def do_send(port, socks, payload):
