@@ -45,7 +45,10 @@ else:
     sigint = signal.SIGINT
     sigusr1 = signal.SIGUSR1
     sigusr2 = signal.SIGUSR2
-    sigrtmin = signal.SIGRTMIN
+    try:
+        sigrtmin = signal.SIGRTMIN
+    except AttributeError:
+        sigrtmin = None
 
 pid = os.getpid()
 
