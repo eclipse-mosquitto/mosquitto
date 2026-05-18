@@ -22,7 +22,7 @@ broker_config = BrokerConfig(
             port=http_port,
             address="127.0.01",
             protocol="http_api",
-            http_dir=".",
+            http_dir=Path("."),
         )
     ],
     allow_anonymous=True
