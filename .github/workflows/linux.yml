@@ -1,20 +1,20 @@
-name: ASAN
+name: Linux
 
 on:
   workflow_dispatch:
   push:
     branches:
       - master
-      - develop
       - fixes
+      - develop
       - release/*
     tags:
       - 'v[0-9]+.*'
   pull_request:
     branches:
       - master
-      - develop
       - fixes
+      - develop
       - release/*
 
 jobs:
@@ -26,9 +26,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          ccache \
-          clang \
           docbook-xsl \
+          ccache \
           lcov \
           libargon2-dev \
           libc-ares-dev \
@@ -40,8 +39,8 @@ jobs:
           libmicrohttpd-dev \
           libssl-dev \
           libwrap0-dev \
-          microsocks \
           ninja-build \
+          microsocks \
           python3-all \
           python3-paho-mqtt \
           python3-psutil \
@@ -59,7 +58,7 @@ jobs:
       uses: actions/cache@v5
       with:
         path: ccache
-        key: ${{ runner.os }}-asan-ccache
+        key: ${{ runner.os }}-cmake-ccache
 
     - run: cmake -E make_directory build
 
@@ -67,15 +66,11 @@ jobs:
         cmake \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=Debug \
-          -DWITH_SHARED_LIBCOMMON=ON \
           -S . \
           -B build
       env:
-        CC: "ccache clang"
-        CXX: "ccache clang++"
-        CFLAGS: "-fsanitize=address -fno-omit-frame-pointer"
-        CXXFLAGS: "-fsanitize=address -fno-omit-frame-pointer"
-        LDFLAGS: "-fsanitize=address -fno-omit-frame-pointer -static-libsan"
+        CC: "ccache gcc"
+        CXX: "ccache g++"
 
     - run: cmake --build build --parallel $(nproc)
 
