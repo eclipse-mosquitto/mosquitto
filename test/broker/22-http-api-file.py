@@ -32,7 +32,13 @@ write_index(mqtt_port)
 broker = MosquittoBroker(config=broker_config)
 broker.add_extra_file("index.html")
 with broker:
-    http_conn = http.client.HTTPConnection(f"localhost:{http_port}")
+    for i in range(10):
+        try:
+            http_conn = http.client.HTTPConnection(f"localhost:{http_port}")
+            break
+        except ConnectionRefusedError:
+            # Windows CI can be slow to start up
+            time.sleep(0.5)
 
     # Bad request
     http_conn.request("POST", "/post")
