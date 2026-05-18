@@ -19,14 +19,22 @@ RUN set -x && \
     apt-get install -y \
         build-essential \
         cmake \
+        docbook-xsl \
         gnupg \
         libargon2-dev \
         libcjson-dev \
+        libcunit1-dev \
         libedit-dev \
+        libeditreadline-dev \
+        libgmock-dev \
+        libgtest-dev \
         libmicrohttpd-dev \
-        libssl-dev \
         libsqlite3-dev \
-        wget && \
+        libssl-dev \
+        ninja-build \
+        uthash-dev \
+        wget \
+        xsltproc && \
     wget https://mosquitto.org/files/source/mosquitto-${VERSION}.tar.gz -O /tmp/mosq.tar.gz && \
     echo "$DOWNLOAD_SHA256  /tmp/mosq.tar.gz" | sha256sum -c - && \
     wget https://mosquitto.org/files/source/mosquitto-${VERSION}.tar.gz.asc -O /tmp/mosq.tar.gz.asc && \
@@ -47,33 +55,31 @@ RUN set -x && \
     mkdir -p /build/mosq && \
     tar --strip=1 -xf /tmp/mosq.tar.gz -C /build/mosq && \
     rm /tmp/mosq.tar.gz && \
-    make -C /build/mosq -j "$(nproc)" \
-        CFLAGS="-Wall -O2 -I/build -DHTTP_API_DIR=\\\"/usr/share/mosquitto/dashboard\\\"" \
-        WITH_ADNS=no \
-        WITH_DOCS=no \
-        WITH_SHARED_LIBRARIES=yes \
-        WITH_SRV=no \
-        WITH_STRIP=yes \
-        WITH_WEBSOCKETS=yes \
-        prefix=/usr \
-        binary && \
+    cmake -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DHTTP_API_DIR='\"/usr/share/mosquitto/dashboard\"' \
+        -DWITH_DOCS=OFF \
+        -S /build/mosq \
+        -B /build/mosq/build && \
+    cmake --build /build/mosq/build && \
     addgroup --system --quiet --gid 1883 mosquitto 2>/dev/null && \
     adduser --system --quiet --no-create-home --ingroup mosquitto --uid 1883 --home /var/empty --shell /usr/sbin/nologin mosquitto 2>/dev/null && \
     mkdir -p /mosquitto/config /mosquitto/data /mosquitto/log && \
     install -d /usr/sbin/ && \
-    install -s -m755 /build/mosq/client/mosquitto_pub /usr/bin/mosquitto_pub && \
-    install -s -m755 /build/mosq/client/mosquitto_rr /usr/bin/mosquitto_rr && \
-    install -s -m755 /build/mosq/client/mosquitto_sub /usr/bin/mosquitto_sub && \
-    install -s -m644 /build/mosq/lib/libmosquitto.so.1 /usr/lib/libmosquitto.so.1 && \
-    install -s -m755 /build/mosq/src/mosquitto /usr/sbin/mosquitto && \
-    install -s -m755 /build/mosq/apps/mosquitto_ctrl/mosquitto_ctrl /usr/bin/mosquitto_ctrl && \
-    install -s -m755 /build/mosq/apps/mosquitto_passwd/mosquitto_passwd /usr/bin/mosquitto_passwd && \
-    install -s -m755 /build/mosq/apps/mosquitto_signal/mosquitto_signal /usr/bin/mosquitto_signal && \
-    install -s -m755 /build/mosq/plugins/acl-file/mosquitto_acl_file.so /usr/lib/mosquitto_acl_file.so && \
-    install -s -m755 /build/mosq/plugins/dynamic-security/mosquitto_dynamic_security.so /usr/lib/mosquitto_dynamic_security.so && \
-    install -s -m755 /build/mosq/plugins/password-file/mosquitto_password_file.so /usr/lib/mosquitto_password_file.so && \
-    install -s -m755 /build/mosq/plugins/persist-sqlite/mosquitto_persist_sqlite.so /usr/lib/mosquitto_persist_sqlite.so && \
-    install -s -m755 /build/mosq/plugins/sparkplug-aware/mosquitto_sparkplug_aware.so /usr/lib/mosquitto_sparkplug_aware.so && \
+    install -s -m755 /build/mosq/build/client/mosquitto_pub /usr/bin/mosquitto_pub && \
+    install -s -m755 /build/mosq/build/client/mosquitto_rr /usr/bin/mosquitto_rr && \
+    install -s -m755 /build/mosq/build/client/mosquitto_sub /usr/bin/mosquitto_sub && \
+    install -s -m644 /build/mosq/build/lib/libmosquitto.so.1 /usr/lib/libmosquitto.so.1 && \
+    install -s -m755 /build/mosq/build/src/mosquitto /usr/sbin/mosquitto && \
+    install -s -m755 /build/mosq/build/apps/mosquitto_ctrl/mosquitto_ctrl /usr/bin/mosquitto_ctrl && \
+    install -s -m755 /build/mosq/build/apps/mosquitto_passwd/mosquitto_passwd /usr/bin/mosquitto_passwd && \
+    install -s -m755 /build/mosq/build/apps/mosquitto_signal/mosquitto_signal /usr/bin/mosquitto_signal && \
+    install -s -m755 /build/mosq/build/plugins/acl-file/mosquitto_acl_file.so /usr/lib/mosquitto_acl_file.so && \
+    install -s -m755 /build/mosq/build/plugins/dynamic-security/mosquitto_dynamic_security.so /usr/lib/mosquitto_dynamic_security.so && \
+    install -s -m755 /build/mosq/build/plugins/password-file/mosquitto_password_file.so /usr/lib/mosquitto_password_file.so && \
+    install -s -m755 /build/mosq/build/plugins/persist-sqlite/mosquitto_persist_sqlite.so /usr/lib/mosquitto_persist_sqlite.so && \
+    install -s -m755 /build/mosq/build/plugins/sparkplug-aware/mosquitto_sparkplug_aware.so /usr/lib/mosquitto_sparkplug_aware.so && \
     install -m644 /build/mosq/docker/2.1-ubuntu/mosquitto.conf /mosquitto/config/mosquitto.conf && \
     install -m644 /build/mosq/docker/2.1-ubuntu/mosquitto.conf /mosquitto-no-auth.conf && \
     install -d /usr/share/mosquitto && \
