@@ -67,8 +67,18 @@ void listeners__reload_all_certificates(void)
 	for(int i=0; i<db.config->listener_count; i++){
 		struct mosquitto__listener *listener = &db.config->listeners[i];
 		if(listener->ssl_ctx && listener->certfile && listener->keyfile){
-			int rc = net__load_certificates(listener);
-			if(rc){
+			/* Recreate the SSL_CTX from scratch to ensure a clean state on every
+			 * reload. Reusing the existing context would leave stale X509_LOOKUP
+			 * instances in the store's lookup-methods stack (net__load_crl_file()
+			 * calls X509_STORE_add_lookup() each time and there is no API to remove
+			 * entries). Recreating also ensures that any change to cafile/capath
+			 * takes effect immediately rather than requiring a full broker restart. */
+			if(net__tls_server_ctx(listener)){
+				log__printf(NULL, MOSQ_LOG_ERR, "Error recreating TLS context for certificate '%s'.",
+						listener->certfile);
+				continue;
+			}
+			if(net__tls_load_verify(listener)){
 				log__printf(NULL, MOSQ_LOG_ERR, "Error when reloading certificate '%s' or key '%s'.",
 						listener->certfile, listener->keyfile);
 			}
