@@ -46,6 +46,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install sccache
+        shell: pwsh
+        run: |
+          choco install sccache -y
+          echo "SCCACHE_DIR=$env:LOCALAPPDATA\sccache" >> $env:GITHUB_ENV
+
+      - name: Restore sccache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.LOCALAPPDATA }}\sccache
+          key: ${{ runner.os }}-${{ matrix.arch }}-windows-sccache
+
+      - name: Start sccache
+        shell: pwsh
+        run: sccache --start-server
+
       - name: vcpkg build
         uses: johnwason/vcpkg-action@v7
         id: vcpkg
@@ -65,10 +81,16 @@ jobs:
             -DVCPKG_MANIFEST_MODE=ON `
             -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} `
             -DWITH_HTTP_API=ON `
-            -DWITH_WEBSOCKETS=ON
+            -DWITH_WEBSOCKETS=ON `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
       - name: Build
         run: cmake --build ${{github.workspace}}/${{ matrix.buildloc }} --config ${{env.BUILD_TYPE}}
+
+      - name: Report sccache stats
+        shell: pwsh
+        run: sccache --show-stats
 
       - uses: suisei-cn/actions-download-file@v1.6.1
         id: vcredist
@@ -96,3 +118,8 @@ jobs:
 
       - name: Tests
         run: ctest --timeout 60 --test-dir ${{ github.workspace }}/${{ matrix.buildloc }} -C ${{ env.BUILD_TYPE }} --output-on-failure --repeat until-pass:5 -j20 --resource-spec-file ../test/resource.json
+
+      - name: Stop sccache
+        if: always()
+        shell: pwsh
+        run: sccache --stop-server || $true
