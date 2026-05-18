@@ -54,12 +54,17 @@ jobs:
           triplet: ${{ matrix.triplet }}
           token: ${{ github.token }}
 
+      - name: Set up VS
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
       - name: Configure CMake
         run: |
           cmake `
+            -G Ninja `
             -B ${{github.workspace}}/${{ matrix.buildloc }} `
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} `
-            -DCMAKE_GENERATOR_PLATFORM=${{ matrix.platform }} `
             -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
             -DHTTP_API_DIR="C:\\${{ matrix.programfiles }}\\Mosquitto\\dashboard" `
             -DVCPKG_MANIFEST_MODE=ON `
@@ -80,6 +85,7 @@ jobs:
       - name: Installer
         uses: joncloud/makensis-action@v5.0
         with:
+          arguments: "/V4"
           script-file: ${{github.workspace}}/installer/${{ matrix.nsis }}
 
       - name: Upload installer to artifacts

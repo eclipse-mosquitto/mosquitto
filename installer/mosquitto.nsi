@@ -184,9 +184,9 @@ SectionEnd
 
 Section "Visual Studio Runtime"
   SetOutPath "$INSTDIR"
-  File "VC_redist.x86.exe"
-  ExecWait '"$INSTDIR\VC_redist.x86.exe" /quiet /norestart'
-  Delete "$INSTDIR\VC_redist.x86.exe"
+  File "vc_redist.x86.exe"
+  ExecWait '"$INSTDIR\vc_redist.x86.exe" /quiet /norestart'
+  Delete "$INSTDIR\vc_redist.x86.exe"
 SectionEnd
 
 Section "Service" SecService
