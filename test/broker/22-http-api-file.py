@@ -20,9 +20,9 @@ broker_config = BrokerConfig(
         ListenerConfig(port=mqtt_port),
         ListenerConfig(
             port=http_port,
-            address="127.0.01",
+            address="127.0.0.1",
             protocol="http_api",
-            http_dir=".",
+            http_dir=Path("."),
         )
     ],
     allow_anonymous=True

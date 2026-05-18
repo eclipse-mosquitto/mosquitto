@@ -497,7 +497,7 @@ int http_api__start(struct mosquitto__listener *listener)
 
 		int rc = getaddrinfo(bind_address, service, &hints, &ainfo);
 		if(rc){
-			log__printf(NULL, MOSQ_LOG_ERR, "Unable to start http api listener.");
+			log__printf(NULL, MOSQ_LOG_ERR, "Unable to start http api listener (%s).", strerror(errno));
 			mosquitto_FREE(x509_cert);
 			mosquitto_FREE(x509_key);
 			return MOSQ_ERR_ERRNO;
