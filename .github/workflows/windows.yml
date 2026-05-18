@@ -71,9 +71,9 @@ jobs:
       - name: Configure CMake
         run: |
           cmake `
+            -G Ninja `
             -B ${{github.workspace}}/${{ matrix.buildloc }} `
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} `
-            -DCMAKE_GENERATOR_PLATFORM=${{ matrix.platform }} `
             -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
             -DHTTP_API_DIR="C:\\${{ matrix.programfiles }}\\Mosquitto\\dashboard" `
             -DVCPKG_MANIFEST_MODE=ON `
@@ -81,7 +81,8 @@ jobs:
             -DWITH_HTTP_API=ON `
             -DWITH_WEBSOCKETS=ON `
             -DCMAKE_C_COMPILER_LAUNCHER=sccache `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
 
       - name: Build
         run: cmake --build ${{github.workspace}}/${{ matrix.buildloc }} --config ${{env.BUILD_TYPE}}
