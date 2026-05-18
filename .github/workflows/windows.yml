@@ -46,6 +46,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Configure MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
       - name: Install sccache
         run: |
           choco install sccache -y
@@ -67,21 +72,24 @@ jobs:
           manifest-dir: ${{ github.workspace }}
           triplet: ${{ matrix.triplet }}
           token: ${{ github.token }}
+          cache-key: ${{ matrix.arch }}
+          vcpkg-subdir: vcpkg-${{ matrix.arch }}
 
       - name: Configure CMake
         run: |
           cmake `
+            -G "Ninja Multi-Config" `
             -B ${{github.workspace}}/${{ matrix.buildloc }} `
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} `
-            -DCMAKE_GENERATOR_PLATFORM=${{ matrix.platform }} `
-            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
+            -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg-${{ matrix.arch }}/scripts/buildsystems/vcpkg.cmake `
             -DHTTP_API_DIR="C:\\${{ matrix.programfiles }}\\Mosquitto\\dashboard" `
             -DVCPKG_MANIFEST_MODE=ON `
             -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} `
             -DWITH_HTTP_API=ON `
             -DWITH_WEBSOCKETS=ON `
             -DCMAKE_C_COMPILER_LAUNCHER=sccache `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded
 
       - name: Build
         run: cmake --build ${{github.workspace}}/${{ matrix.buildloc }} --config ${{env.BUILD_TYPE}}
