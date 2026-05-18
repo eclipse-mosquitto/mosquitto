@@ -1,4 +1,4 @@
-name: Windows build
+name: Windows
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ env:
 
 
 jobs:
-  mosquitto:
+  build:
     runs-on: windows-2022
 
     strategy:

@@ -1,4 +1,4 @@
-name: Mac OS build
+name: Mac OS
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  mosquitto:
+  build:
     runs-on: macos-latest
 
     steps:
