@@ -54,12 +54,12 @@ jobs:
       - name: Install sccache
         run: |
           choco install sccache -y
-          echo "SCCACHE_DIR=$env:LOCALAPPDATA\sccache" >> $env:GITHUB_ENV
+          echo "SCCACHE_DIR=${{ github.workspace }}\sccache" >> $env:GITHUB_ENV
 
       - name: Restore sccache
         uses: actions/cache@v5
         with:
-          path: ${{ env.LOCALAPPDATA }}\sccache
+          path: ${{ github.workspace }}\sccache
           key: ${{ runner.os }}-${{ matrix.arch }}-windows-sccache
 
       - name: Start sccache
