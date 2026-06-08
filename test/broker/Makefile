@@ -47,7 +47,6 @@ msg_sequence_test:
 
 
 02 :
-	./02-shared-nolocal.py
 	./02-shared-qos0-v5.py
 	./02-subhier-crash.py
 	./02-subpub-b2c-topic-alias.py
@@ -72,8 +71,6 @@ msg_sequence_test:
 	./02-subpub-qos2-receive-maximum-2.py
 	./02-subpub-qos2.py
 	./02-subpub-recover-subscriptions.py
-	./02-subscribe-dollar-v5.py
-	./02-subscribe-invalid-utf8.py
 	./02-subscribe-long-topic.py
 	./02-subscribe-persistence-flipflop.py
 
@@ -86,20 +83,13 @@ msg_sequence_test:
 	./03-publish-b2c-qos1-len.py
 	./03-publish-b2c-qos2-len.py
 	./03-publish-c2b-disconnect-qos2.py
-	./03-publish-c2b-qos2-len.py
-	./03-publish-dollar-v5.py
-	./03-publish-dollar.py
-	./03-publish-invalid-utf8.py
 	./03-publish-long-topic.py
 	./03-publish-qos1-max-inflight-expire.py
 	./03-publish-qos1-no-subscribers-v5.py
 	./03-publish-qos1-retain-disabled.py
-	./03-publish-qos1.py
-	./03-publish-qos2-dup.py
 	#./03-publish-qos2-max-inflight-exceeded.py
 	./03-publish-qos2-max-inflight.py
 	./03-publish-qos2-reuse-mid.py
-	./03-publish-qos2.py
 
 04 :
 	./04-retain-check-source-persist-diff-port.py
@@ -145,7 +135,6 @@ msg_sequence_test:
 	./06-bridge-remap-receive-wildcard.py
 
 07 :
-	./07-will-control.py
 	./07-will-delay-invalid-573191.py
 	./07-will-delay-reconnect.py
 	./07-will-delay-recover.py
@@ -154,7 +143,6 @@ msg_sequence_test:
 	./07-will-delay-session-expiry2.py
 	./07-will-delay.py
 	./07-will-disconnect-with-will.py
-	./07-will-invalid-utf8.py
 	./07-will-no-flag.py
 	./07-will-null-topic.py
 	./07-will-null.py

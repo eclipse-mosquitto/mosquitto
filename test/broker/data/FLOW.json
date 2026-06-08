@@ -152,6 +152,30 @@
 				{"type":"recv", "payload":"62 r2 m1", "comment": "PUBREL)"},
 				{"type":"send", "payload":"50 r2 m1", "comment": "PUBREC (should be PUBCOMP))"},
 				{"type":"recv", "payload":"62 r2 m1", "comment": "PUBREL)"}
+			]},
+			{ "name": "QoS 2 PUBLISH-PUBREC-PUBREL(2)-PUBCOMP", "expect_disconnect":false, "msgs": [
+				{"type":"send", "payload":"34 r23 s11 'pubrel-test' m1 v0 'message'"},
+				{"type":"recv", "payload":"50 r2 m1", "comment": "PUBREC"},
+				{"type":"send", "payload":"62 r2 m1", "comment": "PUBREL len 2"},
+				{"type":"recv", "payload":"70 r2 m1", "comment": "PUBCOMP)"}
+			]},
+			{ "name": "QoS 2 PUBLISH-PUBREC-PUBREL(3)-PUBCOMP", "expect_disconnect":false, "msgs": [
+				{"type":"send", "payload":"34 r23 s11 'pubrel-test' m1 v0 'message'"},
+				{"type":"recv", "payload":"50 r2 m1", "comment": "PUBREC"},
+				{"type":"send", "payload":"62 r3 m1 00", "comment": "PUBREL len 3"},
+				{"type":"recv", "payload":"70 r2 m1", "comment": "PUBCOMP)"}
+			]},
+			{ "name": "QoS 2 PUBLISH-PUBREC-PUBREL(4)-PUBCOMP", "expect_disconnect":false, "msgs": [
+				{"type":"send", "payload":"34 r23 s11 'pubrel-test' m1 v0 'message'"},
+				{"type":"recv", "payload":"50 r2 m1", "comment": "PUBREC"},
+				{"type":"send", "payload":"62 r4 m1 00 v0", "comment": "PUBREL len 4"},
+				{"type":"recv", "payload":"70 r2 m1", "comment": "PUBCOMP)"}
+			]},
+			{ "name": "QoS 2 PUBLISH-PUBREC-PUBREL(5)-PUBCOMP", "expect_disconnect":false, "msgs": [
+				{"type":"send", "payload":"34 r23 s11 'pubrel-test' m1 v0 'message'"},
+				{"type":"recv", "payload":"50 r2 m1", "comment": "PUBREC"},
+				{"type":"send", "payload":"62 r17 m1 00 v13 26 s3 'key' s5 'value'", "comment": "PUBREL with property"},
+				{"type":"recv", "payload":"70 r2 m1", "comment": "PUBCOMP)"}
 			]}
 		]
 	},
