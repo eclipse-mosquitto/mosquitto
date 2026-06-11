@@ -16,6 +16,8 @@ recv = 2
 disconnected_check = 3
 connected_check = 4
 external_publish = 5
+subscribe = 6
+unsubscribe = 7
 
 
 class SingleMsg(object):
@@ -26,7 +28,7 @@ class SingleMsg(object):
         self.comment = comment
 
 class MsgSequence(object):
-    __slots__ = 'name', 'msgs', 'msgs_all', 'expect_disconnect', 'port', 'protocol'
+    __slots__ = 'name', 'msgs', 'msgs_all', 'expect_disconnect', 'port', 'protocol', 'proto_ver'
 
     def __init__(self, name, default_connect=True, port=1888, protocol='mqtt', proto_ver=4, expect_disconnect=True):
         self.name = name
@@ -34,6 +36,7 @@ class MsgSequence(object):
         self.expect_disconnect = expect_disconnect
         self.port = port
         self.protocol = protocol
+        self.proto_ver = proto_ver
         if default_connect:
             self.add_default_connect(proto_ver=proto_ver)
 
@@ -49,6 +52,12 @@ class MsgSequence(object):
 
     def add_external_publish(self, message, comment):
         self._add(external_publish, message, comment)
+
+    def add_subscribe(self, message, comment):
+        self._add(subscribe, message, comment)
+
+    def add_unsubscribe(self, message, comment):
+        self._add(unsubscribe, message, comment)
 
     def add_connected_check(self):
         self._add(connected_check, b"")
@@ -97,6 +106,17 @@ class MsgSequence(object):
         if data != msg.message:
             raise ValueError("Receive message %s | rec:%s | exp:%s" % (msg.comment, data.hex(), msg.message.hex()))
 
+    def _subscribe(self, sock, msg):
+        m = msg.message
+        subscribe_packet = mqtt_packets.gen_subscribe(topic=m['topic'], qos=m['qos'], mid=1, proto_ver=self.proto_ver)
+        suback_packet = mqtt_packets.gen_suback(qos=m['qos'], mid=1, proto_ver=self.proto_ver)
+        mosq_test.do_send_receive(sock, subscribe_packet, suback_packet, "suback")
+
+    def _unsubscribe(self, sock, msg):
+        m = msg.message
+        unsubscribe_packet = mqtt_packets.gen_unsubscribe(topic=m['topic'], mid=1, proto_ver=self.proto_ver)
+        unsuback_packet = mqtt_packets.gen_unsuback(mid=1, proto_ver=self.proto_ver)
+        mosq_test.do_send_receive(sock, unsubscribe_packet, unsuback_packet, "unsuback")
 
     def _disconnected_check(self, sock):
         try:
@@ -120,6 +140,10 @@ class MsgSequence(object):
             self._disconnected_check(sock)
         elif msg.action == connected_check:
             self._connected_check(sock)
+        elif msg.action == subscribe:
+            self._subscribe(sock, msg)
+        elif msg.action == unsubscribe:
+            self._unsubscribe(sock, msg)
 
     def process_next(self, sock):
         msg = self.msgs.popleft()
@@ -260,6 +284,10 @@ def do_test(hostname, port, protocol):
                         this_test.add_recv(parse_message(m["payload"]), c)
                     elif m["type"] == "external_publish":
                         this_test.add_external_publish(m, c)
+                    elif m["type"] == "subscribe":
+                        this_test.add_subscribe(m, c)
+                    elif m["type"] == "unsubscribe":
+                        this_test.add_unsubscribe(m, c)
 
                 total += 1
                 try:
