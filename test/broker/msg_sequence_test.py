@@ -15,7 +15,7 @@ send = 1
 recv = 2
 disconnected_check = 3
 connected_check = 4
-publish = 5
+external_publish = 5
 
 
 class SingleMsg(object):
@@ -47,8 +47,8 @@ class MsgSequence(object):
     def add_recv(self, message, comment):
         self._add(recv, message, comment)
 
-    def add_publish(self, message, comment):
-        self._add(publish, message, comment)
+    def add_external_publish(self, message, comment):
+        self._add(external_publish, message, comment)
 
     def add_connected_check(self):
         self._add(connected_check, b"")
@@ -69,14 +69,14 @@ class MsgSequence(object):
     def _send_message(self, sock, msg):
         sock.send(msg.message)
 
-    def _publish_message(self, msg):
+    def _publish_external_message(self, msg):
         sock = mosq_test.client_connect_only(hostname="localhost", port=self.port, timeout=2, protocol=self.protocol)
         sock.send(mqtt_packets.gen_connect("helper"))
         mosq_test.expect_packet(sock, "connack", mqtt_packets.gen_connack(rc=0))
 
         m = msg.message
         if m['qos'] == 0:
-            sock.send(mqtt_packets.gen_publish(topic=m['topic'], payload=m['payload']))
+            sock.send(mqtt_packets.gen_publish(topic=m['topic'], qos=0, payload=m['payload']))
         elif m['qos'] == 1:
             sock.send(mqtt_packets.gen_publish(mid=1, qos=1, topic=m['topic'], payload=m['payload']))
             mosq_test.expect_packet(sock, "helper puback", mqtt_packets.gen_puback(mid=1))
@@ -109,8 +109,8 @@ class MsgSequence(object):
             self._send_message(sock, msg)
         elif msg.action == recv:
             self._recv_message(sock, msg)
-        elif msg.action == publish:
-            self._publish_message(msg)
+        elif msg.action == external_publish:
+            self._publish_external_message(msg)
         elif msg.action == disconnected_check:
             self._disconnected_check(sock)
         elif msg.action == connected_check:
@@ -253,8 +253,8 @@ def do_test(hostname, port, protocol):
                         this_test.add_send(parse_message(m["payload"]))
                     elif m["type"] == "recv":
                         this_test.add_recv(parse_message(m["payload"]), c)
-                    elif m["type"] == "publish":
-                        this_test.add_publish(m, c)
+                    elif m["type"] == "external_publish":
+                        this_test.add_external_publish(m, c)
 
                 total += 1
                 try:
