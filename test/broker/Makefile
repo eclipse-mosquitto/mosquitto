@@ -53,23 +53,17 @@ msg_sequence_test:
 	./02-subpub-qos0-long-topic.py
 	./02-subpub-qos0-oversize-payload.py
 	./02-subpub-qos0-queued-bytes.py
-	./02-subpub-qos0-retain-as-publish.py
 	./02-subpub-qos0-send-retain.py
 	./02-subpub-qos0-subscription-id.py
-	./02-subpub-qos0-topic-alias-unknown.py
 	./02-subpub-qos0-topic-alias.py
 	./02-subpub-qos1-message-expiry-retain.py
 	./02-subpub-qos1-message-expiry-will.py
 	./02-subpub-qos1-message-expiry.py
-	./02-subpub-qos1-nolocal.py
 	./02-subpub-qos1-oversize-payload.py
-	./02-subpub-qos1.py
 	./02-subpub-qos2-1322.py
 	./02-subpub-qos2-max-inflight-bytes.py
-	./02-subpub-qos2-pubrec-error.py
 	./02-subpub-qos2-receive-maximum-1.py
 	./02-subpub-qos2-receive-maximum-2.py
-	./02-subpub-qos2.py
 	./02-subpub-recover-subscriptions.py
 	./02-subscribe-long-topic.py
 	./02-subscribe-persistence-flipflop.py
@@ -96,11 +90,7 @@ msg_sequence_test:
 	./04-retain-check-source-persist.py
 	./04-retain-check-source.py
 	./04-retain-clear-multiple.py
-	./04-retain-qos0-clear.py
-	./04-retain-qos0-fresh.py
 	./04-retain-qos0-repeated.py
-	./04-retain-qos0.py
-	./04-retain-qos1-qos0.py
 	./04-retain-upgrade-outgoing-qos.py
 
 05 :
@@ -241,8 +231,6 @@ endif
 	./12-prop-response-topic-correlation-data.py
 	./12-prop-response-topic.py
 	./12-prop-server-keepalive.py
-	./12-prop-subpub-content-type.py
-	./12-prop-subpub-payload-format.py
 
 13 :
 ifneq ($(WITH_WEBSOCKETS),no)

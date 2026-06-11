@@ -260,6 +260,10 @@
 				{"type":"send", "payload":"32 r15 s0 m1234 v3 23 H1 'payload'"},
 				{"type":"recv", "payload":"E0 r1 82"}
 			]},
+			{ "name": "topic-alias unknown", "msgs": [
+				{"type":"send", "payload":"31 r12 s0 v2 35 01 'message'"},
+				{"type":"recv", "payload":"E0 r1 81"}
+			]},
 
 			{ "name": "response-topic (UTF-8 string)", "expect_disconnect":false, "msgs": [
 				{"type":"send", "payload":"32 r21 s5 'topic' m1234 v4 08 s1 'p' 'payload'"},
