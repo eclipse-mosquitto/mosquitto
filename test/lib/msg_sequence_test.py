@@ -104,9 +104,9 @@ class MsgSequence(object):
         if self.command is not None:
             cmd.append(self.command)
         if platform.system() == 'Windows':
-            self.client = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=env, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+            self.client = subprocess.Popen(cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, env=env, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
         else:
-            self.client = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=env)
+            self.client = subprocess.Popen(cmd, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL, env=env)
 
         (self.sock, _) = server_sock.accept()
 
