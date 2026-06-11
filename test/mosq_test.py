@@ -94,7 +94,7 @@ def env_add_ld_library_path(env=None, extra_path=""):
 
     return newenv
 
-def listen_sock(port, cafile=None, certfile=None, keyfile=None, cert_required=False):
+def listen_sock(port, cafile=None, certfile=None, keyfile=None, cert_required=False, timeout=5):
     sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
@@ -105,7 +105,7 @@ def listen_sock(port, cafile=None, certfile=None, keyfile=None, cert_required=Fa
         if cert_required:
             context.verify_mode = ssl.CERT_REQUIRED
         sock = context.wrap_socket(sock, server_side=True)
-    sock.settimeout(10)
+    sock.settimeout(timeout)
     sock.bind(('', port))
     sock.listen(5)
     return sock
