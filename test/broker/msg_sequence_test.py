@@ -75,13 +75,18 @@ class MsgSequence(object):
         mosq_test.expect_packet(sock, "connack", mqtt_packets.gen_connack(rc=0))
 
         m = msg.message
+        try:
+            retain = m['retain']
+        except KeyError:
+            retain = False
+
         if m['qos'] == 0:
-            sock.send(mqtt_packets.gen_publish(topic=m['topic'], qos=0, payload=m['payload']))
+            sock.send(mqtt_packets.gen_publish(topic=m['topic'], qos=0, payload=m['payload'], retain=retain))
         elif m['qos'] == 1:
-            sock.send(mqtt_packets.gen_publish(mid=1, qos=1, topic=m['topic'], payload=m['payload']))
+            sock.send(mqtt_packets.gen_publish(mid=1, qos=1, topic=m['topic'], payload=m['payload'], retain=retain))
             mosq_test.expect_packet(sock, "helper puback", mqtt_packets.gen_puback(mid=1))
         elif m['qos'] == 2:
-            sock.send(mqtt_packets.gen_publish(mid=1, qos=2, topic=m['topic'], payload=m['payload']))
+            sock.send(mqtt_packets.gen_publish(mid=1, qos=2, topic=m['topic'], payload=m['payload'], retain=retain))
             mosq_test.expect_packet(sock, "helper pubrec", mqtt_packets.gen_pubrec(mid=1))
             sock.send(mqtt_packets.gen_pubrel(mid=1))
             mosq_test.expect_packet(sock, "helper pubcomp", mqtt_packets.gen_pubcomp(mid=1))
