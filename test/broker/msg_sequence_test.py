@@ -104,7 +104,13 @@ class MsgSequence(object):
     def _recv_message(self, sock, msg):
         data = sock.recv(len(msg.message))
         if data != msg.message:
-            raise ValueError("Receive message %s | rec:%s | exp:%s" % (msg.comment, data.hex(), msg.message.hex()))
+            diff = list(data.hex())
+            msghex = msg.message.hex()
+            for i in range(len(diff)):
+                if diff[i] == msghex[i]:
+                    diff[i] = "."
+            diff = "".join(diff)
+            raise ValueError(f"Receive message {msg.comment}\nrec: {data.hex()}\nexp: {msghex}\ndiff:{diff}")
 
     def _subscribe(self, sock, msg):
         m = msg.message
