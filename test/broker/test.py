@@ -91,6 +91,7 @@ tests = [
     (2, './06-bridge-clean-session-csT-lcsF.py'),
     (2, './06-bridge-clean-session-csT-lcsN.py'),
     (2, './06-bridge-clean-session-csT-lcsT.py'),
+    (2, './06-bridge-connack-qos-not-supported.py'),
     (2, './06-bridge-connack-retain-not-supported.py'),
     (2, './06-bridge-fail-persist-resend-qos1.py'),
     (2, './06-bridge-fail-persist-resend-qos2.py'),
