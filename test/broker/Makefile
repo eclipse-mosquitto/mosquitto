@@ -115,6 +115,9 @@ msg_sequence_test:
 	./06-bridge-clean-session-csT-lcsT.py
 	./06-bridge-connack-qos-not-supported.py
 	./06-bridge-connack-retain-not-supported.py
+	./06-bridge-connack-v4-error.py
+	./06-bridge-connack-v5-bad-protocol-version.py
+	./06-bridge-connack-v5-error.py
 	./06-bridge-fail-persist-resend-qos1.py
 	./06-bridge-fail-persist-resend-qos2.py
 	./06-bridge-no-local.py

@@ -5,6 +5,7 @@
 from mosq_test_helper import *
 
 from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
+from matchers import Contains
 from mosquitto_broker import MosquittoBroker
 
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
@@ -32,7 +33,7 @@ def do_test():
                 bridge_protocol_version="mqttv50",
                 topics=["\"bridge with space/#\" both 1"],
                 bridge_max_topic_alias=0,
-                restart_timeout=2,
+                restart_timeout=1,
             ),
         ],
         allow_anonymous=True,
@@ -40,18 +41,20 @@ def do_test():
     )
     broker = MosquittoBroker(config=broker_config)
     with broker:
-        # Connect with a will with retain set, get refused
+        # Connect with a will with QoS=1, get refused
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
         mosq_test.expect_packet(bridge, "connect", connect_packet_qos1)
         bridge.send(connack_packet_qos1)
         bridge.close()
 
-        # Now retry without retain
+        # Now retry with QoS=0
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
         mosq_test.expect_packet(bridge, "connect", connect_packet_qos0)
         bridge.send(connack_packet_qos0)
         bridge.close()
+
+    broker.check_log(Contains("Connection Refused: QoS not supported (will retry)"))
 
 do_test()

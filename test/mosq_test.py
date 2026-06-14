@@ -475,7 +475,7 @@ def to_string(packet):
             (slen, packet) = struct.unpack(pack_format, packet)
             pack_format = "!" + str(slen)+'s' + str(len(packet)-slen) + 's'
             (will_message, packet) = struct.unpack(pack_format, packet)
-            s = s+", will-message="+will_message
+            s = s+", will-message="+str(will_message)
 
             s = s+", will-qos="+str((flags&24)>>3)
             s = s+", will-retain="+str((flags&32)>>5)

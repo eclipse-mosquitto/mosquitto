@@ -7,17 +7,18 @@ from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig, MQTTBridgeConfig
 from matchers import Contains
 from mosquitto_broker import MosquittoBroker
+import mqtt4_rc
 
 mosq_test.require_features(["INC_BRIDGE_SUPPORT"])
 
 def do_test():
     hostname = socket.gethostname()
     client_id = hostname+".bridge_sample"
-    connect_packet_retain = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
-    connect_packet_no_retain = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=False)
+    connect_packet_v5 = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=5, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
+    connect_packet_v4 = mqtt_packets.gen_connect(client_id, clean_session=False, proto_ver=128+4, will_topic=f"$SYS/broker/connection/{hostname}.bridge_sample/state", will_payload=b"0", will_qos=1, will_retain=True)
 
-    props = mqtt5_props.gen_byte_prop(mqtt5_props.RETAIN_AVAILABLE, 0)
-    connack_packet = mqtt_packets.gen_connack(rc=mqtt5_rc.RETAIN_NOT_SUPPORTED, proto_ver=5, properties=props)
+    connack_packet_v4_denied = mqtt_packets.gen_connack(rc=mqtt4_rc.CONNACK_REFUSED_PROTOCOL_VERSION, proto_ver=4)
+    connack_packet_v4_accepted = mqtt_packets.gen_connack(rc=mqtt4_rc.CONNACK_REFUSED_PROTOCOL_VERSION, proto_ver=4)
 
     (port1, port2) = mosq_test.get_port(2)
 
@@ -40,20 +41,20 @@ def do_test():
     )
     broker = MosquittoBroker(config=broker_config)
     with broker:
-        # Connect with a will with retain set, get refused
+        # Connect with v5
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
-        mosq_test.expect_packet(bridge, "connect", connect_packet_retain)
-        bridge.send(connack_packet)
+        mosq_test.expect_packet(bridge, "connect", connect_packet_v5)
+        bridge.send(connack_packet_v4_denied)
         bridge.close()
 
-        # Now retry without retain
+        # Now retry with v4
         (bridge, address) = ssock.accept()
         bridge.settimeout(20)
-        mosq_test.expect_packet(bridge, "connect", connect_packet_no_retain)
-        bridge.send(connack_packet)
+        mosq_test.expect_packet(bridge, "connect", connect_packet_v4)
+        bridge.send(connack_packet_v4_accepted)
         bridge.close()
 
-    broker.check_log(Contains("Connection Refused: retain not available (will retry)"))
+    broker.check_log(Contains("Warning: Remote bridge bridge_sample does not support MQTT v5.0, reconnecting using MQTT v3.1.1."))
 
 do_test()
