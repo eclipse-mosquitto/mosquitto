@@ -228,8 +228,8 @@ def wait_for_subprocess(client,timeout=10,terminate_timeout=2):
     return rc
 
 
-def terminate_broker(broker):
-    if platform.system() == 'Windows':
+def terminate_broker(broker, force=False):
+    if platform.system() == 'Windows' and force == False:
         evt_sent = False
         for i in range(5):
             try:
