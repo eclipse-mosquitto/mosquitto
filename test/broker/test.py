@@ -133,6 +133,7 @@ tests = [
     (1, './08-ssl-connect-cert-auth.py'),
     (1, './08-ssl-connect-dhparam.py'),
     (1, './08-ssl-connect-identity.py'),
+    (1, './08-ssl-connect-keylog.py'),
     (1, './08-ssl-connect-no-auth-wrong-ca.py'),
     (1, './08-ssl-connect-no-auth.py'),
     (1, './08-ssl-connect-no-identity.py'),
