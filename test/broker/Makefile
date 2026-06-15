@@ -279,7 +279,8 @@ PERSIST_TESTS = \
 	./15-persist-client-msg-out-v5-0.py \
 	./15-persist-client-v3-1-1.py \
 	./15-persist-client-v5-0.py \
-	./15-persist-client-will.py \
+	./15-persist-client-will-clean.py \
+	./15-persist-client-will-persistent.py \
 	./15-persist-publish-properties-v5-0.py \
 	./15-persist-retain-clear.py \
 	./15-persist-retain-v3-1-1.py \
