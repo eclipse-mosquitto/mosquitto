@@ -9,6 +9,12 @@ from mosquitto_broker import MosquittoBroker
 
 mosq_test.require_features(["WITH_BROKER", "WITH_UNIX_SOCKETS"])
 
+try:
+    s = socket.AF_UNIX
+except AttributeError:
+    # Not supported on Windows
+    exit(77)
+
 def do_test(proto_ver):
     if proto_ver == 5:
         V = 'mqttv5'
