@@ -158,6 +158,7 @@ ifeq ($(WITH_TLS),yes)
 	./08-ssl-connect-cert-auth.py
 	./08-ssl-connect-dhparam.py
 	./08-ssl-connect-identity.py
+	./08-ssl-connect-keylog.py
 	./08-ssl-connect-no-auth-wrong-ca.py
 	./08-ssl-connect-no-auth.py
 	./08-ssl-connect-no-identity.py
