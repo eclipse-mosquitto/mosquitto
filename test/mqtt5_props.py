@@ -305,4 +305,4 @@ def print_properties(b: bytes) -> str:
     if len(b) < prop_len:
         return f'error unpack properties buffer size {len(b)} < {prop_len}'
     props = unpack_properties(b[offset : offset + prop_len])
-    return f'[{','.join([str(p) for p in props])}]'
+    return f'[{",".join([str(p) for p in props])}]'
