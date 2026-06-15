@@ -13,6 +13,8 @@ on:
       - develop
       - fixes
       - release/*
+  schedule:
+    - cron: "0 2 * * 2"
 
 jobs:
   build:
@@ -55,8 +57,13 @@ jobs:
       with:
         submodules: 'true'
 
-    - name: build
+    - name: build on push and pull_request
+      if: ${{ github.event_name != 'scheduled' }}
       run: ./buildtest.py
+
+    - name: build and test on schedule
+      if: ${{ github.event_name == 'scheduled' }}
+      run: ./buildtest.py --tests
 
     - name: Report ccache stats
       run: ccache -s
