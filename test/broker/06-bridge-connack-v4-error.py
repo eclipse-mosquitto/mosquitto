@@ -40,6 +40,7 @@ def do_test(rc, logmsg):
         bridge.settimeout(20)
         mosq_test.expect_packet(bridge, "connect", connect_packet)
         bridge.send(connack_packet)
+        bridge.recv(1)
         bridge.close()
 
     broker.check_log(Contains(logmsg))
@@ -49,3 +50,4 @@ do_test(mqtt4_rc.CONNACK_REFUSED_BAD_USERNAME_PASSWORD, "Connection Refused: bad
 do_test(mqtt4_rc.CONNACK_REFUSED_NOT_AUTHORIZED, "Connection Refused: not authorised")
 do_test(mqtt4_rc.CONNACK_REFUSED_IDENTIFIER_REJECTED, "Connection Refused: identifier rejected")
 do_test(mqtt4_rc.CONNACK_REFUSED_PROTOCOL_VERSION, "Connection Refused: unacceptable protocol version")
+do_test(128, "Connection Refused: unknown reason")
