@@ -1,0 +1,7 @@
+[package]
+name = "rusquitto-protocol"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]

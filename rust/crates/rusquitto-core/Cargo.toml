@@ -1,0 +1,8 @@
+[package]
+name = "rusquitto-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rusquitto-protocol = { path = "../rusquitto-protocol" }

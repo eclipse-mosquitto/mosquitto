@@ -110,6 +110,7 @@ man/mosquitto_sub.1
 man/mqtt.7
 
 out/
+rust/target/
 
 src/mosquitto
 src/mosquitto_broker.a

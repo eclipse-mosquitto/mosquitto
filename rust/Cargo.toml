@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "crates/rusquitto-core",
+    "crates/rusquitto-protocol",
+    "bin/rusquitto-broker",
+]
+resolver = "2"
+
+[workspace.package]
+version = "2.1.2"
+edition = "2021"
+license = "EPL-2.0 OR BSD-3-Clause"

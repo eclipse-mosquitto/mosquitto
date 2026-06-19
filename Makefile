@@ -66,7 +66,7 @@ DISTFILES= \
 	THANKS.txt \
 	vcpkg.json
 
-.PHONY : all mosquitto api docs binary check clean reallyclean test test-compile install uninstall dist sign copy localdocker
+.PHONY : all mosquitto api docs binary check clean reallyclean test test-compile install uninstall dist sign copy localdocker rust rust-test-core
 
 all : $(MAKE_ALL)
 
@@ -81,6 +81,12 @@ docs :
 binary : mosquitto
 
 binary-all : mosquitto test-compile
+
+rust :
+	cargo build --manifest-path rust/Cargo.toml --workspace
+
+rust-test-core :
+	./scripts/rust-test-core.sh
 
 mosquitto :
 ifeq ($(UNAME),Darwin)
