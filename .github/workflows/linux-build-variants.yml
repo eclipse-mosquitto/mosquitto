@@ -58,11 +58,11 @@ jobs:
         submodules: 'true'
 
     - name: build on push and pull_request
-      if: ${{ github.event_name != 'scheduled' }}
+      if: ${{ github.event_name != 'schedule' }}
       run: ./buildtest.py
 
     - name: build and test on schedule
-      if: ${{ github.event_name == 'scheduled' }}
+      if: ${{ github.event_name == 'schedule' }}
       run: ./buildtest.py --tests
 
     - name: Report ccache stats
