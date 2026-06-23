@@ -17,6 +17,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+            cmake \
             docbook-xsl \
             google-mock \
             googletest \
@@ -37,10 +38,17 @@ jobs:
             uthash-dev \
             xsltproc
 
+    - run: cmake -E make_directory build
+    - run: |
+        cmake \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -S . \
+          -B build
+
     - uses: vapier/coverity-scan-action@v1
       with:
         build_language: 'cxx'
         project: "eclipse/mosquitto"
         token: ${{ secrets.COVERITY_SCAN_TOKEN }}
         email: ${{ secrets.COVERITY_SCAN_EMAIL }}
-        command: "make binary-all"
+        command: "make -C ${{ github.workspace }}/build -j$(nproc)"
