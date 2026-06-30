@@ -17,6 +17,9 @@ on:
       - fixes
       - release/*
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
