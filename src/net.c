@@ -843,11 +843,23 @@ static int net__socket_listen_tcp(struct mosquitto__listener *listener)
 			continue;
 		}
 
-		sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		sock = net__socket_stream(rp->ai_family, rp->ai_socktype, rp->ai_protocol, listener->mptcp);
 		if(sock == INVALID_SOCKET){
 			net__print_error(MOSQ_LOG_WARNING, "Warning: %s");
 			continue;
 		}
+#if defined(__linux__) && defined(SO_PROTOCOL)
+		if(listener->mptcp){
+			int protocol = 0;
+			socklen_t protocol_len = sizeof(protocol);
+
+			if(getsockopt(sock, SOL_SOCKET, SO_PROTOCOL, &protocol, &protocol_len)
+					|| protocol != IPPROTO_MPTCP){
+
+				log__printf(NULL, MOSQ_LOG_WARNING, "Warning: MPTCP is not supported by the kernel, falling back to TCP.");
+			}
+		}
+#endif
 		listener->sock_count++;
 		listener->socks = mosquitto_realloc(listener->socks, sizeof(mosq_sock_t)*(size_t)listener->sock_count);
 		if(!listener->socks){

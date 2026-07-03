@@ -238,6 +238,7 @@ struct mosquitto__listener {
 	int client_count;
 	enum mosquitto_protocol protocol;
 	int socket_domain;
+	bool mptcp;
 	bool use_username_as_clientid;
 	uint8_t max_qos;
 	uint16_t max_topic_alias;

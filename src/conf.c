@@ -2299,6 +2299,20 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 								cur_listener->mount_point);
 						return MOSQ_ERR_INVAL;
 					}
+				}else if(!strcmp(token, "mptcp")){
+					if(reload){
+						continue;        /* Listeners are not recreated on reload. */
+					}
+					REQUIRE_LISTENER_OR_DEFAULT_LISTENER(token);
+					if(conf__parse_bool(&token, "mptcp", &cur_listener->mptcp, &saveptr)){
+						return MOSQ_ERR_INVAL;
+					}
+#if !defined(__linux__)
+					if(cur_listener->mptcp){
+						log__printf(NULL, MOSQ_LOG_WARNING, "Warning: MPTCP support is only available on Linux, 'mptcp' option ignored.");
+						cur_listener->mptcp = false;
+					}
+#endif
 				}else if(!strcmp(token, "notifications")){
 #ifdef WITH_BRIDGE
 					REQUIRE_BRIDGE(token);
