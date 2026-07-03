@@ -1,0 +1,14 @@
+<varlistentry>
+	<term><option>--mptcp</option></term>
+	<listitem>
+		<para>
+			Use Multipath TCP (MPTCP) instead of plain TCP for the connection
+			to the broker. MPTCP allows the connection to make use of multiple
+			network paths simultaneously, which can improve throughput and
+			resilience to network failures, provided the broker also accepts
+			MPTCP connections. This option is only available on Linux, with
+			kernel 5.6 or later. If the running kernel does not support MPTCP,
+			the connection falls back to plain TCP.
+		</para>
+	</listitem>
+</varlistentry>
