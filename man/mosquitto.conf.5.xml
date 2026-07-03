@@ -2149,6 +2149,22 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
+				<term><option>bridge_mptcp</option> [ true | false ]</term>
+				<listitem>
+					<para>Set <option>bridge_mptcp</option> to true to make the
+						bridge connect to the remote broker using Multipath TCP
+						(MPTCP) instead of plain TCP. MPTCP allows the
+						connection to make use of multiple network paths
+						simultaneously, which can improve throughput and
+						resilience to network failures, provided the remote
+						broker also accepts MPTCP connections.</para>
+					<para>This option is only available on Linux, with kernel
+						5.6 or later. If the running kernel does not support
+						MPTCP, the connection falls back to plain TCP.</para>
+					<para>Defaults to false.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
 				<term><option>bridge_outgoing_retain</option> [ true | false ]</term>
 				<listitem>
 					<para>Some MQTT brokers do not allow retained messages. MQTT v5 gives

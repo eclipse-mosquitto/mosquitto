@@ -91,6 +91,7 @@ static struct mosquitto *bridge__new(struct mosquitto__bridge *bridge)
 		context__add_to_by_id(new_context);
 	}
 	new_context->transport = mosq_t_tcp;
+	new_context->mptcp = bridge->mptcp;
 	new_context->bridge = bridge;
 	new_context->is_bridge = true;
 

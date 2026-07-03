@@ -1435,6 +1435,21 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 #else
 					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Bridge support not available.");
 #endif
+				}else if(!strcmp(token, "bridge_mptcp")){
+#if defined(WITH_BRIDGE)
+					REQUIRE_BRIDGE(token);
+					if(conf__parse_bool(&token, "bridge_mptcp", &cur_bridge->mptcp, &saveptr)){
+						return MOSQ_ERR_INVAL;
+					}
+#  if !defined(__linux__)
+					if(cur_bridge->mptcp){
+						log__printf(NULL, MOSQ_LOG_WARNING, "Warning: MPTCP support is only available on Linux, 'bridge_mptcp' option ignored.");
+						cur_bridge->mptcp = false;
+					}
+#  endif
+#else
+					log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Bridge support not available.");
+#endif
 				}else if(!strcmp(token, "bridge_outgoing_retain")){
 #if defined(WITH_BRIDGE)
 					REQUIRE_BRIDGE(token);

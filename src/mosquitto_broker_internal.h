@@ -555,6 +555,7 @@ struct mosquitto__bridge {
 	time_t primary_retry;
 	mosq_sock_t primary_retry_sock;
 	bool round_robin;
+	bool mptcp;
 	bool try_private;
 	bool try_private_accepted;
 	bool clean_start;
