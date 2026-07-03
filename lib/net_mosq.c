@@ -367,7 +367,7 @@ int net__try_connect_step2(struct mosquitto *mosq, uint16_t port, mosq_sock_t *s
 	ainfo = mosq->adns->ar_result;
 
 	for(rp = ainfo; rp != NULL; rp = rp->ai_next){
-		*sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		*sock = net__socket_stream(rp->ai_family, rp->ai_socktype, rp->ai_protocol, mosq->mptcp);
 		if(*sock == INVALID_SOCKET){
 			continue;
 		}
@@ -421,7 +421,31 @@ int net__try_connect_step2(struct mosquitto *mosq, uint16_t port, mosq_sock_t *s
 #endif
 
 
-static int net__try_connect_tcp(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking)
+/* Create a stream socket, optionally attempting to use MPTCP instead of
+ * plain TCP. If MPTCP is requested but not supported by the running kernel,
+ * fall back to creating a plain TCP socket. */
+mosq_sock_t net__socket_stream(int domain, int type, int protocol, bool use_mptcp)
+{
+#if defined(__linux__)
+	if(use_mptcp){
+		mosq_sock_t sock;
+
+		sock = socket(domain, type, IPPROTO_MPTCP);
+		if(sock != INVALID_SOCKET
+				|| (errno != EINVAL && errno != EPROTONOSUPPORT && errno != ENOPROTOOPT)){
+
+			return sock;
+		}
+		/* MPTCP is not available, fall through to plain TCP. */
+	}
+#else
+	UNUSED(use_mptcp);
+#endif
+	return socket(domain, type, protocol);
+}
+
+
+static int net__try_connect_tcp(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking, bool use_mptcp)
 {
 	struct addrinfo hints;
 	struct addrinfo *ainfo, *rp;
@@ -452,7 +476,7 @@ static int net__try_connect_tcp(const char *host, uint16_t port, mosq_sock_t *so
 	}
 
 	for(rp = ainfo; rp != NULL; rp = rp->ai_next){
-		*sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+		*sock = net__socket_stream(rp->ai_family, rp->ai_socktype, rp->ai_protocol, use_mptcp);
 		if(*sock == INVALID_SOCKET){
 			continue;
 		}
@@ -556,16 +580,18 @@ static int net__try_connect_unix(const char *host, mosq_sock_t *sock)
 #endif
 
 
-int net__try_connect(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking)
+int net__try_connect(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking, bool use_mptcp)
 {
 	if(port == 0){
 #ifdef WITH_UNIX_SOCKETS
+		UNUSED(use_mptcp);
 		return net__try_connect_unix(host, sock);
 #else
+		UNUSED(use_mptcp);
 		return MOSQ_ERR_NOT_SUPPORTED;
 #endif
 	}else{
-		return net__try_connect_tcp(host, port, sock, bind_address, blocking);
+		return net__try_connect_tcp(host, port, sock, bind_address, blocking, use_mptcp);
 	}
 }
 
@@ -969,7 +995,7 @@ int net__socket_connect(struct mosquitto *mosq, const char *host, uint16_t port,
 		return MOSQ_ERR_INVAL;
 	}
 
-	rc = net__try_connect(host, port, &mosq->sock, bind_address, blocking);
+	rc = net__try_connect(host, port, &mosq->sock, bind_address, blocking, mosq->mptcp);
 	if(rc > 0){
 		return rc;
 	}

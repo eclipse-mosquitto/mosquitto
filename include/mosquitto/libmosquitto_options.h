@@ -90,6 +90,14 @@ libmosq_EXPORT int mosquitto_opts_set(struct mosquitto *mosq, enum mosq_opt_t op
  *	          packets being sent.
  *	          Defaults to 0, which means Nagle remains enabled.
  *
+ *	MOSQ_OPT_MPTCP - Set to 1 to use Multipath TCP (MPTCP) instead of plain
+ *	          TCP when connecting to the broker. This is currently only
+ *	          supported on Linux, with kernel 5.6 or later. If the running
+ *	          kernel does not support MPTCP, the connection will fall back
+ *	          to plain TCP. On other platforms this option returns
+ *	          MOSQ_ERR_NOT_SUPPORTED. Must be set before the client
+ *	          connects. Defaults to 0, which means plain TCP is used.
+ *
  *	MOSQ_OPT_PROTOCOL_VERSION - Value must be set to either MQTT_PROTOCOL_V31,
  *	          MQTT_PROTOCOL_V311, or MQTT_PROTOCOL_V5. Must be set before the
  *	          client connects.  Defaults to MQTT_PROTOCOL_V311.
