@@ -56,6 +56,7 @@
 			</group>
 			<sbr/>
 			<arg><option>-A</option> <replaceable>bind-address</replaceable></arg>
+			<arg><option>--mptcp</option></arg>
 			<arg><option>--nodelay</option></arg>
 			<arg><option>-S</option></arg>
 			<arg><option>--ws</option></arg>
@@ -226,6 +227,7 @@
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-payload-message.xml" />
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-format-no-eol.xml" />
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-payload-null.xml" />
+			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-mptcp.xml" />
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-nodelay.xml" />
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-no-tls.xml" />
 			<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="common/option-port.xml" />

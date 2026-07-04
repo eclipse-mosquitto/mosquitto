@@ -416,9 +416,9 @@ static void print_usage(void)
 	printf("                     {-f file | -l | -n | -m message}\n");
 	printf("                     [-c] [-k keepalive] [-q qos] [-r] [--repeat N] [--repeat-delay time] [-x session-expiry]\n");
 #ifdef WITH_SRV
-	printf("                     [-A bind_address] [--nodelay] [-S]\n");
+	printf("                     [-A bind_address] [--mptcp] [--nodelay] [-S]\n");
 #else
-	printf("                     [-A bind_address] [--nodelay]\n");
+	printf("                     [-A bind_address] [--mptcp] [--nodelay]\n");
 #endif
 	printf("                     [-i id] [-I id_prefix]\n");
 	printf("                     [-d] [--quiet]\n");
@@ -484,6 +484,7 @@ static void print_usage(void)
 	printf("      seconds after the client disconnects, or use -1, 4294967295, or ∞ for a session\n");
 	printf("      that does not expire. Defaults to -1 if -c is also given, or 0 if -c not given.\n");
 	printf(" --help : display this message.\n");
+	printf(" --mptcp : use Multipath TCP to connect to the broker, if available. Linux only.\n");
 	printf(" --nodelay : disable Nagle's algorithm, to reduce socket sending latency at the possible\n");
 	printf("             expense of more packets being sent.\n");
 	printf(" --quiet : don't print error messages.\n");

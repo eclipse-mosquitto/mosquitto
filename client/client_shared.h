@@ -141,6 +141,7 @@ struct mosq_config {
 	char *options_file;
 	bool have_topic_alias; /* pub */
 	bool tcp_nodelay;
+	bool mptcp;
 	bool no_tls;
 	bool message_rate; /* sub */
 	bool measure_latency; /* rr */

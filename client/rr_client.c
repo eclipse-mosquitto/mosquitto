@@ -176,9 +176,9 @@ static void print_usage(void)
 	printf("                    [-W timeout_secs]\n");
 #endif
 #ifdef WITH_SRV
-	printf("                    [-A bind_address] [--nodelay] [-S]\n");
+	printf("                    [-A bind_address] [--mptcp] [--nodelay] [-S]\n");
 #else
-	printf("                    [-A bind_address] [--nodelay]\n");
+	printf("                    [-A bind_address] [--mptcp] [--nodelay]\n");
 #endif
 	printf("                    [-i id] [-I id_prefix]\n");
 	printf("                    [-d] [-N] [--quiet] [-v]\n");
@@ -240,6 +240,7 @@ static void print_usage(void)
 	printf("      seconds after the client disconnects, or use -1, 4294967295, or ∞ for a session\n");
 	printf("      that does not expire. Defaults to -1 if -c is also given, or 0 if -c not given.\n");
 	printf(" --help : display this message.\n");
+	printf(" --mptcp : use Multipath TCP to connect to the broker, if available. Linux only.\n");
 	printf(" --nodelay : disable Nagle's algorithm, to reduce socket sending latency at the possible\n");
 	printf("             expense of more packets being sent.\n");
 	printf(" --pretty : print formatted output rather than minimised output when using the\n");

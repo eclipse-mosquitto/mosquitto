@@ -569,6 +569,14 @@ int mosquitto_int_option(struct mosquitto *mosq, enum mosq_opt_t option, int val
 			mosq->tcp_nodelay = (bool)value;
 			break;
 
+		case MOSQ_OPT_MPTCP:
+#if defined(__linux__)
+			mosq->mptcp = (bool)value;
+#else
+			return MOSQ_ERR_NOT_SUPPORTED;
+#endif
+			break;
+
 		case MOSQ_OPT_TRANSPORT:
 #if defined(WITH_WEBSOCKETS) && WITH_WEBSOCKETS == WS_IS_BUILTIN
 			if(value == mosq_t_tcp || value == mosq_t_ws){

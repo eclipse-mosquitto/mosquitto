@@ -238,6 +238,7 @@ struct mosquitto__listener {
 	int client_count;
 	enum mosquitto_protocol protocol;
 	int socket_domain;
+	bool mptcp;
 	bool use_username_as_clientid;
 	uint8_t max_qos;
 	uint16_t max_topic_alias;
@@ -554,6 +555,7 @@ struct mosquitto__bridge {
 	time_t primary_retry;
 	mosq_sock_t primary_retry_sock;
 	bool round_robin;
+	bool mptcp;
 	bool try_private;
 	bool try_private_accepted;
 	bool clean_start;

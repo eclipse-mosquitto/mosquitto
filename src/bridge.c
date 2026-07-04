@@ -91,6 +91,7 @@ static struct mosquitto *bridge__new(struct mosquitto__bridge *bridge)
 		context__add_to_by_id(new_context);
 	}
 	new_context->transport = mosq_t_tcp;
+	new_context->mptcp = bridge->mptcp;
 	new_context->bridge = bridge;
 	new_context->is_bridge = true;
 
@@ -1043,7 +1044,8 @@ void bridge_check(void)
 					rc = net__try_connect(context->bridge->addresses[0].address,
 							context->bridge->addresses[0].port,
 							&context->bridge->primary_retry_sock,
-							context->bridge->bind_address, false);
+							context->bridge->bind_address, false,
+							context->mptcp);
 
 					if(rc == 0){
 						COMPAT_CLOSE(context->bridge->primary_retry_sock);

@@ -1604,6 +1604,26 @@ accept_protocol_versions 3, 4</programlisting>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
+					<term><option>mptcp</option> [ true | false ]</term>
+					<listitem>
+						<para>Set <option>mptcp</option> to true to make the
+							listener accept connections using Multipath TCP
+							(MPTCP) as well as plain TCP. MPTCP allows a
+							connection to make use of multiple network paths
+							simultaneously, which can improve throughput and
+							resilience to network failures for clients that
+							also use MPTCP. Clients connecting with plain TCP
+							are unaffected and continue to work as normal.
+							</para>
+						<para>This option is only available on Linux, with
+							kernel 5.6 or later. If the running kernel does
+							not support MPTCP, the listener will fall back to
+							plain TCP and a warning will be logged.</para>
+						<para>Defaults to false.</para>
+						<para>Not reloaded on reload signal.</para>
+					</listitem>
+				</varlistentry>
+				<varlistentry>
 					<term><option>port</option> <replaceable>port number</replaceable></term>
 					<listitem>
 						<para>This option is deprecated and will be removed in a
@@ -2126,6 +2146,22 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 					allow the remote broker to configure. Defaults to 10,
 					maximum of 65535. Set to 0 to disable incoming topic
 					aliases completely.</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>bridge_mptcp</option> [ true | false ]</term>
+				<listitem>
+					<para>Set <option>bridge_mptcp</option> to true to make the
+						bridge connect to the remote broker using Multipath TCP
+						(MPTCP) instead of plain TCP. MPTCP allows the
+						connection to make use of multiple network paths
+						simultaneously, which can improve throughput and
+						resilience to network failures, provided the remote
+						broker also accepts MPTCP connections.</para>
+					<para>This option is only available on Linux, with kernel
+						5.6 or later. If the running kernel does not support
+						MPTCP, the connection falls back to plain TCP.</para>
+					<para>Defaults to false.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>

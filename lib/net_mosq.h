@@ -19,6 +19,7 @@ Contributors:
 #define NET_MOSQ_H
 
 #ifndef WIN32
+#  include <netinet/in.h>
 #  include <sys/socket.h>
 #  include <unistd.h>
 #else
@@ -27,6 +28,13 @@ Contributors:
 typedef SSIZE_T ssize_t;
 #    define _SSIZE_T_DEFINED
 #  endif
+#endif
+
+#if defined(__linux__) && !defined(IPPROTO_MPTCP)
+/* Multipath TCP is supported by Linux 5.6 and later. The protocol number is
+ * part of the kernel ABI, so it is safe to define it here for the case where
+ * we are building against older headers. */
+#  define IPPROTO_MPTCP 262
 #endif
 
 #include "mosquitto_internal.h"
@@ -72,7 +80,8 @@ void net__init_tls(void);
 int net__socket_connect(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking);
 int net__socket_close(struct mosquitto *mosq);
 int net__socket_shutdown(struct mosquitto *mosq);
-int net__try_connect(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking);
+int net__try_connect(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking, bool use_mptcp);
+mosq_sock_t net__socket_stream(int domain, int type, int protocol, bool use_mptcp);
 int net__try_connect_step1(struct mosquitto *mosq, const char *host);
 int net__try_connect_step2(struct mosquitto *mosq, uint16_t port, mosq_sock_t *sock);
 int net__socket_connect_step3(struct mosquitto *mosq, const char *host);

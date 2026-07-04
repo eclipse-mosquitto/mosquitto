@@ -889,6 +889,8 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 				goto unknown_option;
 			}
 			cfg->message_rate = true;
+		}else if(!strcmp(argv[i], "--mptcp")){
+			cfg->mptcp = true;
 		}else if(!strcmp(argv[i], "--nodelay")){
 			cfg->tcp_nodelay = true;
 		}else if(!strcmp(argv[i], "--no-tls")){
@@ -1425,9 +1427,7 @@ static int client_tls_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 
 int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 {
-#if defined(WITH_SOCKS)
 	int rc;
-#endif
 
 	mosquitto_int_option(mosq, MOSQ_OPT_PROTOCOL_VERSION, cfg->protocol_version);
 	mosquitto_int_option(mosq, MOSQ_OPT_TRANSPORT, cfg->transport);
@@ -1461,6 +1461,13 @@ int client_opts_set(struct mosquitto *mosq, struct mosq_config *cfg)
 #endif
 	if(cfg->tcp_nodelay){
 		mosquitto_int_option(mosq, MOSQ_OPT_TCP_NODELAY, 1);
+	}
+	if(cfg->mptcp){
+		rc = mosquitto_int_option(mosq, MOSQ_OPT_MPTCP, 1);
+		if(rc){
+			err_printf(cfg, "Error: MPTCP is not supported on this platform.\n");
+			return rc;
+		}
 	}
 
 	if(cfg->msg_count > 0 && cfg->msg_count < 20){
