@@ -127,7 +127,7 @@ int handle__publish(struct mosquitto *mosq)
 		if(mosq->protocol == mosq_p_mqtt5){
 			if(mosq->msgs_in.inflight_quota == 0){
 				message__cleanup(&message);
-				/* FIXME - should send a DISCONNECT here */
+				send__disconnect(mosq, MQTT_RC_RECEIVE_MAXIMUM_EXCEEDED, NULL );
 				return MOSQ_ERR_PROTOCOL;
 			}
 		}
