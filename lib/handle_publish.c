@@ -128,7 +128,7 @@ int handle__publish(struct mosquitto *mosq)
 			if(mosq->msgs_in.inflight_quota == 0){
 				message__cleanup(&message);
 				send__disconnect(mosq, MQTT_RC_RECEIVE_MAXIMUM_EXCEEDED, NULL );
-				return MOSQ_ERR_PROTOCOL;
+				return MOSQ_ERR_RECEIVE_MAXIMUM_EXCEEDED;
 			}
 		}
 
