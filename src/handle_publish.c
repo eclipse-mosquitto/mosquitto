@@ -298,7 +298,7 @@ int handle__publish(struct mosquitto *context)
 			(cmsg_stored->store->qos != msg->qos
 			 || cmsg_stored->store->payloadlen != msg->payloadlen
 			 || strcmp(cmsg_stored->store->topic, msg->topic)
-			 || memcmp(cmsg_stored->store->payload, msg->payload, msg->payloadlen) )){
+			 || (msg->payloadlen > 0 && memcmp(cmsg_stored->store->payload, msg->payload, msg->payloadlen)) )){
 
 		log__printf(NULL, MOSQ_LOG_WARNING, "Reused message ID %u from %s detected. Clearing from storage.", msg->source_mid, context->id);
 		db__message_remove_incoming(context, msg->source_mid);
