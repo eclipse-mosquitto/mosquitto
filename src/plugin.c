@@ -116,9 +116,8 @@ void plugin__handle_disconnect(struct mosquitto *context, int reason)
 		opts = &context->listener->security_options;
 	}else{
 		opts = &db.config->security_options;
-		memset(&event_data, 0, sizeof(event_data));
 	}
-
+	memset(&event_data, 0, sizeof(event_data));
 	event_data.client = context;
 	event_data.reason = reason;
 	DL_FOREACH(opts->plugin_callbacks.disconnect, cb_base){
