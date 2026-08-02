@@ -46,10 +46,12 @@ class SQLite3Persistence:
     def __close_db(self):
         if self.__cursor is not None:
             self.__cursor.close()
+            self.__cursor = None
 
         if self.__conn is not None:
             self.__conn.commit()
             self.__conn.close()
+            self.__conn = None
 
     def __on_error(self):
         self.__close_db()
@@ -249,7 +251,7 @@ class SQLite3Persistence:
                     base_msg["source-port"],
                     base_msg["qos"],
                     base_msg["retain"],
-                    base_msg["properties"] if "properties" in base_msg else None,
+                    json.dumps(base_msg["properties"]) if "properties" in base_msg else None,
                 ),
             )
 
