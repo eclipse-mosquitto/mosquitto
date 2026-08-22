@@ -36,8 +36,10 @@ extern "C" {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-	struct mosquitto__config config = {0};
 	struct mosquitto__base_msg basemsg, *pbasemsg;
+	struct mosquitto__config config;
+
+	memset(&config, 0, sizeof(config));
 
 	if(mosquitto_pub_topic_check2((const char *)data, size)){
 		/* sub__messages_queue only receives topics that have already been

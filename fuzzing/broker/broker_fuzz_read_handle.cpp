@@ -21,12 +21,15 @@ Contributors:
 
 extern "C" int fuzz_packet_read_init(struct mosquitto *context)
 {
+	UNUSED(context);
+
 	return 0;
 }
 
 
 extern "C" void fuzz_packet_read_cleanup(struct mosquitto *context)
 {
+	UNUSED(context);
 }
 
 

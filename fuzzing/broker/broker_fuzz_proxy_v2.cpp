@@ -25,7 +25,7 @@ Contributors:
 
 static const uint8_t *packet_data = NULL;
 static int packet_data_pos = 0;
-static int packet_data_remaining = 0;
+static size_t packet_data_remaining = 0;
 
 extern "C" {
 #include "mosquitto_broker_internal.h"
@@ -33,10 +33,11 @@ extern "C" {
 
 ssize_t net__read(struct mosquitto *mosq, void *buf, size_t count)
 {
-	int res = count < packet_data_remaining?count:packet_data_remaining;
+	size_t res = count < packet_data_remaining?count:packet_data_remaining;
+	UNUSED(mosq);
 	memcpy(buf, &packet_data[packet_data_pos], res);
 	packet_data_remaining -= res;
-	return res;
+	return (ssize_t)res;
 }
 
 
@@ -50,6 +51,9 @@ int http__context_init(struct mosquitto *context)
 
 int log__printf(struct mosquitto *mosq, unsigned int priority, const char *fmt, ...)
 {
+	UNUSED(mosq);
+	UNUSED(priority);
+	UNUSED(fmt);
 	return MOSQ_ERR_SUCCESS;
 }
 
