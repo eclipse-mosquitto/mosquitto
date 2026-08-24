@@ -41,6 +41,7 @@ jobs:
           libssl-dev \
           libsystemd-dev \
           libwrap0-dev \
+          pkgconf \
           python3-all \
           uthash-dev \
           xsltproc

@@ -41,6 +41,7 @@ jobs:
             libwrap0-dev \
             microsocks \
             ninja-build \
+            pkgconf \
             python3-all \
             python3-paho-mqtt \
             python3-psutil \
