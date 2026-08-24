@@ -96,7 +96,7 @@ if(WITH_TLS)
 	  	common-options
 		libmosquitto_common
 		OpenSSL::SSL
-		cJSON
+		cjson
 	)
 
 	if(WITH_THREADING)

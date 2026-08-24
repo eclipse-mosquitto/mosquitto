@@ -272,7 +272,7 @@ if(WIN32)
 	target_link_libraries(mosquitto PRIVATE ws2_32)
 endif()
 
-target_link_libraries(mosquitto PRIVATE cJSON)
+target_link_libraries(mosquitto PRIVATE cjson)
 
 target_include_directories(mosquitto
 	PUBLIC

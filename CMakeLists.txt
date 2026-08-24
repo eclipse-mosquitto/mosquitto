@@ -52,7 +52,7 @@ include(GNUInstallDirs)
 include(CMakePushCheckState)
 include(CheckSourceCompiles)
 
-find_package(cJSON REQUIRED)
+find_package(cJSON CONFIG REQUIRED)
 find_package(argon2)
 
 option_env(INC_MEMTRACK "Include memory tracking support?" ON)

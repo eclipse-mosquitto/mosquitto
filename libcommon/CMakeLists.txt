@@ -53,7 +53,7 @@ target_include_directories(libmosquitto_common
 target_link_libraries(libmosquitto_common
 	PUBLIC
 		common-options
-		cJSON
+		cjson
 )
 
 if(ARGON2_FOUND)

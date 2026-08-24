@@ -34,7 +34,7 @@ if (WITH_THREADING AND NOT WIN32)
 endif()
 
 if(CJSON_FOUND)
-	target_link_libraries(client-common INTERFACE cJSON)
+	target_link_libraries(client-common INTERFACE cjson)
 endif()
 
 if(WITH_STATIC_LIBRARIES)
