@@ -25,6 +25,7 @@ target_link_libraries(broker-fuzzing-common INTERFACE
 	fuzzing-common
 	libmosquitto_common
 	mosquitto
+	mallocfail::wrap
 )
 
 add_library(fuzz-packet-read-base OBJECT

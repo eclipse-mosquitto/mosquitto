@@ -37,6 +37,7 @@ apt-get update && apt-get install -y \
 	ninja-build \
 	pkg-config
 git clone https://github.com/ralight/cJSON ${SRC}/cJSON
+git clone https://github.com/ralight/mallocfail ${SRC}/mallocfail
 
 # If building outside of oss-fuzz, we need LPM
 if [ ! -d ${SRC}/LPM ]; then

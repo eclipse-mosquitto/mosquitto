@@ -1,3 +1,5 @@
+find_package(mallocfail CONFIG REQUIRED)
+
 add_library(fuzzing-common INTERFACE)
 if(DEFINED ENV{LIB_FUZZING_ENGINE})
 	set(FUZZ_FLAGS "$ENV{LIB_FUZZING_ENGINE}")

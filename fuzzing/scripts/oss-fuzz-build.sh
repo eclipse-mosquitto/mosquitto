@@ -34,6 +34,11 @@ cmake \
 make -j $(nproc)
 make install
 
+cd ${SRC}/mallocfail
+cmake -B build -S .
+cmake --build build
+cmake --install build
+
 # Build broker and library static libraries
 cd ${SRC}/mosquitto
 cmake -B build -S . -GNinja \

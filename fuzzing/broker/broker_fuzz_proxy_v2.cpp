@@ -20,6 +20,7 @@ Contributors:
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <mallocfail/wrap.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -64,6 +65,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
 	struct mosquitto context {};
 	struct mosquitto__listener listener {};
+
+	mallocfailwrap_init(data, size);
 
 	packet_data = data;
 	packet_data_pos = 0;
