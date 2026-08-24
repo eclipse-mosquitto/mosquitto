@@ -1,4 +1,4 @@
-add_executable(mosquitto
+custom_add_executable(mosquitto
 	acl_file.c acl_file.h
 	../plugins/acl-file/acl_check.c
 	../plugins/acl-file/acl_parse.c
@@ -311,6 +311,6 @@ if(UNIX)
 	endif()
 endif()
 
-install(TARGETS mosquitto
+custom_install(TARGETS mosquitto
 	RUNTIME DESTINATION "${CMAKE_INSTALL_SBINDIR}"
 )

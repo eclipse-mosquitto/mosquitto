@@ -51,7 +51,7 @@ if(WITH_TLS)
 			OpenSSL::SSL
 		)
 	endif()
-	add_executable(mosquitto_ctrl ${SRC})
+	custom_add_executable(mosquitto_ctrl ${SRC})
 
 	target_include_directories(mosquitto_ctrl PRIVATE
 		"${mosquitto_SOURCE_DIR}/apps/mosquitto_passwd"
@@ -110,7 +110,7 @@ if(WITH_TLS)
 	endif()
 
 
-	install(TARGETS mosquitto_ctrl
+	custom_install(TARGETS mosquitto_ctrl
 		RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	)
 endif()
