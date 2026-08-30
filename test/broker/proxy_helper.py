@@ -1,4 +1,5 @@
 import socket
+import time
 
 PROXY_VER = 0x20
 PROXY_CMD_LOCAL = 0x00
@@ -24,6 +25,15 @@ def do_proxy_v2_connect(port, ver, cmd, fam, data):
     proxy_header += bytes([ver | cmd, fam, (l&0xFF00)>>8, l&0xFF])
     proxy_header += data
     return do_connect(port, proxy_header)
+
+def do_proxy_v2_connect_split(port, ver, cmd, fam, data, split):
+    proxy_header = b"\x0d\x0a\x0d\x0a\x00\x0d\x0a\x51\x55\x49\x54\x0a"
+    l = len(data)
+    proxy_header += bytes([ver | cmd, fam, (l&0xFF00)>>8, l&0xFF])
+    sock = do_connect(port, proxy_header + data[0:split])
+    time.sleep(0.5)
+    sock.send(data[split:])
+    return sock
 
 def do_proxy_v1_connect(port, data):
     return do_connect(port, data)

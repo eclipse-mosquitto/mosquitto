@@ -251,7 +251,7 @@ int proxy_v2__read(struct mosquitto *context)
 	}
 
 	if(context->proxy.pos < context->proxy.len){
-		ssize_t rc = net__read(context, context->proxy.buf, (size_t)(context->proxy.len - context->proxy.pos));
+		ssize_t rc = net__read(context, &context->proxy.buf[context->proxy.pos], (size_t)(context->proxy.len - context->proxy.pos));
 		if(rc > 0){
 			context->proxy.pos = (uint16_t)(context->proxy.pos + rc);
 		}else{

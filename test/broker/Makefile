@@ -332,6 +332,7 @@ endif
 	./21-proxy-v2-bad-header.py
 	./21-proxy-v2-local.py
 	./21-proxy-v2-ipv4.py
+	./21-proxy-v2-ipv4-split.py
 	./21-proxy-v2-ipv6.py
 	./21-proxy-v2-unix.py
 ifneq ($(WITH_WEBSOCKETS),no)
