@@ -626,19 +626,6 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>$SYS/broker/mqtt/connect/received</option></term>
-				<listitem>
-					<para>The total number of MQTT CONNECT messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/connack/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT CONNACK messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/publish/dropped</option></term>
 				<term><option>$SYS/broker/publish/messages/dropped</option></term>
 				<listitem>
 					<para>
@@ -651,125 +638,15 @@
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>$SYS/broker/mqtt/publish/received</option></term>
 				<term><option>$SYS/broker/publish/messages/received</option></term>
 				<listitem>
 					<para>The total number of MQTT PUBLISH messages received since the broker started.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
-				<term><option>$SYS/broker/mqtt/publish/sent</option></term>
 				<term><option>$SYS/broker/publish/messages/sent</option></term>
 				<listitem>
 					<para>The total number of MQTT PUBLISH messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/puback/received</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBACK messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/puback/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBACK messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubrec/received</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBREC messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubrec/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBREC messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubrel/received</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBREL messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubrel/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBREL messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubcomp/received</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBCOMP messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pubcomp/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT PUBCOMP messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/subscribe/received</option></term>
-				<listitem>
-					<para>The total number of MQTT SUBSCRIBE messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/suback/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT SUBACK messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/unsubscribe/received</option></term>
-				<listitem>
-					<para>The total number of MQTT UNSUBSCRIBE messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/unsuback/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT UNSUBACK messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pingreq/received</option></term>
-				<listitem>
-					<para>The total number of MQTT PINGREQ messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/pingresp/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT PINGRESP messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/disconnect/received</option></term>
-				<listitem>
-					<para>The total number of MQTT DISCONNECT messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/disconnect/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT DISCONNECT messages sent since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/auth/received</option></term>
-				<listitem>
-					<para>The total number of MQTT AUTH messages received since the broker started.</para>
-				</listitem>
-			</varlistentry>
-			<varlistentry>
-				<term><option>$SYS/broker/mqtt/auth/sent</option></term>
-				<listitem>
-					<para>The total number of MQTT AUTH messages sent since the broker started.</para>
 				</listitem>
 			</varlistentry>
 			<varlistentry>
