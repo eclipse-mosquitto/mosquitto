@@ -2894,8 +2894,12 @@ static int config__read_file_core(struct mosquitto__config *config, bool reload,
 					if(conf__parse_int(&token, token, &tmp_int, &saveptr)){
 						return MOSQ_ERR_INVAL;
 					}
-					if(tmp_int < 0 || tmp_int > UINT16_MAX){
-						log__printf(NULL, MOSQ_LOG_WARNING, "Error: Packet buffer size must be between 0 and 65535 inclusive.");
+					/* A buffer of size 0 can never hold the NUL terminator that
+					 * http__read() and the packet reading code both assume is
+					 * always present, so it isn't a usable value here even
+					 * though it fits in the uint16_t range. */
+					if(tmp_int < 1 || tmp_int > UINT16_MAX){
+						log__printf(NULL, MOSQ_LOG_WARNING, "Error: Packet buffer size must be between 1 and 65535 inclusive.");
 						return MOSQ_ERR_INVAL;
 					}
 					config->packet_buffer_size = (uint16_t)tmp_int;

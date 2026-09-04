@@ -24,6 +24,7 @@ do_test_broker_failure(conf_file, ["listener"], port, 3, "Error: Empty 'listener
 do_test_broker_failure(conf_file, ["mount_point test/"], port, 3, "Error: The 'mount_point' option requires a listener to be defined first.") # Missing listener config
 do_test_broker_failure(conf_file, [f"listener {port}","mount_point test/+/"], port, 3, "Error: Invalid 'mount_point' value (test/+/). Does it contain a wildcard character?") # Wildcard in mount point.
 do_test_broker_failure(conf_file, [f"listener 100000"], port, 3, "Error: Invalid 'port' value (100000).") # Out of range
+do_test_broker_failure(conf_file, [f"listener {port}","packet_buffer_size 0"], port, 3, "Error: Packet buffer size must be between 1 and 65535 inclusive.") # A zero-sized buffer can never hold the NUL terminator http__read() assumes is there
 if mosq_test.check_features(["WITH_UNIX_SOCKETS"]):
     do_test_broker_failure(conf_file, [f"listener 0"], port, 3, "Error: A listener with port 0 must provide a Unix socket path.") # Missing unix socket
 do_test_broker_failure(conf_file, [f"listener {port}","protocol"], port, 3, "Error: Empty 'protocol' value in configuration.") # Empty proto
@@ -86,8 +87,8 @@ do_test_broker_failure(conf_file, [f"listener {port}", "max_topic_alias_broker 6
 do_test_broker_failure(conf_file, [f"listener {port}", "max_topic_alias_broker -1"], port, 3, "Error: Invalid 'max_topic_alias_broker' value in configuration.") # Invalid value
 do_test_broker_failure(conf_file, [f"listener {port}", "listener_auto_id_prefix"], port, 3, "Error: Empty 'listener_auto_id_prefix' value in configuration.") # Empty string
 do_test_broker_failure(conf_file, [f"listener {port}", f"listener_auto_id_prefix {'a'*51}"], port, 3, "Error: 'listener_auto_id_prefix' length must be <= 50.") # Invalid value
-do_test_broker_failure(conf_file, ["websockets_headers_size 65536"], port, 3, "Error: Packet buffer size must be between 0 and 65535 inclusive.") # Invalid value
-do_test_broker_failure(conf_file, ["websockets_headers_size -1"], port, 3, "Error: Packet buffer size must be between 0 and 65535 inclusive.") # Invalid value
+do_test_broker_failure(conf_file, ["websockets_headers_size 65536"], port, 3, "Error: Packet buffer size must be between 1 and 65535 inclusive.") # Invalid value
+do_test_broker_failure(conf_file, ["websockets_headers_size -1"], port, 3, "Error: Packet buffer size must be between 1 and 65535 inclusive.") # Invalid value
 do_test_broker_failure(conf_file, ["memory_limit -1"], port, 3, "Error: Invalid 'memory_limit' value (-1).") # Invalid value
 
 do_test_broker_failure(conf_file, ["sys_interval -1"], port, 3, "Error: Invalid 'sys_interval' value (-1).") # Invalid value
