@@ -45,6 +45,7 @@ struct dynsec__group *dynsec_anonymous_group = NULL;
 
 static int dynsec__remove_all_clients_from_group(struct dynsec__group *group);
 static int dynsec__remove_all_roles_from_group(struct dynsec__group *group);
+static void group__add_new_roles(struct dynsec__group *group, struct dynsec__rolelist *base_rolelist);
 static cJSON *add_group_to_json(struct dynsec__group *group);
 
 
@@ -102,10 +103,10 @@ static void group__free_item(struct dynsec__group *group)
 		HASH_DEL(local_groups, found_group);
 	}
 	dynsec__remove_all_clients_from_group(group);
+	dynsec__remove_all_roles_from_group(group);
 	mosquitto_free(group->text_name);
 	mosquitto_free(group->text_description);
 	mosquitto_free(group->groupname);
-	dynsec_rolelist__cleanup(&group->rolelist);
 	mosquitto_free(group);
 }
 
@@ -377,6 +378,7 @@ int dynsec_groups__process_create(cJSON *j_responses, struct mosquitto *context,
 	char *groupname, *text_name, *text_description;
 	struct dynsec__group *group = NULL;
 	int rc = MOSQ_ERR_SUCCESS;
+	struct dynsec__rolelist *rolelist = NULL;
 	const char *admin_clientid, *admin_username;
 
 	if(json_get_string(command, "groupname", &groupname, false) != MOSQ_ERR_SUCCESS){
@@ -432,7 +434,7 @@ int dynsec_groups__process_create(cJSON *j_responses, struct mosquitto *context,
 		}
 	}
 
-	rc = dynsec_rolelist__load_from_json(command, &group->rolelist);
+	rc = dynsec_rolelist__load_from_json(command, &rolelist);
 	if(rc == MOSQ_ERR_SUCCESS || rc == ERR_LIST_NOT_FOUND){
 	}else if(rc == MOSQ_ERR_NOT_FOUND){
 		dynsec__command_reply(j_responses, context, "createGroup", "Role not found", correlation_data);
@@ -440,9 +442,14 @@ int dynsec_groups__process_create(cJSON *j_responses, struct mosquitto *context,
 		return MOSQ_ERR_INVAL;
 	}else{
 		dynsec__command_reply(j_responses, context, "createGroup", "Internal error", correlation_data);
+		dynsec_rolelist__cleanup(&rolelist);
 		group__free_item(group);
 		return MOSQ_ERR_INVAL;
 	}
+
+	/* Add via the group so that the roles hold a reference back to the group */
+	group__add_new_roles(group, rolelist);
+	dynsec_rolelist__cleanup(&rolelist);
 
 	HASH_ADD_KEYPTR_INORDER(hh, local_groups, group->groupname, strlen(group->groupname), group, group_cmp);
 
@@ -618,6 +625,16 @@ static int dynsec__remove_all_roles_from_group(struct dynsec__group *group)
 
 	return MOSQ_ERR_SUCCESS;
 }
+
+static void group__add_new_roles(struct dynsec__group *group, struct dynsec__rolelist *base_rolelist)
+{
+	struct dynsec__rolelist *rolelist, *rolelist_tmp = NULL;
+
+	HASH_ITER(hh, base_rolelist, rolelist, rolelist_tmp){
+		dynsec_rolelist__group_add(group, rolelist->role, rolelist->priority);
+	}
+}
+
 
 int dynsec_groups__remove_client(const char *username, const char *groupname, bool update_config)
 {
@@ -1043,8 +1060,9 @@ int dynsec_groups__process_modify(cJSON *j_responses, struct mosquitto *context,
 	}
 
 	if(have_rolelist){
-		dynsec_rolelist__cleanup(&group->rolelist);
-		group->rolelist = rolelist;
+		dynsec__remove_all_roles_from_group(group);
+		group__add_new_roles(group, rolelist);
+		dynsec_rolelist__cleanup(&rolelist);
 	}
 
 	/* And save */

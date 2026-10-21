@@ -5,9 +5,12 @@ import socket
 import subprocess
 import struct
 import sys
+from typing import Any, Optional, Tuple, Union
 import time
 
 import mqtt5_props
+
+from typing import Callable
 
 import __main__
 
@@ -167,9 +170,9 @@ def do_send_receive(sock, send_packet, receive_packet, error_string="send receiv
 # Useful for testing broker/plugin control commands based on JSON commands
 def do_send_receive_command(sock, command_topic, command_payload, expected_response, msg=None):
     if isinstance(command_payload, str):
-        command_packet = mqtt_packets.gen_publish(topic=command_topic, payload=command_payload, qos=0)
+        command_packet = gen_publish(topic=command_topic, payload=command_payload, qos=0)
     else:
-        command_packet = mqtt_packets.gen_publish(topic=command_topic, payload=json.dumps(command_payload), qos=0)
+        command_packet = gen_publish(topic=command_topic, payload=json.dumps(command_payload), qos=0)
     sock.send(command_packet)
     response = json.loads(read_publish(sock)[0])
     if response != expected_response:

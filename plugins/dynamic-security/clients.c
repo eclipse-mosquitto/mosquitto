@@ -36,6 +36,7 @@ Contributors:
 
 static int dynsec__remove_client_from_all_groups(const char *username);
 static void client__remove_all_roles(struct dynsec__client *client);
+static void client__add_new_roles(struct dynsec__client *client, struct dynsec__rolelist *base_rolelist);
 
 /* ################################################################
  * #
@@ -80,7 +81,7 @@ static void client__free_item(struct dynsec__client *client)
 	if(client_found){
 		HASH_DEL(local_clients, client_found);
 	}
-	dynsec_rolelist__cleanup(&client->rolelist);
+	client__remove_all_roles(client);
 	dynsec__remove_client_from_all_groups(client->username);
 	mosquitto_free(client->text_name);
 	mosquitto_free(client->text_description);
@@ -326,6 +327,7 @@ int dynsec_clients__process_create(cJSON *j_responses, struct mosquitto *context
 	char *username, *password, *clientid = NULL;
 	char *text_name, *text_description;
 	struct dynsec__client *client;
+	struct dynsec__rolelist *rolelist = NULL;
 	int rc;
 	cJSON *j_groups, *j_group;
 	int priority;
@@ -416,7 +418,7 @@ int dynsec_clients__process_create(cJSON *j_responses, struct mosquitto *context
 		}
 	}
 
-	rc = dynsec_rolelist__load_from_json(command, &client->rolelist);
+	rc = dynsec_rolelist__load_from_json(command, &rolelist);
 	if(rc == MOSQ_ERR_SUCCESS || rc == ERR_LIST_NOT_FOUND){
 	}else if(rc == MOSQ_ERR_NOT_FOUND){
 		dynsec__command_reply(j_responses, context, "createClient", "Role not found", correlation_data);
@@ -428,12 +430,17 @@ int dynsec_clients__process_create(cJSON *j_responses, struct mosquitto *context
 		}else{
 			dynsec__command_reply(j_responses, context, "createClient", "Internal error", correlation_data);
 		}
+		dynsec_rolelist__cleanup(&rolelist);
 		client__free_item(client);
 		return MOSQ_ERR_INVAL;
 	}
 
 	/* Must add user before groups, otherwise adding groups will fail */
 	HASH_ADD_KEYPTR_INORDER(hh, local_clients, client->username, strlen(client->username), client, client_cmp);
+
+	/* Add via the client so that the roles hold a reference back to the client */
+	client__add_new_roles(client, rolelist);
+	dynsec_rolelist__cleanup(&rolelist);
 
 	j_groups = cJSON_GetObjectItem(command, "groups");
 	if(j_groups && cJSON_IsArray(j_groups)){

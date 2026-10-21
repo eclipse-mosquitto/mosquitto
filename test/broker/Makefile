@@ -229,6 +229,7 @@ ifeq ($(WITH_CJSON),yes)
 	./14-dynsec-client.py
 	./14-dynsec-client-invalid.py
 	./14-dynsec-default-access.py
+	./14-dynsec-delete-role.py
 	./14-dynsec-disable-client.py
 	./14-dynsec-group.py
 	./14-dynsec-group-invalid.py

@@ -29,6 +29,12 @@ Library:
 Windows:
 - Installer will not overwrite an existing mosquitto.conf
 
+Dynamic security plugin:
+- Fix potential crash caused if createClient/modifyClient/createGroup/modifyGroup was
+  called with a role array, then a role in that array was later deleted and
+  then a further change was made to the dynsec config without having restarted
+  the broker.
+
 
 2.0.22 - 2025-07-11
 ===================
