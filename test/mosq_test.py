@@ -26,6 +26,8 @@ if platform.system() == "Windows":
 import __main__
 
 from pathlib import Path
+from typing import Any, Callable, Optional, Tuple, Union
+
 vg_index = 1
 vg_logfiles = []
 

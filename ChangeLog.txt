@@ -34,6 +34,12 @@
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when
   migrating. Closes #3492.
 
+# Dynamic security plugin
+- Fix potential crash caused if createClient/modifyClient/createGroup/modifyGroup was
+  called with a role array, then a role in that array was later deleted and
+  then a further change was made to the dynsec config without having restarted
+  the broker.
+
 # Apps
 - Ensure mosquitto_ctrl checks that all string parameters are strings.
 
