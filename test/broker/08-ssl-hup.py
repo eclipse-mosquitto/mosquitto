@@ -20,6 +20,12 @@
 #   revoking client-revoked.crt and revoking nothing. Reloading has to replace
 #   the CRL set rather than extend it, so removing and reinstating the
 #   revocation must both take effect, while a valid client keeps working.
+#
+# failure
+#   A reload that fails to load the TLS configuration, because of an empty
+#   certfile, a missing cafile or an invalid cipher list, must keep the
+#   listener serving with its previous configuration, and repairing it and
+#   reloading again must work too.
 
 from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig
@@ -178,10 +184,74 @@ def test_crl():
                                cert="client-revoked")
 
 
+# --- failure ---------------------------------------------------------------
+
+def test_failure():
+    conf_file = basename + ".conf"
+    certfile = basename + ".server.crt"
+    cafile = basename + ".all-ca.crt"
+    replace_file(ssl_dir / "server.crt", certfile)
+    replace_file(ssl_dir / "all-ca.crt", cafile)
+
+    port = mosq_test.get_port()
+    broker_config = BrokerConfig(
+        listeners=[
+            ListenerConfig(
+                port=port,
+                cafile=cafile,
+                certfile=certfile,
+                keyfile=ssl_dir / "server.key",
+                require_certificate=True,
+            ),
+        ],
+        allow_anonymous=True,
+    )
+
+    with MosquittoBroker(config=broker_config, config_file_name=conf_file) as broker:
+        broker.add_extra_file(certfile)
+        broker.add_extra_file(cafile)
+
+        expect_tls_accepted(port, "failure-before", "before any reload")
+
+        # A certfile that is being rewritten non-atomically may be empty or
+        # truncated when the broker reloads.
+        open(certfile, "w").close()
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-empty-certfile", "after reloading an empty certfile")
+
+        replace_file(ssl_dir / "server.crt", certfile)
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-certfile-restored", "after restoring certfile")
+
+        os.remove(cafile)
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-missing-cafile", "after reloading a missing cafile")
+
+        replace_file(ssl_dir / "all-ca.crt", cafile)
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-cafile-restored", "after restoring cafile")
+
+        # An invalid cipher list makes building the new context itself fail.
+        with open(conf_file, "a") as f:
+            f.write("ciphers NOT-A-CIPHER\n")
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-bad-ciphers", "after reloading an invalid cipher list")
+
+        with open(conf_file, "a") as f:
+            f.write("ciphers DEFAULT\n")
+        broker.reload_and_wait()
+        expect_tls_accepted(port, "failure-ciphers-restored", "after restoring a valid cipher list")
+
+    reload_errors = broker.get_log().count(RELOAD_ERROR)
+    if reload_errors != 3:
+        raise mosq_test.TestError(f"Expected 3 failed reloads to be logged, found {reload_errors}")
+
+
 SCENARIOS = {
     "cafile": test_cafile,
     "capath": test_capath,
     "crl": test_crl,
+    "failure": test_failure,
 }
 
 if len(sys.argv) < 2 or sys.argv[1] not in SCENARIOS:
