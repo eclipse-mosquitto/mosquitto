@@ -140,6 +140,7 @@ tests = [
     (1, './08-ssl-hup.py', 'cafile'),
     (1, './08-ssl-hup.py', 'capath'),
     (1, './08-ssl-hup.py', 'crl'),
+    (1, './08-ssl-hup.py', 'failure'),
     (1, './08-ssl-hup-disconnect.py'),
     (2, './08-tls-psk-pub.py'),
     (3, './08-tls-psk-bridge.py'),
