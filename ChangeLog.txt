@@ -12,6 +12,11 @@
   Closes #3515.
 - Fix will messages being incorrectly delayed if a client set
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
+- Fix CA certificates added to or removed from `cafile`/`capath` not taking
+  effect on a SIGHUP reload for listeners without `crlfile`. Each TLS listener
+  now gets a new TLS context on reload, which is only used if it is set up
+  successfully, so a failed reload keeps the previous TLS configuration in
+  use. A `capath` that doesn't exist is now an error.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
