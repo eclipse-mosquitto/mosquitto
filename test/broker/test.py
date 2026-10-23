@@ -143,6 +143,7 @@ tests = [
     (1, './08-ssl-hup.py', 'crl'),
     (2, './08-ssl-hup.py', 'existing-connection'),
     (1, './08-ssl-hup.py', 'failure'),
+    (2, './08-ssl-hup.py', 'psk'),
     (1, './08-ssl-hup-disconnect.py'),
     (2, './08-tls-psk-pub.py'),
     (3, './08-tls-psk-bridge.py'),

@@ -41,6 +41,10 @@
 #   connected with, so it must still be able to receive and send messages
 #   across several reloads, including one after which new connections with the
 #   same certificate are refused because cafile was replaced by an unrelated CA.
+#
+# psk
+#   PSK listeners have no certfile, so reloading must leave their SSL_CTX, with
+#   its PSK callback and identity hint, in place.
 
 from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig
@@ -438,6 +442,52 @@ def test_existing_connection():
         plain_pub.close()
 
 
+# --- psk -------------------------------------------------------------------
+
+def run_psk_publisher(port, sock, when):
+    env = mosq_test.env_add_ld_library_path()
+    pub = subprocess.Popen([Path('c', mosq_test.get_build_type(), '08-tls-psk-pub.exe'), str(port)],
+                           env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if mosq_test.wait_for_subprocess(pub):
+        raise mosq_test.TestError(f"PSK publisher did not terminate {when}")
+    if pub.returncode != 0:
+        raise mosq_test.TestError(f"PSK publisher failed with {pub.returncode} {when}")
+    mosq_test.expect_packet(sock, f"publish {when}",
+                            mqtt_packets.gen_publish(topic="psk/test", payload="message", qos=0))
+
+
+def test_psk():
+    mosq_test.require_features(["WITH_TLS_PSK"])
+    (psk_port, plain_port) = mosq_test.get_port(2)
+
+    broker_config = BrokerConfig(
+        listeners=[
+            ListenerConfig(
+                port=psk_port,
+                psk_hint="hint",
+            ),
+            ListenerConfig(port=plain_port)
+        ],
+        allow_anonymous=True,
+        psk_file=source_dir/'08-tls-psk-pub.psk',
+    )
+
+    with MosquittoBroker(config=broker_config) as broker:
+        broker.wait_until_running()
+
+        sock = mosq_test.do_client_connect(mqtt_packets.gen_connect("psk-hup-sub", keepalive=600),
+                                           mqtt_packets.gen_connack(rc=0), timeout=20, port=plain_port)
+        mosq_test.do_send_receive(sock, mqtt_packets.gen_subscribe(1, "psk/test", 0),
+                                  mqtt_packets.gen_suback(1, 0), "suback")
+
+        run_psk_publisher(psk_port, sock, "before any reload")
+        for i in range(2):
+            broker.reload_and_wait()
+            run_psk_publisher(psk_port, sock, f"after reload {i + 1}")
+
+        sock.close()
+
+
 SCENARIOS = {
     "cafile": test_cafile,
     "capath": test_capath,
@@ -445,6 +495,7 @@ SCENARIOS = {
     "crl": test_crl,
     "failure": test_failure,
     "existing-connection": test_existing_connection,
+    "psk": test_psk,
 }
 
 if len(sys.argv) < 2 or sys.argv[1] not in SCENARIOS:

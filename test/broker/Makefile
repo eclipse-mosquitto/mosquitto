@@ -171,6 +171,7 @@ ifeq ($(WITH_TLS),yes)
 	./08-ssl-hup-disconnect.py
 ifeq ($(WITH_TLS_PSK),yes)
 	./08-tls-psk-pub.py
+	./08-ssl-hup.py psk
 	./08-tls-psk-bridge.py
 endif
 endif
