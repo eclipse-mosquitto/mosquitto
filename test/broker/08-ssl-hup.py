@@ -35,12 +35,18 @@
 #   certfile, a missing cafile or an invalid cipher list, must keep the
 #   listener serving with its previous configuration, and repairing it and
 #   reloading again must work too.
+#
+# existing-connection
+#   A TLS client connected before a reload keeps using the context it
+#   connected with, so it must still be able to receive and send messages
+#   across several reloads, including one after which new connections with the
+#   same certificate are refused because cafile was replaced by an unrelated CA.
 
 from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig
 from tls_helper import (cert_file_fingerprint, cert_fingerprint, expect_tls_accepted,
                         expect_tls_refused, pem_certs, replace_file,
-                        tls_client_context)
+                        tls_client_context, tls_connect)
 import shutil
 
 mosq_test.require_features(["WITH_TLS"])
@@ -362,12 +368,83 @@ def test_failure():
         raise mosq_test.TestError(f"Expected 3 failed reloads to be logged, found {reload_errors}")
 
 
+# --- existing-connection ---------------------------------------------------
+
+def check_existing_client(tls_sock, plain_pub, plain_sub, round_no):
+    # Broker to existing TLS client.
+    payload = f"to-tls-{round_no}"
+    plain_pub.send(mqtt_packets.gen_publish("hup/to-tls", qos=0, payload=payload))
+    mosq_test.expect_packet(tls_sock, f"publish to TLS client (round {round_no})",
+                            mqtt_packets.gen_publish("hup/to-tls", qos=0, payload=payload))
+
+    # Existing TLS client to broker.
+    mid = round_no + 10
+    payload = f"from-tls-{round_no}"
+    mosq_test.do_send_receive(tls_sock,
+                              mqtt_packets.gen_publish("hup/from-tls", qos=1, mid=mid, payload=payload),
+                              mqtt_packets.gen_puback(mid),
+                              f"puback for TLS client (round {round_no})")
+    mosq_test.expect_packet(plain_sub, f"publish from TLS client (round {round_no})",
+                            mqtt_packets.gen_publish("hup/from-tls", qos=0, payload=payload))
+
+
+def test_existing_connection():
+    cafile = basename + ".ca.crt"
+    replace_file(ssl_dir / "all-ca.crt", cafile)
+
+    (tls_port, plain_port) = mosq_test.get_port(2)
+    broker_config = BrokerConfig(
+        listeners=[
+            ListenerConfig(
+                port=tls_port,
+                cafile=cafile,
+                certfile=ssl_dir / "server.crt",
+                keyfile=ssl_dir / "server.key",
+                require_certificate=True,
+            ),
+            ListenerConfig(port=plain_port),
+        ],
+        allow_anonymous=True,
+    )
+
+    with MosquittoBroker(config=broker_config) as broker:
+        broker.add_extra_file(cafile)
+        broker.wait_until_running()
+
+        tls_sock = tls_connect(tls_port, "hup-existing-tls", keepalive=600)
+        mosq_test.do_send_receive(tls_sock, mqtt_packets.gen_subscribe(1, "hup/to-tls", 0),
+                                  mqtt_packets.gen_suback(1, 0), "suback")
+
+        plain_sub = mosq_test.do_client_connect(mqtt_packets.gen_connect("hup-existing-sub", keepalive=600),
+                                                mqtt_packets.gen_connack(rc=0), port=plain_port)
+        mosq_test.do_send_receive(plain_sub, mqtt_packets.gen_subscribe(1, "hup/from-tls", 0),
+                                  mqtt_packets.gen_suback(1, 0), "suback")
+        plain_pub = mosq_test.do_client_connect(mqtt_packets.gen_connect("hup-existing-pub", keepalive=600),
+                                                mqtt_packets.gen_connack(rc=0), port=plain_port)
+
+        check_existing_client(tls_sock, plain_pub, plain_sub, 0)
+
+        for round_no in range(1, 4):
+            broker.reload_and_wait()
+            check_existing_client(tls_sock, plain_pub, plain_sub, round_no)
+
+        replace_file(ssl_dir / "test-fake-root-ca.crt", cafile)
+        broker.reload_and_wait()
+        expect_tls_refused(tls_port, "hup-existing-new", "after cafile was replaced by an unrelated CA")
+        check_existing_client(tls_sock, plain_pub, plain_sub, 4)
+
+        tls_sock.close()
+        plain_sub.close()
+        plain_pub.close()
+
+
 SCENARIOS = {
     "cafile": test_cafile,
     "capath": test_capath,
     "certfile": test_certfile,
     "crl": test_crl,
     "failure": test_failure,
+    "existing-connection": test_existing_connection,
 }
 
 if len(sys.argv) < 2 or sys.argv[1] not in SCENARIOS:
