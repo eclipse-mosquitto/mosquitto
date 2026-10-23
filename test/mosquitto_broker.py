@@ -145,6 +145,15 @@ class MosquittoBroker:
                 raise TimeoutError(f"{self} did not {action} within {timeout}s")
             time.sleep(0.05)
 
+    def wait_until_running(self, timeout=10):
+        """Wait until the broker has opened all of its listeners.
+
+        start() only waits until the first listener accepts connections, so
+        tests that connect to other listeners straight away can race with the
+        broker opening them, especially under valgrind.
+        """
+        self._wait_for_log(r"mosquitto version \S+ running", 1, timeout, "start")
+
     def reload_and_wait(self, timeout=10):
         """Reload the broker and wait until it has acted on the reload.
 

@@ -139,6 +139,7 @@ tests = [
     (1, './08-ssl-connect-no-identity.py'),
     (1, './08-ssl-hup.py', 'cafile'),
     (1, './08-ssl-hup.py', 'capath'),
+    (2, './08-ssl-hup.py', 'certfile'),
     (1, './08-ssl-hup.py', 'crl'),
     (1, './08-ssl-hup.py', 'failure'),
     (1, './08-ssl-hup-disconnect.py'),

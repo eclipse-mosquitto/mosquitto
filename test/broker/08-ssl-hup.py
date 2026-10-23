@@ -15,6 +15,15 @@
 #   capath, e.g. left behind after removing a CA without rehashing, must not
 #   stop it from being loaded.
 #
+# certfile
+#   The listeners point at private copies of a certfile, holding a leaf
+#   certificate followed by the intermediate signing CA, and a keyfile. After a
+#   reload without changes, and after rotating to a different leaf and back,
+#   openssl s_client must see exactly the leaf on disk followed by the
+#   intermediate, and a client that only trusts the root CA must be able to
+#   complete an MQTT CONNECT. With builtin websockets support, the same is
+#   checked for a websockets listener.
+#
 # crl
 #   The listener points at a private copy of a CRL that alternates between
 #   revoking client-revoked.crt and revoking nothing. Reloading has to replace
@@ -29,7 +38,9 @@
 
 from mosq_test_helper import *
 from broker_config import BrokerConfig, ListenerConfig
-from tls_helper import expect_tls_accepted, expect_tls_refused, replace_file
+from tls_helper import (cert_file_fingerprint, cert_fingerprint, expect_tls_accepted,
+                        expect_tls_refused, pem_certs, replace_file,
+                        tls_client_context)
 import shutil
 
 mosq_test.require_features(["WITH_TLS"])
@@ -133,6 +144,110 @@ def test_cafile():
 def test_capath():
     # A hierarchy of CA certs in a directory of individual files.
     run_rotation_test("capath", ["test-root-ca.crt", "test-signing-ca.crt"], ["test-fake-root-ca.crt"])
+
+
+# --- certfile --------------------------------------------------------------
+
+def get_chain_fingerprints(port):
+    """Return the SHA-256 fingerprint of every certificate the broker presents
+    on port, leaf first."""
+    try:
+        result = subprocess.run(
+            ["openssl", "s_client",
+             "-connect", f"localhost:{port}",
+             "-CAfile", str(ssl_dir / "test-root-ca.crt"),
+             "-servername", "localhost",
+             "-showcerts"],
+            input=b"",
+            capture_output=True,
+            timeout=5,
+        )
+    except subprocess.TimeoutExpired:
+        raise mosq_test.TestError(
+            f"openssl s_client timed out connecting to localhost:{port}")
+
+    pem_blocks = pem_certs(result.stdout.decode())
+    if not pem_blocks:
+        raise mosq_test.TestError(
+            "openssl s_client returned no certificates:\n"
+            f"{result.stderr.decode()}")
+    return [cert_fingerprint(p) for p in pem_blocks]
+
+
+def connect_root_ca_only(port, websockets, client_id):
+    """Connect over TLS trusting only the root CA, so the handshake needs the
+    intermediate from the broker, and complete an MQTT CONNECT."""
+    context = tls_client_context(cafile="test-root-ca.crt", cert=None)
+    sock = socket.create_connection(("localhost", port), timeout=20)
+    ssock = context.wrap_socket(sock, server_hostname="localhost")
+    try:
+        if websockets:
+            conn = mosq_test.WebsocketWrapper(ssock, "localhost", port, True, "/mqtt", None)
+        else:
+            conn = ssock
+        mosq_test.do_send_receive(conn, mqtt_packets.gen_connect(client_id),
+                                  mqtt_packets.gen_connack(rc=0), "connack")
+    finally:
+        ssock.close()
+
+
+def test_certfile():
+    with_websockets = mosq_test.check_features(["WITH_WEBSOCKETS", "WITH_WEBSOCKETS_BUILTIN"])
+    certfile = basename + ".server.crt"
+    keyfile = basename + ".server.key"
+    fp_intermediate = cert_file_fingerprint(ssl_dir / "test-signing-ca.crt")
+
+    def set_server_cert(name):
+        with open(certfile + ".new", "w") as out:
+            out.write((ssl_dir / f"{name}.crt").read_text())
+            out.write((ssl_dir / "test-signing-ca.crt").read_text())
+        os.replace(certfile + ".new", certfile)
+        replace_file(ssl_dir / f"{name}.key", keyfile)
+
+    def expect_cert(name, when):
+        expected = [cert_file_fingerprint(ssl_dir / f"{name}.crt"), fp_intermediate]
+        for port, websockets in listeners:
+            kind = "websockets" if websockets else "mqtt"
+            chain = get_chain_fingerprints(port)
+            if chain != expected:
+                raise mosq_test.TestError(
+                    f"{kind} listener did not present {name}.crt + test-signing-ca.crt {when}\n"
+                    f"  got:      {chain}\n"
+                    f"  expected: {expected}")
+            connect_root_ca_only(port, websockets, f"hup-certfile-{kind}")
+
+    set_server_cert("server")
+
+    ports = mosq_test.get_port(2)
+    listeners = [(ports[0], False)]
+    listener_configs = [
+        ListenerConfig(port=ports[0], certfile=certfile, keyfile=keyfile),
+    ]
+    if with_websockets:
+        listeners.append((ports[1], True))
+        listener_configs.append(
+            ListenerConfig(port=ports[1], protocol="websockets",
+                           certfile=certfile, keyfile=keyfile))
+
+    broker_config = BrokerConfig(listeners=listener_configs, allow_anonymous=True)
+
+    with MosquittoBroker(config=broker_config) as broker:
+        broker.add_extra_file(certfile)
+        broker.add_extra_file(keyfile)
+        broker.wait_until_running()
+
+        expect_cert("server", "before any reload")
+
+        broker.reload_and_wait()
+        expect_cert("server", "after a reload without changes")
+
+        set_server_cert("server-san")
+        broker.reload_and_wait()
+        expect_cert("server-san", "after rotating to server-san")
+
+        set_server_cert("server")
+        broker.reload_and_wait()
+        expect_cert("server", "after rotating back to server")
 
 
 # --- crl -------------------------------------------------------------------
@@ -250,6 +365,7 @@ def test_failure():
 SCENARIOS = {
     "cafile": test_cafile,
     "capath": test_capath,
+    "certfile": test_certfile,
     "crl": test_crl,
     "failure": test_failure,
 }

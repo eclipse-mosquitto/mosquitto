@@ -164,6 +164,7 @@ ifeq ($(WITH_TLS),yes)
 	./08-ssl-connect-no-identity.py
 	./08-ssl-hup.py cafile
 	./08-ssl-hup.py capath
+	./08-ssl-hup.py certfile
 	./08-ssl-hup.py crl
 	./08-ssl-hup.py failure
 	./08-ssl-hup-disconnect.py
