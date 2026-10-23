@@ -1,6 +1,8 @@
 """Helpers shared by the tests that reload TLS listeners."""
 
+import hashlib
 import os
+import re
 import shutil
 import socket
 import ssl
@@ -10,6 +12,8 @@ import mosq_test
 import mqtt_packets
 
 ssl_dir = Path(__file__).resolve().parent / "ssl"
+
+_PEM_CERT = re.compile(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----", re.DOTALL)
 
 # How the broker refusing a TLS client shows up on the client side. With
 # TLS 1.3 the client certificate is only checked after the client has finished
@@ -23,6 +27,28 @@ def replace_file(source, dest):
     tmp = f"{dest}.new"
     shutil.copyfile(source, tmp)
     os.replace(tmp, dest)
+
+
+def pem_certs(text):
+    """Return the PEM certificate blocks in text."""
+    return _PEM_CERT.findall(text)
+
+
+def cert_fingerprint(pem):
+    """Return the SHA-256 fingerprint of a PEM certificate block."""
+    return hashlib.sha256(ssl.PEM_cert_to_DER_cert(pem)).hexdigest()
+
+
+def cert_file_fingerprint(path):
+    """Return the SHA-256 fingerprint of the first certificate in a PEM file.
+
+    The fixtures may have a text dump of the certificate before the PEM block.
+    """
+    with open(path) as f:
+        certs = pem_certs(f.read())
+    if not certs:
+        raise ValueError(f"No PEM certificate block found in {path}")
+    return cert_fingerprint(certs[0])
 
 
 def tls_client_context(cafile="test-root-ca.crt", cert="client"):
