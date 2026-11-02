@@ -213,6 +213,7 @@ endif
 	./09-plugin-load-acl.py
 	./09-plugin-load-basic-auth.py
 	./09-plugin-load-extended-auth.py
+	./09-plugin-peer-cred.py
 	./09-plugin-publish.py
 	./09-plugin-unsupported.py
 	./09-pwfile-parse-invalid.py

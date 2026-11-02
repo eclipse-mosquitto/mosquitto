@@ -38,6 +38,9 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
+#ifndef WIN32
+#  include <sys/types.h>
+#endif
 
 #include <mosquitto/mqtt_protocol.h>
 #include <mosquitto/defs.h>
@@ -625,6 +628,41 @@ mosq_EXPORT const char *mosquitto_client_address(const struct mosquitto *client)
  * Retrieve the network port number the client connected to, or 0 on error.
  */
 mosq_EXPORT int mosquitto_client_port(const struct mosquitto *client);
+
+
+/*
+ * Function: mosquitto_client_peer_cred
+ *
+ * Retrieve the Unix credentials of the process at the other end of a client
+ * connection, as reported by the operating system. This allows a plugin to
+ * identify local clients by their Unix user instead of a password.
+ *
+ * This is only available for clients connected through a Unix socket listener.
+ * It is not available on Windows.
+ *
+ * On Linux the credentials come from SO_PEERCRED. On other POSIX systems
+ * getpeereid() is used for uid and gid, and LOCAL_PEERPID for the pid where
+ * available (macOS). If the platform cannot report the pid, it is set to 0.
+ *
+ * Parameters:
+ *	client - the client to query
+ *	uid -    pointer to store the user id of the peer, or NULL
+ *	gid -    pointer to store the group id of the peer, or NULL
+ *	pid -    pointer to store the process id of the peer, or NULL. Set to 0 if
+ *	         the platform cannot report it.
+ *
+ * Returns:
+ *	MOSQ_ERR_SUCCESS - on success
+ *	MOSQ_ERR_INVAL -   if client is NULL or has no socket
+ *	MOSQ_ERR_NOT_SUPPORTED - if the client is not connected through a Unix
+ *	                   socket listener, or the broker was built without Unix
+ *	                   socket support, or the platform does not support peer
+ *	                   credentials
+ *	MOSQ_ERR_ERRNO -   if the operating system call failed, check errno
+ */
+#ifndef WIN32
+mosq_EXPORT int mosquitto_client_peer_cred(const struct mosquitto *client, uid_t *uid, gid_t *gid, pid_t *pid);
+#endif
 
 
 /*
