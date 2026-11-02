@@ -1,4 +1,4 @@
-2.1.3 - 2026-02-xx
+2.1.3 - 2026-11-xx
 ==================
 
 # Broker
@@ -17,6 +17,7 @@
 - Fix potential crash if reading a file in restricted mode and the group id
   does not have an entry in /etc/groups. Closes #3498.
 - Fix missing SONAME. Closes #3483.
+- Increase default iterations for sha512-pbkdf2 to 20000 and document it.
 
 # Lib
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if

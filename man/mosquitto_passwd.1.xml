@@ -27,6 +27,7 @@
 				<arg choice='plain'><option>-c</option></arg>
 				<arg choice='plain'><option>-D</option></arg>
 			</group>
+			<arg choice='optional'><option>-I</option> <replaceable>iterations</replaceable></arg>
 			<arg choice='plain'><replaceable>passwordfile</replaceable></arg>
 			<arg choice='plain'><replaceable>username</replaceable></arg>
 		</cmdsynopsis>
@@ -35,6 +36,7 @@
 			<group>
 				<arg choice='plain'><option>-H</option> <replaceable>hash</replaceable></arg>
 			</group>
+			<arg choice='optional'><option>-I</option> <replaceable>iterations</replaceable></arg>
 			<arg choice='plain'><option>-b</option></arg>
 			<arg choice='plain'><replaceable>passwordfile</replaceable></arg>
 			<arg choice='plain'><replaceable>username</replaceable></arg>
@@ -103,10 +105,44 @@
 						<replaceable>argon2id</replaceable>,
 						<replaceable>sha512-pbkdf2</replaceable>, or
 						<replaceable>sha512</replaceable>. Defaults to
-						<replaceable>argon2id</replaceable>. The
+						<replaceable>sha512-pbkdf2</replaceable>. The
 						<replaceable>sha512</replaceable> option is provided for
 						creating password files for use with Mosquitto 1.6
 						and earlier.
+					</para>
+				</listitem>
+			</varlistentry>
+			<varlistentry>
+				<term><option>-I</option></term>
+				<listitem>
+					<para>
+						If using the <replaceable>sha512-pbkdf2</replaceable> hash,
+						choose the number of hash iterations to use.
+					</para>
+					<para>
+						Setting a greater number of iterations makes the process
+						of generating a hash from a password take a longer
+						amount of time. This is an intentional design that means
+						in the event an attacker obtains the password file, it
+						will take an unreasonable amount of time to brute force
+						the password. It has the negative effect that each time
+						a password needs to be checked, the check takes longer.
+					</para>
+					<para>
+						The current OWASP recommendation is to use 220,000
+						iterations for sha512-pbkdf2 hashes. You have to
+						evaluate for yourself whether this is appropriate in
+						your situation. For example, on a raspberry pi 4, a
+						password check using 220,000 iterations takes 0.5
+						seconds to compute, meaning that only two connections
+						can be accepted per second, and nothing else can be
+						achieved on the broker at the same time.
+					</para>
+					<para>
+						Defaults to 20,000, which should allow ~9 connections
+						per second on a raspberry pi 4. You should use a value
+						that suits the hardware in use and the rate of
+						connections required.
 					</para>
 				</listitem>
 			</varlistentry>

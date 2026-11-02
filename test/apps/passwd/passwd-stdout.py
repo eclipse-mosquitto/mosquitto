@@ -23,10 +23,10 @@ def do_test(args, rc_expected, response=None, input=None):
         print(proc.returncode)
         raise ValueError(args)
 
-resp = "Password: \nReenter password: \nstdout:$7$1000$"
+resp = "Password: \nReenter password: \nstdout:$7$20000$"
 do_test(["-c", "-", "stdout"], 0, response=resp, input="pw\npw\n")
 
-resp = "stdout:$7$1000$"
+resp = "stdout:$7$20000$"
 do_test(["-b", "-c", "-", "stdout", "pw"], 0, response=resp)
 
 exit(0)

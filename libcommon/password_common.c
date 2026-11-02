@@ -44,7 +44,7 @@ Contributors:
 #  define MOSQ_ARGON2_P 1
 #endif
 
-#define PW_DEFAULT_ITERATIONS 1000
+#define PW_DEFAULT_ITERATIONS 20000
 static int pw__encode(struct mosquitto_pw *pw);
 
 struct mosquitto_pw {
