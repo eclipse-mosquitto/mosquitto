@@ -10,6 +10,7 @@ set(PLUGINS
     auth_plugin_extended_single2
     auth_plugin_id_change
     auth_plugin_msg_params
+    auth_plugin_peer_cred
     auth_plugin_publish
     auth_plugin_pwd
     auth_plugin_v2

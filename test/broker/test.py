@@ -184,6 +184,7 @@ tests = [
     (2, './09-plugin-load-acl.py'),
     (3, './09-plugin-load-basic-auth.py'),
     (2, './09-plugin-load-extended-auth.py'),
+    (1, './09-plugin-peer-cred.py'),
     (1, './09-plugin-publish.py'),
     (1, './09-plugin-unsupported.py'),
     (1, './09-pwfile-parse-invalid.py'),

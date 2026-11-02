@@ -1,6 +1,10 @@
 2.2.0 - xxxx-xx-xx
 ==================
 
+# Broker
+- Add mosquitto_client_peer_cred() plugin function to retrieve the Unix
+  credentials (uid, gid, pid) of clients connected via a Unix socket listener.
+
 # Apps
 - Support NO_COLOR environment variable in mosquitto_ctrl
 

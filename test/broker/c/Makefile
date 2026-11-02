@@ -19,6 +19,7 @@ PLUGIN_SRC = \
 	auth_plugin_extended_single2.c \
 	auth_plugin_id_change.c \
 	auth_plugin_msg_params.c \
+	auth_plugin_peer_cred.c \
 	auth_plugin_publish.c \
 	auth_plugin_pwd.c \
 	auth_plugin_v2.c \

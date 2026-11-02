@@ -16,7 +16,18 @@ Contributors:
    Roger Light - initial implementation and documentation.
 */
 
+#if defined(__linux__) && !defined(_GNU_SOURCE)
+/* Required for struct ucred */
+#  define _GNU_SOURCE
+#endif
+
 #include "config.h"
+
+#ifndef WIN32
+#  include <sys/socket.h>
+#  include <sys/types.h>
+#  include <sys/un.h>
+#endif
 
 #include "mosquitto_broker_internal.h"
 #include "mosquitto/mqtt_protocol.h"
@@ -86,6 +97,63 @@ BROKER_EXPORT int mosquitto_client_port(const struct mosquitto *client)
 	}else{
 		return 0;
 	}
+}
+
+
+BROKER_EXPORT int mosquitto_client_peer_cred(const struct mosquitto *client, uid_t *uid, gid_t *gid, pid_t *pid)
+{
+#if defined(WITH_UNIX_SOCKETS) && !defined(WIN32)
+	uid_t p_uid;
+	gid_t p_gid;
+	pid_t p_pid = 0;
+
+	if(client == NULL || client->sock == INVALID_SOCKET){
+		return MOSQ_ERR_INVAL;
+	}
+	if(client->listener == NULL || client->listener->unix_socket_path == NULL){
+		return MOSQ_ERR_NOT_SUPPORTED;
+	}
+
+#  if defined(SO_PEERCRED)
+	{
+		struct ucred cred;
+		socklen_t len = sizeof(cred);
+
+		if(getsockopt(client->sock, SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0){
+			return MOSQ_ERR_ERRNO;
+		}
+		p_uid = cred.uid;
+		p_gid = cred.gid;
+		p_pid = cred.pid;
+	}
+#  elif defined(HAVE_GETPEEREID) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+	if(getpeereid(client->sock, &p_uid, &p_gid) != 0){
+		return MOSQ_ERR_ERRNO;
+	}
+#    if defined(LOCAL_PEERPID)
+	{
+		socklen_t len = sizeof(p_pid);
+
+		if(getsockopt(client->sock, SOL_LOCAL, LOCAL_PEERPID, &p_pid, &len) != 0){
+			p_pid = 0;
+		}
+	}
+#    endif
+#  else
+	return MOSQ_ERR_NOT_SUPPORTED;
+#  endif
+
+	if(uid) *uid = p_uid;
+	if(gid) *gid = p_gid;
+	if(pid) *pid = p_pid;
+	return MOSQ_ERR_SUCCESS;
+#else
+	(void)client;
+	(void)uid;
+	(void)gid;
+	(void)pid;
+	return MOSQ_ERR_NOT_SUPPORTED;
+#endif
 }
 
 

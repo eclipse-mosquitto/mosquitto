@@ -12,6 +12,7 @@ _mosquitto_client_clean_session
 _mosquitto_client_id
 _mosquitto_client_id_hashv
 _mosquitto_client_keepalive
+_mosquitto_client_peer_cred
 _mosquitto_client_port
 _mosquitto_client_protocol
 _mosquitto_client_protocol_version
