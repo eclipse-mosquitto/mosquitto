@@ -108,6 +108,22 @@ static int acl_check_publish_c_send(struct dynsec__data *data, struct mosquitto_
  * #
  * ################################################################ */
 
+/* If the topic starts with "$share/<name>/", skip that part and
+ * return the real topic. Otherwise return the topic as it is. */
+static const char *strip_share_prefix(const char *topic)
+{
+	const char *filter;
+
+	if(strncmp(topic, "$share/", strlen("$share/"))){
+		return topic;
+	}
+	filter = strchr(topic + strlen("$share/"), '/');
+	if(filter == NULL){
+		return topic;
+	}
+	return filter + 1;
+}
+
 
 static int acl_check_subscribe(struct dynsec__data *data, struct mosquitto_evt_acl_check *ed, struct dynsec__rolelist *base_rolelist)
 {
@@ -116,12 +132,14 @@ static int acl_check_subscribe(struct dynsec__data *data, struct mosquitto_evt_a
 	size_t len;
 	bool result;
 	const char *clientid, *username;
+	const char *topic;
 	bool has_wildcard;
 
 	UNUSED(data);
 
-	len = strlen(ed->topic);
-	has_wildcard = (strpbrk(ed->topic, "+#") != NULL);
+	topic = strip_share_prefix(ed->topic);
+	len = strlen(topic);
+	has_wildcard = (strpbrk(topic, "+#") != NULL);
 
 	clientid = mosquitto_client_id(ed->client);
 	username = mosquitto_client_username(ed->client);
@@ -130,7 +148,7 @@ static int acl_check_subscribe(struct dynsec__data *data, struct mosquitto_evt_a
 		if(rolelist->role->allow_wildcard_subs == false && has_wildcard == true){
 			return MOSQ_ERR_ACL_DENIED;
 		}
-		HASH_FIND(hh, rolelist->role->acls.subscribe_literal, ed->topic, len, acl);
+		HASH_FIND(hh, rolelist->role->acls.subscribe_literal, topic, len, acl);
 		if(acl){
 			if(acl->allow){
 				return MOSQ_ERR_SUCCESS;
@@ -139,7 +157,7 @@ static int acl_check_subscribe(struct dynsec__data *data, struct mosquitto_evt_a
 			}
 		}
 		HASH_ITER(hh, rolelist->role->acls.subscribe_pattern, acl, acl_tmp){
-			if(mosquitto_sub_matches_acl_with_pattern(acl->topic, ed->topic, clientid, username, &result)){
+			if(mosquitto_sub_matches_acl_with_pattern(acl->topic, topic, clientid, username, &result)){
 				/* Invalid input, so deny */
 				return MOSQ_ERR_ACL_DENIED;
 			}
@@ -170,16 +188,18 @@ static int acl_check_unsubscribe(struct dynsec__data *data, struct mosquitto_evt
 	size_t len;
 	bool result;
 	const char *clientid, *username;
+	const char *topic;
 
 	UNUSED(data);
 
-	len = strlen(ed->topic);
+	topic = strip_share_prefix(ed->topic);
+	len = strlen(topic);
 
 	clientid = mosquitto_client_id(ed->client);
 	username = mosquitto_client_username(ed->client);
 
 	HASH_ITER(hh, base_rolelist, rolelist, rolelist_tmp){
-		HASH_FIND(hh, rolelist->role->acls.unsubscribe_literal, ed->topic, len, acl);
+		HASH_FIND(hh, rolelist->role->acls.unsubscribe_literal, topic, len, acl);
 		if(acl){
 			if(acl->allow){
 				return MOSQ_ERR_SUCCESS;
@@ -188,7 +208,7 @@ static int acl_check_unsubscribe(struct dynsec__data *data, struct mosquitto_evt
 			}
 		}
 		HASH_ITER(hh, rolelist->role->acls.unsubscribe_pattern, acl, acl_tmp){
-			if(mosquitto_sub_matches_acl_with_pattern(acl->topic, ed->topic, clientid, username, &result)){
+			if(mosquitto_sub_matches_acl_with_pattern(acl->topic, topic, clientid, username, &result)){
 				/* Invalid input, so deny */
 				return MOSQ_ERR_ACL_DENIED;
 			}

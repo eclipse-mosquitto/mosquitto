@@ -25,6 +25,8 @@
 # Plugins
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when
   migrating. Closes #3492.
+- Fix dynamic-security subscribe and unsubscribe ACLs not being applied to
+  the topic filter of $share subscriptions. Closes #3785.
 
 # Build:
 - Fix test when nbuilding with WITH_EDITLINE=no. Closes #3484.

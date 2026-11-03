@@ -226,6 +226,7 @@ tests = [
     (1, './14-dynsec-plugin-invalid.py'),
     (1, './14-dynsec-role-invalid.py'),
     (1, './14-dynsec-role.py'),
+    (1, './14-dynsec-shared-sub.py'),
 
     (2, './15-persist-bridge-queue.py',  'persist_sqlite'),
     (2, './15-persist-client-msg-in-v3-1-1.py', 'persist_sqlite'),
