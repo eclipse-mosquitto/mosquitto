@@ -26,11 +26,11 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
 
       - name: vcpkg build
-        uses: johnwason/vcpkg-action@v6
+        uses: johnwason/vcpkg-action@7c4b562bb35ef5a01d9d728acc90100b107dee4d # v6
         id: vcpkg
         with:
           manifest-dir: ${{ github.workspace }}
@@ -43,7 +43,7 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build64 --config ${{env.BUILD_TYPE}}
 
-      - uses: suisei-cn/actions-download-file@v1.6.0
+      - uses: suisei-cn/actions-download-file@818d6b7dc8fe73f2f924b6241f2b1134ca1377d9 # v1.6.0
         id: vcredist
         name: Download VC redistributable
         with:
@@ -51,12 +51,12 @@ jobs:
           target: ${{github.workspace}}/installer/
 
       - name: Installer
-        uses: joncloud/makensis-action@v4
+        uses: joncloud/makensis-action@c481d9faa93b9189844ea92c602866e7b4f7371b # v4
         with:
           script-file: ${{github.workspace}}/installer/mosquitto64.nsi
 
       - name: Upload installer to artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: installer
           path: ${{ github.workspace }}/installer/mosquitto*.exe
