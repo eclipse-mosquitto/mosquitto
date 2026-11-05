@@ -208,10 +208,13 @@ static int topic_matches_sub(const char *sub, const char *topic, const char *cli
 			if(pattern_check == NULL || pattern_check[0] == '\0'){
 				return MOSQ_ERR_SUCCESS;
 			}
+			if(strpbrk(pattern_check, "+#") != NULL){
+				return MOSQ_ERR_SUCCESS;
+			}
 			spos += 2;
 			sub += 2;
 
-			while(pattern_check[0] != 0 && topic[0] != 0 && topic[0] != '/'){
+			while(pattern_check[0] != 0 && topic[0] != 0){
 				if(pattern_check[0] != topic[0]){
 					/* Valid input, but no match */
 					return MOSQ_ERR_SUCCESS;
@@ -374,21 +377,14 @@ static int sub_matches_acl(const char *acl, const char *sub, const char *clienti
 				/* no match */
 				return MOSQ_ERR_SUCCESS;
 			}
-			if(pattern_check[1] == '\0' &&
-					(
-						pattern_check[0] == '+' ||
-						pattern_check[0] == '#' ||
-						pattern_check[0] == '/')
-					){
-
-				/* username/client id of just + / # not allowed */
+			if(strpbrk(pattern_check, "+#") != NULL){
 				return MOSQ_ERR_SUCCESS;
 			}
 
 			apos +=2;
 			acl += 2;
 
-			while(pattern_check[0] != 0 && sub[0] != 0 && sub[0] != '/'){
+			while(pattern_check[0] != 0 && sub[0] != 0){
 				if(pattern_check[0] != sub[0]){
 					/* Valid input, but no match */
 					return MOSQ_ERR_SUCCESS;

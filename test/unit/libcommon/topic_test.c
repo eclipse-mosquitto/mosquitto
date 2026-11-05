@@ -561,21 +561,29 @@ static void TEST_topic_pattern_wildcard(void)
 	int rc;
 	bool match;
 
+	/* Topic hierarchy in client id */
+	rc = mosquitto_topic_matches_sub_with_pattern("%c", "clientid/test", "clientid/test", NULL, &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, true);
+
+	/* Topic hierarchy in username */
+	rc = mosquitto_topic_matches_sub_with_pattern("%u", "username/test", NULL, "username/test", &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, true);
+
+	rc = mosquitto_topic_matches_sub_with_pattern("%u/#", "user/name/topic", NULL, "user/name", &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, true);
+
 	/* Malicious */
 	/* ========= */
 
-	/* / in client id */
-	rc = mosquitto_topic_matches_sub_with_pattern("%c", "clientid/test", "clientid/test", NULL, &match);
-	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
-
-	/* / in username */
-	rc = mosquitto_topic_matches_sub_with_pattern("%u", "username/test", NULL, "username/test", &match);
-	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
-
 	/* + in client id */
 	rc = mosquitto_topic_matches_sub_with_pattern("%c", "clientid", "+", NULL, &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, false);
+
+	rc = mosquitto_topic_matches_sub_with_pattern("%c/#", "client+id/topic", "client+id", NULL, &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
 	CU_ASSERT_EQUAL(match, false);
 
@@ -1065,26 +1073,30 @@ static void TEST_acl_pattern_wildcard(void)
 	int rc;
 	bool match;
 
-	/* Malicious */
-	/* ========= */
-
-	/* / in client id */
+	/* Topic hierarchy in client id */
 	rc = mosquitto_sub_matches_acl_with_pattern("%c", "clientid/test", "clientid/test", NULL, &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
+	CU_ASSERT_EQUAL(match, true);
+
+	rc = mosquitto_sub_matches_acl_with_pattern("%c/#", "client/id/topic", "client/id", NULL, &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, true);
 
 	rc = mosquitto_sub_matches_acl_with_pattern("%c", "/", "/", NULL, &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
+	CU_ASSERT_EQUAL(match, true);
 
-	/* / in username */
+	/* Topic hierarchy in username */
 	rc = mosquitto_sub_matches_acl_with_pattern("%u", "username/test", NULL, "username/test", &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
+	CU_ASSERT_EQUAL(match, true);
 
 	rc = mosquitto_sub_matches_acl_with_pattern("%u", "/", NULL, "/", &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
-	CU_ASSERT_EQUAL(match, false);
+	CU_ASSERT_EQUAL(match, true);
+
+	/* Malicious */
+	/* ========= */
 
 	/* + in client id */
 	rc = mosquitto_sub_matches_acl_with_pattern("%c", "clientid", "+", NULL, &match);
@@ -1115,6 +1127,10 @@ static void TEST_acl_pattern_wildcard(void)
 
 	/* # in username */
 	rc = mosquitto_sub_matches_acl_with_pattern("%u", "#", NULL, "#", &match);
+	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
+	CU_ASSERT_EQUAL(match, false);
+
+	rc = mosquitto_sub_matches_acl_with_pattern("%u/#", "user#name/topic", NULL, "user#name", &match);
 	CU_ASSERT_EQUAL(rc, MOSQ_ERR_SUCCESS);
 	CU_ASSERT_EQUAL(match, false);
 
