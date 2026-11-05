@@ -50,6 +50,40 @@ def do_test(port, proto_ver):
         raise ValueError(rc)
 
 
+def do_long_delay_test(port):
+    env = {
+        'XDG_CONFIG_HOME':'/tmp/missing'
+    }
+    env = mosq_test.env_add_ld_library_path(env)
+    topic = '03/pub/repeat/long-delay'
+    cmd = [mosq_paths.mosquitto_pub,
+            '-p', str(port),
+            '-t', topic,
+            '-m', 'message',
+            '--repeat', '2',
+            '--repeat-delay', '3000.5',
+            ]
+
+    publish_packet = mqtt_packets.gen_publish(topic, qos=0, payload='message')
+    sock = mosq_test.sub_helper(port=port, topic=topic)
+    pub = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=env)
+
+    try:
+        mosq_test.expect_packet(sock, 'publish 1', publish_packet)
+        sock.settimeout(1)
+        try:
+            sock.recv(1)
+        except socket.timeout:
+            if pub.poll() is not None:
+                raise mosq_test.TestError('Publisher exited before repeat delay')
+        else:
+            raise mosq_test.TestError('Unexpected repeat publish')
+    finally:
+        pub.terminate()
+        mosq_test.wait_for_subprocess(pub, timeout=5)
+        sock.close()
+
+
 if __name__ == '__main__':
     port = mosq_test.get_port()
     broker = MosquittoBroker(port=port)
@@ -57,3 +91,4 @@ if __name__ == '__main__':
         do_test(port, proto_ver=3)
         do_test(port, proto_ver=4)
         do_test(port, proto_ver=5)
+        do_long_delay_test(port)

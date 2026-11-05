@@ -566,7 +566,7 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 {
 	int i;
 	int tmpi;
-	float f;
+	double delay;
 	size_t szt;
 
 	for(i=1; i<argc; i++){
@@ -1038,14 +1038,14 @@ int client_config_line_proc(struct mosq_config *cfg, int pub_or_sub, int argc, c
 				fprintf(stderr, "Error: --repeat-delay argument given but no time specified.\n\n");
 				return 1;
 			}else{
-				f = (float )atof(argv[i+1]);
-				if(f < 0.0f){
+				delay = atof(argv[i+1]);
+				if(delay < 0.0){
 					fprintf(stderr, "Error: --repeat-delay argument must be >=0.0.\n\n");
 					return 1;
 				}
-				f *= 1.0e6f;
-				cfg->repeat_delay.tv_sec = (int)f/1000000;
-				cfg->repeat_delay.tv_usec = (int)f%1000000;
+				cfg->repeat_delay.tv_sec = (long )delay;
+				delay -= (double )cfg->repeat_delay.tv_sec;
+				cfg->repeat_delay.tv_usec = (int )(delay * 1.0e6);
 			}
 			i++;
 		}else if(!strcmp(argv[i], "--retain-as-published")){
