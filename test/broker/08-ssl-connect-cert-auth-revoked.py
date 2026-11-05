@@ -42,7 +42,7 @@ try:
             # payload and so we get an EOF.
             ssl_eof = True
         except ssl.SSLError as err:
-            if err.reason == "SSLV3_ALERT_CERTIFICATE_REVOKED":
+            if err.reason in ["SSLV3_ALERT_CERTIFICATE_REVOKED", "TLS_ALERT_CERTIFICATE_REVOKED"]:
                 rc = 0
             elif err.errno == 8 and "EOF occurred" in err.strerror:
                 rc = 0
