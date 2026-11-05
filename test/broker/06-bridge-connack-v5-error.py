@@ -37,10 +37,16 @@ def do_test(rc, logmsg):
     broker = MosquittoBroker(config=broker_config)
     with broker:
         (bridge, address) = ssock.accept()
-        bridge.settimeout(20)
-        mosq_test.expect_packet(bridge, "connect", connect_packet)
-        bridge.send(connack_packet)
-        bridge.close()
+        with bridge:
+            bridge.settimeout(20)
+            mosq_test.expect_packet(bridge, "connect", connect_packet)
+            bridge.sendall(connack_packet)
+
+            # Wait for rejection handling before stopping the broker.
+            if bridge.recv(1) != b"":
+                raise AssertionError(
+                    "Expected bridge connection to close after rejected CONNACK"
+                )
 
     broker.check_log(Contains(logmsg))
 
