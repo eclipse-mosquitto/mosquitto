@@ -274,9 +274,6 @@ static int mosquitto__reconnect(struct mosquitto *mosq, bool blocking)
 	{
 		rc = net__socket_connect(mosq, mosq->host, mosq->port, mosq->bind_address, blocking);
 	}
-	char address[1024];
-	uint16_t port;
-	get_address(mosq->sock, address, 1024, &port);
 	if(rc>0){
 		mosquitto__set_state(mosq, mosq_cs_connect_pending);
 		return rc;
