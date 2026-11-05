@@ -38,6 +38,7 @@ Contributors:
 
 #include "ctrl_shell.h"
 #include "ctrl_shell_internal.h"
+#include "json_help.h"
 
 #define UNUSED(A) (void)(A)
 
@@ -537,7 +538,7 @@ void ctrl_shell__on_message(struct mosquitto *mosq, void *userdata, const struct
 
 	cJSON *j_tree = cJSON_Parse((char *)msg->payload);
 	cJSON *j_endpoint_error = cJSON_GetObjectItem(j_tree, "error");
-	if(j_endpoint_error && !strcmp(j_endpoint_error->valuestring, "endpoint not available")){
+	if(CJSON_IS_VALID_STRING(j_endpoint_error) && !strcmp(j_endpoint_error->valuestring, "endpoint not available")){
 		ctrl_shell_printf("%s$CONTROL endpoint for this module not available.%s\n", ANSI_ERROR, ANSI_RESET);
 	}else{
 		cJSON *j_responses = cJSON_GetObjectItem(j_tree, "responses");
@@ -546,10 +547,14 @@ void ctrl_shell__on_message(struct mosquitto *mosq, void *userdata, const struct
 		cJSON *j_error = cJSON_GetObjectItem(j_command_obj, "error");
 		cJSON *j_data = cJSON_GetObjectItem(j_command_obj, "data");
 		if(j_error){
-			ctrl_shell_printf("%s%s%s\n", ANSI_ERROR, j_error->valuestring, ANSI_RESET);
-		}else if(j_data && data.response_callback){
+			if(CJSON_IS_VALID_STRING(j_error)){
+				ctrl_shell_printf("%s%s%s\n", ANSI_ERROR, j_error->valuestring, ANSI_RESET);
+			}else{
+				ctrl_shell_printf("Invalid response from broker.\n");
+			}
+		}else if(j_data && data.response_callback && CJSON_IS_VALID_STRING(j_command)){
 			data.response_callback(j_command->valuestring, j_data, msg->payload);
-		}else if(j_command){
+		}else if(CJSON_IS_VALID_STRING(j_command)){
 			ctrl_shell_printf("OK\n");
 		}else{
 			ctrl_shell_printf("Invalid response from broker.\n");

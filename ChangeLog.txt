@@ -26,6 +26,9 @@
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when
   migrating. Closes #3492.
 
+# Apps
+- Ensure mosquitto_ctrl checks that all string parameters are strings.
+
 # Build:
 - Fix test when nbuilding with WITH_EDITLINE=no. Closes #3484.
 - Fix tests when building with WITH_WEBSOCKETS=no. Closes #3502.

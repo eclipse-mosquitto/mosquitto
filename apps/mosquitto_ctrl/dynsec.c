@@ -126,7 +126,7 @@ static void print_list(cJSON *j_response, const char *arrayname, const char *key
 			if(json_get_string(j_elem, keyname, &stmp, false) == MOSQ_ERR_SUCCESS){
 				printf("%s\n", stmp);
 			}
-		}else if(cJSON_IsString(j_elem) && j_elem->valuestring){
+		}else if(CJSON_IS_VALID_STRING(j_elem)){
 			printf("%s\n", j_elem->valuestring);
 		}
 	}
@@ -169,7 +169,7 @@ static void print_json_array(cJSON *j_list, int slen, const char *label, const c
 					print_json_value(cJSON_GetObjectItem(j_elem, optional_element_name), optional_element_null_value);
 					printf(")");
 				}
-			}else if(cJSON_IsString(j_elem) && j_elem->valuestring){
+			}else if(CJSON_IS_VALID_STRING(j_elem)){
 				printf("%-*s %s", (int)slen, label, j_elem->valuestring);
 			}
 			label = "";

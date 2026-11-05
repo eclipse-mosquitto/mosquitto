@@ -35,6 +35,8 @@ cJSON *cJSON_AddIntToObject(cJSON * const object, const char * const name, long 
 cJSON *cJSON_AddUIntToObject(cJSON * const object, const char * const name, unsigned long long number);
 cJSON *cJSON_CreateInt(int num);
 
+#define CJSON_IS_VALID_STRING(A) ((A) != NULL && cJSON_IsString(A) && (A)->valuestring)
+
 #ifdef __cplusplus
 }
 #endif

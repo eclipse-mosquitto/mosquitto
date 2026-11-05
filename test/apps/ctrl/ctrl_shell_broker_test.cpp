@@ -331,6 +331,68 @@ TEST_F(CtrlShellBrokerTest, PublishDenied)
 }
 
 
+TEST_F(CtrlShellBrokerTest, EndPointNotAvailable)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_broker(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|broker> ")))
+		.WillOnce(t::Return(strdup("listListeners")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+
+	const char request[] = "{\"commands\":[{\"command\":\"listListeners\"}]}";
+	const char response[] = "{\"error\": \"endpoint not available\"}";
+	expect_request_response(&mosq, request, response);
+
+	const char *outputs[] = {
+		"$CONTROL endpoint for this module not available.\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+}
+
+
+TEST_F(CtrlShellBrokerTest, BadError)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_broker(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|broker> ")))
+		.WillOnce(t::Return(strdup("listListeners")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+
+	const char request[] = "{\"commands\":[{\"command\":\"listListeners\"}]}";
+	const char response[] = "{\"error\": 42}";
+	expect_request_response(&mosq, request, response);
+
+	const char *outputs[] = {
+		"Invalid response from broker.\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+}
+
+
 TEST_F(CtrlShellBrokerTest, ListListeners)
 {
 	mosq_config config{};
@@ -434,6 +496,42 @@ TEST_F(CtrlShellBrokerTest, ListPlugins)
 		"  plugin1\n",
 		"Control endpoints:",
 		"  $CONTROL/plugin1\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+}
+
+
+TEST_F(CtrlShellBrokerTest, ListPluginsWithBadArray)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_broker(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|broker> ")))
+		.WillOnce(t::Return(strdup("listPlugins")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+
+	const char request[] = "{\"commands\":[{\"command\":\"listPlugins\"}]}";
+	const char response[] = "{\"responses\":[{\"command\":\"listPlugins\",\"data\":{"
+			"\"plugins\":["
+			"{\"name\":\"plugin1\",\"control-endpoints\":[42]}"
+			"]}}]}";
+	expect_request_response(&mosq, request, response);
+
+	const char *outputs[] = {
+		"Plugin:",
+		"  plugin1\n",
+		"Control endpoints:",
 		"\n",
 	};
 	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));

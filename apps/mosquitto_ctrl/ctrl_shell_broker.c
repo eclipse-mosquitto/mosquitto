@@ -136,7 +136,9 @@ static void print_plugins(cJSON *j_data)
 		if(j_endpoints){
 			ctrl_shell_print_label(0, "Control endpoints:");
 			cJSON_ArrayForEach(j_endpoint, j_endpoints){
-				ctrl_shell_print_value(1, "%s\n", j_endpoint->valuestring);
+				if(CJSON_IS_VALID_STRING(j_endpoint)){
+					ctrl_shell_print_value(1, "%s\n", j_endpoint->valuestring);
+				}
 			}
 		}
 		ctrl_shell_print_value(0, "\n");
