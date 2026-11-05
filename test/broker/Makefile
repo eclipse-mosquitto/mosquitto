@@ -263,6 +263,7 @@ ifeq ($(WITH_TLS),yes)
 	./14-dynsec-plugin-invalid.py
 	./14-dynsec-role-invalid.py
 	./14-dynsec-role.py
+	./14-dynsec-shared-sub.py
 endif
 
 PERSIST_TESTS = \
