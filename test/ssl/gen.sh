@@ -43,13 +43,13 @@ rm -f test-alt-ca.csr
 # Valid server key and certificate.
 openssl genrsa -out server.key 2048
 openssl req -new -key server.key -out server.csr -config openssl.cnf -subj "${SBASESUBJ}/CN=localhost/"
-openssl ca -batch -config openssl.cnf -name CA_signing -out server.crt -infiles server.csr
+openssl ca -batch -config openssl.cnf -name CA_signing -out server.crt -extensions server_cert -infiles server.csr
 rm -f server.csr
 
 # Expired server certificate
 openssl genrsa -out server-expired.key 2048
 openssl req -new -key server-expired.key -out server-expired.csr -config openssl.cnf -subj "${SBASESUBJ}-expired/CN=localhost/"
-openssl ca -batch -config openssl.cnf -name CA_signing -days 1 -startdate 120820000000Z -enddate 120821000000Z -out server-expired.crt -infiles server-expired.csr
+openssl ca -batch -config openssl.cnf -name CA_signing -days 1 -startdate 120820000000Z -enddate 120821000000Z -out server-expired.crt -extensions server_cert -infiles server-expired.csr
 rm -f server-expired.csr
 
 # Valid client key and certificate.
