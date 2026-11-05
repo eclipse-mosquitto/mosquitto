@@ -1802,6 +1802,8 @@ accept_protocol_versions 3, 4</programlisting>
 							certificates that are trusted when checking incoming
 							client certificates.
 						</para>
+						<para>Reloaded when Mosquitto receives a SIGHUP signal.
+						</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
@@ -1817,6 +1819,12 @@ accept_protocol_versions 3, 4</programlisting>
 							you add/remove a certificate.
 						</para>
 						<para><option>capath</option> is not supported for websockets.</para>
+						<para>The directory must exist. If it doesn't,
+							Mosquitto fails to start, or keeps using the
+							previous TLS configuration when reloading.
+						</para>
+						<para>Reloaded when Mosquitto receives a SIGHUP signal.
+						</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
@@ -1828,10 +1836,32 @@ accept_protocol_versions 3, 4</programlisting>
 							to enable certificate based TLS encryption.
 						</para>
 						<para>
-							The certificate pointed to by this option will be
-							reloaded when Mosquitto receives a SIGHUP signal.
-							This can be used to load new certificates prior to
-							the existing ones expiring.
+							The certificate pointed to by this option, together
+							with <option>keyfile</option>, <option>cafile</option>,
+							<option>capath</option>, <option>crlfile</option>,
+							<option>ciphers</option>, and
+							<option>ciphers_tls1.3</option>, will be reloaded when
+							Mosquitto receives a SIGHUP signal. This can be used
+							to load new certificates prior to the existing ones
+							expiring, or to stop trusting CA certificates and
+							revocations that have been removed. If any of them
+							fail to load, the listener keeps using its previous
+							TLS configuration and an error is logged. Clients
+							connecting after a reload have to complete a full
+							TLS handshake rather than resuming an earlier
+							session.
+						</para>
+						<para>
+							When Mosquitto is built to use libwebsockets,
+							websockets listeners only reload
+							<option>certfile</option> and <option>keyfile</option>,
+							plus any revocations added to
+							<option>crlfile</option>. Restart Mosquitto to apply
+							other changes to those listeners. These listeners
+							don't keep their previous TLS configuration if a
+							reload fails: if, for example, the new certificate
+							loads but the key doesn't, they refuse TLS
+							connections until a later reload succeeds.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -1844,6 +1874,8 @@ accept_protocol_versions 3, 4</programlisting>
 							a colon. Available ciphers can be obtained using
 							the "openssl ciphers" command.
 						</para>
+						<para>Reloaded when Mosquitto receives a SIGHUP signal.
+						</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
@@ -1852,6 +1884,8 @@ accept_protocol_versions 3, 4</programlisting>
 						<para>
 							The list of allowed ciphersuites for this listener,
 							for TLS v1.3, each separated with a colon.
+						</para>
+						<para>Reloaded when Mosquitto receives a SIGHUP signal.
 						</para>
 					</listitem>
 				</varlistentry>
@@ -1864,6 +1898,8 @@ accept_protocol_versions 3, 4</programlisting>
 							access to particular client certificates. If you
 							have done this, use crlfile to point to the PEM
 							encoded revocation file.</para>
+						<para>Reloaded when Mosquitto receives a SIGHUP signal.
+						</para>
 					</listitem>
 				</varlistentry>
 				<varlistentry>
@@ -1906,7 +1942,9 @@ openssl dhparam -out dhparam.pem 2048</programlisting>
 							The private key pointed to by this option will be
 							reloaded when Mosquitto receives a SIGHUP signal.
 							This can be used to load new keys prior to
-							the existing ones expiring.
+							the existing ones expiring. Engine keys, used when
+							<option>tls_keyform</option> is "engine", are not
+							reloaded.
 						</para>
 					</listitem>
 				</varlistentry>
