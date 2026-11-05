@@ -87,6 +87,7 @@ add_python_test(PY_TEST_NAMES ${PREFIX} 2 "04-retain-check-source-persist-diff-p
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-check-source-persist.py")
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-check-source.py")
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-clear-multiple.py")
+add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-qos0-busy.py")
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-qos0-repeated.py")
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "04-retain-upgrade-outgoing-qos.py")
 add_python_test(PY_TEST_NAMES ${PREFIX} 1 "05-clean-session-qos1.py")

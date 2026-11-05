@@ -278,15 +278,17 @@ int handle__subscribe(struct mosquitto *context)
 	db.persistence_changes++;
 #endif
 
-	if(context->out_packet == NULL){
-		rc = db__message_write_queued_out(context);
-		if(rc){
-			return rc;
-		}
-		rc = db__message_write_inflight_out_latest(context);
-		if(rc){
-			return rc;
-		}
+	if(rc){
+		return rc;
+	}
+
+	rc = db__message_write_queued_out(context);
+	if(rc){
+		return rc;
+	}
+	rc = db__message_write_inflight_out_latest(context);
+	if(rc){
+		return rc;
 	}
 
 	return rc;

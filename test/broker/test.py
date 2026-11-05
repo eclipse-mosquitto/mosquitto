@@ -69,6 +69,7 @@ tests = [
     (1, './04-retain-check-source-persist.py'),
     (1, './04-retain-check-source.py'),
     (1, './04-retain-clear-multiple.py'),
+    (1, './04-retain-qos0-busy.py'),
     (1, './04-retain-qos0-repeated.py'),
     (1, './04-retain-upgrade-outgoing-qos.py'),
     (2, './04-retain-check-source-persist-diff-port.py'),
