@@ -100,7 +100,7 @@ endfunction()
 
 function(custom_install)
 	if(NOT WITH_FUZZING)
-		install(${NARGS})
+		install(${ARGN})
 	endif()
 endfunction()
 
