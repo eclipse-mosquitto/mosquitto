@@ -12,6 +12,9 @@
   Closes #3515.
 - Fix will messages being incorrectly delayed if a client set
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
+- Fix bridges exceeding the remote receive-maximum after reconnecting, caused
+  by the PUBACK of the connection state notification releasing send quota.
+  Closes #3275.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id

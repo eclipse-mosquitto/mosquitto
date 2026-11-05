@@ -60,9 +60,12 @@ int handle__pubackcomp(struct mosquitto *mosq, const char *type)
 		}
 	}
 
+#ifndef WITH_BROKER
+	/* The broker releases send quota in db__message_delete_outgoing() */
 	COMPAT_pthread_mutex_lock(&mosq->msgs_out.mutex);
 	util__increment_send_quota(mosq);
 	COMPAT_pthread_mutex_unlock(&mosq->msgs_out.mutex);
+#endif
 
 	rc = packet__read_uint16(&mosq->in_packet, &mid);
 	if(rc){
