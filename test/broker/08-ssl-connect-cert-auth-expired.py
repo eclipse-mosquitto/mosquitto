@@ -42,7 +42,7 @@ with broker:
             # payload and so we get an EOF.
             ssl_eof = True
         except ssl.SSLError as err:
-            if err.reason == "SSLV3_ALERT_CERTIFICATE_EXPIRED":
+            if err.reason in ["SSLV3_ALERT_CERTIFICATE_EXPIRED", "TLS_ALERT_CERTIFICATE_EXPIRED"]:
                 rc = 0
             elif err.errno == 8 and "EOF occurred" in err.strerror:
                 rc = 0
