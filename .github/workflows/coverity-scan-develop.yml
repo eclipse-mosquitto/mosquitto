@@ -9,7 +9,7 @@ jobs:
   coverity:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       with:
         ref: develop
 
@@ -34,7 +34,7 @@ jobs:
             uthash-dev \
             xsltproc
 
-    - uses: vapier/coverity-scan-action@v1
+    - uses: vapier/coverity-scan-action@8fe7b0af23cbbd4eced5f63dcd2384640eaa5d49 # v1.10.0
       with:
         build_language: 'cxx'
         project: "eclipse/mosquitto"
