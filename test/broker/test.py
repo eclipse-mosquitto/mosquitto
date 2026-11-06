@@ -24,6 +24,7 @@ tests = [
     (1, './01-connect-uname-password-denied-no-will.py'),
     (1, './01-connect-uname-password-denied.py'),
     (1, './01-connect-unix-socket.py'),
+    (1, './01-connect-websocket-empty-frame.py'),
     (1, './01-connect-windows-line-endings.py'),
     (2, './01-connect-zero-length-id.py'),
     (1, './01-plugin-connect-uname-password-denied.py'),

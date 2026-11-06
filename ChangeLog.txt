@@ -1,6 +1,11 @@
 2.1.3 - 2026-11-xx
 ==================
 
+# Security
+- Fix incorrect handling of websocket frames for the builtin implementation,
+  which could lead to out of bounds memory access and potential remote code
+  execution.
+
 # Broker
 - Fix MOSQ_EVT_DISCONNECT being called before MOSQ_EVT_ACL_CHECK for the will
   of that client. Closes #3487.
