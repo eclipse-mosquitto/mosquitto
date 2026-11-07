@@ -21,6 +21,8 @@
 # Lib
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if
   thread creation fails. Closes #3496.
+- Fix memory leak of the private key and the engine reference on every
+  connect when using a TLS engine key (`tls_keyform engine`).
 
 # Plugins
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when

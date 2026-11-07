@@ -859,7 +859,10 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 						net__print_ssl_error(mosq, "while trying to load the private key");
 						return MOSQ_ERR_TLS;
 					}
-					if(SSL_CTX_use_PrivateKey(mosq->ssl_ctx, pkey) <= 0){
+					ret = SSL_CTX_use_PrivateKey(mosq->ssl_ctx, pkey);
+					/* ssl_ctx holds its own reference to pkey on success */
+					EVP_PKEY_free(pkey);
+					if(ret <= 0){
 						log__printf(mosq, MOSQ_LOG_ERR, "Error: Unable to use engine private key file \"%s\".", mosq->tls_keyfile);
 						ENGINE_FINISH(engine);
 						net__print_ssl_error(mosq, "while trying to use the private key");
@@ -901,6 +904,10 @@ static int net__init_ssl_ctx(struct mosquitto *mosq)
 		}
 	}
 
+#if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
+	/* Balance ENGINE_init() above, which runs on every connect */
+	ENGINE_FINISH(engine);
+#endif
 	return MOSQ_ERR_SUCCESS;
 }
 #endif
