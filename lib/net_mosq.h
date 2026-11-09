@@ -69,7 +69,8 @@ void net__cleanup(void);
 void net__init_tls(void);
 #endif
 
-int net__socket_connect(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address, bool blocking);
+int net__socket_connect(struct mosquitto *mosq, const char *host, uint16_t port, const char *bind_address,
+   bool blocking, const char *hostaddress);
 int net__socket_close(struct mosquitto *mosq);
 int net__socket_shutdown(struct mosquitto *mosq);
 int net__try_connect(const char *host, uint16_t port, mosq_sock_t *sock, const char *bind_address, bool blocking);
