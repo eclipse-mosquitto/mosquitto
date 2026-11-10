@@ -84,3 +84,60 @@ data = b"\xC0\x00\x02\x05" + b"\x00\x00\x00\x00" + b"\x18\x83" + b"\x00\x00" \
     + b"\x54\x4C\x53\x76\x31\x2E\x33"
 expect_log = "Client proxy-test [192.0.2.5:6275] disconnected: not authorised."
 do_test(data, expect_log)
+
+
+# SSL, duplicate SSL_CN
+# IP, IP, port, port, SSL-tlv, length, client, verify,
+# SSL-version sub-tlv, length, value = TLSv1.3
+# SSL_CN sub-tlv, length, value = ppppppp
+# SSL_CN sub-tlv, length, value = qqqqqqq
+data = b"\xC0\x00\x02\x05" + b"\x00\x00\x00\x00" + b"\x18\x83" + b"\x00\x00" \
+    + b"\x20" \
+    + b"\x00\x23" \
+    + b"\x05" \
+    + b"\x00\x00\x00\x00" \
+    + b"\x21" \
+    + b"\x00\x07" \
+    + b"\x54\x4C\x53\x76\x31\x2E\x33" \
+    + b"\x22" \
+    + b"\x00\x07" \
+    + b"\x70\x70\x70\x70\x70\x70\x70" \
+    + b"\x22" \
+    + b"\x00\x07" \
+    + b"\x71\x71\x71\x71\x71\x71\x71"
+expect_log = "Connection from 192.0.2.5:6275 rejected, corrupt PROXY header."
+do_test(data, expect_log)
+
+
+# SSL, SSL_CN with embedded NULL
+# IP, IP, port, port, SSL-tlv, length, client, verify,
+# SSL-version sub-tlv, length, value = TLSv1.3
+# SSL_CN sub-tlv, length, value = ppp0ppp
+data = b"\xC0\x00\x02\x05" + b"\x00\x00\x00\x00" + b"\x18\x83" + b"\x00\x00" \
+    + b"\x20" \
+    + b"\x00\x19" \
+    + b"\x05" \
+    + b"\x00\x00\x00\x00" \
+    + b"\x21" \
+    + b"\x00\x07" \
+    + b"\x54\x4C\x53\x76\x31\x2E\x33" \
+    + b"\x22" \
+    + b"\x00\x07" \
+    + b"\x70\x70\x70\x00\x70\x70\x70"
+expect_log = "Connection from 192.0.2.5:6275 rejected, corrupt PROXY header."
+do_test(data, expect_log)
+
+
+# SSL, SSL_VERSION with embedded NULL
+# IP, IP, port, port, SSL-tlv, length, client, verify,
+# SSL-version sub-tlv, length, value = TLSv1.3
+data = b"\xC0\x00\x02\x05" + b"\x00\x00\x00\x00" + b"\x18\x83" + b"\x00\x00" \
+    + b"\x20" \
+    + b"\x00\x0F" \
+    + b"\x05" \
+    + b"\x00\x00\x00\x00" \
+    + b"\x21" \
+    + b"\x00\x07" \
+    + b"\x54\x4C\x53\x00\x31\x2E\x33"
+expect_log = "Connection from 192.0.2.5:6275 rejected, corrupt PROXY header."
+do_test(data, expect_log)

@@ -285,6 +285,7 @@ static void config__init_reload(struct mosquitto__config *config)
 
 	config->local_only = true;
 	config->allow_duplicate_messages = true;
+	config->check_retain_source = true;
 
 	mosquitto_FREE(config->security_options.acl_data.acl_file);
 	mosquitto_FREE(config->security_options.password_data.password_file);
