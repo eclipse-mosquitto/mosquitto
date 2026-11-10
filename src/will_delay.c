@@ -30,7 +30,13 @@ static time_t last_check = 0;
 
 static int will_delay__cmp(struct will_delay_list *i1, struct will_delay_list *i2)
 {
-	return (int)(i1->context->will_delay_interval - i2->context->will_delay_interval);
+	if(i1->context->will_delay_time == i2->context->will_delay_time){
+		return 0;
+	}else if(i1->context->will_delay_time > i2->context->will_delay_time){
+		return 1;
+	}else{
+		return -1;
+	}
 }
 
 
@@ -66,11 +72,16 @@ void will_delay__send_all(void)
 	struct will_delay_list *item, *tmp;
 
 	DL_FOREACH_SAFE(delay_list, item, tmp){
+		struct mosquitto *context = item->context;
+
 		DL_DELETE(delay_list, item);
-		item->context->will_delay_interval = 0;
-		item->context->will_delay_entry = NULL;
-		context__send_will(item->context);
 		mosquitto_FREE(item);
+
+		/* Clear the interval before sending, otherwise context__send_will()
+		 * would add the context straight back onto this list. */
+		context->will_delay_interval = 0;
+		context->will_delay_entry = NULL;
+		context__send_will(context);
 	}
 }
 
@@ -90,14 +101,18 @@ void will_delay__check(void)
 
 	DL_FOREACH_SAFE(delay_list, item, tmp){
 		if(item->context->will_delay_time <= db.now_real_s){
+			struct mosquitto *context = item->context;
+
 			DL_DELETE(delay_list, item);
-			item->context->will_delay_interval = 0;
-			item->context->will_delay_entry = NULL;
-			context__send_will(item->context);
-			if(item->context->session_expiry_interval == MQTT_SESSION_EXPIRY_IMMEDIATE){
-				context__add_to_disused(item->context);
-			}
 			mosquitto_FREE(item);
+
+			context->will_delay_interval = 0;
+			context->will_delay_entry = NULL;
+			context__send_will(context);
+
+			if(context->session_expiry_interval == MQTT_SESSION_EXPIRY_IMMEDIATE){
+				context__add_to_disused(context);
+			}
 		}else{
 			loop__update_next_event((item->context->will_delay_time - db.now_real_s)*1000);
 			return;

@@ -5,6 +5,8 @@
 - Fix incorrect handling of websocket frames for the builtin implementation,
   which could lead to out of bounds memory access and potential remote code
   execution.
+- Fix case where use of a specific will delay interval could cause all delayed
+  wills to be suppressed.
 
 # Broker
 - Fix MOSQ_EVT_DISCONNECT being called before MOSQ_EVT_ACL_CHECK for the will
@@ -19,6 +21,8 @@
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
 - Reject PROXY v2 connections with duplicate SSL_CN entries.
 - Reject PROXY v2 connections with SSL string entries that are not valid UTF-8.
+- Fix case where use of a specific will delay interval could cause all delayed
+  wills to be suppressed.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id
