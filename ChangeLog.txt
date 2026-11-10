@@ -33,6 +33,7 @@
 # Lib
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if
   thread creation fails. Closes #3496.
+- Reject payloads>65535 bytes in mosquitto_will_set().
 
 # Plugins
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when

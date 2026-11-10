@@ -113,6 +113,11 @@ int send__connect(struct mosquitto *mosq, uint16_t keepalive, bool clean_session
 		will = 1;
 		assert(mosq->will->msg.topic);
 
+		if(mosq->will->msg.payloadlen > UINT16_MAX){
+			mosquitto_property_free_all(&local_props);
+			return MOSQ_ERR_PAYLOAD_SIZE;
+		}
+
 		payloadlen += (uint32_t)(2+strlen(mosq->will->msg.topic) + 2+(uint32_t)mosq->will->msg.payloadlen);
 		if(mosq->protocol == mosq_p_mqtt5){
 			payloadlen += mosquitto_property_get_remaining_length(mosq->will->properties);
