@@ -2,16 +2,79 @@
 Containers built with this Dockerfile build as source from published tarballs.
 
 ## Mount Points
-A docker mount point has been created in the image to be used for configuration.
+The image uses three directories that are intended to be mounted from the host
+or from a docker volume:
 ```
 /mosquitto/config
-```
-
-Two docker volumes have been created in the image to be used for persistent storage and logs.
-```
 /mosquitto/data
 /mosquitto/log
 ```
+
+The image does not declare any of these as a `VOLUME`, so docker will not
+create anonymous volumes for them. Anything written to a directory that you have
+not mounted is stored in the container's writable layer and is **lost when the
+container is removed or recreated**, for example when updating to a new image.
+If you enable persistence or file logging, or keep password, ACL or dynamic
+security files in `/mosquitto/data`, mount that directory.
+
+### Named volumes
+Name the volumes however you like:
+```
+docker volume create mosquitto-data
+docker volume create mosquitto-log
+docker run -it -p 1883:1883 \
+    -v mosquitto-data:/mosquitto/data \
+    -v mosquitto-log:/mosquitto/log \
+    eclipse-mosquitto:<version>
+```
+
+An empty named volume is populated with the contents and ownership of the
+image directory the first time it is mounted.
+
+### Bind mounts
+```
+docker run -it -p 1883:1883 \
+    -v <absolute-path-to-config-directory>:/mosquitto/config \
+    -v <absolute-path-to-data-directory>:/mosquitto/data \
+    -v <absolute-path-to-log-directory>:/mosquitto/log \
+    eclipse-mosquitto:<version>
+```
+
+Mosquitto runs as uid/gid 1883, so it must be able to write to the data and log
+directories. When the container starts as root, the entrypoint changes the
+ownership of `/mosquitto/data` to `PUID`:`PGID` (default 1883:1883). The log
+directory is not changed, so make it writable for that user yourself, e.g.
+`chown 1883:1883 <absolute-path-to-log-directory>`.
+
+### Docker Compose
+```
+services:
+  mosquitto:
+    image: eclipse-mosquitto:<version>
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:
+```
+
+### Upgrading from an image that declared volumes
+Earlier images declared `/mosquitto/data` and `/mosquitto/log` as volumes. If
+you did not mount anything there yourself, your data is in an anonymous volume
+attached to the old container. Copy it into a named volume before removing that
+container:
+```
+docker volume create mosquitto-data
+docker run --rm --volumes-from <old-container> -v mosquitto-data:/new alpine \
+    cp -a /mosquitto/data/. /new/
+```
+Then start the new container with `-v mosquitto-data:/mosquitto/data`. The same
+applies to `/mosquitto/log` if you need to keep old log files.
 
 ## User/Group
 
@@ -90,4 +153,5 @@ plugin /usr/lib/mosquitto_persist_sqlite.so
 log_dest file /mosquitto/log/mosquitto.log
 ```
 
-**Note**: For any volume used, the data will be persistent between containers.
+**Note**: Data is only kept between containers for directories that are mounted,
+see [Mount Points](#mount-points).
