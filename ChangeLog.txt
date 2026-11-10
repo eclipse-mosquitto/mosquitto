@@ -27,6 +27,7 @@ Library:
   thread creation fails. Closes #3496.
 - Fix will messages being incorrectly delayed if a client set
   session-expiry-interval=0 when using will-delay-interval>0. Closes #3505.
+- Reject payloads>65535 bytes in mosquitto_will_set().
 
 Windows:
 - Installer will not overwrite an existing mosquitto.conf

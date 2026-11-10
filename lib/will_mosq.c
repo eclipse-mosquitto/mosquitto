@@ -43,7 +43,7 @@ int will__set(struct mosquitto *mosq, const char *topic, int payloadlen, const v
 	mosquitto_property *p;
 
 	if(!mosq || !topic) return MOSQ_ERR_INVAL;
-	if(payloadlen < 0 || payloadlen > (int)MQTT_MAX_PAYLOAD) return MOSQ_ERR_PAYLOAD_SIZE;
+	if(payloadlen < 0 || payloadlen > (int)UINT16_MAX) return MOSQ_ERR_PAYLOAD_SIZE;
 	if(payloadlen > 0 && !payload) return MOSQ_ERR_INVAL;
 
 	if(mosquitto_pub_topic_check(topic)) return MOSQ_ERR_INVAL;
