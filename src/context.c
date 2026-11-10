@@ -140,6 +140,7 @@ void context__cleanup(struct mosquitto *context, bool force_free)
 
 	alias__free_all(context);
 	keepalive__remove(context);
+	will_delay__remove(context);
 	context__cleanup_out_packets(context);
 
 	mosquitto__free(context->auth_method);
@@ -160,6 +161,9 @@ void context__cleanup(struct mosquitto *context, bool force_free)
 	mosquitto__free(context->address);
 	context->address = NULL;
 
+	/* clear will delay interval so the will is actually sent and not just
+	 * added with will_delay__add */
+	context->will_delay_interval = 0;
 	context__send_will(context);
 
 	if(context->id){
