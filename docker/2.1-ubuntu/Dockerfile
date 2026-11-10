@@ -100,8 +100,6 @@ RUN set -x && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /build
 
-VOLUME ["/mosquitto/data", "/mosquitto/log"]
-
 # Set up the entry point script and default command
 COPY docker-entrypoint.sh /
 EXPOSE 1883
