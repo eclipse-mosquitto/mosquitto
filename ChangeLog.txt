@@ -7,6 +7,8 @@
   execution.
 - Fix case where use of a specific will delay interval could cause all delayed
   wills to be suppressed.
+- Fix potential authentication bypass due to not checking failing password
+  hash functions for OpenSSL 4.0 when using the FIPS module.
 
 # Broker
 - Fix MOSQ_EVT_DISCONNECT being called before MOSQ_EVT_ACL_CHECK for the will
@@ -29,6 +31,7 @@
   does not have an entry in /etc/groups. Closes #3498.
 - Fix missing SONAME. Closes #3483.
 - Increase default iterations for sha512-pbkdf2 to 20000 and document it.
+- Fix missing checks on password hashing functions.
 
 # Lib
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if
