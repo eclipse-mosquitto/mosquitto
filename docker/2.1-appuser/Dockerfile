@@ -39,6 +39,7 @@ RUN set -x && \
         libmicrohttpd-dev \
         linux-headers \
         openssl-dev \
+        pkgconf \
         samurai \
         sqlite-dev \
         uthash-dev \
@@ -50,6 +51,7 @@ RUN set -x && \
     found=''; \
     for server in \
         hkps://keys.openpgp.org \
+        hkps://pgpkeys.eu \
         hkp://keyserver.ubuntu.com:80 \
         pgp.mit.edu \
     ; do \
@@ -110,6 +112,7 @@ VOLUME ["/mosquitto/data", "/mosquitto/log"]
 
 # Set up the entry point script and default command
 COPY --chmod=0755 docker-entrypoint.sh /
+RUN dos2unix /docker-entrypoint.sh
 EXPOSE 1883
 ENTRYPOINT ["/sbin/tini","-g", "--", "/docker-entrypoint.sh"]
 CMD ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
