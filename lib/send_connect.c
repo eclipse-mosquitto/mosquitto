@@ -55,6 +55,20 @@ int send__connect(struct mosquitto *mosq, uint16_t keepalive, bool clean_session
 		return MOSQ_ERR_PROTOCOL;
 	}
 
+#ifndef WITH_BROKER
+	/* The keepalive timers were last reset in mosquitto__reconnect(), before
+	 * the TCP (and TLS/SOCKS/WebSockets) connection was made. A blocking
+	 * connect can take longer than the keepalive interval, for example when
+	 * the first resolved address does not answer and the next one does. The
+	 * keepalive check would then close the new connection with
+	 * MOSQ_ERR_KEEPALIVE before the CONNACK could arrive, on every attempt.
+	 * Start the keepalive interval from the CONNECT instead. */
+	COMPAT_pthread_mutex_lock(&mosq->msgtime_mutex);
+	mosq->last_msg_in = mosquitto_time();
+	mosq->next_msg_out = mosq->last_msg_in + mosq->keepalive;
+	COMPAT_pthread_mutex_unlock(&mosq->msgtime_mutex);
+#endif
+
 #if defined(WITH_BROKER) && defined(WITH_BRIDGE)
 	if(mosq->bridge){
 		clientid = mosq->bridge->remote_clientid;
