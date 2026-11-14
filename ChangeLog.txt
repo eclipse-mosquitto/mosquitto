@@ -21,6 +21,10 @@
 # Lib
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if
   thread creation fails. Closes #3496.
+- Fix clients being disconnected with "Keepalive exceeded" straight after
+  connecting, if the TCP/TLS connect took longer than the keepalive interval
+  (for example when the first resolved address does not answer). The
+  keepalive interval now starts when CONNECT is sent.
 
 # Plugins
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when
