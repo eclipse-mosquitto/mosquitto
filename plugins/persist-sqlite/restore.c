@@ -298,6 +298,7 @@ static int base_msg_restore(struct mosquitto_sqlite *ms)
 	long count = 0, failed = 0;
 	const char *str;
 	const void *payload;
+	int64_t stored_payloadlen;
 
 	rc = sqlite3_prepare_v2(ms->db,
 			"SELECT store_id, expiry_time, topic, payload, source_id, source_username, payloadlen, source_mid, source_port, qos, retain, properties "
@@ -324,7 +325,14 @@ static int base_msg_restore(struct mosquitto_sqlite *ms)
 		base_msg.source_id = (char *)sqlite3_column_text(stmt, 4);
 		base_msg.source_username = (char *)sqlite3_column_text(stmt, 5);
 		payload = (const void *)sqlite3_column_blob(stmt, 3);
-		base_msg.payloadlen = (uint32_t)sqlite3_column_int(stmt, 6);
+		stored_payloadlen = sqlite3_column_int64(stmt, 6);
+		if(stored_payloadlen < 0 || stored_payloadlen > sqlite3_column_bytes(stmt, 3)){
+			/* Don't trust a stored payloadlen that is larger than the payload blob */
+			mosquitto_free(base_msg.topic);
+			failed++;
+			continue;
+		}
+		base_msg.payloadlen = (uint32_t)stored_payloadlen;
 		if(payload && base_msg.payloadlen){
 			base_msg.payload = mosquitto_malloc(base_msg.payloadlen+1);
 			if(!base_msg.payload){
@@ -469,6 +477,7 @@ static int will_restore(struct mosquitto_sqlite *ms)
 	const char *clientid, *topic;
 	const void *payload;
 	mosquitto_property *properties;
+	int64_t stored_payloadlen;
 	int payloadlen, qos, retain;
 
 	rc = sqlite3_prepare_v2(ms->db,
@@ -487,7 +496,13 @@ static int will_restore(struct mosquitto_sqlite *ms)
 		clientid = (const char *)sqlite3_column_text(stmt, 0);
 		topic = (const char *)sqlite3_column_text(stmt, 1);
 		payload = (const void *)sqlite3_column_blob(stmt, 2);
-		payloadlen = (int)sqlite3_column_int64(stmt, 3);
+		stored_payloadlen = sqlite3_column_int64(stmt, 3);
+		if(stored_payloadlen < 0 || stored_payloadlen > sqlite3_column_bytes(stmt, 2)){
+			/* Don't trust a stored payloadlen that is larger than the payload blob */
+			failed++;
+			continue;
+		}
+		payloadlen = (int)stored_payloadlen;
 		qos = sqlite3_column_int(stmt, 4);
 		retain = (bool)sqlite3_column_int(stmt, 5);
 		properties = json_to_properties((const char *)sqlite3_column_text(stmt, 6));

@@ -284,6 +284,7 @@ PERSIST_TESTS = \
 	./15-persist-client-will-persistent.py \
 	./15-persist-publish-properties-v5-0.py \
 	./15-persist-retain-clear.py \
+	./15-persist-retain-payloadlen-mismatch.py \
 	./15-persist-retain-v3-1-1.py \
 	./15-persist-retain-v5-0.py \
 	./15-persist-subscription-v3-1-1.py \
