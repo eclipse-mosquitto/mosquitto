@@ -460,6 +460,15 @@ def modify_base_msgs(
     return num_modified_rows
 
 
+def modify_base_msg_payloadlen(port: int, topic: str, payloadlen: int):
+    with get_connection(port, readonly=False) as con:
+        cur = con.execute(
+            "UPDATE base_msgs SET payloadlen = ? WHERE topic = ?", (payloadlen, topic)
+        )
+        con.commit()
+        return cur.rowcount
+
+
 @mosq_test.retry()
 def check_retain(port, topic, store_id):
     with sqlite3.connect(Path(str(port), "mosquitto.sqlite3")) as con:
