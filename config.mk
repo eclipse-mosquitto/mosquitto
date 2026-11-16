@@ -157,7 +157,7 @@ WITH_HTTP_API=yes
 
 # Also bump lib/mosquitto.h, CMakeLists.txt,
 # installer/mosquitto.nsi, installer/mosquitto64.nsi
-VERSION=2.1.2
+VERSION=2.1.3
 
 # Client library SO version. Bump if incompatible API/ABI changes are made.
 SOVERSION=1

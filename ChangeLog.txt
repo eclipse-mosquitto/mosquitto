@@ -1,4 +1,4 @@
-2.1.3 - 2026-11-xx
+2.1.3 - 2026-11-17
 ==================
 
 # Security
@@ -9,6 +9,11 @@
   wills to be suppressed.
 - Fix potential authentication bypass due to not checking failing password
   hash functions for OpenSSL 4.0 when using the FIPS module.
+- Fix potential crash in the dynamic security plugin caused if
+  createClient/modifyClient/createGroup/modifyGroup was called with a role
+  array, then a role in that array was later deleted and then a further change
+  was made to the dynsec config without having restarted the broker.
+- Fix crashes in mosquitto_ctrl if connecting to a malicious broker.
 
 # Broker
 - Fix MOSQ_EVT_DISCONNECT being called before MOSQ_EVT_ACL_CHECK for the will
