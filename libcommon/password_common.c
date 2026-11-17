@@ -397,7 +397,7 @@ static int pw__hash_sha512(const char *password, struct mosquitto_pw *pw, unsign
 		return MOSQ_ERR_NOMEM;
 	}
 	ok = EVP_DigestInit_ex(context, digest, NULL) == 1
-			&& EVP_DigestUpdate(context, password, strlen(password) == 1)
+			&& EVP_DigestUpdate(context, password, strlen(password)) == 1
 			&& EVP_DigestUpdate(context, pw->params.sha512.salt, pw->params.sha512.salt_len) == 1
 			&& EVP_DigestFinal_ex(context, password_hash, &hash_len) == 1;
 	EVP_MD_CTX_free(context);
