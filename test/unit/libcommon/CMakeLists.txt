@@ -1,6 +1,7 @@
 add_executable(libcommon-test
 	base64_test.c
 	file_test.c
+	password_test.c
 	property_add.c
 	property_value.c
 	strings_test.c
