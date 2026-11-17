@@ -110,7 +110,20 @@ def expect_packet(sock, name, expected):
     else:
         rlen = 1
 
-    packet_recvd = sock.recv(rlen)
+    packet_recvd = b""
+    try:
+        while len(packet_recvd) < rlen:
+            data = sock.recv(rlen-len(packet_recvd))
+            if len(data) == 0:
+                try:
+                    s = f"when reading {name} from {sock.getpeername()}"
+                except OSError:
+                    s = f"when reading {name} from {sock}"
+                raise BrokenPipeError(s)
+            packet_recvd += data
+    except socket.timeout:
+        pass
+
     if packet_matches(name, packet_recvd, expected):
         return True
     else:
@@ -286,7 +299,7 @@ def to_string(packet):
             (slen, packet) = struct.unpack(pack_format, packet)
             pack_format = "!" + str(slen)+'s' + str(len(packet)-slen) + 's'
             (will_message, packet) = struct.unpack(pack_format, packet)
-            s = s+", will-message="+will_message
+            s = s+", will-message="+str(will_message)
 
             s = s+", will-qos="+str((flags&24)>>3)
             s = s+", will-retain="+str((flags&32)>>5)
