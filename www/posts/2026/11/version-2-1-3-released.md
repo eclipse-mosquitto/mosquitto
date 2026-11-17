@@ -9,8 +9,16 @@
 .. type: text
 -->
 
+Version 2.1.4 of Mosquitto has been released. This is a bugfix release.
 Version 2.1.3 of Mosquitto has been released. This is a critical security release.
 Version 2.0.23 of Mosquitto has been released. This is a security release.
+
+
+# 2.1.4 changes
+
+# Broker
+- Fix legacy sha512 passwords always being rejected. This was a regression
+  introduced in 2.1.3.
 
 
 # 2.1.3 changes
