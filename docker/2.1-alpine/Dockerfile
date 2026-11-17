@@ -19,6 +19,7 @@ RUN set -x && \
         argon2-dev \
         build-base \
         cjson-dev \
+        cjson-static \
         cmake \
         cunit-dev \
         gnupg \
