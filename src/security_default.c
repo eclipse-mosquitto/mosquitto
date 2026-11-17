@@ -1336,6 +1336,7 @@ int pw__digest(const char *password, const unsigned char *salt, unsigned int sal
 #else
 	EVP_MD_CTX *context;
 #endif
+	bool ok = false;
 
 	digest = EVP_get_digestbyname("sha512");
 	if(!digest){
@@ -1346,29 +1347,36 @@ int pw__digest(const char *password, const unsigned char *salt, unsigned int sal
 	if(hashtype == pw_sha512){
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 		EVP_MD_CTX_init(&context);
-		EVP_DigestInit_ex(&context, digest, NULL);
-		EVP_DigestUpdate(&context, password, strlen(password));
-		EVP_DigestUpdate(&context, salt, salt_len);
-		/* hash is assumed to be EVP_MAX_MD_SIZE bytes long. */
-		EVP_DigestFinal_ex(&context, hash, hash_len);
+		ok = EVP_DigestInit_ex(&context, digest, NULL) == 1
+				&& EVP_DigestUpdate(&context, password, strlen(password)) == 1
+				&& EVP_DigestUpdate(&context, salt, salt_len) == 1
+				/* hash is assumed to be EVP_MAX_MD_SIZE bytes long. */
+				&& EVP_DigestFinal_ex(&context, hash, hash_len) == 1;
 		EVP_MD_CTX_cleanup(&context);
 #else
 		context = EVP_MD_CTX_new();
-		EVP_DigestInit_ex(context, digest, NULL);
-		EVP_DigestUpdate(context, password, strlen(password));
-		EVP_DigestUpdate(context, salt, salt_len);
-		/* hash is assumed to be EVP_MAX_MD_SIZE bytes long. */
-		EVP_DigestFinal_ex(context, hash, hash_len);
+		if(!context){
+			return MOSQ_ERR_NOMEM;
+		}
+		ok = EVP_DigestInit_ex(context, digest, NULL) == 1
+				&& EVP_DigestUpdate(context, password, strlen(password)) == 1
+				&& EVP_DigestUpdate(context, salt, salt_len) == 1
+				/* hash is assumed to be EVP_MAX_MD_SIZE bytes long. */
+				&& EVP_DigestFinal_ex(context, hash, hash_len) == 1;
 		EVP_MD_CTX_free(context);
 #endif
 	}else{
 		*hash_len = EVP_MAX_MD_SIZE;
-		PKCS5_PBKDF2_HMAC(password, (int)strlen(password),
+		ok = PKCS5_PBKDF2_HMAC(password, (int)strlen(password),
 			salt, (int)salt_len, iterations,
-			digest, (int)(*hash_len), hash);
+			digest, (int)(*hash_len), hash) == 1;
 	}
 
-	return MOSQ_ERR_SUCCESS;
+	if(ok){
+		return MOSQ_ERR_SUCCESS;
+	}else{
+		return MOSQ_ERR_UNKNOWN;
+	}
 }
 
 #endif
