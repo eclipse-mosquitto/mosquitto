@@ -195,7 +195,8 @@ int http__read(struct mosquitto *mosq)
 			if(mosq->listener){
 				bool have_match = false;
 				for(int j=0; j<mosq->listener->ws_origin_count; j++){
-					if(!strncmp(mosq->listener->ws_origins[j], http_headers[i].value, http_headers[i].value_len)){
+					if(strlen(mosq->listener->ws_origins[j]) == http_headers[i].value_len
+							&& !strncmp(mosq->listener->ws_origins[j], http_headers[i].value, http_headers[i].value_len)){
 						have_match = true;
 						break;
 					}
