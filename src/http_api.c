@@ -440,9 +440,23 @@ int http_api__start_local(struct mosquitto__listener *listener)
 		if(!http_dir_canonical){
 			return MOSQ_ERR_NOMEM;
 		}
+		/* Trailing separator, so the prefix check in http__canonical_filename()
+		 * can't match a sibling directory such as "<http_dir>-other". */
+		size_t http_dir_len = strlen(http_dir_canonical);
+		bool have_sep = http_dir_len > 0 && http_dir_canonical[http_dir_len-1] == DIR_SEP;
+		http_dir_len += 2;
 		mosquitto_FREE(listener->http_dir);
-		listener->http_dir = mosquitto_strdup(http_dir_canonical);
-		mosquitto_FREE(http_dir_canonical);
+		listener->http_dir = mosquitto_calloc(http_dir_len, sizeof(char));
+		if(!listener->http_dir){
+			free(http_dir_canonical);
+			return MOSQ_ERR_NOMEM;
+		}
+		if(have_sep){
+			snprintf(listener->http_dir, http_dir_len, "%s", http_dir_canonical);
+		}else{
+			snprintf(listener->http_dir, http_dir_len, "%s%c", http_dir_canonical, DIR_SEP);
+		}
+		free(http_dir_canonical);
 	}
 
 	return http_api__start(listener);
