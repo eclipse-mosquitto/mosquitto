@@ -63,7 +63,7 @@ tests = [
     (1, './03-publish-qos1-max-inflight.py'),
     (1, './03-publish-qos1-no-subscribers-v5.py'),
     (1, './03-publish-qos1-retain-disabled.py'),
-    #(1, './03-publish-qos2-max-inflight-exceeded.py'),
+    (1, './03-publish-qos2-max-inflight-exceeded.py'),
     (1, './03-publish-qos2-max-inflight.py'),
     (1, './03-publish-qos2-reuse-mid.py'),
 
