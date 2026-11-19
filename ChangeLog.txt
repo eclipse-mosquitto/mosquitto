@@ -3,6 +3,8 @@
 
 # libcommon
 - Fix out of bounds read on mosquitto_trimblanks empty string.
+- Fix mosquitto_fgets incorrectly incrementing its counter on failure.
+  Closes #3810.
 
 
 2.1.4 - 2026-11-17

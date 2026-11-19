@@ -318,11 +318,11 @@ char *mosquitto_fgets(char **buf, int *buflen, FILE *stream)
 
 		/* No EOL char found, so extend buffer */
 		offset = (*buflen)-1;
-		*buflen += 1000;
-		newbuf = realloc(*buf, (size_t)*buflen);
+		newbuf = realloc(*buf, (size_t)(*buflen + 1000));
 		if(!newbuf){
 			return NULL;
 		}
+		*buflen += 1000;
 		*buf = newbuf;
 	}while(1);
 }
