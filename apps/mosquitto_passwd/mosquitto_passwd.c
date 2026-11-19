@@ -457,6 +457,13 @@ int main(int argc, char *argv[])
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L || OPENSSL_API_COMPAT < 0x10100000L
 	OpenSSL_add_all_digests();
+#elif defined(WITH_FUZZING)
+	/* The oss-fuzz build links against an uninstrumented libcrypto, which
+	 * causes a false positive MemorySanitizer report when OpenSSL loads its
+	 * default config file. Loading the config file is not needed for
+	 * fuzzing, so disable it. OpenSSL only initialises once, so this also
+	 * prevents the later automatic initialisation from loading the config. */
+	OPENSSL_init_crypto(OPENSSL_INIT_NO_LOAD_CONFIG, NULL);
 #else
 	OPENSSL_init_crypto(OPENSSL_INIT_ADD_ALL_CIPHERS \
 			| OPENSSL_INIT_ADD_ALL_DIGESTS \
