@@ -1,7 +1,14 @@
+3.1.5 - 2026-xx-xx
+==================
+
+# libcommon
+- Fix out of bounds read on mosquitto_trimblanks empty string.
+
+
 2.1.4 - 2026-11-17
 ==================
 
-Broker:
+# Broker
 - Fix legacy sha512 password hashes being rejected due to regression in 2.1.3.
 
 
