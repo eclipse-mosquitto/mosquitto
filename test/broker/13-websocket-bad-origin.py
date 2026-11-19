@@ -36,6 +36,23 @@ with broker:
     except BrokenPipeError:
         pass
 
+    # A prefix of an allowed origin must not match
+    try:
+        websocket_req_prefix = b"GET /mqtt HTTP/1.1\r\n" \
+            + b"Host: localhost\r\n" \
+            + b"Upgrade: websocket\r\n" \
+            + b"Connection: Upgrade\r\n" \
+            + B"Sec-WebSocket-Key: 1JaITHdgDZVd/4OE2AzTTA==\r\n" \
+            + b"Sec-WebSocket-Protocol: mqtt\r\n" \
+            + b"Sec-WebSocket-Version: 13\r\n" \
+            + b"Origin: example.or\r\n" \
+            + b"\r\n"
+
+        sock = mosq_test.do_client_connect(websocket_req_prefix, b"", port=port)
+        sock.close()
+    except BrokenPipeError:
+        pass
+
     websocket_req_good = b"GET /mqtt HTTP/1.1\r\n" \
         + b"Host: localhost\r\n" \
         + b"Upgrade: websocket\r\n" \
