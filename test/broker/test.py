@@ -280,6 +280,7 @@ tests = [
     (1, './21-proxy-v2-ssl-common-name-failure.py'),
     (1, './21-proxy-v2-ssl-common-name-success.py'),
     (1, './21-proxy-v2-lost-connection.py'),
+    (1, './21-proxy-v2-split-header.py'),
     (1, './21-proxy-v2-ssl-cipher.py'),
     (1, './21-proxy-v2-ssl-require-tls-failure.py'),
     (1, './21-proxy-v2-ssl-require-tls-success.py'),

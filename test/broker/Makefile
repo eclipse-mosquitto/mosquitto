@@ -341,6 +341,7 @@ ifneq ($(WITH_WEBSOCKETS),no)
 endif
 	./21-proxy-v2-long-tlv.py
 	./21-proxy-v2-lost-connection.py
+	./21-proxy-v2-split-header.py
 	./21-proxy-v2-ssl-require-cert-failure.py
 	./21-proxy-v2-ssl-require-cert-success.py
 	./21-proxy-v2-ssl-common-name-failure.py
