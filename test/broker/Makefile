@@ -220,6 +220,7 @@ endif
 
 10 :
 	./10-listener-mount-point.py
+	./10-listener-mount-point-unsubscribe.py
 
 11 :
 	./11-message-expiry.py

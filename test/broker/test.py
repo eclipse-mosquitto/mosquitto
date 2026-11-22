@@ -190,6 +190,7 @@ tests = [
     (1, './09-pwfile-parse-invalid.py'),
 
     (2, './10-listener-mount-point.py'),
+    (2, './10-listener-mount-point-unsubscribe.py'),
 
     (1, './11-message-expiry.py'),
     (1, './11-persistence-autosave-changes.py'),
