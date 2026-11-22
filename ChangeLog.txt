@@ -1,6 +1,11 @@
 3.1.5 - 2026-xx-xx
 ==================
 
+# Broker
+- Fix UNSUBSCRIBE not removing the subscription on listeners that use a
+  mount_point, because the mount point was not applied to the topic filter.
+  Closes #3799.
+
 # libcommon
 - Fix out of bounds read on mosquitto_trimblanks empty string.
 - Fix mosquitto_fgets incorrectly incrementing its counter on failure.

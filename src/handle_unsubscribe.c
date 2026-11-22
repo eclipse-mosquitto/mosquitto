@@ -31,6 +31,8 @@ int handle__unsubscribe(struct mosquitto *context)
 {
 	uint16_t mid;
 	uint16_t slen;
+	size_t len;
+	char *sub_mount;
 	int rc;
 	uint8_t reason = 0;
 	int reason_code_count = 0;
@@ -118,6 +120,23 @@ int handle__unsubscribe(struct mosquitto *context)
 			mosquitto_FREE(sub.topic_filter);
 			mosquitto_FREE(reason_codes);
 			return MOSQ_ERR_MALFORMED_PACKET;
+		}
+
+		/* Apply the listener mount point, in the same way as for SUBSCRIBE, so
+		 * that the filter matches the one that was stored. */
+		if(context->listener && context->listener->mount_point){
+			len = strlen(context->listener->mount_point) + slen + 1;
+			sub_mount = mosquitto_malloc(len+1);
+			if(!sub_mount){
+				mosquitto_FREE(sub.topic_filter);
+				mosquitto_FREE(reason_codes);
+				return MOSQ_ERR_NOMEM;
+			}
+			snprintf(sub_mount, len, "%s%s", context->listener->mount_point, sub.topic_filter);
+			sub_mount[len] = '\0';
+
+			mosquitto_FREE(sub.topic_filter);
+			sub.topic_filter = sub_mount;
 		}
 
 		/* ACL check */
