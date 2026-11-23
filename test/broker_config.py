@@ -28,6 +28,7 @@ class ListenerConfig:
     psk_hint: Optional[str] = None
     require_certificate: Optional[bool] = None
     use_identity_as_username: Optional[bool] = None
+    use_subject_as_username: Optional[bool] = None
     websockets_origin: Optional[str] = None
 
     # Only for per_listener_settings=True

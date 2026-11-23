@@ -405,6 +405,7 @@ struct mosquitto {
 #    endif
 #  endif
 	bool assigned_id;
+	bool username_from_tls_identity; /* username is the client's verified certificate or PSK identity */
 #else
 #  ifdef WITH_SOCKS
 	char *socks5_host;

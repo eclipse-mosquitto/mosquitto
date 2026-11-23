@@ -176,7 +176,10 @@ int mosquitto_security_apply_default(void)
 
 		/* Check for connected clients that are no longer authorised */
 #ifdef WITH_TLS
-		if(context->listener && context->listener->ssl_ctx && (context->listener->use_identity_as_username || context->listener->use_subject_as_username)){
+		if(context->username_from_tls_identity && !context->ssl){
+			/* The identity came from a PROXY v2 header, so there is no
+			 * certificate to read again and no password to check. */
+		}else if(context->listener && context->listener->ssl_ctx && (context->listener->use_identity_as_username || context->listener->use_subject_as_username)){
 			/* Client must have either a valid certificate, or valid PSK used as a username. */
 			if(!context->ssl){
 				if(context->protocol == mosq_p_mqtt5){
