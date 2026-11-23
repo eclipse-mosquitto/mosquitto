@@ -6,6 +6,10 @@
 - Fix mosquitto_fgets incorrectly incrementing its counter on failure.
   Closes #3810.
 
+# Documentation
+- Document that the default config file for the clients on Windows is
+  %USERPROFILE%\<command>.conf. Closes #3817.
+
 
 2.1.4 - 2026-11-17
 ==================

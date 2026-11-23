@@ -10,7 +10,7 @@
 		The default config file is located at
 		<option>$XDG_CONFIG_HOME/&commandname;</option> or
 		<option>$HOME/.config/&commandname;</option> on POSIX systems, or
-		<option>%USERPROFILE%\&commandname;</option> on Windows.
+		<option>%USERPROFILE%\&commandname;.conf</option> on Windows.
 	</para>
 
 	<para>
