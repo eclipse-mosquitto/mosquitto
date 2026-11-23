@@ -241,9 +241,7 @@ int net__socket_close(struct mosquitto *mosq)
 			mosquitto__set_state(mosq, mosq_cs_disconnect_ws);
 		}
 		lws_callback_on_writable(mosq->wsi);
-		if(mosq->listener){
-			mosq->listener->client_count--;
-		}
+		/* client_count is released in LWS_CALLBACK_CLOSED (websockets.c). */
 	}else
 #endif
 	{

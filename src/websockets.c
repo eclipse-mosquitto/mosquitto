@@ -183,6 +183,7 @@ static int callback_mqtt(
 				u->mosq = NULL;
 				return -1;
 			}
+			u->listener = mosq->listener;
 			mosq->sock = lws_get_socket_fd(wsi);
 			HASH_ADD(hh_sock, db.contexts_by_sock, sock, sizeof(mosq->sock), mosq);
 			mux__new(mosq);
@@ -191,6 +192,13 @@ static int callback_mqtt(
 		case LWS_CALLBACK_CLOSED:
 			if(!u){
 				return -1;
+			}
+			/* Release the slot here, once per accepted connection: by the
+			 * time do_disconnect() runs below, mosq->wsi is NULL and
+			 * net__socket_close() no longer knows this was a websocket. */
+			if(u->listener){
+				u->listener->client_count--;
+				u->listener = NULL;
 			}
 			mosq = u->mosq;
 			if(mosq){

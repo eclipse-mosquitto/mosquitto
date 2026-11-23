@@ -624,6 +624,9 @@ struct libws_mqtt_hack {
 
 struct libws_mqtt_data {
 	struct mosquitto *mosq;
+	/* The listener whose client_count this connection holds a slot of, set
+	 * once it is accepted and cleared when LWS_CALLBACK_CLOSED releases it. */
+	struct mosquitto__listener *listener;
 };
 #endif
 
