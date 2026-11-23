@@ -1002,6 +1002,7 @@ static int handle_username_from_cert_options(struct mosquitto *context, char **u
 				return rc;
 			}
 		}
+		context->username_from_tls_identity = true;
 	}else
 #endif /* WITH_TLS */
 	{
@@ -1010,9 +1011,11 @@ static int handle_username_from_cert_options(struct mosquitto *context, char **u
 			mosquitto_FREE(*username);
 			mosquitto_FREE(*password);
 
-			if(!context->username){
+			/* The username is the certificate CN from the PROXY v2 header. */
+			if(!context->username || context->username[0] == '\0'){
 				return send__connack_bad_username_or_password_error(context, MOSQ_ERR_AUTH);
 			}
+			context->username_from_tls_identity = true;
 		}else
 #endif
 		{
@@ -1242,7 +1245,7 @@ int handle__connect(struct mosquitto *context)
 		}
 	}else{
 #ifdef WITH_TLS
-		if(context->listener->ssl_ctx && (context->listener->use_identity_as_username || context->listener->use_subject_as_username)){
+		if(context->username_from_tls_identity){
 			/* Authentication assumed to be cleared */
 		}else
 #endif

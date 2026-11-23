@@ -330,6 +330,7 @@ endif
 	./21-proxy-bad-version.py
 	./21-proxy-v1-bad.py
 	./21-proxy-v1-success.py
+	./21-proxy-username-basic-auth.py
 	./21-proxy-v2-bad-config.py
 	./21-proxy-v2-bad-header.py
 	./21-proxy-v2-local.py
@@ -345,6 +346,7 @@ endif
 	./21-proxy-v2-ssl-require-cert-success.py
 	./21-proxy-v2-ssl-common-name-failure.py
 	./21-proxy-v2-ssl-common-name-success.py
+	./21-proxy-v2-ssl-hup-disconnect.py
 	./21-proxy-v2-ssl-cipher.py
 	./21-proxy-v2-ssl-require-tls-failure.py
 	./21-proxy-v2-ssl-require-tls-success.py
