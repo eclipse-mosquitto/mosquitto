@@ -57,15 +57,29 @@ static struct timespec publish_send_time;
 static struct timespec publish_recv_time;
 
 #ifndef WIN32
+static volatile sig_atomic_t alarm_received = 0;
 
 
+/* Only async-signal-safe operations are allowed here, so just make a note of
+ * the signal. It is acted upon by signal_check(), from the main loop. */
 static void my_signal_handler(int signum)
 {
 	if(signum == SIGALRM){
-		process_messages = false;
-		mosquitto_disconnect_v5(g_mosq, MQTT_RC_DISCONNECT_WITH_WILL_MSG, cfg.disconnect_props);
-		timed_out = true;
+		alarm_received = 1;
 	}
+}
+
+
+static void signal_check(void)
+{
+	if(alarm_received == 0){
+		return;
+	}
+	alarm_received = 0;
+
+	process_messages = false;
+	mosquitto_disconnect_v5(g_mosq, MQTT_RC_DISCONNECT_WITH_WILL_MSG, cfg.disconnect_props);
+	timed_out = true;
 }
 #endif
 
@@ -409,6 +423,9 @@ int main(int argc, char *argv[])
 
 	do{
 		rc = mosquitto_loop(g_mosq, -1, 1);
+#ifndef WIN32
+		signal_check();
+#endif
 		if(client_state == rr_s_ready_to_publish){
 			client_state = rr_s_wait_for_response;
 			switch(cfg.pub_mode){

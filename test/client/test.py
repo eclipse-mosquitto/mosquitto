@@ -20,6 +20,7 @@ tests = [
     (1, './02-subscribe-qos1.py'),
     (2, './02-subscribe-qos1-ws.py'),
     (1, './02-subscribe-retain-handling.py'),
+    (2, './02-subscribe-signals.py'),
     (1, './02-subscribe-verbose.py'),
 
     (1, './03-publish-argv-errors-tls-psk.py'),
@@ -52,6 +53,7 @@ tests = [
     (1, './04-rr-qos1.py'),
     (2, './04-rr-qos1-ws.py'),
     (1, './04-rr-retain-handling.py'),
+    (1, './04-rr-timeout.py'),
     ]
 
 if __name__ == "__main__":

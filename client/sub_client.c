@@ -71,20 +71,105 @@ void CALLBACK timeout_cb(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 }
 #else
 
+static volatile sig_atomic_t signal_received = 0;
+static volatile sig_atomic_t alarm_received = 0;
+static bool disconnected = false;
 
+
+/* Only async-signal-safe operations are allowed here, so just make a note of
+ * the signal. It is acted upon by signal_check(), from the main loop. */
 static void my_signal_handler(int signum)
 {
-	if(signum == SIGALRM || signum == SIGTERM || signum == SIGINT){
-		if(connack_received){
-			process_messages = false;
-			mosquitto_disconnect_v5(g_mosq, MQTT_RC_DISCONNECT_WITH_WILL_MSG, cfg.disconnect_props);
-		}else{
-			exit(-1);
-		}
-		run = false;
-	}
 	if(signum == SIGALRM){
+		alarm_received = 1;
+	}
+	signal_received = 1;
+}
+
+
+static void signal_check(void)
+{
+	if(signal_received == 0){
+		return;
+	}
+	signal_received = 0;
+
+	if(connack_received){
+		process_messages = false;
+		if(mosquitto_disconnect_v5(g_mosq, MQTT_RC_DISCONNECT_WITH_WILL_MSG, cfg.disconnect_props) == MOSQ_ERR_NO_CONN){
+			/* Not connected, so there will be no disconnect callback. */
+			disconnected = true;
+		}
+	}else{
+		exit(-1);
+	}
+	run = false;
+	if(alarm_received){
 		timed_out = true;
+	}
+}
+
+
+static void my_disconnect_callback(struct mosquitto *mosq, void *obj, int result, const mosquitto_property *properties)
+{
+	UNUSED(mosq);
+	UNUSED(obj);
+	UNUSED(properties);
+
+	if(result == MOSQ_ERR_SUCCESS){
+		/* The disconnect was requested by us. */
+		disconnected = true;
+	}
+}
+
+
+/* This is the equivalent of mosquitto_loop_forever(), but checks for signals
+ * between the calls to mosquitto_loop(). mosquitto_loop() returns when it is
+ * interrupted by a signal, so signals are acted upon promptly. */
+static int sub_loop_forever(struct mosquitto *mosq)
+{
+	struct timespec ts;
+	int rc;
+
+	while(1){
+		do{
+			rc = mosquitto_loop(mosq, -1, 1);
+			signal_check();
+		}while(rc == MOSQ_ERR_SUCCESS && disconnected == false);
+
+		/* Quit after fatal errors. */
+		switch(rc){
+			case MOSQ_ERR_NOMEM:
+			case MOSQ_ERR_PROTOCOL:
+			case MOSQ_ERR_INVAL:
+			case MOSQ_ERR_NOT_FOUND:
+			case MOSQ_ERR_TLS:
+			case MOSQ_ERR_PAYLOAD_SIZE:
+			case MOSQ_ERR_NOT_SUPPORTED:
+			case MOSQ_ERR_AUTH:
+			case MOSQ_ERR_ACL_DENIED:
+			case MOSQ_ERR_UNKNOWN:
+			case MOSQ_ERR_EAI:
+			case MOSQ_ERR_PROXY:
+				return rc;
+		}
+		if(errno == EPROTO){
+			return rc;
+		}
+
+		do{
+			if(disconnected){
+				return MOSQ_ERR_SUCCESS;
+			}
+			ts.tv_sec = 1;
+			ts.tv_nsec = 0;
+			nanosleep(&ts, NULL);
+			signal_check();
+			if(disconnected){
+				return MOSQ_ERR_SUCCESS;
+			}
+			rc = mosquitto_reconnect(mosq);
+		}while(rc != MOSQ_ERR_SUCCESS);
 	}
 }
 #endif
@@ -428,6 +513,9 @@ int main(int argc, char *argv[])
 	mosquitto_subscribe_callback_set(g_mosq, my_subscribe_callback);
 	mosquitto_connect_v5_callback_set(g_mosq, my_connect_callback);
 	mosquitto_message_v5_callback_set(g_mosq, my_message_callback);
+#ifndef WIN32
+	mosquitto_disconnect_v5_callback_set(g_mosq, my_disconnect_callback);
+#endif
 
 	output_init(&cfg);
 
@@ -479,13 +567,18 @@ int main(int argc, char *argv[])
 #else
 			struct timespec ts = {1, 0};
 			nanosleep(&ts, NULL);
+			signal_check();
 #endif
 			int message_count = message_rate_msg_count;
 			message_rate_msg_count = 0;
 			printf("%d msgs/s\n", message_count);
 		}
 	}else{
+#ifdef WIN32
 		rc = mosquitto_loop_forever(g_mosq, -1, 1);
+#else
+		rc = sub_loop_forever(g_mosq);
+#endif
 	}
 
 	mosquitto_destroy(g_mosq);

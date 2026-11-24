@@ -22,6 +22,12 @@
 - Fix mosquitto_loop_start() leaving the mosq struct in an invalid state if
   thread creation fails. Closes #3496.
 
+# Clients
+- Fix mosquitto_sub and mosquitto_rr potentially hanging forever when the `-W`
+  timeout expires, or when mosquitto_sub receives SIGINT or SIGTERM. The
+  disconnect is no longer carried out from inside the signal handler.
+  See #3175.
+
 # Plugins
 - Fix migrate_to_persist_sqlite.py not base64 decoding message payloads when
   migrating. Closes #3492.
