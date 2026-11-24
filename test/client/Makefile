@@ -33,6 +33,7 @@ ifeq ($(WITH_WEBSOCKETS),yes)
 	./02-subscribe-qos1-ws.py
 endif
 	./02-subscribe-retain-handling.py
+	./02-subscribe-signals.py
 	./02-subscribe-format.py
 	./02-subscribe-null.py
 	./02-subscribe-verbose.py
@@ -80,6 +81,7 @@ ifeq ($(WITH_WEBSOCKETS),yes)
 	./04-rr-qos1-ws.py
 endif
 	./04-rr-retain-handling.py
+	./04-rr-timeout.py
 
 ptest :
 	./test.sh
