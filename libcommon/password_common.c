@@ -44,7 +44,7 @@ Contributors:
 #  define MOSQ_ARGON2_P 1
 #endif
 
-#define PW_DEFAULT_ITERATIONS 1000
+#define PW_DEFAULT_ITERATIONS 20000
 static int pw__encode(struct mosquitto_pw *pw);
 
 struct mosquitto_pw {
@@ -191,9 +191,12 @@ static int pw__hash_sha512_pbkdf2(const char *password, struct mosquitto_pw *pw,
 		return MOSQ_ERR_UNKNOWN;
 	}
 
-	PKCS5_PBKDF2_HMAC(password, (int)strlen(password),
+	if(PKCS5_PBKDF2_HMAC(password, (int)strlen(password),
 			pw->params.sha512.salt, (int)pw->params.sha512.salt_len, iterations,
-			digest, (int)hash_len, password_hash);
+			digest, (int)hash_len, password_hash) != 1){
+
+		return MOSQ_ERR_UNKNOWN;
+	}
 
 	return MOSQ_ERR_SUCCESS;
 }
@@ -374,6 +377,7 @@ static int pw__hash_sha512(const char *password, struct mosquitto_pw *pw, unsign
 #else
 	EVP_MD_CTX *context;
 #endif
+	bool ok = false;
 
 	digest = EVP_get_digestbyname("sha512");
 	if(!digest){
@@ -382,21 +386,27 @@ static int pw__hash_sha512(const char *password, struct mosquitto_pw *pw, unsign
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	EVP_MD_CTX_init(&context);
-	EVP_DigestInit_ex(&context, digest, NULL);
-	EVP_DigestUpdate(&context, password, strlen(password));
-	EVP_DigestUpdate(&context, pw->params.sha512.salt, pw->params.sha512.salt_len);
-	EVP_DigestFinal_ex(&context, password_hash, &hash_len);
+	ok = EVP_DigestInit_ex(&context, digest, NULL) == 1
+			&& EVP_DigestUpdate(&context, password, strlen(password)) == 1
+			&& EVP_DigestUpdate(&context, pw->params.sha512.salt, pw->params.sha512.salt_len) == 1
+			&& EVP_DigestFinal_ex(&context, password_hash, &hash_len) == 1;
 	EVP_MD_CTX_cleanup(&context);
 #else
 	context = EVP_MD_CTX_new();
-	EVP_DigestInit_ex(context, digest, NULL);
-	EVP_DigestUpdate(context, password, strlen(password));
-	EVP_DigestUpdate(context, pw->params.sha512.salt, pw->params.sha512.salt_len);
-	EVP_DigestFinal_ex(context, password_hash, &hash_len);
+	if(!context){
+		return MOSQ_ERR_NOMEM;
+	}
+	ok = EVP_DigestInit_ex(context, digest, NULL) == 1
+			&& EVP_DigestUpdate(context, password, strlen(password)) == 1
+			&& EVP_DigestUpdate(context, pw->params.sha512.salt, pw->params.sha512.salt_len) == 1
+			&& EVP_DigestFinal_ex(context, password_hash, &hash_len) == 1;
 	EVP_MD_CTX_free(context);
 #endif
-
-	return MOSQ_ERR_SUCCESS;
+	if(ok){
+		return MOSQ_ERR_SUCCESS;
+	}else{
+		return MOSQ_ERR_UNKNOWN;
+	}
 }
 #endif
 

@@ -43,19 +43,19 @@ rm -f test-alt-ca.csr
 # Valid server key and certificate.
 openssl genrsa -out server.key 2048
 openssl req -new -key server.key -out server.csr -config openssl.cnf -subj "${SBASESUBJ}/CN=localhost/"
-openssl ca -batch -config openssl.cnf -name CA_signing -out server.crt -infiles server.csr
+openssl ca -batch -config openssl.cnf -name CA_signing -out server.crt -extensions server_cert -infiles server.csr
 rm -f server.csr
 
-# Valid server key and certificate, with subjectAltName.
+# Valid server key and certificate, with subjectAltName - all server certs not use SAN, but this one still has a non-matching commonName
 openssl genrsa -out server-san.key 2048
 openssl req -new -key server-san.key -out server-san.csr -config openssl.cnf -subj "${SBASESUBJ}/CN=san/"
-openssl ca -batch -config openssl.cnf -name CA_signing -out server-san.crt -extensions test_SAN -infiles server-san.csr
+openssl ca -batch -config openssl.cnf -name CA_signing -out server-san.crt -extensions server_cert -infiles server-san.csr
 rm -f server-san.csr
 
 # Expired server certificate
 openssl genrsa -out server-expired.key 2048
 openssl req -new -key server-expired.key -out server-expired.csr -config openssl.cnf -subj "${SBASESUBJ}-expired/CN=localhost/"
-openssl ca -batch -config openssl.cnf -name CA_signing -days 1 -startdate 120820000000Z -enddate 120821000000Z -out server-expired.crt -infiles server-expired.csr
+openssl ca -batch -config openssl.cnf -name CA_signing -days 1 -startdate 120820000000Z -enddate 120821000000Z -out server-expired.crt -extensions server_cert -infiles server-expired.csr
 rm -f server-expired.csr
 
 # Valid client key and certificate.

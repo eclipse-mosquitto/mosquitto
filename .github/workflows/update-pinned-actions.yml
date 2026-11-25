@@ -1,0 +1,35 @@
+name: Update pinned github actions
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pinact:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Update pinned actions
+        uses: suzuki-shunsuke/pinact-action@896d595f299e71d65b9d28349d6956abe144390a # v3.0.0
+        with:
+          skip_push: "true"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          branch: pinact-updates-develop
+          commit-message: "Update pinned github actions"
+          title: "Update pinned github actions (develop)"
+          body: |
+            Automated update of pinned github action SHAs.
+            Please review each updated action to ensure it is legitimate.
+            Close and reopen the PR to trigger the required checks.
+          delete-branch: true

@@ -120,6 +120,9 @@ static int read_tlv_ssl(struct mosquitto *context, uint16_t len, bool *have_cert
 #ifdef WITH_TLS
 				mosquitto_free(context->proxy.tls_version);
 				context->proxy.tls_version = mosquitto_strndup((const char *)&context->proxy.buf[context->proxy.pos], tlv_len);
+				if(mosquitto_validate_utf8(context->proxy.tls_version, tlv_len)){
+					return MOSQ_ERR_MALFORMED_UTF8;
+				}
 #else
 				return MOSQ_ERR_NOT_SUPPORTED;
 #endif
@@ -129,6 +132,9 @@ static int read_tlv_ssl(struct mosquitto *context, uint16_t len, bool *have_cert
 #ifdef WITH_TLS
 				mosquitto_free(context->proxy.cipher);
 				context->proxy.cipher = mosquitto_strndup((const char *)&context->proxy.buf[context->proxy.pos], tlv_len);
+				if(mosquitto_validate_utf8(context->proxy.cipher, tlv_len)){
+					return MOSQ_ERR_MALFORMED_UTF8;
+				}
 #else
 				return MOSQ_ERR_NOT_SUPPORTED;
 #endif
@@ -137,10 +143,17 @@ static int read_tlv_ssl(struct mosquitto *context, uint16_t len, bool *have_cert
 			case PP2_SUBTYPE_SSL_CN:
 #ifdef WITH_TLS
 				if(context->listener->use_identity_as_username){
+					if(context->username){
+						/* Don't allow multiple SSL_CN TLVs */
+						return MOSQ_ERR_INVAL;
+					}
 					mosquitto_free(context->username);
 					context->username = mosquitto_strndup((const char *)&context->proxy.buf[context->proxy.pos], tlv_len);
 					if(!context->username){
 						return MOSQ_ERR_NOMEM;
+					}
+					if(mosquitto_validate_utf8(context->username, tlv_len)){
+						return MOSQ_ERR_MALFORMED_UTF8;
 					}
 				}
 #else

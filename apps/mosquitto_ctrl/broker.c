@@ -125,7 +125,7 @@ static void print_plugin_info(cJSON *j_response)
 		if(j_eps && cJSON_IsArray(j_eps)){
 			first = true;
 			cJSON_ArrayForEach(jtmp, j_eps){
-				if(jtmp && cJSON_IsString(jtmp) && jtmp->valuestring){
+				if(CJSON_IS_VALID_STRING(jtmp)){
 					if(first){
 						first = false;
 						printf("Control endpoints: %s\n", jtmp->valuestring);
@@ -171,7 +171,7 @@ static void broker__payload_callback(struct mosq_ctrl *ctrl, long payloadlen, co
 	}
 
 	j_command = cJSON_GetObjectItem(j_response, "command");
-	if(j_command == NULL){
+	if(!CJSON_IS_VALID_STRING(j_command)){
 		fprintf(stderr, "Error: Payload missing data.\n");
 		cJSON_Delete(tree);
 		return;

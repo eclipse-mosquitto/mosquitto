@@ -589,6 +589,9 @@ static int packet__read_single(struct mosquitto *mosq, enum mosquitto_client_sta
 	while(mosq->in_packet.to_process>0){
 		read_length = local__read(mosq, &(mosq->in_packet.payload[mosq->in_packet.pos]), mosq->in_packet.to_process);
 		if(read_length > 0){
+			if((size_t)read_length > (size_t)mosq->in_packet.to_process){
+				return MOSQ_ERR_PROTOCOL;
+			}
 			metrics__int_inc(mosq_counter_bytes_received, read_length);
 			mosq->in_packet.to_process -= (uint32_t)read_length;
 			mosq->in_packet.pos += (uint32_t)read_length;

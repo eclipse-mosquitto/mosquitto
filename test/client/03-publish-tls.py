@@ -61,7 +61,7 @@ def do_test(address, insecure_option, expect_ssl_fail):
     except mosq_test.TestError:
         pass
     except ssl.SSLError as e:
-        if expect_ssl_fail and e.reason == "SSLV3_ALERT_BAD_CERTIFICATE":
+        if expect_ssl_fail and e.reason in ["SSLV3_ALERT_BAD_CERTIFICATE", "TLS_ALERT_BAD_CERTIFICATE"]:
             rc = 0
             pass
         else:

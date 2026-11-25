@@ -2,6 +2,7 @@ import atexit
 import base64
 import errno
 import hashlib
+import json
 import os
 import platform
 import signal
@@ -25,6 +26,8 @@ if platform.system() == "Windows":
 import __main__
 
 from pathlib import Path
+from typing import Any, Callable, Optional, Tuple, Union
+
 vg_index = 1
 vg_logfiles = []
 
@@ -284,6 +287,22 @@ def sub_helper(port, topic='#', qos=0, proto_ver=4):
     return sock
 
 
+def read_bytes(sock: socket.socket, num_bytes: int, name: str):
+    data = b""
+    while len(data) < num_bytes:
+        recv_data = sock.recv(num_bytes-len(data))
+        if len(recv_data) == 0:
+            peername = "<unknown>"
+            try:
+                peername = sock.getpeername()
+            except:
+                pass
+            raise BrokenPipeError(f"when reading {name} ({len(data)}/{num_bytes}) from {peername}")
+        data += recv_data
+
+    return data
+
+
 def expect_packet(sock, name, expected):
     if len(expected) > 0:
         rlen = len(expected)
@@ -362,6 +381,27 @@ def do_send_receive(sock, send_packet, receive_packet, error_string="send receiv
     else:
         sock.close()
         raise ValueError
+
+
+# Useful for testing broker/plugin control commands based on JSON commands
+def do_send_receive_command(sock, command_topic, command_payload, expected_response, msg=None):
+    if isinstance(command_payload, str):
+        command_packet = mqtt_packets.gen_publish(topic=command_topic, payload=command_payload, qos=0)
+    else:
+        command_packet = mqtt_packets.gen_publish(topic=command_topic, payload=json.dumps(command_payload), qos=0)
+    sock.send(command_packet)
+    response = json.loads(read_publish(sock)[0])
+    if response != expected_response:
+        print(expected_response)
+        print(response)
+        if msg:
+            print(msg)
+        raise ValueError(f"Received {response}, but expected {expected_response}")
+
+
+def do_send_receive_command_error(sock, command_topic, command_payload, cmd_name, error_msg, msg=None):
+    expected_response = {'responses': [{'command': cmd_name, 'error': error_msg}]}
+    do_send_receive_command(sock, command_topic, command_payload, expected_response, msg)
 
 
 # Useful for mocking a client receiving (with ack) a qos1 publish
@@ -618,48 +658,78 @@ def to_string(packet):
         return "AUTH, rl="+str(rl)
 
 
-def read_varint(sock, rl):
+# Returns tuple of:
+#   variable byte integer
+#   remaining length reduced by parsed bytes
+#   packed bytes
+def read_varint(sock: socket.socket, name: str, rl: int) -> Tuple[int, int, bytes]:
+    packed = b""
     varint = 0
     multiplier = 1
     while True:
-        byte = sock.recv(1)
-        byte, = struct.unpack("!B", byte)
-        varint += (byte & 127)*multiplier
+        byte = read_bytes(sock, 1, name)
+        packed += byte
+        (byte,) = struct.unpack("!B", byte)
+        varint += (byte & 127) * multiplier
         multiplier *= 128
         rl -= 1
         if byte & 128 == 0x00:
-            return (varint, rl)
+            return (varint, rl, packed)
 
 
-def mqtt_read_string(sock, rl):
-    slen = sock.recv(2)
+def mqtt_read_string(sock : socket.socket, rl: int, name : str) -> Tuple[bytes,int]:
+    slen = read_bytes(sock, 2, f"string length of {name}")
     slen, = struct.unpack("!H", slen)
-    payload = sock.recv(slen)
+    payload = read_bytes(sock, slen, name)
     payload, = struct.unpack("!%ds" % (slen), payload)
     rl -= (2 + slen)
     return (payload, rl)
 
+def read_packed_properties(sock, proto_ver : int, action : str, rl : int) -> Tuple[bytes,int]:
+    packed_properties = b""
+    if proto_ver == 5:
+        proplen, rl, _ = read_varint(sock, action, rl)
+        if proplen > rl:
+            raise ValueError(
+                f"Expecting {proplen} bytes for properties, but remaining length is {rl}, while reading {action}"
+            )
+        packed_properties = read_bytes(sock, proplen, f"while reading properties {action}")
+        rl -= proplen
+    return packed_properties, rl
 
-def read_publish(sock, proto_ver=4):
-    cmd, = struct.unpack("!B", sock.recv(1))
+
+# Returns payload, mid, topic, retain, qos, packed_properties
+def read_publish_ext(
+    sock, proto_ver=4, payload_decoder: Optional[Callable[[Union[str,bytes]], Any]] = None
+) -> Tuple[str, Optional[int], str, int, int, bytes]:
+    (cmd,) = struct.unpack("!B", read_bytes(sock, 1, "read publish (cmd)"))
     if cmd & 0xF0 != 0x30:
-        raise ValueError
+        raise ValueError(f"Did not receive a publish, got {cmd}")
 
     qos = (cmd & 0x06) >> 1
-    rl, t = read_varint(sock, 0)
-    topic, rl = mqtt_read_string(sock, rl)
+    retain = cmd & 0x01
+    rl, t, _ = read_varint(sock, "read_publish", 0)
+    topic, rl = mqtt_read_string(sock, rl, "read_publish (topic)")
 
     if qos > 0:
-        sock.recv(2)
-        rl -= 1
+        mid = int.from_bytes(read_bytes(sock, 2, "read_publish (mid)"), byteorder="big")
+        rl -= 2
+    else:
+        mid = None
 
-    if proto_ver == 5:
-        proplen, rl = read_varint(sock, rl)
-        sock.recv(proplen)
-        rl -= proplen
+    packed_properties, rl = read_packed_properties(sock, proto_ver, "read_publish", rl)
 
-    payload = sock.recv(rl).decode('utf-8')
-    return payload
+    raw_payload = read_bytes(sock, rl, "read publish (payload)")
+    rl = 0
+    if payload_decoder is None:
+        payload = raw_payload.decode("utf-8")
+    else:
+        payload = payload_decoder(raw_payload)
+    return payload, mid, topic.decode("utf-8"), retain, qos, packed_properties
+
+
+def read_publish(sock, proto_ver=4) -> Tuple[str, Optional[int], str]:
+    return read_publish_ext(sock, proto_ver)[:3]
 
 
 def get_port(count=1):

@@ -924,6 +924,40 @@ TEST_F(CtrlShellDynsecTest, GetAnonymousGroup)
 }
 
 
+TEST_F(CtrlShellDynsecTest, GetAnonymousGroupWithBadGroupName)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_dynsec(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|dynsec> ")))
+		.WillOnce(t::Return(strdup("getAnonymousGroup")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+	expect_single_lists(&mosq);
+
+	const char request[] = "{\"commands\":[{\"command\":\"getAnonymousGroup\"}]}";
+	const char response[] =
+			"{\"responses\":[{\"command\":\"getAnonymousGroup\",\"data\":{"
+			"\"group\":{\"groupname\":42}"
+			"}}]}";
+	expect_request_response(&mosq, request, response);
+
+	const char *outputs[] = {
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+}
+
+
 TEST_F(CtrlShellDynsecTest, GetClient)
 {
 	mosq_config config{};
@@ -2492,6 +2526,52 @@ TEST_F(CtrlShellDynsecTest, ListClients)
 }
 
 
+TEST_F(CtrlShellDynsecTest, ListClientsWithBadArray)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_dynsec(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|dynsec> ")))
+		.WillOnce(t::Return(strdup("listClients")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+	expect_request_response_empty(&mosq, "listGroups");
+	expect_request_response_empty(&mosq, "listRoles");
+
+	EXPECT_CALL(libmosquitto_mock_, mosquitto_publish(t::Eq(&mosq), nullptr, t::StrEq("$CONTROL/dynamic-security/v1"), t::_,
+			t::StrEq("{\"commands\":[{\"command\":\"listClients\"}]}"), 1, false))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listClients\",\"data\":{"
+		"\"clients\":[\"client1\",\"client2\"]"
+		"}}]}");
+		return 0;
+	}))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listClients\",\"data\":{"
+		"\"clients\":[\"client1\",42]"
+		"}}]}");
+		return 0;
+	}));
+
+
+	const char *outputs[] = {
+		"client1\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+	EXPECT_EQ(pending_payloads, nullptr);
+}
+
+
 TEST_F(CtrlShellDynsecTest, ListClientsWithCount)
 {
 	mosq_config config{};
@@ -2623,6 +2703,52 @@ TEST_F(CtrlShellDynsecTest, ListGroups)
 }
 
 
+TEST_F(CtrlShellDynsecTest, ListGroupsWithBadArray)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_dynsec(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|dynsec> ")))
+		.WillOnce(t::Return(strdup("listGroups")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+	expect_request_response_empty(&mosq, "listClients");
+	expect_request_response_empty(&mosq, "listRoles");
+
+	EXPECT_CALL(libmosquitto_mock_, mosquitto_publish(t::Eq(&mosq), nullptr, t::StrEq("$CONTROL/dynamic-security/v1"), t::_,
+			t::StrEq("{\"commands\":[{\"command\":\"listGroups\"}]}"), 1, false))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listGroups\",\"data\":{"
+		"\"groups\":[\"group1\",\"group2\"]"
+		"}}]}");
+		return 0;
+	}))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listGroups\",\"data\":{"
+		"\"groups\":[\"group1\",42]"
+		"}}]}");
+		return 0;
+	}));
+
+
+	const char *outputs[] = {
+		"group1\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+	EXPECT_EQ(pending_payloads, nullptr);
+}
+
+
 TEST_F(CtrlShellDynsecTest, ListGroupsWithCount)
 {
 	mosq_config config{};
@@ -2745,6 +2871,52 @@ TEST_F(CtrlShellDynsecTest, ListRoles)
 	const char *outputs[] = {
 		"role1\n",
 		"role2\n",
+		"\n",
+	};
+	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));
+
+	ctrl_shell__main(&config);
+	EXPECT_EQ(pending_payloads, nullptr);
+}
+
+
+TEST_F(CtrlShellDynsecTest, ListRolesWithBadArray)
+{
+	mosq_config config{};
+	mosquitto mosq{};
+	const char host[] = "localhost";
+	int port = 1883;
+
+	expect_setup(&config);
+	expect_connect(&mosq, host, port);
+	expect_dynsec(host, port);
+
+	EXPECT_CALL(editline_mock_, readline(t::StrEq("mqtt://localhost:1883|dynsec> ")))
+		.WillOnce(t::Return(strdup("listRoles")))
+		.WillOnce(t::Return(strdup("exit")));
+
+	expect_connect_and_messages(&mosq);
+	expect_request_response_empty(&mosq, "listClients");
+	expect_request_response_empty(&mosq, "listGroups");
+
+	EXPECT_CALL(libmosquitto_mock_, mosquitto_publish(t::Eq(&mosq), nullptr, t::StrEq("$CONTROL/dynamic-security/v1"), t::_,
+			t::StrEq("{\"commands\":[{\"command\":\"listRoles\"}]}"), 1, false))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listRoles\",\"data\":{"
+		"\"roles\":[\"role1\",\"role2\"]"
+		"}}]}");
+		return 0;
+	}))
+		.WillOnce(t::Invoke([this](){
+		append_response("{\"responses\":[{\"command\":\"listRoles\",\"data\":{"
+		"\"roles\":[\"role1\",42]"
+		"}}]}");
+		return 0;
+	}));
+
+
+	const char *outputs[] = {
+		"role1\n",
 		"\n",
 	};
 	expect_outputs(outputs, sizeof(outputs)/sizeof(char *));

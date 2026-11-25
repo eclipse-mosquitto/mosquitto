@@ -47,10 +47,10 @@ jobs:
             triplet: x64-windows-release
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Configure MSVC
-        uses: ilammy/msvc-dev-cmd@v1
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
           arch: ${{ matrix.arch }}
 
@@ -60,7 +60,7 @@ jobs:
           echo "SCCACHE_DIR=${{ github.workspace }}\sccache" >> $env:GITHUB_ENV
 
       - name: Restore sccache
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: ${{ github.workspace }}\sccache
           key: ${{ runner.os }}-${{ matrix.arch }}-windows-sccache
@@ -69,7 +69,7 @@ jobs:
         run: sccache --start-server
 
       - name: vcpkg build
-        uses: johnwason/vcpkg-action@v7
+        uses: johnwason/vcpkg-action@ff71808de10afc0e3160fd079353c69ba0d7dd60 # v7.0.0
         id: vcpkg
         with:
           manifest-dir: ${{ github.workspace }}
@@ -100,7 +100,7 @@ jobs:
       - name: Report sccache stats
         run: sccache --show-stats
 
-      - uses: suisei-cn/actions-download-file@v1.6.1
+      - uses: suisei-cn/actions-download-file@9f75b8c2dad5ccced7509c44a3b881c5613abde2 # v1.6.1
         id: vcredist
         name: Download VC redistributable
         with:
@@ -108,17 +108,17 @@ jobs:
           target: ${{github.workspace}}/installer/
 
       - name: Installer
-        uses: joncloud/makensis-action@v5.0
+        uses: joncloud/makensis-action@971ef20f43e4f9f3af2c7f276cb7348d033da1cd # v5.0
         with:
           script-file: ${{github.workspace}}/installer/${{ matrix.nsis }}
 
       - name: Upload installer to artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: installer${{ matrix.arch }}
           path: ${{ github.workspace }}/installer/mosquitto*.exe
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: '3.13'
           cache: 'pip' # caching pip dependencies

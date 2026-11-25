@@ -263,6 +263,7 @@ FILE *mosquitto_fopen(const char *path, const char *mode, bool restrict_read)
 char *mosquitto_trimblanks(char *str)
 {
 	char *endptr;
+	size_t slen;
 
 	if(str == NULL){
 		return NULL;
@@ -271,7 +272,11 @@ char *mosquitto_trimblanks(char *str)
 	while(isspace((unsigned char)str[0])){
 		str++;
 	}
-	endptr = &str[strlen(str)-1];
+	slen = strlen(str);
+	if(slen == 0){
+		return str;
+	}
+	endptr = &str[slen-1];
 	while(endptr > str && isspace((unsigned char)endptr[0])){
 		endptr[0] = '\0';
 		endptr--;
@@ -313,11 +318,11 @@ char *mosquitto_fgets(char **buf, int *buflen, FILE *stream)
 
 		/* No EOL char found, so extend buffer */
 		offset = (*buflen)-1;
-		*buflen += 1000;
-		newbuf = realloc(*buf, (size_t)*buflen);
+		newbuf = realloc(*buf, (size_t)(*buflen + 1000));
 		if(!newbuf){
 			return NULL;
 		}
+		*buflen += 1000;
 		*buf = newbuf;
 	}while(1);
 }

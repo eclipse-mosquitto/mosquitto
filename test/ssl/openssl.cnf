@@ -403,7 +403,7 @@ tsa_name		= yes	# Must the TSA name be included in the reply?
 ess_cert_id_chain	= no	# Must the ESS cert id chain be included?
 				# (optional, default: no)
 
-[ test_SAN ]
+[ server_cert ]
 basicConstraints = critical,CA:FALSE
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid,issuer

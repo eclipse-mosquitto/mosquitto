@@ -144,7 +144,7 @@ static int generate_password(struct dynsec__data *data, cJSON *j_client, char **
 					return MOSQ_ERR_UNKNOWN;
 				}
 				v = vb;
-			}while(v >= (RAND_MAX - (RAND_MAX % len)));
+			}while(v >= (256 - (256 % len)));
 			(*password)[i] = pw_chars[v%len];
 		}
 		(*password)[pwlen] = '\0';

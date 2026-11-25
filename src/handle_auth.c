@@ -98,11 +98,11 @@ int handle__auth(struct mosquitto *context)
 
 		if(!auth_method || strcmp(auth_method, context->auth_method)){
 			/* No method, or non-matching method */
-			mosquitto_FREE(auth_method);
-			mosquitto_property_free_all(&properties);
 			send__disconnect(context, MQTT_RC_PROTOCOL_ERROR, NULL);
 			log__printf(NULL, MOSQ_LOG_INFO, "Protocol error from %s: AUTH packet with non-matching auth-method property (%s:%s).",
 					context->id, context->auth_method, auth_method);
+			mosquitto_FREE(auth_method);
+			mosquitto_property_free_all(&properties);
 			return MOSQ_ERR_PROTOCOL;
 		}
 		mosquitto_FREE(auth_method);

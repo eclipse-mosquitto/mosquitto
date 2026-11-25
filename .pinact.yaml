@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/pinact/refs/heads/main/json-schema/pinact.json
+# pinact - https://github.com/suzuki-shunsuke/pinact
+version: 3
+min_age:
+  value: 14      # threshold in days
+#   always: true  # also run the passive audit on every `pinact run` (extra GitHub API calls)
+# separator: "  # "
+# files:
+#   - pattern: action.yaml
+#   - pattern: */action.yaml
+
+rules:
+  - ignore: true
+    conditions:
+      - expr: |
+          ActionName == "google/oss-fuzz/infra/cifuzz/actions/build_fuzzers"
+      - expr: |
+          ActionName == "google/oss-fuzz/infra/cifuzz/actions/run_fuzzers"
+#   - min_age: 0
+#     conditions:
+#       - expr: |
+#           ActionName matches "actions/.*"

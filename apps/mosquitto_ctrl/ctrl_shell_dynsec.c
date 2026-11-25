@@ -780,7 +780,7 @@ static void print_json_array(cJSON *j_list, const char *label, const char *eleme
 					print_json_value(cJSON_GetObjectItem(j_elem, optional_element_name), optional_element_null_value);
 					ctrl_shell_print_value(0, ")");
 				}
-			}else if(cJSON_IsString(j_elem) && j_elem->valuestring){
+			}else if(CJSON_IS_VALID_STRING(j_elem)){
 				ctrl_shell_print_value(1, "%s", j_elem->valuestring);
 			}
 			ctrl_shell_print_value(0, "\n");
@@ -983,10 +983,12 @@ static void response_callback(const char *command, cJSON *j_data, const char *pa
 
 		clients = cJSON_GetObjectItem(j_data, "clients");
 		cJSON_ArrayForEach(client, clients){
-			if(do_print_list){
-				ctrl_shell_print_value(0, "%s\n", client->valuestring);
+			if(CJSON_IS_VALID_STRING(client)){
+				if(do_print_list){
+					ctrl_shell_print_value(0, "%s\n", client->valuestring);
+				}
+				completion_tree_arg_list_add_arg(tree_clients, client->valuestring);
 			}
-			completion_tree_arg_list_add_arg(tree_clients, client->valuestring);
 		}
 		do_print_list = false;
 	}else if(!strcmp(command, "listGroups")){
@@ -996,10 +998,12 @@ static void response_callback(const char *command, cJSON *j_data, const char *pa
 
 		groups = cJSON_GetObjectItem(j_data, "groups");
 		cJSON_ArrayForEach(group, groups){
-			if(do_print_list){
-				ctrl_shell_print_value(0, "%s\n", group->valuestring);
+			if(CJSON_IS_VALID_STRING(group)){
+				if(do_print_list){
+					ctrl_shell_print_value(0, "%s\n", group->valuestring);
+				}
+				completion_tree_arg_list_add_arg(tree_groups, group->valuestring);
 			}
-			completion_tree_arg_list_add_arg(tree_groups, group->valuestring);
 		}
 		do_print_list = false;
 	}else if(!strcmp(command, "listRoles")){
@@ -1009,10 +1013,12 @@ static void response_callback(const char *command, cJSON *j_data, const char *pa
 
 		roles = cJSON_GetObjectItem(j_data, "roles");
 		cJSON_ArrayForEach(role, roles){
-			if(do_print_list){
-				ctrl_shell_print_value(0, "%s\n", role->valuestring);
+			if(CJSON_IS_VALID_STRING(role)){
+				if(do_print_list){
+					ctrl_shell_print_value(0, "%s\n", role->valuestring);
+				}
+				completion_tree_arg_list_add_arg(tree_roles, role->valuestring);
 			}
-			completion_tree_arg_list_add_arg(tree_roles, role->valuestring);
 		}
 		do_print_list = false;
 	}else if(!strcasecmp(command, "getAnonymousGroup")){
@@ -1020,7 +1026,9 @@ static void response_callback(const char *command, cJSON *j_data, const char *pa
 
 		group = cJSON_GetObjectItem(j_data, "group");
 		groupname = cJSON_GetObjectItem(group, "groupname");
-		ctrl_shell_print_value(0, "%s\n", groupname->valuestring);
+		if(CJSON_IS_VALID_STRING(groupname)){
+			ctrl_shell_print_value(0, "%s\n", groupname->valuestring);
+		}
 	}else if(!strcasecmp(command, "getDetails")){
 		print_details(j_data);
 	}else if(!strcasecmp(command, "getClient")){

@@ -1,7 +1,7 @@
-FROM alpine:3.23
+FROM alpine:3.24
 
-ENV VERSION=2.1.2 \
-    DOWNLOAD_SHA256=fd905380691ac65ea5a93779e8214941829e3d6e038d5edff9eac5fd74cbed02 \
+ENV VERSION=2.1.4 \
+    DOWNLOAD_SHA256=ca30b26ccd3041c0e11fc407fe4f2e62bc445e8d8dea94a083cc60c09bd5ea30 \
     GPG_KEYS=A0D6EEA1DCAE49A635A3B2F0779B22DFB3E717B7
 
 LABEL \
@@ -19,6 +19,7 @@ RUN set -x && \
         argon2-dev \
         build-base \
         cjson-dev \
+        cjson-static \
         cmake \
         cunit-dev \
         gnupg \

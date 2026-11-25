@@ -229,6 +229,7 @@ static ssize_t read_ws_mask(struct mosquitto *mosq)
 ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count)
 {
 	ssize_t len = 0;
+	ssize_t mqtt_len = -1;
 
 	if(mosq->wsd.payloadlen == 0){
 		if(mosq->wsd.opcode == UINT8_MAX){
@@ -302,12 +303,12 @@ ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count)
 		if(count > mosq->wsd.payloadlen - (uint64_t)mosq->wsd.pos){
 			count = mosq->wsd.payloadlen - (uint64_t)mosq->wsd.pos;
 		}
-		len = net__read(mosq, buf, count);
-		if(len > 0){
-			for(ssize_t i=0; i<len; i++){
+		mqtt_len = net__read(mosq, buf, count);
+		if(mqtt_len > 0){
+			for(ssize_t i=0; i<mqtt_len; i++){
 				((uint8_t *)buf)[i] ^= mosq->wsd.maskingkey[(i+mosq->wsd.pos)%4];
 			}
-			mosq->wsd.pos += len;
+			mosq->wsd.pos += mqtt_len;
 		}
 	}
 
@@ -316,12 +317,12 @@ ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count)
 			mosquitto_FREE(mosq->wsd.out_packet);
 
 			/* Testing or PING - so we haven't read any data for the application yet. */
-			len = -1;
+			mqtt_len = -1;
 			errno = EAGAIN;
 		}else if(mosq->wsd.opcode == WS_PONG){
 			mosquitto_FREE(mosq->wsd.out_packet);
 			/* Testing or PING - so we haven't read any data for the application yet. */
-			len = -1;
+			mqtt_len = -1;
 			errno = EAGAIN;
 		}else if(mosq->wsd.out_packet){
 			packet__queue(mosq, mosq->wsd.out_packet);
@@ -330,7 +331,11 @@ ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count)
 			/* Testing or PING - so we haven't read any data for the application yet.
 			* Simulate that situation. This has to be done *after* the call to
 			* packet__queue. */
-			len = -1;
+			mqtt_len = -1;
+			errno = EAGAIN;
+		}else if(mosq->wsd.payloadlen == 0){
+			/* Empty frame */
+			mqtt_len = -1;
 			errno = EAGAIN;
 		}
 		mosq->wsd.payloadlen = 0;
@@ -339,10 +344,10 @@ ssize_t net__read_ws(struct mosquitto *mosq, void *buf, size_t count)
 	}else if(mosq->wsd.out_packet){
 		/* Testing or PING - so we haven't read any data for the application yet.
 		* Simulate that situation.*/
-		len = -1;
+		mqtt_len = -1;
 		errno = EAGAIN;
 	}
-	return len;
+	return mqtt_len;
 }
 
 
