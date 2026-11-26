@@ -67,9 +67,20 @@ void listeners__reload_all_certificates(void)
 	for(int i=0; i<db.config->listener_count; i++){
 		struct mosquitto__listener *listener = &db.config->listeners[i];
 		if(listener->ssl_ctx && listener->certfile && listener->keyfile){
-			int rc = net__load_certificates(listener);
+			int rc;
+#if defined(WITH_WEBSOCKETS) && WITH_WEBSOCKETS == WS_IS_LWS
+			if(listener->ws_context){
+				/* libwebsockets owns the SSL_CTX of its listeners and we only hold a
+				 * borrowed pointer to it, so it can't be replaced. Load the
+				 * certificate, key and CRL into it in place instead. */
+				rc = net__load_certificates(listener);
+			}else
+#endif
+			{
+				rc = net__tls_reload_ctx(listener);
+			}
 			if(rc){
-				log__printf(NULL, MOSQ_LOG_ERR, "Error when reloading certificate '%s' or key '%s'.",
+				log__printf(NULL, MOSQ_LOG_ERR, "Error when reloading certificate '%s' or key '%s', keeping the previous TLS configuration.",
 						listener->certfile, listener->keyfile);
 			}
 		}

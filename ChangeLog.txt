@@ -46,6 +46,11 @@
 - Reject PROXY v2 connections with SSL string entries that are not valid UTF-8.
 - Fix case where use of a specific will delay interval could cause all delayed
   wills to be suppressed.
+- Fix CA certificates added to or removed from `cafile`/`capath` not taking
+  effect on a SIGHUP reload for listeners without `crlfile`. Each TLS listener
+  now gets a new TLS context on reload, which is only used if it is set up
+  successfully, so a failed reload keeps the previous TLS configuration in
+  use. A `capath` that doesn't exist is now an error.
 
 # Common lib:
 - Fix potential crash if reading a file in restricted mode and the group id

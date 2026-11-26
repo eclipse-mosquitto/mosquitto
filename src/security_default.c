@@ -133,26 +133,10 @@ int mosquitto_security_apply_default(void)
 	X509_NAME *name;
 	X509_NAME_ENTRY *name_entry;
 	ASN1_STRING *name_asn1 = NULL;
-	struct mosquitto__listener *listener;
 	BIO *subject_bio;
 	char *data_start;
 	size_t name_length;
 	char *subject;
-#endif
-
-#ifdef WITH_TLS
-	for(int i=0; i<db.config->listener_count; i++){
-		listener = &db.config->listeners[i];
-		if(listener && listener->ssl_ctx && listener->certfile && listener->keyfile && listener->crlfile && listener->require_certificate){
-			if(net__tls_server_ctx(listener)){
-				return MOSQ_ERR_TLS;
-			}
-
-			if(net__tls_load_verify(listener)){
-				return MOSQ_ERR_TLS;
-			}
-		}
-	}
 #endif
 
 	HASH_ITER(hh_id, db.contexts_by_id, context, ctxt_tmp){

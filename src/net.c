@@ -481,9 +481,14 @@ int net__tls_server_ctx(struct mosquitto__listener *listener)
 #endif
 
 	if(db.tls_keylog){
-		log__printf(NULL, MOSQ_LOG_NOTICE, "TLS key logging to '%s' enabled for all listeners.",
-				db.tls_keylog);
-		log__printf(NULL, MOSQ_LOG_NOTICE, "TLS key logging is for DEBUGGING only.");
+		static bool keylog_notice_logged = false;
+
+		if(!keylog_notice_logged){
+			log__printf(NULL, MOSQ_LOG_NOTICE, "TLS key logging to '%s' enabled for all listeners.",
+					db.tls_keylog);
+			log__printf(NULL, MOSQ_LOG_NOTICE, "TLS key logging is for DEBUGGING only.");
+			keylog_notice_logged = true;
+		}
 
 		SSL_CTX_set_keylog_callback(listener->ssl_ctx, tls_keylog_callback);
 	}
@@ -651,9 +656,11 @@ static int net__load_engine(struct mosquitto__listener *listener)
 #endif
 
 
-int net__tls_load_verify(struct mosquitto__listener *listener)
-{
 #ifdef WITH_TLS
+/* prev_ctx is the context being replaced when reloading, or NULL when the
+ * listener is first set up. */
+static int net__tls_load_verify_ctx(struct mosquitto__listener *listener, SSL_CTX *prev_ctx)
+{
 	int rc;
 
 #  if OPENSSL_VERSION_NUMBER < 0x30000000L
@@ -680,6 +687,7 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 		if(rc == 0){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load CA certificates. Check cafile \"%s\".", listener->cafile);
 			net__print_ssl_error(NULL, NULL);
+			sk_X509_NAME_pop_free(ca_names, X509_NAME_free);
 			return MOSQ_ERR_TLS;
 		}
 
@@ -693,7 +701,15 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 
 	}
 	if(listener->capath){
-		rc = SSL_CTX_load_verify_dir(listener->ssl_ctx, listener->capath);
+		struct stat capath_stat;
+
+		/* SSL_CTX_load_verify_dir() only registers the directory for lazy
+		 * lookups, so it succeeds even if the directory doesn't exist. */
+		if(stat(listener->capath, &capath_stat) != 0 || (capath_stat.st_mode & S_IFDIR) != S_IFDIR){
+			rc = 0;
+		}else{
+			rc = SSL_CTX_load_verify_dir(listener->ssl_ctx, listener->capath);
+		}
 		if(rc == 0){
 			log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to load CA certificates. Check capath \"%s\".", listener->capath);
 			net__print_ssl_error(NULL, NULL);
@@ -701,7 +717,12 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 			return MOSQ_ERR_TLS;
 		}
 
-		SSL_add_dir_cert_subjects_to_stack(ca_names, listener->capath);
+		/* This fails on entries such as dangling symlinks, which lookups in
+		 * the directory skip, so it only limits the CA names sent to clients. */
+		if(!SSL_add_dir_cert_subjects_to_stack(ca_names, listener->capath)){
+			log__printf(NULL, MOSQ_LOG_WARNING, "Warning: Unable to read the names of all CA certificates in capath \"%s\".", listener->capath);
+			ERR_clear_error();
+		}
 	}
 	if(ca_names){
 		SSL_CTX_set_client_CA_list(listener->ssl_ctx, ca_names);
@@ -709,12 +730,71 @@ int net__tls_load_verify(struct mosquitto__listener *listener)
 #  endif
 
 #  if !defined(OPENSSL_NO_ENGINE) && OPENSSL_API_LEVEL < 30000
-	if(net__load_engine(listener)){
+	if(prev_ctx){
+		/* The engine was initialised when the listener was first set up, and
+		 * loading an engine key again could prompt for its passphrase, so carry
+		 * over the key that is already in use. */
+		if(listener->tls_engine && listener->tls_keyform == mosq_k_engine){
+			EVP_PKEY *pkey = SSL_CTX_get0_privatekey(prev_ctx);
+			if(!pkey || SSL_CTX_use_PrivateKey(listener->ssl_ctx, pkey) <= 0){
+				log__printf(NULL, MOSQ_LOG_ERR, "Error: Unable to reuse engine private key \"%s\".", listener->keyfile);
+				net__print_ssl_error(NULL, NULL);
+				return MOSQ_ERR_TLS;
+			}
+		}
+	}else if(net__load_engine(listener)){
 		return MOSQ_ERR_TLS;
 	}
+#  else
+	UNUSED(prev_ctx);
 #  endif
-#endif
 	return net__load_certificates(listener);
+}
+#endif
+
+
+int net__tls_load_verify(struct mosquitto__listener *listener)
+{
+#ifdef WITH_TLS
+	return net__tls_load_verify_ctx(listener, NULL);
+#else
+	UNUSED(listener);
+	return MOSQ_ERR_SUCCESS;
+#endif
+}
+
+
+/* Replace the listener's SSL_CTX with a newly built one, so that entries removed
+ * from cafile/capath/crlfile stop being trusted; loading into the existing
+ * context could only ever add to its store. The new context is only swapped in
+ * once it is fully configured, so a failed reload leaves the listener serving
+ * with its previous context. Established connections keep a reference to the
+ * old context, so it stays alive until they have all closed.
+ *
+ * TLS sessions and tickets issued by the old context can't be resumed with the
+ * new one. This is deliberate: resuming would skip verifying the client
+ * against the reloaded CAs and CRLs. */
+int net__tls_reload_ctx(struct mosquitto__listener *listener)
+{
+#ifdef WITH_TLS
+	SSL_CTX *old_ctx = listener->ssl_ctx;
+	int rc;
+
+	listener->ssl_ctx = NULL;
+	rc = net__tls_server_ctx(listener);
+	if(rc == MOSQ_ERR_SUCCESS){
+		rc = net__tls_load_verify_ctx(listener, old_ctx);
+	}
+	if(rc){
+		SSL_CTX_free(listener->ssl_ctx);
+		listener->ssl_ctx = old_ctx;
+		return rc;
+	}
+	SSL_CTX_free(old_ctx);
+#else
+	UNUSED(listener);
+#endif
+	return MOSQ_ERR_SUCCESS;
 }
 
 
