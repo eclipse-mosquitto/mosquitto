@@ -50,7 +50,7 @@ def write_config(filename, ports, per_listener_settings, plugver, acl_file):
         f.write("set_tcp_nodelay true\n")
         f.write("sys_interval 60\n")
         f.write("upgrade_outgoing_qos true\n")
-        if os.environ.get('WITH_WEBSOCKETS') != "no":
+        if mosq_test.check_features(["WITH_WEBSOCKETS"]):
             f.write("websockets_log_level 255\n")
             f.write("websockets_headers_size 4096\n")
 

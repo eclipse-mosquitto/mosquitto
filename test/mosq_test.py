@@ -1132,15 +1132,21 @@ class WebsocketWrapper(object):
         self._socket.setblocking(flag)
 
 
+def feature_enabled(value):
+    # Interpret the value as CMake's if() would, so -DWITH_TLS=yes works as
+    # well as ON. This also covers the Makefile build's yes/no/lws.
+    return value.upper() not in ("", "0", "OFF", "NO", "FALSE", "N", "IGNORE", "NOTFOUND") \
+        and not value.endswith("-NOTFOUND")
+
 def check_features(features):
     for feature in features:
-        requirement = "ON"
+        requirement = True
         if feature[0] == "!":
             feature = feature[1:]
-            requirement = "OFF"
+            requirement = False
 
         env = os.environ.get(feature)
-        if env is not None and env != requirement:
+        if env is not None and feature_enabled(env) != requirement:
             return False
     return True
 
