@@ -821,6 +821,11 @@ int mux__delete(struct mosquitto *context);
 int mux__wait(void);
 int mux__handle(struct mosquitto__listener_sock *listensock, int listensock_count);
 int mux__cleanup(void);
+void mux__wakeup(void);
+#ifndef WIN32
+int mux__wakeup_fd(void);
+void mux__wakeup_drain(void);
+#endif
 
 /* ============================================================
  * Listener related functions

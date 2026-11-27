@@ -68,6 +68,7 @@ static void handle_signal(int signal)
 		flag_log_rotate = true;
 #endif
 	}
+	mux__wakeup();
 }
 
 

@@ -17,11 +17,97 @@ Contributors:
    Tatsuzo Osawa - Add epoll.
 */
 
+#include "config.h"
+
+#ifndef WIN32
+#  include <errno.h>
+#  include <fcntl.h>
+#  include <string.h>
+#  include <unistd.h>
+#endif
+
 #include "mux.h"
+
+#ifndef WIN32
+/* Self-pipe used by the signal handler to wake up the mux. Without it, a
+ * signal that arrives after the main loop has checked g_run and the signal
+ * flags, but before the mux starts waiting, is not acted upon until the wait
+ * times out, which may be a long time. */
+static int wakeup_pipe[2] = {-1, -1};
+
+
+static int mux__wakeup_init(void)
+{
+	if(pipe(wakeup_pipe) == -1){
+		log__printf(NULL, MOSQ_LOG_ERR, "Error creating wakeup pipe: %s", strerror(errno));
+		return MOSQ_ERR_UNKNOWN;
+	}
+	for(int i=0; i<2; i++){
+		int flags = fcntl(wakeup_pipe[i], F_GETFL, 0);
+		if(flags == -1
+				|| fcntl(wakeup_pipe[i], F_SETFL, flags | O_NONBLOCK) == -1
+				|| fcntl(wakeup_pipe[i], F_SETFD, FD_CLOEXEC) == -1){
+
+			log__printf(NULL, MOSQ_LOG_ERR, "Error configuring wakeup pipe: %s", strerror(errno));
+			return MOSQ_ERR_UNKNOWN;
+		}
+	}
+	return MOSQ_ERR_SUCCESS;
+}
+
+
+static void mux__wakeup_cleanup(void)
+{
+	for(int i=0; i<2; i++){
+		if(wakeup_pipe[i] != -1){
+			(void)close(wakeup_pipe[i]);
+			wakeup_pipe[i] = -1;
+		}
+	}
+}
+
+
+int mux__wakeup_fd(void)
+{
+	return wakeup_pipe[0];
+}
+
+
+void mux__wakeup_drain(void)
+{
+	char buf[64];
+
+	while(read(wakeup_pipe[0], buf, sizeof(buf)) > 0){
+	}
+}
+#endif
+
+
+/* Called from signal handlers, so must be async-signal-safe. */
+void mux__wakeup(void)
+{
+#ifndef WIN32
+	int saved_errno = errno;
+
+	if(wakeup_pipe[1] != -1){
+		/* If the pipe is full a wakeup is already pending, so a failed write
+		 * does not matter. */
+		if(write(wakeup_pipe[1], "", 1) == -1){
+		}
+	}
+	errno = saved_errno;
+#endif
+}
 
 
 int mux__init(void)
 {
+#ifndef WIN32
+	if(mux__wakeup_init()){
+		return MOSQ_ERR_UNKNOWN;
+	}
+#endif
+
 #ifdef WITH_EPOLL
 	return mux_epoll__init();
 #elif defined(WITH_KQUEUE)
@@ -122,11 +208,17 @@ int mux__handle(struct mosquitto__listener_sock *listensock, int listensock_coun
 
 int mux__cleanup(void)
 {
+	int rc;
+
 #ifdef WITH_EPOLL
-	return mux_epoll__cleanup();
+	rc = mux_epoll__cleanup();
 #elif defined(WITH_KQUEUE)
-	return mux_kqueue__cleanup();
+	rc = mux_kqueue__cleanup();
 #else
-	return mux_poll__cleanup();
+	rc = mux_poll__cleanup();
 #endif
+#ifndef WIN32
+	mux__wakeup_cleanup();
+#endif
+	return rc;
 }
