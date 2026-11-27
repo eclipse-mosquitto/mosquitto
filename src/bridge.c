@@ -1172,6 +1172,9 @@ void bridge_check(void)
 						}
 					}
 #endif
+				}else if(context->bridge->start_type == bst_automatic){
+					/* db.next_event_ms is reset every loop iteration */
+					loop__update_next_event(context->bridge->restart_t - 1000*db.now_s);
 				}
 			}
 		}

@@ -1,6 +1,10 @@
 3.1.5 - 2026-xx-xx
 ==================
 
+# Broker
+- Fix automatic bridges sometimes reconnecting later than their restart
+  timeout.
+
 # libcommon
 - Fix out of bounds read on mosquitto_trimblanks empty string.
 - Fix mosquitto_fgets incorrectly incrementing its counter on failure.
