@@ -40,6 +40,7 @@ def do_test(rc, logmsg):
         bridge.settimeout(20)
         mosq_test.expect_packet(bridge, "connect", connect_packet)
         bridge.send(connack_packet)
+        bridge.recv(1)
         bridge.close()
 
     broker.check_log(Contains(logmsg))
