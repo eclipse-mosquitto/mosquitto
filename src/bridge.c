@@ -1087,6 +1087,12 @@ void bridge_check(void)
 						loop__update_next_event(5000);
 					}
 				}
+			}else if(context->bridge->round_robin == false
+					&& context->bridge->cur_address != 0
+					&& context->bridge->primary_retry){
+
+				/* db.next_event_ms is reset every loop iteration */
+				loop__update_next_event((context->bridge->primary_retry - db.now_s)*1000);
 			}
 		}else{
 			if(reload_if_needed(context)){
