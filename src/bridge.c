@@ -1087,6 +1087,12 @@ void bridge_check(void)
 						loop__update_next_event(5000);
 					}
 				}
+			}else if(context->bridge->round_robin == false
+					&& context->bridge->cur_address != 0
+					&& context->bridge->primary_retry){
+
+				/* db.next_event_ms is reset every loop iteration */
+				loop__update_next_event((context->bridge->primary_retry - db.now_s)*1000);
 			}
 		}else{
 			if(reload_if_needed(context)){
@@ -1111,7 +1117,7 @@ void bridge_check(void)
 						/* Connection attempted, waiting on DNS lookup */
 						rc = gai_error(context->adns);
 						if(rc == EAI_INPROGRESS){
-							/* Just keep on waiting */
+							loop__update_next_event(1000);
 						}else if(rc == 0){
 							rc = bridge__connect_step2(context);
 							if(rc == MOSQ_ERR_SUCCESS){
@@ -1172,6 +1178,9 @@ void bridge_check(void)
 						}
 					}
 #endif
+				}else if(context->bridge->start_type == bst_automatic){
+					/* db.next_event_ms is reset every loop iteration */
+					loop__update_next_event(context->bridge->restart_t - 1000*db.now_s);
 				}
 			}
 		}

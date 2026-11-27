@@ -1,6 +1,14 @@
 3.1.5 - 2026-xx-xx
 ==================
 
+# Broker
+- Fix automatic bridges sometimes reconnecting later than their restart
+  timeout.
+- Fix bridges sometimes connecting long after their ADNS lookup has
+  finished.
+- Fix non round robin bridges sometimes retrying their primary broker
+  later than intended.
+
 # libcommon
 - Fix out of bounds read on mosquitto_trimblanks empty string.
 - Fix mosquitto_fgets incorrectly incrementing its counter on failure.
