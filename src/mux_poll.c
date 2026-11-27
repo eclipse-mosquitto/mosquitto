@@ -92,6 +92,13 @@ int mux_poll__add_listeners(struct mosquitto__listener_sock *listensock, int lis
 		pollfds[pollfd_index].revents = 0;
 		pollfd_index++;
 	}
+#ifndef WIN32
+	/* The signal wakeup pipe goes in the slot after the listeners. */
+	pollfds[pollfd_index].fd = mux__wakeup_fd();
+	pollfds[pollfd_index].events = POLLIN;
+	pollfds[pollfd_index].revents = 0;
+	pollfd_index++;
+#endif
 
 	if(pollfd_current_max == 0){
 		pollfd_current_max = pollfd_index-1;
@@ -112,6 +119,14 @@ int mux_poll__delete_listeners(struct mosquitto__listener_sock *listensock, int 
 		pollfds[pollfd_index].revents = 0;
 		pollfd_index++;
 	}
+#ifndef WIN32
+	/* Called on shutdown even if startup failed before mux__init() */
+	if(pollfds){
+		pollfds[pollfd_index].fd = INVALID_SOCKET;
+		pollfds[pollfd_index].events = 0;
+		pollfds[pollfd_index].revents = 0;
+	}
+#endif
 
 	return MOSQ_ERR_SUCCESS;
 }
@@ -231,6 +246,12 @@ int mux_poll__handle(struct mosquitto__listener_sock *listensock, int listensock
 		}
 	}else{
 		loop_handle_reads_writes();
+
+#ifndef WIN32
+		if(pollfds[listensock_count].revents & POLLIN){
+			mux__wakeup_drain();
+		}
+#endif
 
 		for(int i=0; i<listensock_count; i++){
 			if(pollfds[i].revents & POLLIN){

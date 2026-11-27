@@ -45,11 +45,22 @@ static struct epoll_event ep_events[MAX_EVENTS];
 
 int mux_epoll__init(void)
 {
+	struct epoll_event ev;
+
 	memset(&ep_events, 0, sizeof(struct epoll_event)*MAX_EVENTS);
 
 	db.epollfd = 0;
 	if((db.epollfd = epoll_create(MAX_EVENTS)) == -1){
 		log__printf(NULL, MOSQ_LOG_ERR, "Error in epoll creating: %s", strerror(errno));
+		return MOSQ_ERR_UNKNOWN;
+	}
+
+	/* A NULL data.ptr marks the signal wakeup pipe. */
+	memset(&ev, 0, sizeof(struct epoll_event));
+	ev.data.ptr = NULL;
+	ev.events = EPOLLIN;
+	if(epoll_ctl(db.epollfd, EPOLL_CTL_ADD, mux__wakeup_fd(), &ev) == -1){
+		log__printf(NULL, MOSQ_LOG_ERR, "Error in epoll registering wakeup pipe: %s", strerror(errno));
 		return MOSQ_ERR_UNKNOWN;
 	}
 
@@ -181,7 +192,9 @@ int mux_epoll__handle(void)
 		default:
 			for(int i=0; i<event_count; i++){
 				context = ep_events[i].data.ptr;
-				if(context->ident == id_client){
+				if(context == NULL){
+					mux__wakeup_drain();
+				}else if(context->ident == id_client){
 					loop_handle_reads_writes(context, ep_events[i].events);
 				}else if(context->ident == id_listener){
 					listensock = ep_events[i].data.ptr;

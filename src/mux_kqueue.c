@@ -38,11 +38,20 @@ static struct kevent event_list[MAX_EVENTS];
 
 int mux_kqueue__init(void)
 {
+	struct kevent ev;
+
 	memset(&event_list, 0, sizeof(struct kevent)*MAX_EVENTS);
 
 	db.kqueuefd = 0;
 	if((db.kqueuefd = kqueue()) == -1){
 		log__printf(NULL, MOSQ_LOG_ERR, "Error in kqueue creating: %s", strerror(errno));
+		return MOSQ_ERR_UNKNOWN;
+	}
+
+	/* A NULL udata marks the signal wakeup pipe. */
+	EV_SET(&ev, mux__wakeup_fd(), EVFILT_READ, EV_ADD, 0, 0, NULL);
+	if(kevent(db.kqueuefd, &ev, 1, NULL, 0, NULL) == -1){
+		log__printf(NULL, MOSQ_LOG_ERR, "Error in kqueue registering wakeup pipe: %s", strerror(errno));
 		return MOSQ_ERR_UNKNOWN;
 	}
 
@@ -184,7 +193,9 @@ int mux_kqueue__handle(void)
 		default:
 			for(int i=0; i<event_count; i++){
 				context = event_list[i].udata;
-				if(context->ident == id_client){
+				if(context == NULL){
+					mux__wakeup_drain();
+				}else if(context->ident == id_client){
 					loop_handle_reads_writes(context, event_list[i].filter);
 					if(event_list[i].flags & (EV_EOF | EV_ERROR)){
 						do_disconnect(context, MOSQ_ERR_CONN_LOST);
