@@ -4,6 +4,8 @@
 # Broker
 - Fix automatic bridges sometimes reconnecting later than their restart
   timeout.
+- Fix bridges sometimes connecting long after their ADNS lookup has
+  finished.
 
 # libcommon
 - Fix out of bounds read on mosquitto_trimblanks empty string.

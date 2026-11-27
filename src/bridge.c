@@ -1111,7 +1111,7 @@ void bridge_check(void)
 						/* Connection attempted, waiting on DNS lookup */
 						rc = gai_error(context->adns);
 						if(rc == EAI_INPROGRESS){
-							/* Just keep on waiting */
+							loop__update_next_event(1000);
 						}else if(rc == 0){
 							rc = bridge__connect_step2(context);
 							if(rc == MOSQ_ERR_SUCCESS){
